@@ -1,6 +1,21 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" >
+<!-- xmlns:tools="http://schemas.android.com/tools" -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- to get user location -->
+    <!-- Define ACCESS_FINE_LOCATION if you will use enableHighAccuracy=true  -->
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+<!-- Define ACCESS_COARSE_LOCATION if you will use enableHighAccuracy=false  -->
+<!-- <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/> -->
+    
+    <!-- to get user location -->
+
+    <!-- PUSH NOTIFICATION -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- PUSH NOTIFICATION -->
 
     <application
       android:name=".MainApplication"
@@ -8,8 +23,36 @@
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="false"
-      android:theme="@style/AppTheme"
-      android:supportsRtl="true">
+      android:theme="@style/AppTheme">
+        <!-- PUSH NOTIFICATION -->
+          <!-- Change the value to true to enable pop-up for in foreground on receiving remote notifications (for prevent duplicating while showing local notifications set this to false) -->
+        <meta-data  android:name="com.dieam.reactnativepushnotification.notification_foreground"
+                    android:value="true"/>
+                     <!-- <meta-data android:name="com.dieam.reactnativepushnotification.notification_channel_description" android:value="foodDeliverycustomer"/>
+                       <meta-data
+         android:name="com.google.firebase.messaging.default_notification_channel_id"
+           tools:replace="android:value"
+         android:value="rn-push-notification-channel-id-4-300" /> -->
+     
+        <!-- Change the resource name to your App's accent color - or any other color you want -->
+        <meta-data  android:name="com.dieam.reactnativepushnotification.notification_color"
+                    android:resource="@color/white"/> <!-- or @android:color/{name} to use a standard color -->
+
+        <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationActions" />
+        <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher" />
+        <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver">
+        </receiver>
+
+        <service
+            android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationListenerService"
+            android:exported="false" 
+            >
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+      <!-- PUSH NOTIFICATION -->
+
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"
@@ -20,7 +63,16 @@
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
+              <!-- PUSH NOTIFICATION -->
+              <action android:name="android.intent.action.BOOT_COMPLETED" />
+              <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+              <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            <!-- PUSH NOTIFICATION -->
         </intent-filter>
       </activity>
+
+      <meta-data
+     android:name="com.google.android.geo.API_KEY"
+     android:value="AIzaSyD2gv4DJD2-xSnjvdfPmdyjhbhFyPgqMrI"/>
     </application>
 </manifest>
