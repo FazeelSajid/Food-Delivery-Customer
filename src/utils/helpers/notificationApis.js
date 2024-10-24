@@ -1,11 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../constants/api';
 
-export const GetAllNotifications = async () => {
+export const GetAllNotifications = async (customer_id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let customer_id = await AsyncStorage.getItem('customer_id');
-      console.log({customer_id});
+      // let customer_id = await AsyncStorage.getItem('customer_id');
+      // console.log({customer_id});llllk
       fetch(api.get_all_notifications + customer_id)
         .then(response => response.json())
         .then(response => {

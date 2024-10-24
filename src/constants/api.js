@@ -100,6 +100,7 @@ const api = {
   get_order_by_id: BASE_URL + 'orders/getById?order_id=',
   search_order_by_user: BASE_URL + 'orders/searchwithUser',
   update_order_status: BASE_URL + 'orders/updateOrderStatus',
+  calculatePreOrder : BASE_URL + 'orders/calculatePreOrder',
 
   // favorites
   add_item_to_favorites: BASE_URL + 'favourites/addItem_to_favourites',

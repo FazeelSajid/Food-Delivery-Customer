@@ -50,7 +50,7 @@ import {getEstimatedDeliveryTime} from '../../../utils/helpers/location';
 import {getShippingAddress} from '../../../utils/helpers/localStorage';
 
 const MyCart = ({navigation, route}) => {
-  const {cart_restaurant_id} = useSelector(store => store.cart);
+  const {cart_restaurant_id, my_cart} = useSelector(store => store.cart);
   const { customer_id } = useSelector(store => store.store);
 
 
@@ -67,7 +67,7 @@ const MyCart = ({navigation, route}) => {
 
   const [loading, setLoading] = useState(false);
 
-  const [estimated_delivery_time, setEstimated_delivery_time] = useState(0);
+  // const [estimated_delivery_time, setEstimated_delivery_time] = useState(0);
 
   const [data, setData] = useState([
     // {
@@ -106,7 +106,7 @@ const MyCart = ({navigation, route}) => {
       console.log('data   :  ', obj);
       await updateCartItemQuantity(obj);
       const newData = data?.map(element => {
-        if (element?.item_id == item.item_id) {
+        if (element?.cart_item_id == item.cart_item_id) {
           return {
             ...element,
             quantity: element.quantity + 1,
@@ -178,7 +178,7 @@ const MyCart = ({navigation, route}) => {
             const filter = data.filter(
               element => element?.cart_item_id != item?.cart_item_id,
             );
-            console.log('filter, from remove from cart' ,filter );
+            // console.log('filter, from remove from cart' ,filter );
             
             setData(filter);
             dispatch(addToCart(filter));
@@ -208,25 +208,25 @@ const MyCart = ({navigation, route}) => {
     }
   };
 
-  const getDeliveryTime = async cartItems => {
-    let shipping_address = await getShippingAddress();
-    let location = shipping_address?.address;
-    if (location) {
-      let res_details = await getRestaurantDetail(
-        cartItems[0]?.itemData?.restaurant_id,
-      );
-      let pickup_location = res_details?.location;
-      let dropOff_Location = location;
+  // const getDeliveryTime = async cartItems => {
+  //   let shipping_address = await getShippingAddress();
+  //   let location = shipping_address?.address;
+  //   if (location) {
+  //     let res_details = await getRestaurantDetail(
+  //       cartItems[0]?.itemData?.restaurant_id,
+  //     );
+  //     let pickup_location = res_details?.location;
+  //     let dropOff_Location = location;
 
-      let delivery_time = await getEstimatedDeliveryTime(
-        pickup_location,
-        dropOff_Location,
-      );
-      setEstimated_delivery_time(delivery_time);
-    } else {
-      setEstimated_delivery_time(0);
-    }
-  };
+  //     let delivery_time = await getEstimatedDeliveryTime(
+  //       pickup_location,
+  //       dropOff_Location,
+  //     );
+  //     setEstimated_delivery_time(delivery_time);
+  //   } else {
+  //     setEstimated_delivery_time(0);
+  //   }
+  // };
 
   const get_Cart_Items = async () => {
     try {
@@ -333,7 +333,7 @@ const MyCart = ({navigation, route}) => {
                           : item?.itemData?.name}
                       </Text>
                       <View style={styles.rowViewSB}>
-                        <PriceText text={item?.itemData?.variationData?.price} />
+                        <PriceText text={item?.itemData?.variationData ? item?.itemData?.variationData.price: item?.itemData?.price  } />
                         <TouchableOpacity onPress={() => handleDelete(item)}>
                           <Ionicons name="close" size={22} color={'#000'} />
                         </TouchableOpacity>

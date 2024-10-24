@@ -44,6 +44,35 @@ const Map = ({navigation}) => {
 
     // console.log(customer_id, 'id');
     
+ 
+
+    // Function to get distance in meters and duration in seconds between two points
+    const getDistanceAndDuration = async (originLat, originLng, destinationLat, destinationLng) => {
+        try {
+          const origin = `${originLat},${originLng}`;
+          const destination = `${destinationLat},${destinationLng}`;
+          const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${googleMapKey}`;
+          
+          const response = await fetch(url);
+          const data = await response.json();
+      
+          // Check if the response contains valid data
+          if (data.rows && data.rows[0].elements[0].status === 'OK') {
+            const distance = data.rows[0].elements[0].distance.text;
+            const duration = data.rows[0].elements[0].duration.text;
+            return { distance, duration };
+          } else {
+            throw new Error('Invalid response from API');
+          }
+        } catch (error) {
+          console.error('Error fetching distance data:', error);
+          return null; // or handle error based on your app logic
+        }
+      };
+      
+    // Example usage:
+   
+    
 
 useEffect(()=>{
     getCurrentLocatin()
@@ -61,8 +90,6 @@ useEffect(()=>{
     }
 
     const getCurrentLocatin = async () => {
-      
-
         const { latitude, longitude, address, shortAddress : shortAdress } = await getCurrentLocation()
 
         setRegion({
@@ -86,14 +113,12 @@ useEffect(()=>{
             shortAddress : shortAdress
         }))
 
-
         setSelectedLocation({
             latitude: latitude,
             longitude: longitude,
             address: address,
             shortAddress : shortAdress
         });
-
     }
 
 
@@ -128,10 +153,6 @@ useEffect(()=>{
         const namee = extractEnglishWords(name)
         console.log(namee);
 
-        
-
-        
-
         // Get the address using reverse geocoding
         const address = await getAddressFromCoordinates(latitude, longitude);
 
@@ -144,12 +165,6 @@ useEffect(()=>{
         setLabel(namee);
 
         showBtmSheet()
-
-        // Show the popup with latitude, longitude, and address
-        // Alert.alert(
-        //     `${name}`,
-        //     `Address: ${address}\nLatitude: ${latitude}\nLongitude: ${longitude}`
-        // );
     };
 
     // Function to handle place search and get lat/lng
@@ -217,8 +232,18 @@ useEffect(()=>{
         return Object.keys(errors).length === 0;
     };
 
-    const handleSubmit = () => {
-        if (validate()) {
+    const handleSubmit = async() => {
+       const distance = await getDistanceAndDuration(selectedLocation?.latitude ,selectedLocation?.longitude, 33.651552140687556, 73.0760657787323,)
+        .then(result => {
+          if (result) {
+            console.log(result.distance, 'location result');
+            
+            return result
+        } else { 
+            console.log('Failed to retrieve distance and duration');
+          }
+        });
+        if (validate() && distance) {
             setIsLoading(true)
             const data = {
                 house_number: '',
@@ -231,7 +256,7 @@ useEffect(()=>{
                 address: selectedLocation?.address,
                 longitude: selectedLocation?.longitude,
                 latitude: selectedLocation?.latitude,
-                distance: ""
+                distance: distance.distance
             }
             console.log(data, 'data');
 

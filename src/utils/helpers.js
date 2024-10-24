@@ -437,6 +437,8 @@ export const fetchApis = async (endPoint,method,setLoading, header, payload,  ) 
       // Forbidden - you do not have permission
       // throw new Error('Forbidden: You do not have permission to perform this action.');
     } else if (response.status === 404) {
+      console.log(endPoint);
+      
       showAlert( 'Not Found: The requested resource was not found.');
       setLoading(false)
       console.log('fetchapi func, Not Found: The requested resource was not found.');

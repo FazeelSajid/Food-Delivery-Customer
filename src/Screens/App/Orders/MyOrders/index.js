@@ -55,18 +55,18 @@ const MyOrders = () => {
   const getData = async () => {
     console.log(api.get_all_order_by_customer_Id +customer_id);
     
-    fetch(api.get_all_order_by_customer_Id + '201570')
+    fetch(api.get_all_order_by_customer_Id + customer_id)
       .then(response => response.json())
       .then(response => {
         let list = response?.result ? response?.result : [];
-        console.log(list, 'list');
+        // console.log(list, 'list');
         
         const filter = list?.filter(item => item?.cart_items_Data?.length > 0);
         // setData([...data, ...list]);
-        console.log(filter, 'filter');
+        // console.log(filter, 'filter');
         
         setData(filter);
-        // dispatch(setAllOrders(filter?.reverse()));
+        dispatch(setAllOrders(filter?.reverse()));
       })
       .catch(err => console.log('error : ', err))
       .finally(() => {

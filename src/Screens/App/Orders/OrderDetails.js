@@ -327,6 +327,8 @@ const OrderDetails = ({navigation, route}) => {
   };
 
   const getDetail = id => {
+    console.log(api.get_order_by_id + id);
+    
     setLoading(true);
     fetch(api.get_order_by_id + id)
       .then(response => response.json())

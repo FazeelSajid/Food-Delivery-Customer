@@ -34,7 +34,7 @@ import { fetchApis, getCustomerDetail, showAlert } from '../../utils/helpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetState, setLocation, setPromos } from '../../redux/AuthSlice';
-import { Badge } from 'react-native-paper';
+import { Badge, RadioButton } from 'react-native-paper';
 import CRBSheetComponent from '../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import PagerView from 'react-native-pager-view';
@@ -43,17 +43,25 @@ import { setcuisines, setitems, setdeals } from '../../redux/AuthSlice';
 import WhiteCart from '../../Assets/svg/WhiteCart.svg';
 import { addFavoriteDeal, addFavoriteitem, getFavoriteDeals, getFavoriteItem, removeFavoriteitem } from '../../utils/helpers/FavoriteApis';
 import { removeFavoriteDeal } from '../../utils/helpers/FavoriteApis';
+import FoodCards from '../../components/Cards/FoodCards';
+import { addItemToCart, getCustomerCart, updateCartItemQuantity } from '../../utils/helpers/cartapis';
+import { addItemToMYCart, updateMyCartList } from '../../redux/CartSlice';
+import RBSheetSuccess from '../../components/BottomSheet/RBSheetSuccess';
+import DealCard from '../../components/Cards/DealCard';
 
 
 const Dashboard = ({ navigation, route }) => {
   const dispatch = useDispatch();
   const { location, customer_detail, customer_id, cuisines, items, deals, promos } = useSelector(store => store.store);
   const { cart, my_cart } = useSelector(store => store.cart);
-  const { favoriteItems, favoriteDeals} = useSelector(store => store.favorite);
+  const { favoriteItems, favoriteDeals } = useSelector(store => store.favorite);
+  const [variations, setVariations] = useState([])
+  const [itemName, setItemName] = useState('')
+  const [itemObj, setItemObj] = useState({})
 
-  
 
-  
+
+
 
 
 
@@ -74,7 +82,7 @@ const Dashboard = ({ navigation, route }) => {
   const [filteredRestaurant, setFilteredRestaurant] = useState([]);
   const [item, setItems] = useState([])
   const [allSelected, setAllSelected] = useState(true)
-  const btmSheetRef = useRef()
+  const locationBtmSheetRef = useRef()
   const [Cuisine, setCuisine] = useState([]);
   const [promoCodes, setPromoCodes] = useState([])
   const [Deals, setDeals] = useState([]);
@@ -87,7 +95,7 @@ const Dashboard = ({ navigation, route }) => {
   };
   const [searchBtns, setSearchBtns] = useState({
     all: true,
-    category : false,
+    category: false,
     price: false,
     priceUp: false,
     priceDown: false,
@@ -141,11 +149,11 @@ const Dashboard = ({ navigation, route }) => {
   };
 
 
-  const showBtmSheet = () => {
-    btmSheetRef?.current?.open()
+  const showLocationBtmSheet = () => {
+    locationBtmSheetRef?.current?.open()
   }
-  const closeBtmSheet = () => {
-    btmSheetRef?.current?.close()
+  const closeLocationBtmSheet = () => {
+    locationBtmSheetRef?.current?.close()
   }
 
   const ItemSeparator = () => (
@@ -175,6 +183,245 @@ const Dashboard = ({ navigation, route }) => {
     //   .catch(err => console.log('error getAllCuisines : ', err));
   };
 
+  // const getVariationsByItemId = async (item_id) => {
+  //   return new Promise((resolve, reject) => {
+  //     const itam = item.find(item => item.item_id === item_id); 
+  //     if (itam) {
+  //       resolve(itam.variations); 
+  //     } else {
+  //       reject(new Error("Item not found"))
+  //     }
+  //   });
+  // };
+
+
+
+  const btmSheetRef = useRef()
+  const ref_RBSheetSuccess = useRef();
+
+
+
+  const [selectedVariation, setSelectedVariation] = useState(null);
+
+
+  const showBtmSheet = (item) => {
+    setSelectedVariation(null)
+
+    setItemObj({
+      id: item.item_id,
+      variations: item.item_variations,
+      name: item?.item_name,
+    })
+
+    btmSheetRef?.current?.open()
+  }
+  const closeBtmSheet = () => {
+    btmSheetRef?.current?.close()
+    setVariations([])
+  }
+  const add_item_to_cart = async (id, type) => {
+
+    // let customer_id = await AsyncStorage.getItem('customer_id');
+    // console.log('customer_Id :  ', customer_id);
+    let cart = await getCustomerCart(customer_id);
+    console.log('______cart    :  ', cart?.cart_id);
+
+
+    let data = type ==='item'? {
+      item_id: itemObj.id?.toString(),
+      cart_id: cart?.cart_id?.toString(),
+      item_type: type,
+      comments: 'Adding item in cart',
+      quantity: 1,
+      variation_id: id
+    } : {
+      item_id: id,
+      cart_id: cart?.cart_id?.toString(),
+      item_type: 'deal',
+      comments: '',
+      quantity: 1,
+    };
+
+    console.log('data   :  ', data);
+
+    await addItemToCart(data)
+      .then(response => {
+        console.log('response ', response);
+        if (response?.status == true) {
+          // navigation?.navigate('MyCart');
+          // cart_restaurant_id
+          // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+          //my_cart
+          dispatch(addItemToMYCart(response?.result));
+          setSelectedVariation(null)
+
+          // ref_RBSheetSuccess?.current?.open();
+          showAlert(`${itemObj.name} is added to cart`);
+        } else {
+          showAlert(response?.message);
+        }
+      })
+      .catch(error => {
+        console.log('error  :  ', error);
+      })
+      .finally(() => {
+        setLoading(false)
+      });
+  };
+
+  const handleAddToCart = async (variation_id, item_id) => {
+    // console.log(id, 'id');
+    setSelectedVariation(variation_id)
+
+    if (variation_id === null) {
+      showBtmSheet()
+    } else {
+      const filter = my_cart?.filter(
+        item => item?.item_id == item_id
+      );
+      // console.log(filter, 'filter');
+      // const OtherFilter = filter.filter(
+      //   item => item.variation_id === id
+      // )
+
+      if (filter?.length > 0) {
+        const checkVariation = filter?.filter(
+          item =>
+            item?.variation_id == variation_id,
+        )
+
+        // console.log( 'checkVariation', checkVariation.length > 0);
+
+
+        if (checkVariation.length === 0) {
+          add_item_to_cart(variation_id, 'item');
+          closeBtmSheet()
+        } else {
+          // console.log('check variation icon' , checkVariation);
+
+          let obj = {
+            cart_item_id: checkVariation[0]?.cart_item_id,
+            quantity: checkVariation[0]?.quantity + 1,
+          };
+
+          await updateCartItemQuantity(obj);
+
+          // also update quantity in redux
+          const newData = my_cart?.map(item => {
+            if (item?.item_id == item_id) {
+              return {
+                ...item,
+                quantity: checkVariation[0]?.quantity + 1,
+              };
+            } else {
+              return { ...item };
+            }
+          });
+          dispatch(updateMyCartList(newData));
+          // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+          ref_RBSheetSuccess?.current?.open();
+        }
+
+      } else {
+        add_item_to_cart(variation_id, 'item');
+        closeBtmSheet()
+      }
+
+    }
+
+
+    // if item already exists in card then we will only update quantity of that item
+
+    // setLoading(true);
+    // let time_obj = await checkRestaurantTimings(
+    //   restaurantDetails?.restaurant_id,
+    // );
+    // console.log('time_obj?.isClosed : ', time_obj?.isClosed);
+    // setLoading(false);
+    // if (time_obj?.isClosed) {
+    //   setRestaurant_timings(time_obj);
+    //   ref_RBSheetResClosed.current.open();
+    //   return;
+    // } else if (validate()) {
+    //   // if item already exists in card then we will only update quantity of that item
+    //   const filter = my_cart?.filter(
+    //     item => item?.item_id == item_id
+    //   );
+    //   if (filter?.length > 0) {
+    //     let obj = {
+    //       cart_item_id: filter[0]?.cart_item_id,
+    //       quantity: filter[0]?.quantity + count,
+    //     };
+    //     await updateCartItemQuantity(obj);
+    //     // also update quantity in redux
+    //     const newData = my_cart?.map(item => {
+    //       if (item?.item_id == item_id) {
+    //         return {
+    //           ...item,
+    //           quantity: filter[0]?.quantity + count,
+    //         };
+    //       } else {
+    //         return {...item};
+    //       }
+    //     });
+    //     dispatch(updateMyCartList(newData));
+    //     dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+    //     ref_RBSheetSuccess?.current?.open();
+    //   } else {
+    //     add_item_to_cart();
+    //   }
+    // }
+  };
+  
+  const handleDealAddToCart = async (deal) => {
+
+    setItemObj({
+      id: deal.deal_id,
+      name: deal?.item_name,
+    })
+    // setLoading(true);
+    // let time_obj = await checkRestaurantTimings(
+    //   restaurantDetails?.restaurant_id,
+    // );
+    // setLoading(false);
+    // if (time_obj?.isClosed) {
+    //   setRestaurant_timings(time_obj);
+    //   ref_RBSheetResClosed.current.open();
+    //   return;
+    // } else 
+    // if (validate()) {
+      // if item already exists in card then we will only update quantity of that item
+      const filter = my_cart?.filter(
+        item => item?.item_id == deal.deal_id,
+      );
+      if (filter?.length > 0) {
+        let obj = {
+          cart_item_id: filter[0]?.cart_item_id,
+          quantity: filter[0]?.quantity + 1,
+        };
+        await updateCartItemQuantity(obj);
+        // also update quantity in redux
+        const newData = my_cart?.map(item => {
+          if (item?.item_id == deal.deal_id) {
+            return {
+              ...item,
+              quantity: filter[0]?.quantity + 1,
+            };
+          } else {
+            return { ...item };
+          }
+        });
+        dispatch(updateMyCartList(newData));
+
+
+        // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+        // ref_RBSheetSuccess?.current?.open();
+      } else {
+        add_item_to_cart(deal.deal_id, 'deal');
+
+      }
+    // }
+  };
 
 
 
@@ -253,7 +500,7 @@ const Dashboard = ({ navigation, route }) => {
       // let deals = await searchDealsByName(query);
       // let restaurants = await searchRestaurantByName(query);
       // console.log(items, 'item');
-      
+
       setSearchedItems(items);
       // setFilteredDeals(deals);
       // setFilteredRestaurant(restaurants);
@@ -353,7 +600,7 @@ const Dashboard = ({ navigation, route }) => {
     let list = response?.result ? response?.result : [];
     dispatch(setcuisines(list))
     setCuisine(list);
-    
+
   };
 
   const getDeals = async () => {
@@ -361,15 +608,17 @@ const Dashboard = ({ navigation, route }) => {
 
     const response = await fetchApis(api.get_all_deals, 'GET', setLoading);
     let list = response?.result ? response?.result : [];
+    // console.log(list , 'deals list');
+    
     dispatch(setdeals(list))
 
 
-        if (list?.length > 2) {
-          const slicedArray = list.slice(0, 2);
-          setDeals(slicedArray);
-        } else {
-          setDeals(list);
-        }
+    if (list?.length > 2) {
+      const slicedArray = list.slice(0, 2);
+      setDeals(slicedArray);
+    } else {
+      setDeals(list);
+    }
     // let { latitude, longitude } = await getCurrentLocation();
     // fetch(
     //   api.get_all_deals,
@@ -404,22 +653,25 @@ const Dashboard = ({ navigation, route }) => {
       shortAddress: shortAdress
     }))
   }
+
+  // console.log(items);
+  
   const getAllItems = async () => {
 
 
-    const response = await fetchApis(api.get_all_items, 'GET', setLoading);
+    const response = await fetchApis(api.get_all_items_by_restaurant + 'res_4074614', 'GET', setLoading);
 
     let list = response?.result ? response?.result : [];
     dispatch(setitems(list))
     // console.log(list, 'restaurants');
 
-    if (list?.length > 3) {
-      const slicedArray = list.slice(0, 3);
-      setItems(slicedArray);
-      setLoading(false)
-    } else {
-      setItems(list);
-    }
+    // if (list?.length > 3) {
+    //   const slicedArray = list.slice(0, 3);
+    //   setItems(slicedArray);
+    //   setLoading(false)s
+    // } else {
+    //   setItems(list);
+    // }
     // fetch(api.get_all_items )
     //   .then(response => response.json())
     //   .then(response => {
@@ -454,22 +706,24 @@ const Dashboard = ({ navigation, route }) => {
 
     getFavoriteItem(customer_id, dispatch);
     getFavoriteDeals(customer_id, dispatch);
+    getPromo()
+    getAllCuisines()
 
 
     getDeals();
-    if (deals.length > 0 && promos.length > 0 && items.length > 0 && cuisines.length > 0) {
-      setRefresh (false)
-    }
+    // if (deals.length > 0 && promos.length > 0 && items.length > 0 && cuisines.length > 0) {
+    //   setRefresh(false)
+    // }
   };
 
   useEffect(() => {
     if (deals.length > 0) {
-      setDeals(deals.slice(0,2)); 
+      setDeals(deals.slice(0, 2));
     } else {
       getDeals();
     }
     if (items.length > 0) {
-      setItems(items.slice(0,2))
+      setItems(items.slice(0, 2))
     } else {
       handleSelect(false, false, true)
     }
@@ -480,17 +734,17 @@ const Dashboard = ({ navigation, route }) => {
     }
     if (cuisines.length > 0) {
       setCuisine(cuisines)
-    }else{
+    } else {
       getAllCuisines();
     }
-  
-   
+
+
     getCurrentLocatin()
     // getRestaurants();
-    
+
   }, []);
 
-
+  const str = 'A fresh mix of romaine lettuce, baby spinach, cucumber, cherry tomatoes, red onion, and avocado, drizzled with olive oil and lemon juice. Customizable with grilled chicken, feta cheese, or extra avocado. Vegan and gluten-free options available.'
 
 
   useEffect(() => {
@@ -498,19 +752,28 @@ const Dashboard = ({ navigation, route }) => {
     getFavoriteDeals(customer_id, dispatch);
   }, [customer_id]);
 
-  const isItemFavorite = (id) => {    
+  const isItemFavorite = (id) => {
     return favoriteItems.some(item => item?.item?.item_id === id);
   };
   const isDealFavorite = (id) => {
-    
+
     return favoriteDeals.some(item => item?.deal?.deal_id === id);
   };
 
+  const [numColumns, setNumColumns] = useState(2)
 
-  
-  
+  const shortenString = (str) => {
+    // Check if the string length exceeds 50
+    if (str.length > 35) {
+      // Cut the string to 50 characters and append "..."
+      return str.substring(0, 35) + '...';
+    }
+    // If the string length is less than or equal to 50, return it as is
+    return str;
+  }
+
   // console.log(Cuisine,'promos');
-  
+
 
   // const getCustomerData = async () => {
   //   let customer_id = await AsyncStorage.getItem('customer_id');
@@ -538,7 +801,7 @@ const Dashboard = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <Loader loading={loading || isFetching} />
-      
+
 
       {/* <View
         style={{
@@ -576,7 +839,7 @@ const Dashboard = ({ navigation, route }) => {
         refreshControl={
           <RefreshControl
             colors={[Colors.Orange, Colors.OrangeLight]}
-            refreshing={refresh}
+            refreshing={loading}
             onRefresh={() => onRefresh()}
           />
         }>
@@ -597,10 +860,10 @@ const Dashboard = ({ navigation, route }) => {
               onPress={() => {
 
                 // console.log(customer_id, 'stte');
-                showBtmSheet()
+                showLocationBtmSheet()
               }}>
               <Icons.MarkerOutlineActive />
-              
+
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => navigation?.navigate('Notification')}>
@@ -618,7 +881,7 @@ const Dashboard = ({ navigation, route }) => {
           }}>
           Let’s find your favorite food!
         </Text> */}
-     
+
 
 
 
@@ -646,10 +909,10 @@ const Dashboard = ({ navigation, route }) => {
         )} */}
 
         <View style={{ marginVertical: 15 }}>
-       
+
           {isSearch ? (
-            <View style={{paddingHorizontal: 20}} >
-             <CInput
+            <View style={{ paddingHorizontal: 20 }} >
+              <CInput
                 width={wp(88)}
                 height={42}
                 containerStyle={{ marginBottom: 0 }}
@@ -673,73 +936,75 @@ const Dashboard = ({ navigation, route }) => {
                 }
               />
 
-              <View style={{flexDirection: 'row', marginVertical: hp(2)}} >
+              <View style={{ flexDirection: 'row', marginVertical: hp(2) }} >
 
-              <TouchableOpacity
-                onPress={() =>
-                  handleSelect(false, false, true)
-                }
-                style={{
-                  ...styles.topChip,
-                  backgroundColor: searchBtns.all
-                    ? Colors.Orange
-                    : '#F5F6FA',
-                }}>
-                <Text
+                <TouchableOpacity
+                  onPress={() =>
+                    handleSelect(false, false, true)
+                  }
                   style={{
-                    ...styles.topChipText,
-                    color: searchBtns.all ? Colors.White : '#9F9F9F',
+                    ...styles.topChip,
+                    backgroundColor: searchBtns.all
+                      ? Colors.Orange
+                      : '#F5F6FA',
                   }}>
-                  All
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() =>
-                  handleSelect(false, false, true)
-                }
-                style={{
-                  ...styles.topChip,
-                  backgroundColor: searchBtns.category
-                    ? Colors.Orange
-                    : '#F5F6FA',
-                }}>
-                <Text
+                  <Text
+                    style={{
+                      ...styles.topChipText,
+                      color: searchBtns.all ? Colors.White : '#9F9F9F',
+                    }}>
+                    All
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    handleSelect(false, false, true)
+                  }
                   style={{
-                    ...styles.topChipText,
-                    color: searchBtns.category ? Colors.White : '#9F9F9F',
+                    ...styles.topChip,
+                    backgroundColor: searchBtns.category
+                      ? Colors.Orange
+                      : '#F5F6FA',
                   }}>
-                  Category
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() =>
-                handlePriceToggle()
-                }
-                style={{
-                  ...styles.topChip,
-                  backgroundColor: searchBtns.price
-                    ? Colors.Orange
-                    : '#F5F6FA',
-                }}>
-                <Text
+                  <Text
+                    style={{
+                      ...styles.topChipText,
+                      color: searchBtns.category ? Colors.White : '#9F9F9F',
+                    }}>
+                    Category
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    handlePriceToggle()
+                  }
                   style={{
-                    ...styles.topChipText,
-                    color: searchBtns.price ? Colors.White : '#9F9F9F',
+                    ...styles.topChip,
+                    backgroundColor: searchBtns.price
+                      ? Colors.Orange
+                      : '#F5F6FA',
                   }}>
-                 {!searchBtns.price? 'Price ↑↓' : searchBtns.priceUp ? 'Price ↑' : 'Price ↓' }
-                </Text>
-              </TouchableOpacity>
+                  <Text
+                    style={{
+                      ...styles.topChipText,
+                      color: searchBtns.price ? Colors.White : '#9F9F9F',
+                    }}>
+                    {!searchBtns.price ? 'Price ↑↓' : searchBtns.priceUp ? 'Price ↑' : 'Price ↓'}
+                  </Text>
+                </TouchableOpacity>
 
               </View>
 
               <FlatList
                 scrollEnabled={false}
                 data={searchedItems}
-                ListEmptyComponent={() => searchQuery?.length == 0? <Text style={{fontFamily: Fonts.PlusJakartaSans_Bold,
+                ListEmptyComponent={() => searchQuery?.length == 0 ? <Text style={{
+                  fontFamily: Fonts.PlusJakartaSans_Bold,
                   color: '#0A212B',
                   textAlign: 'center',
                   fontSize: RFPercentage(1.8),
-                  lineHeight: 30,}}>Search Your Favorite Food</Text> :<NoDataFound />}
+                  lineHeight: 30,
+                }}>Search Your Favorite Food</Text> : <NoDataFound />}
                 renderItem={({ item, index }) => {
 
                   const fav = isItemFavorite(item?.item_id)
@@ -769,19 +1034,13 @@ const Dashboard = ({ navigation, route }) => {
                       showNextButton={true}
                       showRating={false}
                       priceContainerStyle={{ marginTop: 0 }}
-                      onRemove = {()=> removeFavoriteitem( item?.item_id,customer_id, favoriteItems, dispatch, showAlert)}
-                      addFav={()=> addFavoriteitem( item?.item_id,customer_id, dispatch, showAlert)}
+                      onRemove={() => removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert)}
+                      addFav={() => addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
                       isFavorite={fav}
                     />
                   );
                 }}
               />
-
-                  
-              
-
-            
-
             </View>
 
 
@@ -789,20 +1048,20 @@ const Dashboard = ({ navigation, route }) => {
             <>
               <View style={{ alignItems: 'center', marginTop: wp(0) }} >
                 <PagerView
-                  style={[{ height: hp(16), backgroundColor: 'white', width: wp(100), }]}
+                  style={[{ height: hp(25), backgroundColor: 'white', width: wp(100), }]}
                   initialPage={0}
                   onPageSelected={onPageSelected}
                   ref={pagerRef} // Reference to control PagerView programmatically
                 >
                   {promoCodes.map((promo, index) => {
                     // console.log(promo);
-                    
-                  return(
-                    <TouchableOpacity key={index} style={{ backgroundColor: 'white' }} activeOpacity={0.7}>
-                      <Image source={{ uri: BASE_URL + promo.image }} style={{ width: wp(100), height: hp(15), resizeMode: 'cover' }} />
-                    </TouchableOpacity>
-                  )
-})}
+
+                    return (
+                      <TouchableOpacity key={index} style={{ backgroundColor: 'white' }} activeOpacity={0.7}>
+                        <Image source={{ uri: BASE_URL + promo.image }} style={{ width: wp(100), height: hp(25), resizeMode: 'cover' }} />
+                      </TouchableOpacity>
+                    )
+                  })}
                 </PagerView>
 
                 {renderPaginationDots()}
@@ -820,7 +1079,7 @@ const Dashboard = ({ navigation, route }) => {
                         <Feather name="search" size={17} color="#9F9F9F" />
                       </TouchableOpacity>
                       <View>
-                        
+
                       </View>
                       <TouchableOpacity
                         onPress={() =>
@@ -869,48 +1128,72 @@ const Dashboard = ({ navigation, route }) => {
                   }}
                 />
               </View>
+
+              {/* <View style={styles.rowViewSB1} >
+                <FoodCards description={shortenString(str)} image={BASE_URL_IMAGE + 'images/1729497777802--cheeseFries.jpg'} price={'250'} />
+                <FoodCards isFavorite={true} image={BASE_URL_IMAGE + 'images/1729497777802--cheeseFries.jpg'} description={shortenString(str)} price={'200'} />
+              </View> */}
+
               <FlatList
                 scrollEnabled={false}
                 data={item}
-                style={{paddingHorizontal: 20}}
+                key={numColumns}
+                keyExtractor={(item) => item.item_id.toString()}
+                numColumns={numColumns}
+                style={{ paddingHorizontal: 10 }}
                 ListEmptyComponent={() => <NoDataFound />}
                 renderItem={({ item, index }) => {
                   // console.log(item);
-
                   const fav = isItemFavorite(item?.item_id)
+
+                  console.log(item, );
                   
-
-                  
-
-
-
                   return (
-                    <FoodCardWithRating
-                    onPress={() =>
-                      navigation?.navigate('ItemDetails', {
-                        id: item?.item_id,
-                      })
-                    }
-                      title={item?.item_name}
-                      image={
-                        // item.image
-                        item?.images?.length > 0
-                          ? BASE_URL_IMAGE + item?.images[0]
-                          : ''
-                      }
-                      price={item?.item_prices[0]?.price}
-                      rating={item?.rating}
-                      tag={setCusineNameByItemCusineId(item?.cuisine_id)}
-                      isTagArray={false}
-                      nextIconWidth={26}
-                      cardStyle={{ marginHorizontal: 0, marginBottom: 15 }}
-                      showNextButton={true}
-                      showRating={false}
-                      priceContainerStyle={{ marginTop: 0 }}
+
+                    <FoodCards
                       isFavorite={fav}
-                      onRemove = {()=> removeFavoriteitem( item?.item_id,customer_id, favoriteItems, dispatch, showAlert)}
-                      addFav={()=> addFavoriteitem( item?.item_id,customer_id, dispatch, showAlert)}
+                      image={BASE_URL_IMAGE + item?.images[0]}
+                      description={shortenString(item.description)}
+                      // price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
+                      heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
+                      title={item?.item_name}
+                      item={item}
+                      id={item?.item_id}
+                      onPress={() =>
+                        navigation?.navigate('ItemDetails', {
+                          id: item?.item_id,
+                        })
+                      }
+                      addToCart={() => showBtmSheet(item)}
+
                     />
+                    // <FoodCardWithRating
+                    //   onPress={() =>
+                    //     navigation?.navigate('ItemDetails', {
+                    //       id: item?.item_id,
+                    //     })
+                    //   }
+                    //   title={item?.item_name}
+                    //   image={
+                    //     // item.image
+                    //     item?.images?.length > 0
+                    //       ? BASE_URL_IMAGE + item?.images[0]
+                    //       : ''
+                    //   }
+                    //   price={item?.item_prices[0]?.price}
+                    //   rating={item?.rating}
+                    //   tag={setCusineNameByItemCusineId(item?.cuisine_id)}
+                    //   isTagArray={false}
+                    //   nextIconWidth={26}
+                    //   cardStyle={{ marginHorizontal: 0, marginBottom: 15 }}
+                    //   showNextButton={true}
+                    //   showRating={false}
+                    //   priceContainerStyle={{ marginTop: 0 }}
+                    //   isFavorite={fav}
+                    //   onRemove={() => removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert)}
+                    //   addFav={() => addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
+
+                    // />
                   );
                 }}
               />
@@ -918,71 +1201,90 @@ const Dashboard = ({ navigation, route }) => {
 
           )}
           <View style={styles.headerTextView}>
-                <Text style={styles.headerText}>Explore Deals</Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate('NearByDeals');
-                  }}>
-                  <Text style={styles.viewAllText}>See All</Text>
-                </TouchableOpacity>
-              </View>
-              
-              <FlatList
-                scrollEnabled={false}
-                data={Deals}
-                style={{paddingHorizontal: 20}}
-                ListEmptyComponent={() => <NoDataFound />}
-                renderItem={({ item, index }) => {
-                  // console.log(item, 'deal');
-                  const cuisineIds = item?.items?.map(item => item?.cuisine_id);
-                  const cuisineNames = cuisineIds?.map(cuisineId =>
-                    setCusineNameByItemCusineId(cuisineId)
-                  );
-                  const fav = isDealFavorite(item?.deal_id)
-                  // console.log(cuisineIds);
-                  // console.log(fav ,'fav Deal')
-                  // console.log(favoriteDeals[0], 'deal as favorite');
-                  
-                  
-                 
-                  
+            <Text style={styles.headerText}>Explore Deals</Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('NearByDeals');
+              }}>
+              <Text style={styles.viewAllText}>See All</Text>
+            </TouchableOpacity>
+          </View>
 
-                  
-                  return (
-                    <FoodCardWithRating
-                      onPress={() =>
-                        navigation?.navigate('NearByDealsDetails', {
-                          id: item?.deal_id,
-                        })
-                      }
-                      title={item?.name}
-                      image={
-                        // item.image
-                        item?.images?.length > 0
-                          ? BASE_URL_IMAGE + item?.images[0]
-                          : ''
-                      }
-                      price={item?.price}
-                      rating={item?.rating}
-                      tag={cuisineNames
-                        // item.tag
-                        // item?.items ? item?.items : []
 
-                      }
-                      isFavorite={fav}
-                      isTagArray={true}
-                      nextIconWidth={26}
-                      cardStyle={{ marginHorizontal: 0, marginBottom: 15 }}
-                      showNextButton={true}
-                      showRating={false}
-                      priceContainerStyle={{ marginTop: 0 }}
-                      onRemove = {()=> removeFavoriteDeal( item?.deal_id,customer_id, favoriteDeals, dispatch, showAlert)}
-                      addFav={()=> addFavoriteDeal( item?.deal_id, customer_id, dispatch, showAlert)}
 
-                    />
-                  );
-                }}
-              />
+          <FlatList
+            // scrollEnabled={false}
+            horizontal
+            data={Deals}
+            style={{ paddingHorizontal: 20 }}
+            ListEmptyComponent={() => <NoDataFound />}
+            renderItem={({ item, index }) => {
+              // console.log(item, 'deal');
+              const cuisineIds = item?.items?.map(item => item?.cuisine_id);
+              const cuisineNames = cuisineIds?.map(cuisineId =>
+                setCusineNameByItemCusineId(cuisineId)
+              );
+              const fav = isDealFavorite(item?.deal_id)
+              // console.log(cuisineIds);
+              // console.log(fav ,'fav Deal')
+              // console.log(favoriteDeals[0], 'deal as favorite');
+
+
+
+
+
+
+              return (
+
+                <DealCard 
+                 image={item?.images?.length > 0 && BASE_URL_IMAGE + item?.images[0]}
+                 description={shortenString(item.description)} 
+                 price={item?.price} 
+                 title={item?.name} 
+                 onPress={() =>
+                  navigation?.navigate('NearByDealsDetails', {
+                    id: item?.deal_id,
+                  })
+                } 
+                isFavorite={fav} 
+                heartPress={() => fav ? removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch, showAlert) : addFavoriteDeal(item?.deal_id, customer_id, dispatch, showAlert)}
+                addToCartpress={()=> handleDealAddToCart(item)}
+                />
+                
+                // <FoodCardWithRating
+                //   onPress={() =>
+                //     navigation?.navigate('NearByDealsDetails', {
+                //       id: item?.deal_id,
+                //     })
+                //   }
+                //   title={item?.name}
+                //   image={
+                //     // item.image
+                //     item?.images?.length > 0
+                //       ? BASE_URL_IMAGE + item?.images[0]
+                //       : ''
+                //   }
+                //   price={item?.price}
+                //   rating={item?.rating}
+                //   tag={cuisineNames
+                //     // item.tag
+                //     // item?.items ? item?.items : []
+
+                //   }
+                //   isFavorite={fav}
+                //   isTagArray={true}
+                //   nextIconWidth={26}
+                //   cardStyle={{ marginHorizontal: 0, marginBottom: 15 }}
+                //   showNextButton={true}
+                //   showRating={false}
+                //   priceContainerStyle={{ marginTop: 0 }}
+                //   onRemove={() => removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch, showAlert)}
+                //   addFav={() => addFavoriteDeal(item?.deal_id, customer_id, dispatch, showAlert)}
+
+                // />
+              );
+            }}
+          />
         </View>
         {/* <View>
           <Text style={styles.welcomeText}>Welcome!</Text>
@@ -1112,12 +1414,12 @@ const Dashboard = ({ navigation, route }) => {
         )}
 
         {/* {!showFilteredData && !showSearchedData && ( */}
-          <View style={{ marginVertical: 0 }}>
-            <>
-            
-              
-            </>
-            {/* <>
+        <View style={{ marginVertical: 0 }}>
+          <>
+
+
+          </>
+          {/* <>
               <View style={styles.headerTextView}>
                 <Text style={styles.headerText}>Our Cuisines</Text>
                 <TouchableOpacity
@@ -1165,75 +1467,114 @@ const Dashboard = ({ navigation, route }) => {
                 }}
               />
             </> */}
-            <CRBSheetComponent
-              height={170}
-              refRBSheet={btmSheetRef}
-              content={
-                <View style={{ width: wp(90) }} >
-                  <View style={styles.rowViewSB1}>
-                    <Text style={styles.rbSheetHeading}>Select an option</Text>
-                    <TouchableOpacity
-                      onPress={() => closeBtmSheet()}>
-                      <Ionicons name={'close'} size={22} color={'#1E2022'} />
-                    </TouchableOpacity>
-                  </View>
-                  <TouchableOpacity style={styles.rowView} onPress={async () => {
-
-                    // getRestaurants();
-                    // getDeals();
-                    // console.log(address);
-                    closeBtmSheet()
-                    // navigation.navigate('AddAddress', { address })
-
-
-                  }} >
-                    <Icons.MarkerOutlineActive />
-                    <Text style={styles.btmsheettext} >Current Location</Text>
+          <CRBSheetComponent
+            height={170}
+            refRBSheet={locationBtmSheetRef}
+            content={
+              <View style={{ width: wp(90) }} >
+                <View style={styles.rowViewSB1}>
+                  <Text style={styles.rbSheetHeading}>Select an option</Text>
+                  <TouchableOpacity
+                    onPress={() => closeLocationBtmSheet()}>
+                    <Ionicons name={'close'} size={22} color={'#1E2022'} />
                   </TouchableOpacity>
-                  <ItemSeparator />
-                  <TouchableOpacity style={styles.rowView} onPress={() => {
-                    closeBtmSheet()
-                    navigation.navigate('Map')
-                  }} >
-                    <Icons.AddSimple />
-                    <Text style={styles.btmsheettext} >Add Location</Text>
-                  </TouchableOpacity>
-
                 </View>
-              }
-            />
-          </View>
-         {/* )} */}
+                <TouchableOpacity style={styles.rowView} onPress={async () => {
+
+                  // getRestaurants();
+                  // getDeals();
+                  // console.log(address);
+                  closeLocationBtmSheet()
+                  // navigation.navigate('AddAddress', { address })
+
+
+                }} >
+                  <Icons.MarkerOutlineActive />
+                  <Text style={styles.btmsheettext} >Current Location</Text>
+                </TouchableOpacity>
+                <ItemSeparator />
+                <TouchableOpacity style={styles.rowView} onPress={() => {
+                  closeLocationBtmSheet()
+                  navigation.navigate('Map')
+                }} >
+                  <Icons.AddSimple />
+                  <Text style={styles.btmsheettext} >Add Location</Text>
+                </TouchableOpacity>
+
+              </View>
+            }
+          />
+        </View>
+        {/* )} */}
       </ScrollView>
       <TouchableOpacity style={styles.floatingButton} activeOpacity={0.9} onPress={() => navigation.navigate('MyCart')}>
         <View>
-        {my_cart?.length > 0 && (
-                <Badge
-                  style={{
-                    position: 'absolute',
-                    top: -8,
-                    right: -4,
-                    backgroundColor: Colors.White,
-                    color: Colors.Orange,
-                    fontFamily: Fonts.PlusJakartaSans_Bold,
-                    fontSize: RFPercentage(1.2),
-                    
+          {my_cart?.length > 0 && (
+            <Badge
+              style={{
+                position: 'absolute',
+                top: -8,
+                right: -4,
+                backgroundColor: Colors.White,
+                color: Colors.Orange,
+                fontFamily: Fonts.PlusJakartaSans_Bold,
+                fontSize: RFPercentage(1.2),
 
-                  }}
-                 
-                
-                  size={15}
-              
-                  >
-                  {my_cart?.length}
-                </Badge>
-              )}
-               <WhiteCart />
+
+              }}
+
+
+              size={15}
+
+            >
+              {my_cart?.length}
+            </Badge>
+          )}
+          <WhiteCart />
         </View>
-      
-       
-        
       </TouchableOpacity>
+
+      <CRBSheetComponent
+        height={230}
+        refRBSheet={btmSheetRef}
+        content={
+          <View style={{ width: wp(90) }} >
+            <View style={styles.rowViewSB} >
+              <Text style={[styles.variationTxt, { fontSize: RFPercentage(2) }]} >Select your variation</Text>
+              <TouchableOpacity
+                onPress={() => closeBtmSheet()}>
+                <Ionicons name={'close'} size={22} color={'#1E2022'} />
+              </TouchableOpacity>
+            </View>
+            {itemObj.variations?.map((variation, i) => (
+              <View key={i} style={styles.rowViewSB}>
+                <View style={styles.rowView} >
+                  <RadioButton
+                    color={Colors.Orange} // Custom color for selected button
+                    uncheckedColor={Colors.Orange} // Color for unselected buttons
+                    status={selectedVariation === variation.variation_id ? 'checked' : 'unchecked'}
+                    onPress={() => handleAddToCart(variation.variation_id, itemObj.id)}
+                  />
+                  <Text style={styles.variationText}>{variation.variation_name}</Text>
+                </View>
+                <Text style={styles.variationText}>£ {variation?.price}</Text>
+              </View>
+            ))}
+
+          </View>
+        }
+
+      />
+
+      <RBSheetSuccess
+        refRBSheet={ref_RBSheetSuccess}
+        title={`${itemObj.name} added to cart.`}
+        btnText={'OK'}
+        onPress={() => {
+          ref_RBSheetSuccess?.current?.close();
+          // navigation.goBack();
+        }}
+      />
     </View>
   );
 };
@@ -1241,7 +1582,7 @@ const Dashboard = ({ navigation, route }) => {
 export default Dashboard;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.White,  },
+  container: { flex: 1, backgroundColor: Colors.White, },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1303,10 +1644,10 @@ const styles = StyleSheet.create({
   },
   rowViewSB1: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    // alignItems: 'center',
+    justifyContent: 'space-bssetween',
     marginBottom: 20,
-    paddingHorizontal: 10,
+    // paddingHorizontal: 10,
   },
   rowView: {
     flexDirection: 'row',
@@ -1327,10 +1668,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.PlusJakartaSans_Regular,
     textAlign: "center",
     paddingTop: hp(1)
-  }, paginationContainer: {
+  },
+  paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: hp(1),
+    position: 'absolute',
+    bottom: 90
   },
   dot: {
     height: wp(2),
@@ -1350,8 +1694,29 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.Orange,
     paddingVertical: wp(3),
     paddingHorizontal: wp(2.5),
-    
+
   },
+  variationTxt: {
+    color: '#02010E',
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    fontSize: RFPercentage(1.7),
+    marginBottom: hp(1)
+  },
+  radioButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  variationText: {
+    fontSize: RFPercentage(1.6),
+    color: '#02010E',
+    fontFamily: Fonts.PlusJakartaSans_Medium,
+  },
+  rowViewSB: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
 });
 
 // import React, {useState, useEffect, useRef} from 'react';

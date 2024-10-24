@@ -27,6 +27,7 @@ import CInput from '../../../components/TextInput/CInput';
 import { RadioButton } from 'react-native-paper';
 import RBSheetSuccess from '../../../components/BottomSheet/RBSheetSuccess';
 import {
+  fetchApis,
   getCustomerDetail,
   getCustomerShippingAddress,
   getRestaurantDetail,
@@ -87,6 +88,9 @@ const Checkout = ({ navigation, route }) => {
     selected_payment_string,
   } = useSelector(store => store.cart);
 
+
+  
+
   const btmSheetRef = useRef()
 
 
@@ -121,36 +125,38 @@ const Checkout = ({ navigation, route }) => {
 
   const [selected_card, setSelected_card] = useState('');
   const { customer_id, location } = useSelector(store => store.store);
+  const [cartItemIds, setCartItemIds] = useState([])
+  const [infoObj, setInfoObj] = useState({})
 
   const location_id = location.id
 
 
 
   const [data, setData] = useState([
-    {
-      id: 0,
-      image: Images.food1,
-      title: 'Fresh Orange splash',
-      description: 'Mix fresh real orange',
-      price: 13.2,
-      count: 1,
-    },
-    {
-      id: 1,
-      image: Images.food2,
-      title: 'Fresh Orange splash',
-      description: 'Mix fresh real orange',
-      price: 13.2,
-      count: 1,
-    },
-    {
-      id: 2,
-      image: Images.food3,
-      title: 'Fresh Orange',
-      description: 'Mix fresh real orange',
-      price: 13.2,
-      count: 1,
-    },
+    // {
+    //   id: 0,
+    //   image: Images.food1,
+    //   title: 'Fresh Orange splash',
+    //   description: 'Mix fresh real orange',
+    //   price: 13.2,
+    //   count: 1,
+    // },
+    // {
+    //   id: 1,
+    //   image: Images.food2,
+    //   title: 'Fresh Orange splash',
+    //   description: 'Mix fresh real orange',
+    //   price: 13.2,
+    //   count: 1,
+    // },
+    // {
+    //   id: 2,
+    //   image: Images.food3,
+    //   title: 'Fresh Orange',
+    //   description: 'Mix fresh real orange',
+    //   price: 13.2,
+    //   count: 1,
+    // },
   ]);
 
   // ____________________________ stripe payment ________________________________
@@ -420,7 +426,7 @@ const Checkout = ({ navigation, route }) => {
       .catch(error => console.log('makeOrderPayment', error));
   };
 
-  // console.log(location_id);
+  console.log(location_id);
 
   const placeOrder = async () => {
         
@@ -442,7 +448,7 @@ const Checkout = ({ navigation, route }) => {
 
     // "message": "customer_id , cart_items_ids , restaurant_id , phone_no ,
     // payment_option, total_amount must be Provided ", "status": false
-    if (location_id?.length == 0) {
+    if (!location_id) {
       navigation.navigate('ManageAddress');
     } else {
       setLoading(true);
@@ -474,12 +480,12 @@ const Checkout = ({ navigation, route }) => {
         location_id: location_id,
         address: location.address,
         restaurant_id: cart_restaurant_id,
-        phone_no: newPhoneNO,
+        phone_no: countryCode+ newPhoneNO,
         promo_code: isValidPromoCode ? promoCodeDetail?.promo_code_id : '',
         payment_option: selected_payment_type,
         // payment_option: 'card',
         // customer_payment: 1, // card -> total amount :  cash->0
-        total_amount: parseInt(total_amount),
+        sub_total: parseInt(total_amount),
         comments: comments,
         Estimated_delivery_time: 45,
         // Estimated_delivery_time: delivery_time,
@@ -528,7 +534,7 @@ const Checkout = ({ navigation, route }) => {
             ref_RBSheet?.current?.open();
           } else {
             setTimeout(() => {
-              showAlert(response.message);
+              showAlert(response.message, 'green');
             }, 200);
           }
           console.log('create order response  :  ', response);
@@ -544,16 +550,26 @@ const Checkout = ({ navigation, route }) => {
   }
   };
 
+  const extractCartItemIds = (itemsArray) => {
+    return itemsArray.map(item => item.cart_item_id);
+  };
+
+
   const calculateTotalAmount = () => {
+      const cartItemIds = extractCartItemIds(cart)
+      setCartItemIds(cartItemIds)
+      
     try {
       let total = 0;
       for (const item of cart) {
         console.log('item?.itemData?.price :  ', item?.itemData?.variationData?.price);
-        let price = item?.itemData?.price ? parseInt(item?.itemData?.variationData?.price) : 0;
+        // let price = item?.itemData?.price ? parseInt(item?.itemData?.variationData?.price) : 0
+        let price = parseInt(item?.itemData?.variationData?.price)
         let quantity = item?.quantity ? parseInt(item?.quantity) : 1;
         total = total + price * quantity;
-        console.log('total : ', total);
+        // console.log('total : ', total);
       }
+
 
       setSubtotal(total.toFixed(2));
       // let totalAmount = total + service_fee;
@@ -653,7 +669,7 @@ const Checkout = ({ navigation, route }) => {
       // calculateTotalAmount();
       getCustomerData();
       //
-      getSelectedCard();
+      // getSelectedCard();
     }, []),
   );
 
@@ -714,6 +730,22 @@ const Checkout = ({ navigation, route }) => {
     btmSheetRef?.current?.close()
   }
 
+
+  const calculatePreOrderdetails = (paymentType) => {
+    const body = {
+      customer_id :customer_id,
+      cart_items_ids:  cartItemIds,
+      // "promo_code": "", // optional
+      payment_option: paymentType,
+      sub_total: subtotal,
+      location_id : location_id
+  }
+    const response =  fetchApis(api.calculatePreOrder, 'POST', setLoading, 'application/json', body )
+
+    setInfoObj(response.result)
+
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: Colors.White }}>
       <Loader loading={loading} />
@@ -726,7 +758,7 @@ const Checkout = ({ navigation, route }) => {
               <Icons.Location height={20} />
             </View>
             <View style={styles.textContainer}>
-              <Text style={styles.subText}>{location.address}</Text>
+              <Text style={styles.subText}>{location_id ? location.address: "Select Location"}</Text>
             </View>
             <TouchableOpacity
               // onPress={() => navigation.navigate('UpdateLocation')}
@@ -748,7 +780,7 @@ const Checkout = ({ navigation, route }) => {
             </View>
             <View style={styles.textContainer}>
               <Text style={styles.subText}>
-                {phoneNo ? phoneNo : '0000 000000'}
+                {newPhoneNO ? newPhoneNO : '0000 000000'}
               </Text>
             </View>
             <TouchableOpacity
@@ -1048,6 +1080,7 @@ const Checkout = ({ navigation, route }) => {
                       setChecked('cash');
                       setSelectPaymentMethod('cash on Delivery');
                       ref_RBSheetPaymentOption?.current?.close();
+
                     }}
                   />
                   <Text

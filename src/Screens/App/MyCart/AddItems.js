@@ -352,7 +352,7 @@ const AddItems = ({ navigation, route }) => {
 
   const getData = () => {
     setLoading(true);
-    fetch(api.get_all_items)
+    fetch(api.get_all_items_by_restaurant + 'res_4074614')
       .then(response => response.json())
       .then(async response => {
         let list = response?.result ? response?.result : [];
@@ -361,11 +361,11 @@ const AddItems = ({ navigation, route }) => {
         for (const item of list) {
           const filter = my_cart?.filter(e => e?.item_id == item?.item_id);
           // getting restaurant timings
-          let time_obj = await checkRestaurantTimings(item?.restaurant_id);
+          // let time_obj = await checkRestaurantTimings(item?.restaurant_id);
           let obj = {
             ...item,
             quantity: filter?.length > 0 ? filter[0]?.quantity : 0,
-            restaurant_timings: time_obj,
+            // restaurant_timings: time_obj,
           };
           newList.push(obj);
         }
@@ -448,7 +448,7 @@ const AddItems = ({ navigation, route }) => {
                 item?.images?.length > 0 ? BASE_URL_IMAGE + item?.images[0] : ''
               }
               title={item?.item_name}
-              price={item?.item_prices[0]?.price}
+              price={item?.item_variations[0]?.price}
               showRating={false}
               rating={item?.rating}
               tag={setCusineNameByItemCusineId(item?.cuisine_id)}
@@ -627,7 +627,7 @@ const AddItems = ({ navigation, route }) => {
                     status={selectedVariation === variation.variation_id ? 'checked' : 'unchecked'}
                     onPress={() => handlePress(Item, variation.variation_id)}
                   />
-                  <Text style={styles.variationText}>Small</Text>
+                  <Text style={styles.variationText}>{variation.variation_name}</Text>
 
                 </View>
                 <Text style={styles.variationText}>£ {variation?.price}</Text>

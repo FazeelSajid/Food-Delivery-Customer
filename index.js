@@ -7,6 +7,7 @@ import App from './App';
 import {name as appName} from './app.json';
 import PushNotification, {Importance} from 'react-native-push-notification';
 import messaging from '@react-native-firebase/messaging';
+import { navigate } from './src/utils/NavigationService';
 
 // Listen for incoming foreground messages
 messaging().onMessage(async remoteMessage => {
@@ -14,6 +15,8 @@ messaging().onMessage(async remoteMessage => {
   // You can use your UI components here
   console.log('remoteMessage  :  ', remoteMessage);
 });
+
+
 
 PushNotification.configure({
   // (optional) Called when Token is generated (iOS and Android)
@@ -72,5 +75,56 @@ PushNotification.configure({
    */
   requestPermissions: true,
 });
+
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  console.log('Message handled in the background!', remoteMessage);
+
+  // yaha par Handle background notification navigation here
+  // navigate('NotificationUser', {notificationData: remoteMessage.data});
+  
+  if (remoteMessage) {
+    navigate('NotificationUser', {
+      title: remoteMessage.notification.title,
+      body: remoteMessage.notification.body,
+    });
+  }
+});
+
+messaging().onNotificationOpenedApp(remoteMessage => {
+  console.log(
+    'Notification caused app to open from background state:',
+    remoteMessage.notification,
+  );
+  // Navigate to the Notifications screen and pass the notification content
+  if (remoteMessage.notification) {
+    navigate('NotificationUser', {
+      title: remoteMessage.notification.title,
+      body: remoteMessage.notification.body,
+    });
+  }
+  // navigate('NotificationUser', {notificationData: remoteMessage.data});
+  //navigation.navigate(remoteMessage.data.type);
+});
+
+// Check whether an initial notification is available
+messaging()
+  .getInitialNotification()
+  .then(remoteMessage => {
+    if (remoteMessage) {
+      console.log(
+        'Notification caused app to open from quit state:',
+        remoteMessage.notification,
+        
+      );
+      // navigate('NotificationUser', {notificationData: remoteMessage.data});
+    // Navigate to the Notifications screen and pass the notification content
+    if (remoteMessage.notification) {
+      navigate('NotificationUser', {
+        title: remoteMessage.notification.title,
+        body: remoteMessage.notification.body,
+      });
+    }
+    }
+  });
 
 AppRegistry.registerComponent(appName, () => App);

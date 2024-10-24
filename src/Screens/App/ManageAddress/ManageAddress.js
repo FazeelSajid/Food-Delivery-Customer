@@ -166,6 +166,12 @@ const ManageAddress = () => {
                                         color={Colors.Orange}
                                         uncheckedColor={Colors.Orange}
                                         status={location.id === item.location_id ? 'checked' : 'unchecked'}
+                                        onPress={() => dispatch(setLocation({
+                                            latitude: item.latitude,
+                                            longitude: item.longitude,
+                                            address: item.address,
+                                            id: item.location_id
+                                        }))} 
                                     />
                                 </View>
                             </TouchableOpacity>

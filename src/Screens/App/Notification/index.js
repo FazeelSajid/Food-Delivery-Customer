@@ -12,9 +12,11 @@ import {GetAllNotifications} from '../../../utils/helpers/notificationApis';
 import Loader from '../../../components/Loader';
 import moment from 'moment';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
+import { useSelector } from 'react-redux';
 const Notification = ({navigation, route}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { customer_id } = useSelector(store => store.store);
   const [data, setData] = useState([
     // {
     //   id: 0,
@@ -96,7 +98,7 @@ const Notification = ({navigation, route}) => {
   ]);
 
   const getData = async () => {
-    let list = await GetAllNotifications();
+    let list = await GetAllNotifications(customer_id);
     setData(list);
     setLoading(false);
     setRefreshing(false);
@@ -167,11 +169,14 @@ const Notification = ({navigation, route}) => {
                 <Icons.Refresh />
               </View>
             ) : (
-              <Avatar.Image
-                source={item?.profile}
-                size={50}
-                style={{backgroundColor: Colors.Orange}}
-              />
+              // <Avatar.Image
+              //   source={item?.profile}
+              //   size={50}
+              //   style={{backgroundColor: Colors.Orange}}
+              // />
+              <View style={styles.iconContainer}>
+                <Icons.OrderInProcess />
+              </View>
             )}
             <View style={{marginLeft: 10, flex: 1}}>
               <View style={styles.rowViewSB}>

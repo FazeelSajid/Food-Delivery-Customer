@@ -760,13 +760,8 @@ const ItemDetails = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
             {itemDetail?.item_prices?.map((variation, i) => (
-
-
-
               <View key={i} style={styles.rowViewSB}>
-
                 <View style={styles.rowView } > 
-
                 <RadioButton
                   color={Colors.Orange} // Custom color for selected button
                   uncheckedColor={Colors.Orange} // Color for unselected buttons
@@ -774,14 +769,9 @@ const ItemDetails = ({ navigation, route }) => {
                   onPress={() => handleAddToCart(variation.variation_id)}
                 />
                 <Text style={styles.variationText}>{variation.variation_name}</Text>
-                
                 </View>
                 <Text style={styles.variationText}>£ {variation?.price}</Text>
-
-                
               </View>
-
-
             ))}
 
           </View>

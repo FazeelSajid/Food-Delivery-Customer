@@ -6,8 +6,10 @@ export const firebase_server_key =
 // export const BASE_URL = 'https://food-delivery-be.caprover-demo.mtechub.com/';
 // export const BASE_URL_IMAGE = 'https://food-delivery-be.caprover-demo.mtechub.com/';
 
-export const BASE_URL = 'http://192.168.18.90:3017/';
-export const BASE_URL_IMAGE = 'http://192.168.18.90:3017/';
+export const BASE_URL = 'http://192.168.100.154:3017/';
+export const BASE_URL_IMAGE = 'http://192.168.100.154:3017/';
+// export const BASE_URL = 'http://192.168.18.90:3017/';
+// export const BASE_URL_IMAGE = 'http://192.168.18.90:3017/';
 
 // export const BASE_URL = 'http://192.168.18.120:3017/';
 // export const BASE_URL_IMAGE = 'http://192.168.18.120:3017/';

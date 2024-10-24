@@ -123,36 +123,36 @@ const NearByDealsDetails = ({ navigation, route }) => {
     //   image: Images.biryani,
     // },
   ]);
-  const removeFavorite = async id => {
-    console.log('id passed to removeFavorite :  ', id);
-    setLoading(true);
-    // favourite_item_id
+  // const removeFavorite = async id => {
+  //   console.log('id passed to removeFavorite :  ', id);
+  //   setLoading(true);
+  //   // favourite_item_id
 
-    fetch(api.delete_deal_from_favorites + id, {
-      method: 'DELETE',
-      // body: JSON.stringify(data),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
-    })
-      .then(response => response.json())
-      .then(async response => {
-        console.log('response : ', response);
-        if (response?.status == true) {
-          setFavoriteDetails(response?.result);
-          setIsFavorite(false);
-        } else {
-          showAlert(response?.message);
-        }
-      })
-      .catch(err => {
-        console.log('Error   ', err);
-        showAlert('Something Went Wrong');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+  //   fetch(api.delete_deal_from_favorites + id, {
+  //     method: 'DELETE',
+  //     // body: JSON.stringify(data),
+  //     headers: {
+  //       'Content-type': 'application/json; charset=UTF-8',
+  //     },
+  //   })
+  //     .then(response => response.json())
+  //     .then(async response => {
+  //       console.log('response : ', response);
+  //       if (response?.status == true) {
+  //         setFavoriteDetails(response?.result);
+  //         setIsFavorite(false);
+  //       } else {
+  //         showAlert(response?.message);
+  //       }
+  //     })
+  //     .catch(err => {
+  //       console.log('Error   ', err);
+  //       showAlert('Something Went Wrong');
+  //     })
+  //     .finally(() => {
+  //       setLoading(false);
+  //     });
+  // };
   // const handleFavorite = async () => {
   //   console.log('handleFavorite called...');
   //   setLoading(true);
@@ -198,48 +198,48 @@ const NearByDealsDetails = ({ navigation, route }) => {
     }
   };
 
-  const handleOnRemove = () => {
-    setLoading(true);
-    // remove all items of previous restaurant
-    clearCartItems()
-      .then(response => {
-        //add new item
-        dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-        console.log(
-          'new cart restaurant_id : ',
-          restaurantDetails?.restaurant_id,
-        );
-        //my_cart
-        dispatch(updateMyCartList([]));
+  // const handleOnRemove = () => {
+  //   setLoading(true);
+  //   // remove all items of previous restaurant
+  //   clearCartItems()
+  //     .then(response => {
+  //       //add new item
+  //       dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+  //       console.log(
+  //         'new cart restaurant_id : ',
+  //         restaurantDetails?.restaurant_id,
+  //       );
+  //       //my_cart
+  //       dispatch(updateMyCartList([]));
 
-        add_item_to_cart();
+  //       add_item_to_cart();
 
-        // //my_cart
-        // dispatch(clearMyCart());
-      })
-      .catch(error => {
-        console.log('error : ', error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+  //       // //my_cart
+  //       // dispatch(clearMyCart());
+  //     })
+  //     .catch(error => {
+  //       console.log('error : ', error);
+  //     })
+  //     .finally(() => {
+  //       setLoading(false);
+  //     });
+  // };
 
-  const validate = () => {
-    if (cart_restaurant_id == null) {
-      return true;
-    } else if (cart_restaurant_id != restaurantDetails?.restaurant_id) {
-      console.log(
-        'cart_restaurant_id  : ',
-        cart_restaurant_id,
-        restaurantDetails?.restaurant_id,
-      );
-      ref_cartAlert.current.open();
-      return false;
-    } else {
-      return true;
-    }
-  };
+  // const validate = () => {
+  //   if (cart_restaurant_id == null) {
+  //     return true;
+  //   } else if (cart_restaurant_id != restaurantDetails?.restaurant_id) {
+  //     console.log(
+  //       'cart_restaurant_id  : ',
+  //       cart_restaurant_id,
+  //       restaurantDetails?.restaurant_id,
+  //     );
+  //     ref_cartAlert.current.open();
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // };
 
   const add_item_to_cart = async () => {
     setLoading(true);
@@ -261,9 +261,10 @@ const NearByDealsDetails = ({ navigation, route }) => {
 
       await addItemToCart(data)
         .then(response => {
-          console.log('response ', response);
+          // console.log('response ', response);
           if (response?.status == true) {
-            dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+            
+            // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
             // navigation?.navigate('MyCart');
             //my_cart
             dispatch(addItemToMYCart(response?.result));
@@ -281,28 +282,29 @@ const NearByDealsDetails = ({ navigation, route }) => {
     }
   };
 
-  const parseTime = timeString => {
-    console.log('timeString  : ', timeString);
-    const timeParts = timeString.match(/(\d+):(\d+)/);
-    if (timeParts) {
-      const hours = parseInt(timeParts[1], 10);
-      const minutes = parseInt(timeParts[2], 10);
-      return hours * 60 + minutes;
-    }
-    return 0;
-  };
+  // const parseTime = timeString => {
+  //   console.log('timeString  : ', timeString);
+  //   const timeParts = timeString.match(/(\d+):(\d+)/);
+  //   if (timeParts) {
+  //     const hours = parseInt(timeParts[1], 10);
+  //     const minutes = parseInt(timeParts[2], 10);
+  //     return hours * 60 + minutes;
+  //   }
+  //   return 0;
+  // };
 
   const handleAddToCart = async () => {
     setLoading(true);
-    let time_obj = await checkRestaurantTimings(
-      restaurantDetails?.restaurant_id,
-    );
-    setLoading(false);
-    if (time_obj?.isClosed) {
-      setRestaurant_timings(time_obj);
-      ref_RBSheetResClosed.current.open();
-      return;
-    } else if (validate()) {
+    // let time_obj = await checkRestaurantTimings(
+    //   restaurantDetails?.restaurant_id,
+    // );
+    // setLoading(false);
+    // if (time_obj?.isClosed) {
+    //   setRestaurant_timings(time_obj);
+    //   ref_RBSheetResClosed.current.open();
+    //   return;
+    // } else 
+    // if (validate()) {
       // if item already exists in card then we will only update quantity of that item
       const filter = my_cart?.filter(
         item => item?.item_id == route?.params?.id,
@@ -325,12 +327,12 @@ const NearByDealsDetails = ({ navigation, route }) => {
           }
         });
         dispatch(updateMyCartList(newData));
-        dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+        // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
         ref_RBSheetSuccess?.current?.open();
       } else {
         add_item_to_cart();
       }
-    }
+    // }
   };
 
   const getItemDetails = async id => {
@@ -343,9 +345,9 @@ const NearByDealsDetails = ({ navigation, route }) => {
       .then(async response => {
         let list = response?.result ? response?.result : {};
         setItemDetail(list);
-        console.log('list?.restaurant_id : ', list?.restaurant_id);
-        let restaurant_details = await getRestaurantDetail(list?.restaurant_id);
-        setRestaurantDetails(restaurant_details);
+        // console.log('list?.restaurant_id : ', list?.restaurant_id);
+        // let restaurant_details = await getRestaurantDetail(list?.restaurant_id);
+        // setRestaurantDetails(restaurant_details);
         let imageList = [];
         for (const item of list?.images) {
           let obj = {
@@ -444,8 +446,6 @@ const NearByDealsDetails = ({ navigation, route }) => {
                     }}
                   >
                     <View style={styles.rowViewSB} >
-
-
                       <TouchableOpacity
                         onPress={() => navigation?.goBack()}
                         style={{ ...styles.iconContainer, }}>
@@ -650,7 +650,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
         }}
       />
 
-      <RBSheetOtherRestaurantCartItem
+      {/* <RBSheetOtherRestaurantCartItem
         refRBSheet={ref_cartAlert}
         title={'Remove your previous items?'}
         description={
@@ -665,7 +665,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
         onCancel={() => {
           ref_cartAlert?.current?.close();
         }}
-      />
+      /> */}
 
       <RBSheetSuccess
         refRBSheet={ref_RBSheetSuccess}
@@ -795,7 +795,7 @@ const styles = StyleSheet.create({
     height: hp(25),
     // backgroundColor: '#ccc',
     marginHorizontal: wp(4.5),
-    borderRadius: 10,
+    // borderRadius: 10,
     overflow: 'hidden',
   },
   // sliderContainer: { marginVertical: 20, paddingHorizontal: 0, height: hp(30) },

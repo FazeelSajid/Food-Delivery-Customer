@@ -17,7 +17,9 @@ export const Colors = {
   Black: '#000000',
   Text: '#0A212B',
   grayText: '#999999',
-  borderGray: '#EAE9E9'
+  borderGray: '#EAE9E9',
+  favoriteHeart: '#B00020',
+  darkTextColor: '#545151'
 };
 export const Fonts = {
   PlusJakartaSans_Bold: 'PlusJakartaSans-Bold',
