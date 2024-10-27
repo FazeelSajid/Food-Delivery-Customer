@@ -30,6 +30,8 @@ const RBSheetConfirmation = ({
   onCancel,
   onOk,
   description,
+  svg,
+  okBtnColor
 }) => {
   const navigation = useNavigation();
 
@@ -51,20 +53,41 @@ const RBSheetConfirmation = ({
         }}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={{width: wp(87), alignItems: 'center'}}>
-            <View
+            {/* <View
               style={{
                 height: 150,
                 width: 150,
                 marginBottom: 10,
                 //   aspectRatio: 1,
-              }}>
-              <Lottie
-                source={Images.success_check}
-                autoPlay
-                loop={true}
-                resizeMode="cover"
-              />
-            </View>
+              }}> */}
+
+                {
+                  svg ? <View style={{
+                    height: 120,
+                    // width: 150,
+                    marginBottom: 10,
+                    //   aspectRatio: 1,
+                  }} >
+                    {svg}
+                  </View> :   
+                  <View style={{
+                    height: 150,
+                    width: 150,
+                    marginBottom: 10,
+                    //   aspectRatio: 1,
+                  }}>
+                     <Lottie
+                  source={Images.success_check}
+                  autoPlay
+                  loop={true}
+                  resizeMode="cover"
+                />
+                  </View>
+                 
+                }
+
+            
+            {/* </View> */}
             <Text
               style={{
                 color: textColor ? textColor : '#1D1D20',
@@ -109,6 +132,7 @@ const RBSheetConfirmation = ({
                 height={hp(5.5)}
                 marginTop={hp(5)}
                 onPress={onOk}
+                bgColor={okBtnColor}
               />
             </View>
           </View>

@@ -157,7 +157,7 @@ const SignUpWithEmail = ({navigation, route}) => {
     // if (validate()) {
       console.log({userEmail, phone_no, password, fcm_token, userName});
       let fcm_token = await getUserFcmToken();
-      console.log(fcm_token, 'token');
+      console.log( 'SignUp token',fcm_token);
       
       
 
@@ -171,7 +171,7 @@ const SignUpWithEmail = ({navigation, route}) => {
           signup_type: "email",
           fcm_token: fcm_token,
         };
-        console.log('data  :  ', data);
+        // console.log('data  :  ', data);
 
         fetch(api.register, {
           method: 'POST',
@@ -182,10 +182,9 @@ const SignUpWithEmail = ({navigation, route}) => {
         })
           .then(response => response.json())
           .then(async response => {
-            console.log('response  :  ', response);
+            // console.log('response  :  ', response);
             if (response?.status == false) {
               showAlert(response?.message);
-              // showAlert('Invalid Credentials');
             } else if(response.result.verified === false){
               navigation.navigate('Verification',{
                 response,
@@ -198,10 +197,11 @@ const SignUpWithEmail = ({navigation, route}) => {
               let wallet = await createCustomerWallet(
                 response?.result?.customer_id,
               );
-              console.log(wallet);
+              // console.log(wallet);
               dispatch(
                 setCustomerId(response?.result?.customer_id?.toString()),
               );
+              dispatch(setJoinAsGuest(false));
               dispatch(setCustomerDetail(response?.result));
               // navigation?.popToTop()
               navigation?.navigate('Drawer');
@@ -375,18 +375,18 @@ const SignUpWithEmail = ({navigation, route}) => {
           onPress={() => navigation.navigate('SignIn')}>
           <Text style={STYLE.topScreenBTn}>Sign In</Text>
         </TouchableOpacity>
-        <View style={{alignItems: 'center'}}>
+        <View style={{alignItems: 'center',}}>
           <Text style={STYLE.heading}>Sign Up </Text>
 
-          <CInput
-            placeholder="Username"
-            value={userName}
-            onChangeText={text => setUserName(text)}
-          />
           <CInput
             placeholder="Email Address"
             value={userEmail}
             onChangeText={text => setUserEmail(text)}
+          />
+            <CInput
+            placeholder="Name"
+            value={userName}
+            onChangeText={text => setUserName(text)}
           />
           {/* <CInput
             placeholder="Phone Number"

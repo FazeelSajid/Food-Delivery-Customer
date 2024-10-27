@@ -8,12 +8,17 @@ import {name as appName} from './app.json';
 import PushNotification, {Importance} from 'react-native-push-notification';
 import messaging from '@react-native-firebase/messaging';
 import { navigate } from './src/utils/NavigationService';
+import { Colors, Icons } from './src/constants';
+
 
 // Listen for incoming foreground messages
 messaging().onMessage(async remoteMessage => {
   // Display the notification manually
   // You can use your UI components here
-  console.log('remoteMessage  :  ', remoteMessage);
+  console.log('onMessage  :  ', remoteMessage);
+
+  
+
 });
 
 
@@ -32,6 +37,10 @@ PushNotification.configure({
         soundName: 'default', // (optional) See `soundName` parameter of `localNotification` function
         importance: Importance.HIGH, // (optional) default: Importance.HIGH. Int value of the Android notification importance
         vibrate: true, // (optional) default: true. Creates the default vibration pattern if true.
+         color: Colors.OrangeLight,
+         largeIcon: Icons.OrderInProcess, // Large icon displayed in the notification
+          smallIcon: Icons.OrderInProcess, // Small icon displayed in the status bar
+        
       },
       created => console.log(`createChannel returned '${created}'`), // (optional) callback returns whether the channel was created, false means it already existed.
     );
@@ -39,14 +48,17 @@ PushNotification.configure({
   // (required) Called when a remote is received or opened, or local notification is opened
   onNotification: function (notification) {
     let data = notification?.data;
-    // console.log('notification  ::: ', notification);
+    navigate('Order');
+   
+    console.log('OnNotifications  ::: ', notification);
+
   },
   //   requestPermissions: Platform.OS === 'ios',
 
   // (optional) Called when Registered Action is pressed and invokeApp is false, if true onNotification will be called (Android)
   onAction: function (notification) {
     // console.log('ACTION:', notification.action);
-    // console.log('NOTIFICATION:', notification);
+    console.log('onActionNotification :', notification);
     // process the action
   },
 

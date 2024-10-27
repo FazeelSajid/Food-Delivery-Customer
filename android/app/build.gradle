@@ -91,6 +91,15 @@ def reactNativeArchitectures() {
 }
 
 android {
+    // -----------------
+    tasks.whenTaskAdded { task ->
+    if (task.name == "lintVitalAnalyzeRelease") {
+        task.dependsOn(":app:copyReactNativeVectorIconFonts")
+    }
+}
+    // -----------------
+
+
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -155,6 +164,7 @@ android {
 
         }
     }
+
 }
 
 dependencies {

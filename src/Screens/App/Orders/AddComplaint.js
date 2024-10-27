@@ -29,6 +29,7 @@ import RBSheetSuccess from '../../../components/BottomSheet/RBSheetSuccess';
 import Loader from '../../../components/Loader';
 import api from '../../../constants/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
 
 const AddComplaint = ({navigation, route}) => {
   const ref_RBSheet = useRef();
@@ -36,6 +37,7 @@ const AddComplaint = ({navigation, route}) => {
   const [videoFile, setVideoFile] = useState(null);
   const [videoName, setVideoName] = useState(null);
   const [videoType, setVideoType] = useState(null);
+  const customer_id = useSelector(store => store.store.customer_id)
 
   const [complaintFor, setComplaintFor] = useState('rider');
   const [loading, setLoading] = useState(false);
@@ -186,7 +188,7 @@ const AddComplaint = ({navigation, route}) => {
       setLoading(true);
       let images = await handleUploadImagesToServer();
       let videoPath = await handleUploadVideoToServer();
-      let customer_id = await AsyncStorage.getItem('customer_id');
+      // let customer_id = await AsyncStorage.getItem('customer_id');
       let data = {
         customer_id: customer_id,
         order_id: route?.params?.id,

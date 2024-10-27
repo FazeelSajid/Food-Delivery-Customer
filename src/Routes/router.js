@@ -95,6 +95,8 @@ import AddAddress from '../Screens/App/AddAddress/AddAddress';
 import Map from '../Screens/App/Map/Map';
 import { resetState } from '../redux/AuthSlice';
 import ManageAddress from '../Screens/App/ManageAddress/ManageAddress';
+import UpdatePassord from '../Screens/App/UpdatePassword/UpdatePassord';
+import Invite from '../Screens/App/Invite/Invite';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -247,7 +249,7 @@ const CustomDrawerContent = props => {
               }}
               icon={focused => <Heart />}
             />
-            <DrawerItem
+            {/* <DrawerItem
               label="Order History"
               // labelStyle={{ color: 'red'}}
               onPress={() => {
@@ -258,7 +260,7 @@ const CustomDrawerContent = props => {
                 }
               }}
               icon={focused => <Cart />}
-            />
+            /> */}
             <DrawerItem
               label="Promocodes"
               // labelStyle={{ color: 'red'}}
@@ -293,6 +295,7 @@ const CustomDrawerContent = props => {
       </View>
 
       <RBSheetConfirmation
+      height={360}
         refRBSheet={ref_RBSheet}
         title={'Logout?'}
         description={'Do you want to logout?'}
@@ -334,7 +337,7 @@ const DrawerNavigation = () => {
       screenOptions={{ headerShown: false }}
       drawerContent={props => <CustomDrawerContent {...props} />}>
       <Drawer.Screen
-        name="Dashboard"
+        name="x"
         component={DashboardTabs}
         options={{ title: 'Home' }}
       />
@@ -407,6 +410,7 @@ function Router() {
       <Stack.Screen name="UpdateLocation" component={UpdateLocation} />
       <Stack.Screen name="Conversation" component={Conversation} />
       <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
+      <Stack.Screen name="UpdatePassord" component={UpdatePassord} />
       <Stack.Screen name="Languages" component={Languages} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
       <Stack.Screen name="TermsAndCondition" component={TermsAndCondition} />
@@ -429,6 +433,7 @@ function Router() {
       <Stack.Screen name="AddItems" component={AddItems} />
       <Stack.Screen name="Drawer" component={DrawerNavigation} />
       <Stack.Screen name="Map" component={Map} />
+      <Stack.Screen name='Invite' component={Invite} />
 
       <Stack.Screen name="AddComplaint" component={AddComplaint} />
       <Stack.Screen name="SetupCard" component={SetupCard} />

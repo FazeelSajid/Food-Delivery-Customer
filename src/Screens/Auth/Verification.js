@@ -26,7 +26,7 @@ import api from '../../constants/api';
 import Loader from '../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch} from 'react-redux';
-import {setCustomerDetail, setCustomerId} from '../../redux/AuthSlice';
+import {setCustomerDetail, setCustomerId, setJoinAsGuest} from '../../redux/AuthSlice';
 
 const Verification = ({navigation, route}) => {
   const dispatch = useDispatch();
@@ -160,6 +160,7 @@ const Verification = ({navigation, route}) => {
         } else {
           // showAlert(response.message, 'green');
           ref_RBSheet?.current?.open();
+          dispatch(setJoinAsGuest(false));
           // await AsyncStorage.setItem(
           //   'customer_id',
           //   prevResponse?.result?.customer_id?.toString(),
@@ -262,11 +263,12 @@ const Verification = ({navigation, route}) => {
           onPress={() => {
             ref_RBSheet?.current?.close();
             // navigation?.popToTop();
-            // navigation?.replace('Drawer');
-            navigation.navigate('EnableLocation', {
-              customer_id: route?.params?.customer_id,
-            });
-          }}
+            navigation?.replace('Drawer');
+            // navigation.navigate('EnableLocation', {
+            //   customer_id: route?.params?.customer_id,
+            // });
+          }
+        }
         />
       </View>
     </View>

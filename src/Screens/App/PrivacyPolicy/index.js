@@ -13,63 +13,16 @@ const PrivacyPolicy = () => {
     <ScrollView style={{flex: 1, backgroundColor: Colors.White}}>
       <StackHeader title={'Privacy Policy'} headerStyle={{paddingBottom: 10}} />
 
-      <WebView
+      {/* <WebView
         source={{uri: 'https://mtechub.org/privacy/'}}
         style={{flex: 1, height: hp(90), width: wp(100)}}
-      />
+      /> */}
 
-      {/* <View style={styles.textContainer}>
+      <View style={styles.textContainer}>
         <Text style={styles.text}>
-          Morem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus. Maecenas eget condimentum velit, sit amet feugiat
-          lectus. Class aptent taciti sociosqu ad litora torquent per conubia
-          nostra, per inceptos himenaeos. Praesent auctor purus luctus enim
-          egestas, ac scelerisque ante pulvinar. Donec ut rhoncus ex.
-          Suspendisse ac rhoncus nisl, eu tempor urna. Curabitur vel bibendum
-          lorem. Morbi convallis convallis diam sit amet lacinia. Aliquam in
-          elementum tellus. Curabitur tempor quis eros tempus lacinia. Nam
-          bibendum pellentesque quam a convallis. Sed ut vulputate nisi. Integer
-          in felis sed leo vestibulum venenatis. Suspendisse quis arcu sem.
-          Aenean feugiat ex eu vestibulum vestibulum. Morbi a eleifend magna.
-          Nam metus lacus, porttitor eu mauris a, blandit ultrices nibh. Mauris
-          sit amet magna non ligula vestibulum eleifend. Nulla varius volutpat
-          turpis sed lacinia. Nam eget mi in purus lobortis eleifend. Sed nec
-          ante dictum sem condimentum ullamcorper quis venenatis nisi. Proin
-          vitae facilisis nisi, ac posuere leo. . Suspendisse quis arcu sem.
-          Aenean feugiat ex eu vestibulum vestibulum. Morbi a eleifend magna.
-          Nam metus lacus, porttitor eu mauris a, blandit ultrices nibh. Mauris
-          sit amet magna non ligula vestibulum eleifend. Nulla varius volutpat
-          turpis sed lacinia. Nam eget mi in purus lobortis eleifend. Sed nec
-          ante dictum sem condimentum ullamcorper quis venenatis nisi. Proin
-          vitae facilisis nisi, ac posuere leo.Morem ipsum dolor sit amet,
-          consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a,
-          mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem
-          sollicitudin lacus, ut interdum tellus elit sed risus. Maecenas eget
-          condimentum velit, sit amet feugiat lectus. Class aptent taciti
-          sociosqu ad litora torquent per conubia nostra, per inceptos
-          himenaeos. Praesent auctor purus luctus enim egestas, ac scelerisque
-          ante pulvinar. Donec ut rhoncus ex. Suspendisse ac rhoncus nisl, eu
-          tempor urna. Curabitur vel bibendum lorem. Morbi convallis convallis
-          diam sit amet lacinia. Aliquam in elementum tellus. Curabitur tempor
-          quis eros tempus lacinia. Nam bibendum pellentesque quam a convallis.
-          Sed ut vulputate nisi. Integer in felis sed leo vestibulum venenatis.
-          Suspendisse quis arcu sem. Aenean feugiat ex eu vestibulum vestibulum.
-          Morbi a eleifend magna. Nam metus lacus, porttitor eu mauris a,
-          blandit ultrices nibh. Mauris sit amet magna non ligula vestibulum
-          eleifend. Nulla varius volutpat turpis sed lacinia. Nam eget mi in
-          purus lobortis eleifend. Sed nec ante dictum sem condimentum
-          ullamcorper quis venenatis nisi. Proin vitae facilisis nisi, ac
-          posuere leo. . Suspendisse quis arcu sem. Aenean feugiat ex eu
-          vestibulum vestibulum. Morbi a eleifend magna. Nam metus lacus,
-          porttitor eu mauris a, blandit ultrices nibh. Mauris sit amet magna
-          non ligula vestibulum eleifend. Nulla varius volutpat turpis sed
-          lacinia. Nam eget mi in purus lobortis eleifend. Sed nec ante dictum
-          sem condimentum ullamcorper quis venenatis nisi. Proin vitae facilisis
-          nisi, ac posuere leo.
+        At Food Delivery Customer, we are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner. This Privacy Policy outlines how we collect, use, and protect your data when you use our app. When you register for our service, we may collect personal information such as your name, email address, phone number, and delivery address to facilitate your food orders. We may also gather data about your device and usage patterns to enhance your experience and improve our services. We use your information to process your orders, communicate with you about your delivery, send you promotional offers, and provide customer support. Your data may be shared with third-party partners, such as payment processors and delivery services, solely for the purpose of fulfilling your orders. We take the security of your information seriously and implement appropriate technical and organizational measures to protect your data from unauthorized access, loss, or misuse. You have the right to access, correct, or delete your personal information at any time by contacting our support team. By using our app, you consent to the collection and use of your information as outlined in this Privacy Policy. We may update this policy from time to time, and we will notify you of any significant changes. Your continued use of the app after such changes indicates your acceptance of the new terms. If you have any questions or concerns regarding this policy, please reach out to our customer support team.
         </Text>
-      </View> */}
+      </View>
     </ScrollView>
   );
 };
@@ -80,13 +33,13 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     paddingHorizontal: 25,
-    marginTop: -10,
+    marginTop: hp(1.5),
     paddingBottom: 20,
   },
   text: {
     color: '#595959',
     fontFamily: Fonts.PlusJakartaSans_Regular,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.5),
     lineHeight: 25,
   },
 });

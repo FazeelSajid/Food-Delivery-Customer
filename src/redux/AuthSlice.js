@@ -5,6 +5,20 @@ import {createSlice} from '@reduxjs/toolkit';
 const initialState = {
   join_as_guest: false,
   otpConfirm: null,
+  currentLocation: {
+    id: null,
+    latitude: 0.0,
+    longitude: 0.0,
+    address: '',
+    city: '',
+  },
+  updateLocation: {
+    id: null,
+    latitude: 0.0,
+    longitude: 0.0,
+    address: '',
+    city: '',
+  },
   location: {
     id: null,
     latitude: 0.0,
@@ -21,6 +35,7 @@ const initialState = {
   customer_detail: null,
   selectedLanguage: 'English',
   signUpWith: '',
+  password : ''
 }
 const AuthSlice = createSlice({
   name: 'authSlice',
@@ -31,6 +46,12 @@ const AuthSlice = createSlice({
     },
     setOtpConfirm(state, action) {
       state.otpConfirm = action.payload;
+    },
+    setCurrentLocation(state, action) {
+      state.currentLocation = action.payload;
+    },
+    setUpdateLocation(state, action) {
+      state.updateLocation = action.payload;
     },
     setLocation(state, action) {
       state.location = action.payload;
@@ -55,6 +76,9 @@ const AuthSlice = createSlice({
     },
     setdeals(state, action) {
       state.deals = action.payload;
+    },
+    setPassword(state, action) {
+      state.password = action.payload;
     },
     setPromos(state, action) {
       state.promos = action.payload;
@@ -86,6 +110,8 @@ const AuthSlice = createSlice({
 export const {
   setJoinAsGuest,
   setOtpConfirm,
+  setCurrentLocation,
+  setUpdateLocation,
   setLocation,
   setCustomerId,
   setCustomerDetail,
@@ -97,7 +123,8 @@ export const {
   setdeals,
   setPromos,
   setDealsResearch,
-  removeDealResearch
+  removeDealResearch,
+  setPassword
 } = AuthSlice.actions;
 
 export default AuthSlice.reducer;

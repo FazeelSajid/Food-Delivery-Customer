@@ -16,6 +16,8 @@ const api = {
   get_customer_by_id: BASE_URL + 'customer/view_user_profile?customer_id=',
   forgetPassword: BASE_URL + 'customer/forgetPassword',
   otpVerification: BASE_URL + 'customer/otpVerification',
+  delete_customer: BASE_URL + 'customer/deleteUser?customer_id=',
+  
 
   // cart
   get_customer_cart: BASE_URL + 'cart_items/getCustomerCart?customer_id=',

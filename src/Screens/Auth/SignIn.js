@@ -24,7 +24,8 @@ import {
   setCustomerDetail,
   setCustomerId,
   setJoinAsGuest,
-  setSignUpWith
+  setSignUpWith,
+  setPassword
 } from '../../redux/AuthSlice';
 import {getUserFcmToken, showAlert} from '../../utils/helpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -38,6 +39,8 @@ import {
 import CRBSheetComponent from '../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RadioButton } from 'react-native-paper';
+import Google from '../../Assets/svg/Googlee.svg';
+
 
 const SignIn = ({navigation, route}) => {
   const dispatch = useDispatch();
@@ -83,7 +86,7 @@ const SignIn = ({navigation, route}) => {
   const [loading, setLoading] = useState(false);
   const [userValue, setUserValue] = useState(null);
   const [phone_no, setPhone_no] = useState('');
-  const [password, setPassword] = useState('');
+  const [password, setPasswords] = useState('');
   const [showPass, setShowPass] = useState(false);
 
   const [countryCode, setCountryCode] = useState('+92');
@@ -92,7 +95,7 @@ const SignIn = ({navigation, route}) => {
     setShowPass(false);
     // setUser_name('');
     setPhone_no('');
-    setPassword('');
+    setPasswords('');
   };
 
   const validate = () => {
@@ -136,7 +139,7 @@ const SignIn = ({navigation, route}) => {
     console.log(emailRegex);
     
     let fcm_token = await getUserFcmToken();
-    console.log(fcm_token, 'fcm');
+    console.log({fcm_token});
     
 
     if (emailRegex.test(userValue)) {
@@ -147,7 +150,7 @@ const SignIn = ({navigation, route}) => {
         login_type: "email"
     }
 
-    console.log(data, 'dataaa');
+    // console.log(data, 'dataaa');
     
 
     fetch(api.login, {
@@ -159,7 +162,7 @@ const SignIn = ({navigation, route}) => {
     })
       .then(response => response.json())
       .then(async response => {
-        console.log('login response   : ', response);
+        // console.log('login response   : ', response);
         if (
           response?.verified == false ||
           response?.message == 'User is not verified'
@@ -196,6 +199,7 @@ const SignIn = ({navigation, route}) => {
             setCustomerId(response?.user?.customer_id?.toString()),
           );
           dispatch(setCustomerDetail(response?.user));
+          dispatch(setPassword(password))
           // navigation?.popToTop()
           navigation?.replace('Drawer');
           clearFields();
@@ -265,6 +269,7 @@ const SignIn = ({navigation, route}) => {
             dispatch(
               setCustomerId(response?.user?.customer_id?.toString()),
             );
+            dispatch(setPassword(password))
             dispatch(setCustomerDetail(response?.user));
             // navigation?.popToTop()
             navigation?.replace('Drawer');
@@ -419,7 +424,7 @@ const SignIn = ({navigation, route}) => {
 
   return (
     <View style={STYLE.container}>
-      <StatusBar translucent={true} backgroundColor={'transparent'} />
+      <StatusBar translucent={true} backgroundColor={'transparent'} barStyle={'dark-content'} />
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={{flexGrow: 1}}
@@ -457,7 +462,7 @@ const SignIn = ({navigation, route}) => {
           <CInput
             placeholder="Password"
             value={password}
-            onChangeText={text => setPassword(text)}
+            onChangeText={text => setPasswords(text)}
             secureTextEntry={!showPass}
             rightContent={
               <TouchableOpacity onPress={() => setShowPass(!showPass)}>
@@ -525,7 +530,21 @@ const SignIn = ({navigation, route}) => {
           />
 
           <Text style={STYLE.orText}>-- Or --</Text>
-          <View style={STYLE.socialIconContainer}>
+          <View style={{}} >
+          <CButton
+            title="Sign in with Google"
+            height={hp(6.2)}
+            // marginTop={hp(10)}
+            transparent={true}
+            width={wp(88)}
+            leftIcon={<Google  />}
+            borderColor={Colors.borderGray}
+            color={Colors.Black}
+            onPress={() => handleGoogleSignIn()}
+            style={{marginTop: 0}}
+          />
+          </View>
+          {/* <View style={STYLE.socialIconContainer}>
             <TouchableOpacity
               onPress={() => handleGoogleSignIn()}
               activeOpacity={0.7}
@@ -535,10 +554,10 @@ const SignIn = ({navigation, route}) => {
             <TouchableOpacity activeOpacity={0.7}>
               <Icons.Facebook width={wp(13)} />
             </TouchableOpacity>
-          </View>
+          </View> */}
         </View>
         <CRBSheetComponent
-          height={190}
+          height={170}
           refRBSheet={btmSheetRef}
           content={
             <View style={{ width: wp(90) }} >
@@ -551,13 +570,13 @@ const SignIn = ({navigation, route}) => {
               </View>
 
               <TouchableOpacity style={STYLE.rowView} onPress={() =>toggleSelection('phone')} >
-                <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/>
+                {/* <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/> */}
                 <Text
                   style={{
                     color: '#56585B',
                     fontFamily: Fonts.PlusJakartaSans_Regular,
-                    marginTop: -2,
                     fontSize: RFPercentage(2),
+                    marginLeft: wp(4)
                   }}>
                   Phone Number
                 </Text>
@@ -565,13 +584,13 @@ const SignIn = ({navigation, route}) => {
               </TouchableOpacity  >
               <ItemSeparator />
               <TouchableOpacity style={STYLE.rowView} onPress={() => toggleSelection('email')}>
-                <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} />
+                {/* <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} /> */}
                 <Text
                   style={{
                     color: '#56585B',
                     fontFamily: Fonts.PlusJakartaSans_Regular,
-                    marginTop: -2,
                     fontSize: RFPercentage(2),
+                    marginLeft: wp(4)
                   }}>
                   Email
                 </Text>

@@ -4,7 +4,7 @@ import {
     heightPercentageToDP as hp,
     widthPercentageToDP as wp,
   } from 'react-native-responsive-screen';
-  import WhiteCart from '../../Assets/svg/WhiteCart.svg';
+import AddButton from '../../Assets/svg/addButton.svg';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Colors, Fonts } from '../../constants';
 import { BASE_URL } from '../../utils/globalVariables';
@@ -21,7 +21,7 @@ const DealCard = ({isFavorite,  description, price, title, onPress, image, heart
         />
         {/* Cart Icon */}
         <TouchableOpacity style={styles.cartIconContainer} onPress={addToCartpress} >
-        <WhiteCart width={17}   />
+        <AddButton width={wp(10)} height={hp(5)} />
         </TouchableOpacity>
       {/* </View> */}
 
@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     shadowRadius: wp('5%'),
     shadowOffset: { width: 0, height: hp('0.5%') },
     elevation: 2,
+    marginRight: wp(6)
   },
   imageContainer: {
     position: 'relative',
@@ -74,12 +75,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: hp('1.5%'),
     right: wp('2%'),
-    borderRadius: wp('10%'),
-    padding: wp('2%'),
-    alignItems: 'center',
-    backgroundColor: Colors.Orange,
-    paddingVertical: wp(0.6),
-    paddingHorizontal: wp(2.2),
+    // borderRadius: wp('10%'),
+    // padding: wp('2%'),
+    // alignItems: 'center',
+    // backgroundColor: Colors.Orange,
+    // paddingVertical: wp(0.6),
+    // paddingHorizontal: wp(2.2),
   },
   productTitle: {
     fontSize: wp('5%'),

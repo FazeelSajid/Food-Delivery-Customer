@@ -43,7 +43,8 @@ export default STYLE = StyleSheet.create({
     color: '#91909A',
     fontFamily: Fonts.PlusJakartaSans_Regular,
     fontSize: RFPercentage(2),
-    marginTop: hp(2),
+    marginVertical: hp(5)
+    // marginTop: hp(2),
   },
   socialIconContainer: {
     flexDirection: 'row',

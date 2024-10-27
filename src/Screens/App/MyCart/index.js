@@ -333,7 +333,7 @@ const MyCart = ({navigation, route}) => {
                           : item?.itemData?.name}
                       </Text>
                       <View style={styles.rowViewSB}>
-                        <PriceText text={item?.itemData?.variationData ? item?.itemData?.variationData.price: item?.itemData?.price  } />
+                        <PriceText text={item?.itemData?.variationData ? item?.itemData?.variationData.price * item?.quantity : item?.itemData?.price * item?.quantity  } />
                         <TouchableOpacity onPress={() => handleDelete(item)}>
                           <Ionicons name="close" size={22} color={'#000'} />
                         </TouchableOpacity>

@@ -34,7 +34,7 @@ export const styles = StyleSheet.create({
     fontFamily: Fonts.PlusJakartaSans_Bold,
     textAlign: 'center',
     lineHeight: wp(8),
-    marginTop: hp(2),
+    marginTop: hp(8),
     // backgroundColor : 'green',
     width: wp(100)
   },

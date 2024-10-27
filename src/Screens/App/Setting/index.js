@@ -4,29 +4,35 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  Share,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import {Colors, Fonts, Icons} from '../../../constants';
+import { Colors, Fonts, Icons } from '../../../constants';
 import MenuHeader from '../../../components/Header/MenuHeader';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 import Entypo from 'react-native-vector-icons/Entypo';
 import CSwitch from '../../../components/Switch/CSwitch';
 import RBSheetConfirmation from '../../../components/BottomSheet/RBSheetConfirmation';
-import {useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Loader from '../../../components/Loader';
 import api from '../../../constants/api';
-import {getCustomerDetail, showAlert} from '../../../utils/helpers';
+import { getCustomerDetail, showAlert } from '../../../utils/helpers';
 import RBSheetGuestUser from '../../../components/BottomSheet/RBSheetGuestUser';
-import {useFocusEffect} from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
+import LogoutModalSvg from '../../../Assets/svg/logoutModalSvg.svg';
+import DeleteModalSvg from '../../../Assets/svg/DeleteModalSvg.svg';
+import { resetState } from '../../../redux/AuthSlice';
 
-const Setting = ({navigation, route}) => {
-  const {join_as_guest} = useSelector(store => store.store);
+const Setting = ({ navigation, route }) => {
+  const { join_as_guest, customer_id } = useSelector(store => store.store);
   const ref_RBSheetGuestUser = useRef(null);
+  const dispatch = useDispatch();
 
-  const {customer_detail} = useSelector(store => store.store);
+  const { customer_detail } = useSelector(store => store.store);
   const ref_RBSheet = useRef();
+  const ref_RBSheetDELETE = useRef();
   const [isNotificationEnable, setIsNotificationEnable] = useState(false);
   const [isEmailEnable, setIsEmailEnable] = useState(false);
 
@@ -34,9 +40,28 @@ const Setting = ({navigation, route}) => {
 
   const handleLogout = async () => {
     ref_RBSheet?.current?.close();
-    // navigation?.popToTop();
-    // navigation?.navigate('SignIn');
+    dispatch(resetState())
     navigation?.replace('SignIn');
+  };
+
+  const onShare = async () => {
+    try {
+      const result = await Share.share({
+        message: 'Check out this awesome content!',
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // You can do something here if specific activity is detected
+          console.log('Shared with activity type: ', result.activityType);
+        } else {
+          console.log('Shared successfully');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log('Share dismissed');
+      }
+    } catch (error) {
+      console.error('Error sharing: ', error.message);
+    }
   };
 
   useEffect(() => {
@@ -54,7 +79,7 @@ const Setting = ({navigation, route}) => {
 
   const handleNotificationStatusChange = async status => {
     setLoading(true);
-    let customer_id = await AsyncStorage.getItem('customer_id', customer_id);
+    // let customer_id = await AsyncStorage.getItem('customer_id', customer_id);
     let data = {
       customer_id: customer_id,
       recieve_notification: status,
@@ -85,11 +110,31 @@ const Setting = ({navigation, route}) => {
       });
   };
 
+  const handleDelete = () =>{
+    fetch(api. delete_customer + 201730, {
+      method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then (response => {
+      console.log(response);
+      if(response?.status == true){
+        dispatch(resetState())
+        navigation.replace('SignIn');
+        // console.log(response.data);
+        // showAlert(response?.message);
+        ref_RBSheetDELETE?.current?.close();
+        
+      }else{
+        showAlert(response?.message);
+      }
+    } )
+  }
+
   const handleOfferByEmailStatusChange = async status => {
-    console.log({status});
+    console.log({ status });
 
     setLoading(true);
-    let customer_id = await AsyncStorage.getItem('customer_id', customer_id);
+    // let customer_id = await AsyncStorage.getItem('customer_id', customer_id);
     let data = {
       customer_id: customer_id,
       recieve_email: status,
@@ -122,7 +167,7 @@ const Setting = ({navigation, route}) => {
   };
 
   const getUserInfo = async () => {
-    let customer_id = await AsyncStorage.getItem('customer_id');
+    // let customer_id = await AsyncStorage.getItem('customer_id');
     // setLoading(true);
     let details = await getCustomerDetail(customer_id);
     if (details) {
@@ -156,7 +201,7 @@ const Setting = ({navigation, route}) => {
   );
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{ flex: 1, backgroundColor: Colors.White }}>
       {join_as_guest ? (
         <RBSheetGuestUser
           showCloseButton={false}
@@ -176,7 +221,7 @@ const Setting = ({navigation, route}) => {
       ) : (
         <>
           <Loader loading={loading} />
-          <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
+          <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
             <MenuHeader
               title={'Settings'}
               rightIcon={
@@ -185,7 +230,7 @@ const Setting = ({navigation, route}) => {
                 </TouchableOpacity>
               }
             />
-            <View style={{alignItems: 'center'}}>
+            <View style={{ alignItems: 'center' }}>
               <View
                 style={{
                   backgroundColor: Colors.Orange,
@@ -236,7 +281,7 @@ const Setting = ({navigation, route}) => {
                 {customer_detail?.phone_no}
               </Text>
             </View>
-            <View style={{flex: 1, paddingHorizontal: 20, paddingVertical: 25}}>
+            <View style={{ flex: 1, paddingHorizontal: 20, paddingVertical: 25 }}>
               <TouchableOpacity
                 onPress={() => navigation.navigate('UpdateProfile')}
                 style={styles.card}>
@@ -247,17 +292,37 @@ const Setting = ({navigation, route}) => {
                   color={'#292323'}
                 />
               </TouchableOpacity>
-              {/* Change Language */}
               <TouchableOpacity
-                style={styles.card}
-                onPress={() => navigation.navigate('Languages')}>
-                <Text style={styles.cardTitle}>Change Language</Text>
+                onPress={() => navigation.navigate('UpdatePassord')}
+                style={styles.card}>
+                <Text style={styles.cardTitle}>Update Password</Text>
                 <Entypo
                   name="chevron-small-right"
                   size={styles.cardIconSize}
                   color={'#292323'}
                 />
               </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ManageAddress')}
+                style={styles.card}>
+                <Text style={styles.cardTitle}>Manage Addresses</Text>
+                <Entypo
+                  name="chevron-small-right"
+                  size={styles.cardIconSize}
+                  color={'#292323'}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('UpdateProfile')}
+                style={styles.card}>
+                <Text style={styles.cardTitle}>My Coins</Text>
+                <Entypo
+                  name="chevron-small-right"
+                  size={styles.cardIconSize}
+                  color={'#292323'}
+                />
+              </TouchableOpacity>
+
               {/* Receive Notifications */}
               <TouchableOpacity disabled style={styles.card}>
                 <Text style={styles.cardTitle}>Receive Notifications</Text>
@@ -273,6 +338,18 @@ const Setting = ({navigation, route}) => {
                 <CSwitch
                   value={isEmailEnable}
                   onValueChange={value => handleOfferByEmailStatusChange(value)}
+                />
+              </TouchableOpacity>
+
+              {/* Change Language */}
+              <TouchableOpacity
+                style={styles.card}
+                onPress={() => navigation.navigate('Languages')}>
+                <Text style={styles.cardTitle}>Language Support</Text>
+                <Entypo
+                  name="chevron-small-right"
+                  size={styles.cardIconSize}
+                  color={'#292323'}
                 />
               </TouchableOpacity>
 
@@ -298,14 +375,72 @@ const Setting = ({navigation, route}) => {
                   color={'#292323'}
                 />
               </TouchableOpacity>
+              {/*Share App */}
+              <TouchableOpacity
+                onPress={() => onShare()}
+                style={styles.card}>
+                <Text style={styles.cardTitle}>Share App</Text>
+                <Entypo
+                  name="chevron-small-right"
+                  size={styles.cardIconSize}
+                  color={'#292323'}
+                />
+              </TouchableOpacity>
+              {/*Rate App */}
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Invite')}
+                style={styles.card}>
+                <Text style={styles.cardTitle}>Rate App</Text>
+                <Entypo
+                  name="chevron-small-right"
+                  size={styles.cardIconSize}
+                  color={'#292323'}
+                />
+              </TouchableOpacity>
+              {/*Invite Friend*/}
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Invite')}
+                style={styles.card}>
+                <Text style={styles.cardTitle}>Invite Friend</Text>
+                <Entypo
+                  name="chevron-small-right"
+                  size={styles.cardIconSize}
+                  color={'#292323'}
+                />
+              </TouchableOpacity>
+              {/*Delete Account*/}
+              <TouchableOpacity
+                onPress={() => ref_RBSheetDELETE.current?.open()}
+                style={styles.card}>
+                <Text style={styles.cardTitle}>Delete Account</Text>
+                <Entypo
+                  name="chevron-small-right"
+                  size={styles.cardIconSize}
+                  color={'#292323'}
+                />
+              </TouchableOpacity>
             </View>
           </ScrollView>
           <View>
             <RBSheetConfirmation
+               height={350}
+              refRBSheet={ref_RBSheetDELETE}
+              title={'Delete?'}
+              description={`Your account will be permanently deleted.${'\n'} Do you want to delete your account?`}
+              okText={'Delete'}
+              onOk={() => handleDelete()}
+              svg={<DeleteModalSvg/>}
+              okBtnColor={'#F21515'}
+
+
+            />
+            <RBSheetConfirmation
+               height={330}
               refRBSheet={ref_RBSheet}
               title={'Logout?'}
               description={'Do you want to logout?'}
               okText={'LOGOUT'}
+              svg={<LogoutModalSvg/>}
               onOk={() => handleLogout()}
             />
           </View>

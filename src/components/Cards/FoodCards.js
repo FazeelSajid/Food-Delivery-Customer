@@ -1,14 +1,16 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useRef, useState } from 'react'
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { Colors, Fonts } from '../../constants';
+import { Colors, Fonts, Icons } from '../../constants';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import Svg from '../../Assets/svg/svg';
-import WhiteCart from '../../Assets/svg/WhiteCart.svg';
+import AddButton from '../../Assets/svg/addButton.svg';
+import Heart from '../../Assets/svg/heartBlack.svg';
+import HeartActive from '../../Assets/svg/heartActive.svg';
 import {
-    heightPercentageToDP as hp,
-    widthPercentageToDP as wp,
-  } from 'react-native-responsive-screen';
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from 'react-native-responsive-screen';
 import { useDispatch, useSelector } from 'react-redux';
 import { addItemToCart, getCustomerCart, updateCartItemQuantity } from '../../utils/helpers/cartapis';
 import { addItemToMYCart, setCartRestaurantId, updateMyCartList } from '../../redux/CartSlice';
@@ -16,47 +18,47 @@ import { showAlert } from '../../utils/helpers';
 
 
 const FoodCards = ({
-    isFavorite,
-    image,
-    description, 
-    price,
-    addToCart,
-    heartPress,
-    title,
-    item,
-    id,
-    onPress,
-    newComponent,
+  isFavorite,
+  image,
+  description,
+  price,
+  addToCart,
+  heartPress,
+  title,
+  item,
+  id,
+  onPress,
+  newComponent,
 
 }) => {
 
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-    <Image source={{ uri: image }} style={styles.image} />
+      <Image source={{ uri: image }} style={styles.image} />
 
-    <TouchableOpacity style={styles.heartBtn} onPress={heartPress}>
+      <TouchableOpacity style={styles.heartBtn} onPress={heartPress}>
         {isFavorite ? (
-            <AntDesign name="heart" size={24} color={Colors.Orange} />
+          <HeartActive/>
         ) : (
-            <AntDesign name="hearto" size={24} color={Colors.Orange} />
+          <Heart />
         )}
-    </TouchableOpacity>
+      </TouchableOpacity>
 
-    <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">{title}</Text>
-    <Text style={styles.description} numberOfLines={2} ellipsizeMode="tail">{description}</Text>
- 
-    <View style={styles.rowView}>
+      <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">{title}</Text>
+      <Text style={styles.description} numberOfLines={2} ellipsizeMode="tail">{description}</Text>
+
+      <View style={styles.rowView}>
         {newComponent ? newComponent : <TouchableOpacity
-            style={styles.floatingButton}
-            activeOpacity={0.9}
-            onPress={addToCart}
+          style={styles.floatingButton}
+          activeOpacity={0.9}
+          onPress={addToCart}
         >
-            <WhiteCart width={17} />
+          <AddButton width={wp(10)} height={hp(5)} />
         </TouchableOpacity>}
         <Text style={styles.price}>£ {price}</Text>
-    </View>
-</TouchableOpacity>
+      </View>
+    </TouchableOpacity>
 
   )
 }
@@ -112,12 +114,12 @@ const styles = StyleSheet.create({
     marginTop: hp(1),
     alignItems: 'center',
   },
-  floatingButton: {
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.Orange,
-    paddingVertical: wp(0.6),
-    paddingHorizontal: wp(2.2),
-  },
+  // floatingButton: {
+  //   borderRadius: 30,
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   backgroundColor: Colors.Orange,
+  //   paddingVertical: wp(0.6),
+  //   paddingHorizontal: wp(2.2),
+  // },
 });

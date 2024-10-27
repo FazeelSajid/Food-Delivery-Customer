@@ -9,6 +9,7 @@ import Snackbar from 'react-native-snackbar';
 import api from '../constants/api';
 import moment from 'moment';
 import { BASE_URL } from './globalVariables';
+import { Fonts } from '../constants';
 showAlert
 
 export const chooseImageFromCamera = async () => {
@@ -136,6 +137,7 @@ export const showAlert = (message, bgColor, numberOfLines) => {
     duration: Snackbar.LENGTH_SHORT,
     backgroundColor: bgColor ? bgColor : 'red',
     numberOfLines: numberOfLines ? numberOfLines : 2,
+    fontFamily: Fonts.PlusJakartaSans_Regular
     // marginBottom:20,
   });
 };
@@ -387,9 +389,12 @@ export const getLocationById = id => {
 
 
 
-export const fetchApis = async (endPoint,method,setLoading, header, payload,  ) => {
+export const fetchApis = async (endPoint,method,setLoading, header, payload  ) => {
   // const request = `${BASE_URL}${endPoint}`;
   setLoading(true)
+
+  console.log({payload}, 'calculatePreOrderDetails');
+
 
 
   // console.log('Fetching apis...', endPoint, method);

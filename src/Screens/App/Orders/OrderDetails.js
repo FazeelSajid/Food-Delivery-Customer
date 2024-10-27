@@ -95,7 +95,7 @@ const OrderDetails = ({navigation, route}) => {
       order_id: route?.params?.id,
       order_status: 'cancelled',
     };
-    console.log(data);
+    // console.log(data);
     fetch(api.update_order_status, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -106,7 +106,7 @@ const OrderDetails = ({navigation, route}) => {
       .then(response => response.json())
       .then(async response => {
         console.log('response  :  ', response);
-        if (response?.status == true) {
+        if (response?.error == false) {
           setVisible(true);
         } else {
           showAlert(response?.message);
@@ -333,7 +333,8 @@ const OrderDetails = ({navigation, route}) => {
     fetch(api.get_order_by_id + id)
       .then(response => response.json())
       .then(response => {
-        if (response.status == true) {
+        console.log('response :  ', response);
+        if (response.error == false) {
           setOrderDetails(response.result);
           let cart_item =
             response.result?.cart_items_Data?.length > 0
@@ -348,6 +349,8 @@ const OrderDetails = ({navigation, route}) => {
       .catch(err => console.log('error : ', err))
       .finally(() => setLoading(false));
   };
+
+  console.log(orderDetails, 'orderDetails')
 
   useEffect(() => {
     let id = route?.params?.id;
@@ -525,12 +528,13 @@ const OrderDetails = ({navigation, route}) => {
                 <View style={styles.rowViewSB}>
                   <Text style={styles.subText2}>Subtotal</Text>
                   <Text style={styles.subText2}>
-                    ${' '}
+                    ${orderDetails?.sub_total}
+                    {/* ${' '}
                     {calculateSubTotal(
                       orderDetails?.total_amount,
                       orderDetails?.platform_fees,
                       orderDetails?.delivery_charges,
-                    )}
+                    )} */}
                     {/* {parseInt(orderDetails?.total_amount) -
                       (parseInt(orderDetails?.platform_fees) +
                         parseInt(orderDetails?.delivery_charges))} */}
@@ -538,11 +542,21 @@ const OrderDetails = ({navigation, route}) => {
                 </View>
 
                 <View style={styles.rowViewSB}>
-                  <Text style={styles.subText2}>Service Charges</Text>
+                  <Text style={styles.subText2}>Delivery Charges</Text>
                   <Text style={styles.subText2}>
-                    ${' '}
+                    $ {orderDetails?.delivery_charges}
+                    {/* ${' '}
                     {parseInt(orderDetails?.platform_fees) +
-                      parseInt(orderDetails?.delivery_charges)}
+                      parseInt(orderDetails?.delivery_charges)} */}
+                  </Text>
+                </View>
+                <View style={styles.rowViewSB}>
+                  <Text style={styles.subText2}>Gst Charges</Text>
+                  <Text style={styles.subText2}>
+                    $ {orderDetails?.gst}
+                    {/* ${' '}
+                    {parseInt(orderDetails?.platform_fees) +
+                      parseInt(orderDetails?.delivery_charges)} */}
                   </Text>
                 </View>
                 <ItemSeparator />
@@ -625,11 +639,11 @@ const OrderDetails = ({navigation, route}) => {
                         style={{backgroundColor: Colors.Orange}}
                         size={45}
                         // source={Images.user}
-                        source={{
-                          uri:
-                            BASE_URL_IMAGE +
-                            orderDetails?.restaurantData?.images[0],
-                        }}
+                        // source={{
+                        //   uri:
+                        //     BASE_URL_IMAGE +
+                        //     orderDetails?.restaurantData?.images[0],
+                        // }}
                       />
                       <View style={styles.textContainer}>
                         <Text style={{...styles.subText, marginLeft: 5}}>

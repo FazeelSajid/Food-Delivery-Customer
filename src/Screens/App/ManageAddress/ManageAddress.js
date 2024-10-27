@@ -14,11 +14,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { showAlert } from '../../../utils/helpers';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import Ionicons from 'react-native-vector-icons/Ionicons';  // For delete icon (optional)
-import { setLocation } from '../../../redux/AuthSlice';
+import { setLocation, setUpdateLocation } from '../../../redux/AuthSlice';
+import { setSelectedPaymentString, setSelectedPaymentType } from '../../../redux/CartSlice';
+import { ScrollView } from 'react-native-gesture-handler';
+import CButton from '../../../components/Buttons/CButton';
+import Loader from '../../../components/Loader';
 
 
 
-const ManageAddress = () => {
+const ManageAddress = ({navigation}) => {
 
     const { customer_id, location } = useSelector(store => store.store)
     const [isLoading, setIsLoading] = useState()
@@ -83,16 +87,19 @@ const ManageAddress = () => {
                 }
                 else {
                     setLocations(response.customerData.locations)
-                    console.log(api.get_customer_location + customer_id);
+                    // console.log(api.get_customer_location + customer_id);
 
                     setIsLoading(false)
-                    console.log(response.customerData.locations[0]);
+                    // console.log(response.customerData.locations[0]);
                     dispatch(setLocation({
                         latitude: response.customerData.locations[0].latitude,
                         longitude: response.customerData.locations[0].longitude,
                         address: response.customerData.locations[0].address,
                         id: response.customerData.locations[0].location_id
                     }))
+
+                    dispatch(setSelectedPaymentType(''));
+                    dispatch(setSelectedPaymentString(''));
 
                 }
 
@@ -127,7 +134,7 @@ const ManageAddress = () => {
     return (
         <View style={styles.container}>
             <StackHeader title={'Manage Addresses'} headerStyle={{ marginBottom: hp(2) }} iconContainerStyle={{ marginTop: hp(1) }} />
-
+            <Loader loading={isLoading} />
             {/* <View style={{alignItems: 'center'}}  > */}
 
             <FlatList
@@ -135,25 +142,38 @@ const ManageAddress = () => {
                 contentContainerStyle={{ alignItems: 'center' }}
                 keyExtractor={(item) => item.location_id.toString()} // Ensure each item has a unique id
                 renderItem={({ item }) => {
+
                     return (
                         <Swipeable
                             renderRightActions={() => renderRightActions(item.location_id)} // Pass the item's id to delete
 
                         >
                             <TouchableOpacity onPress={() => {
-                                console.log({
+                                // console.log({
+                                //     latitude: item.latitude,
+                                //     longitude: item.longitude,
+                                //     address: item.address,
+                                //     id: item.location_id
+                                // });
+
+                                dispatch(setLocation({
                                     latitude: item.latitude,
                                     longitude: item.longitude,
                                     address: item.address,
                                     id: item.location_id
-                                });
-                                
-                                dispatch(setLocation({
-                                latitude: item.latitude,
-                                longitude: item.longitude,
-                                address: item.address,
-                                id: item.location_id
-                            }))}} style={styles.listContainer}>
+                                }))
+                                dispatch(setUpdateLocation({
+                                    latitude: item?.latitude,
+                                    longitude: item?.longitude,
+                                    address: item?.address,
+                                    id: item.location_id
+                                }))
+                                dispatch(setSelectedPaymentType(''));
+                                dispatch(setSelectedPaymentString(''));
+
+                            }}
+
+                                style={styles.listContainer}>
                                 <View>
                                     <MapMarker />
                                 </View>
@@ -166,12 +186,26 @@ const ManageAddress = () => {
                                         color={Colors.Orange}
                                         uncheckedColor={Colors.Orange}
                                         status={location.id === item.location_id ? 'checked' : 'unchecked'}
-                                        onPress={() => dispatch(setLocation({
-                                            latitude: item.latitude,
-                                            longitude: item.longitude,
-                                            address: item.address,
-                                            id: item.location_id
-                                        }))} 
+                                        onPress={() => {
+                                            dispatch(setLocation({
+                                                latitude: item.latitude,
+                                                longitude: item.longitude,
+                                                address: item.address,
+                                                id: item.location_id
+                                            }))
+
+                                            dispatch(setUpdateLocation({
+                                                latitude: item?.latitude,
+                                                longitude: item?.longitude,
+                                                address: item?.address,
+                                                id: item.location_id
+                                            }))
+                                        }
+
+
+
+                                        }
+
                                     />
                                 </View>
                             </TouchableOpacity>
@@ -207,6 +241,25 @@ const ManageAddress = () => {
 
 
             {/* </View> */}
+
+            <View
+                style={{
+                    flex: 0.8,
+                    paddingBottom: 30,
+                    justifyContent: 'flex-end',
+                }}>
+                <CButton
+                    title="Add Address"
+                    width={wp(85)}
+                    loading={isLoading}
+                    onPress={() => {
+                      
+                        // ref_RBSheet?.current?.open();
+                        navigation.navigate('Map')
+
+                    }}
+                />
+            </View>
 
 
         </View>

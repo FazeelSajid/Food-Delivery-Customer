@@ -88,9 +88,6 @@ const Checkout = ({ navigation, route }) => {
     selected_payment_string,
   } = useSelector(store => store.cart);
 
-
-  
-
   const btmSheetRef = useRef()
 
 
@@ -113,7 +110,7 @@ const Checkout = ({ navigation, route }) => {
   const [total_amount, setTotal_amount] = useState(0);
   const [subtotal, setSubtotal] = useState(0);
   // const [platform_fee, setPlatform_fee] = useState(0);
-  const [delivery_charges, setDelivery_charges] = useState(0);
+  // const [delivery_charges, setDelivery_charges] = useState(0);
   // const [service_fee, setService_fee] = useState(4);
   const [service_fee, setService_fee] = useState(0);
 
@@ -126,9 +123,20 @@ const Checkout = ({ navigation, route }) => {
   const [selected_card, setSelected_card] = useState('');
   const { customer_id, location } = useSelector(store => store.store);
   const [cartItemIds, setCartItemIds] = useState([])
-  const [infoObj, setInfoObj] = useState({})
 
   const location_id = location.id
+
+  
+
+  const [Bill, setBill] = useState({
+    total_amount: 0,
+    subtotal: 0,
+    cartItemIds: [],
+    delivery_charges: 0,
+    gst_charges: 0,
+    total_amount: 0
+
+  })
 
 
 
@@ -426,7 +434,7 @@ const Checkout = ({ navigation, route }) => {
       .catch(error => console.log('makeOrderPayment', error));
   };
 
-  console.log(location_id);
+  // console.log(location_id);
 
   const placeOrder = async () => {
         
@@ -485,7 +493,7 @@ const Checkout = ({ navigation, route }) => {
         payment_option: selected_payment_type,
         // payment_option: 'card',
         // customer_payment: 1, // card -> total amount :  cash->0
-        sub_total: parseInt(total_amount),
+        sub_total: parseInt(Bill.subtotal),
         comments: comments,
         Estimated_delivery_time: 45,
         // Estimated_delivery_time: delivery_time,
@@ -510,7 +518,7 @@ const Checkout = ({ navigation, route }) => {
       //   comments: 'comments',
       //   Estimated_delivery_time: 30,
       // };
-      console.log(data);
+      // console.log(data);
 
       fetch(api.create_order, {
         method: 'POST',
@@ -521,7 +529,7 @@ const Checkout = ({ navigation, route }) => {
       })
         .then(response => response.json())
         .then(async response => {
-          if (response.status == true) {
+          if (response.error == false) {
             // clear_Cart_items(); //remove all items from cart
             dispatch(setCartRestaurantId(null));
             dispatch(addToCart([]));
@@ -532,12 +540,15 @@ const Checkout = ({ navigation, route }) => {
               makeOrderPayment(response?.result?.order_id);
             }
             ref_RBSheet?.current?.open();
+            setTimeout(() => {
+             navigation.navigate('Dashboard')
+            }, 20000);
           } else {
             setTimeout(() => {
               showAlert(response.message, 'green');
             }, 200);
           }
-          console.log('create order response  :  ', response);
+          // console.log('create order response  :  ', response);
         })
         .catch(err => {
           console.log('Error in create order :  ', err);
@@ -556,60 +567,76 @@ const Checkout = ({ navigation, route }) => {
 
 
   const calculateTotalAmount = () => {
+
       const cartItemIds = extractCartItemIds(cart)
-      setCartItemIds(cartItemIds)
+     setBill(prev => {
+       return {
+        ...prev,
+        cartItemIds: cartItemIds
+       };
+     })
       
     try {
       let total = 0;
       for (const item of cart) {
-        console.log('item?.itemData?.price :  ', item?.itemData?.variationData?.price);
+        // console.log(item);
+        
+        // console.log('item?.itemData?.price :  ', item?.itemData?.variationData?.price);
         // let price = item?.itemData?.price ? parseInt(item?.itemData?.variationData?.price) : 0
-        let price = parseInt(item?.itemData?.variationData?.price)
+        let price = parseInt(item?.itemData?.variationData?.price ? item?.itemData?.variationData?.price : item?.itemData?.price  )
         let quantity = item?.quantity ? parseInt(item?.quantity) : 1;
         total = total + price * quantity;
+        // console.log({price, quantity,});
+        
+
         // console.log('total : ', total);
       }
 
-
-      setSubtotal(total.toFixed(2));
+      setBill(prev => {
+        return {
+         ...prev,
+          subtotal: total.toFixed(2),
+        };
+      })
+      // setSubtotal(total.toFixed(2));
       // let totalAmount = total + service_fee;
       // let totalAmount = total + delivery_charges + platform_fee;
       // console.log(totalAmount, 'total amount');
 
-      setTotal_amount(total.toFixed(2));
+      // setTotal_amount(total.toFixed(2));
     } catch (error) {
       console.log('error in calculating total amount : ', error);
     }
   };
 
-  const handleEditAddress = async () => {
-    let shipping_address = await getShippingAddress();
-    console.log('shipping_address  :  ', shipping_address?.location_id);
-    if (shipping_address) {
-      navigation.navigate('ShippingAddressList');
-    } else {
-      navigation?.navigate('ShippingAddress');
-    }
+  // const handleEditAddress = async () => {
+  //   let shipping_address = await getShippingAddress();
+  //   console.log('shipping_address  :  ', shipping_address?.location_id);
+  //   if (shipping_address) {
+  //     navigation.navigate('ShippingAddressList');
+  //   } else {
+  //     navigation?.navigate('ShippingAddress');
+  //   }
 
-    // setLoading(true);
-    // let customer_Id = await AsyncStorage.getItem('customer_id');
-    // getCustomerShippingAddress(customer_Id)
-    //   .then(response => {
-    //     let list = response?.result ? response?.result : [];
-    //     if (list?.length == 0) {
-    //       navigation?.navigate('ShippingAddress');
-    //     } else {
-    //       navigation.navigate('ShippingAddressList');
-    //     }
-    //   })
-    //   .catch(error => {
-    //     console.log('error : ', error);
-    //   })
-    //   .finally(() => {
-    //     setLoading(false);
-    //   });
-    // navigation.navigate('ShippingAddressList');
-  };
+  //   // setLoading(true);
+  //   // let customer_Id = await AsyncStorage.getItem('customer_id');
+  //   // getCustomerShippingAddress(customer_Id)
+  //   //   .then(response => {
+  //   //     let list = response?.result ? response?.result : [];
+  //   //     if (list?.length == 0) {
+  //   //       navigation?.navigate('ShippingAddress');
+  //   //     } else {
+  //   //       navigation.navigate('ShippingAddressList');
+  //   //     }
+  //   //   })
+  //   //   .catch(error => {
+  //   //     console.log('error : ', error);
+  //   //   })
+  //   //   .finally(() => {
+  //   //     setLoading(false);
+  //   //   });
+  //   // navigation.navigate('ShippingAddressList');
+  // };
 
   const getCustomerData = async () => {
     setLoading(true);
@@ -731,19 +758,55 @@ const Checkout = ({ navigation, route }) => {
   }
 
 
-  const calculatePreOrderdetails = (paymentType) => {
-    const body = {
+  const handlePaymentTypeChange = (type, string) => {
+    dispatch(setSelectedPaymentType(type));
+    dispatch(setSelectedPaymentString(string));
+    setChecked(type);
+    setSelectPaymentMethod(string);
+    ref_RBSheetPaymentOption?.current?.close();
+    console.log('handlePaymentTypeChange');
+    
+    calculatePreOrderdetails(type)
+  };
+
+  const calculatePreOrderdetails = (paymentType ) => {
+       const body = {
       customer_id :customer_id,
-      cart_items_ids:  cartItemIds,
+      cart_items_ids:  Bill.cartItemIds,
       // "promo_code": "", // optional
       payment_option: paymentType,
-      sub_total: subtotal,
-      location_id : location_id
+      sub_total: Bill.subtotal,
+      location_id : location.id
   }
-    const response =  fetchApis(api.calculatePreOrder, 'POST', setLoading, 'application/json', body )
 
-    setInfoObj(response.result)
+  fetch(api.calculatePreOrder, {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      'Content-type': 'application/json; charset=UTF-8',
+    },
+  })
+    .then(response => response.json())
+    .then(response => {
+      // console.log({response});
+      // console.log(body);
+      
+      if (response.error == false) {
+        setBill(prev => {
+          return {
+           ...prev,
+           delivery_charges: response?.result?.delivery_charges,
+           gst_charges:response?.result?.gst_charges,
+           total_amount:  response?.result?.total_amount
+          };
+        })
+        
+      }
+    } )
+  
+    // const response =  fetchApis(api.calculatePreOrder, 'POST', setLoading, 'application/json', body )
 
+  //  console.log({response});
   }
 
   return (
@@ -800,8 +863,6 @@ const Checkout = ({ navigation, route }) => {
         <View style={[styles.rowViewSB, { width: wp(80), alignSelf: 'center', alignItems: 'center', marginTop: 10,marginBottom: 10 }]} >
           <TextInput placeholder='Promo Code' placeholderTextColor={'#B0B0B0'} style={{ borderRadius: 25, backgroundColor: '#F5F6FA', width: wp(60), paddingLeft: wp(5), marginRight: wp(2), color: Colors.Black  }} value={promoCode}  onChangeText={text => setPromoCode(text)} />
           <CustomButton text={'Apply'} textStyle={{ color: Colors.White, fontSize: RFPercentage(2) }} containerStyle={{ backgroundColor: Colors.Orange, paddingHorizontal: wp(5), paddingVertical: hp(1.3), borderRadius: 25 }} onPress={()=> handleVerifyPromoCode(promoCode)} pressedRadius={25} />
-
-
         </View>
 
         {isPromocodeApplied && (
@@ -935,25 +996,25 @@ const Checkout = ({ navigation, route }) => {
           <View style={{ marginVertical: 10 }}>
             <View style={styles.rowViewSB}>
               <Text style={styles.subText1}>Subtotal</Text>
-              <Text style={styles.subText1}>${subtotal}</Text>
+              <Text style={styles.subText1}>£{Bill.subtotal}</Text>
             </View>
             <View style={styles.rowViewSB}>
-              {/* <Text style={styles.subText1}>Delivery Charges</Text> */}
-              {/* <Text style={styles.subText1}>${delivery_charges}</Text> */}
+              <Text style={styles.subText1}>Delivery Charges</Text>
+              <Text style={styles.subText1}>£{Bill.delivery_charges}</Text>
             </View>
             <View style={styles.rowViewSB}>
-              {/* <Text style={styles.subText1}>Platform Fee</Text>
-              <Text style={styles.subText1}>${platform_fee}</Text> */}
+              <Text style={styles.subText1}>Gst Charges</Text>
+              <Text style={styles.subText1}>£{Bill.gst_charges}</Text>
             </View>
             {/* <View style={styles.rowViewSB}>
               <Text style={styles.subText1}>Service Charges</Text>
-              <Text style={styles.subText1}>${service_fee}</Text>
+              <Text style={styles.subText1}>£{service_fee}</Text>
             </View> */}
 
             <ItemSeparator />
             <View style={styles.rowViewSB}>
               <Text style={styles.title}>Total</Text>
-              <Text style={styles.title}>${total_amount}</Text>
+              <Text style={styles.title}>£{Bill.total_amount}</Text>
             </View>
           </View>
         </View>
@@ -1038,7 +1099,7 @@ const Checkout = ({ navigation, route }) => {
                   marginTop={12}
                   onPress={() => {
                     ref_RBSheetPhoneNo?.current?.close();
-                    handleSendCode();
+                    // handleSendCode();
                   }}
                 />
               </View>
@@ -1060,11 +1121,7 @@ const Checkout = ({ navigation, route }) => {
               <View style={{ flex: 1 }}>
                 <TouchableOpacity
                   onPress={() => {
-                    dispatch(setSelectedPaymentType('cash'));
-                    dispatch(setSelectedPaymentString('cash on Delivery'));
-                    setChecked('cash');
-                    setSelectPaymentMethod('cash on Delivery');
-                    ref_RBSheetPaymentOption?.current?.close();
+                    handlePaymentTypeChange('cash', 'cash on Delivery')
                   }}
                   style={styles.rowView}>
                   <RadioButton
@@ -1075,11 +1132,7 @@ const Checkout = ({ navigation, route }) => {
                       selected_payment_type === 'cash' ? 'checked' : 'unchecked'
                     }
                     onPress={() => {
-                      dispatch(setSelectedPaymentType('cash'));
-                      dispatch(setSelectedPaymentString('cash on Delivery'));
-                      setChecked('cash');
-                      setSelectPaymentMethod('cash on Delivery');
-                      ref_RBSheetPaymentOption?.current?.close();
+                      handlePaymentTypeChange('cash', 'cash on Delivery')
 
                     }}
                   />

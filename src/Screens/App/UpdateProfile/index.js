@@ -19,12 +19,12 @@ import {
 import Loader from '../../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
-import {setCustomerDetail, setLocation} from '../../../redux/AuthSlice';
+import {setCustomerDetail, setLocation, setUpdateLocation} from '../../../redux/AuthSlice';
 import api from '../../../constants/api';
 
 const UpdateProfile = ({navigation, route}) => {
   const dispatch = useDispatch();
-  const {location, customer_detail} = useSelector(store => store.store);
+  const {location, customer_detail, customer_id, updateLocation} = useSelector(store => store.store);
 
   const ref_RBSheet = useRef();
   const textInput_HEIGHT = 42;
@@ -36,24 +36,34 @@ const UpdateProfile = ({navigation, route}) => {
   const [email, setEmail] = useState('');
   const [userDetail, setUserDetail] = useState(null);
 
+  const [customer, setCustomer] = useState({
+    name: customer_detail?.user_name,
+    phoneNo: customer_detail?.phone_no,
+    email: customer_detail?.email,
+    // location: customer_detail?.location
+  })
+  
+
   // const [location, setLocation] = useState('');
+  // console.log(updateLocation);
+  
 
   const handleUpdateProfile = async () => {
     setUpdating(true);
-    let customer_id = await AsyncStorage.getItem('customer_id');
+    // let customer_id = await AsyncStorage.getItem('customer_id');
     let fcm_token = await getUserFcmToken();
     let data = {
       customer_id: customer_id,
-      location: location?.address,
-      user_name: name,
-      email: email,
-      phone_no: phoneNo,
+      location: updateLocation?.address,
+      user_name: customer.name,
+      email: customer.email,
+      phone_no: customer.phoneNo,
       fcm_token: fcm_token,
-      latitude: location?.latitude,
-      longitude: location?.longitude,
+      latitude: updateLocation?.latitude,
+      longitude: updateLocation?.longitude,
     };
 
-    console.log('data  :  ', data);
+    console.log('Update request data  :  ', data);
 
     fetch(api.update_profile, {
       method: 'PUT',
@@ -66,12 +76,14 @@ const UpdateProfile = ({navigation, route}) => {
       .then(async response => {
         console.log('response  : ', response);
         if (response?.status == true) {
-          ref_RBSheet?.current?.open();
+          // ref_RBSheet?.current?.open();
+          console.log(" Update request response  :  ",response?.result  );
+          
           dispatch(setCustomerDetail(response?.result));
-          await AsyncStorage.setItem(
-            'customer_detail',
-            JSON.stringify(response?.result),
-          );
+          // await AsyncStorage.setItem(
+          //   'customer_detail',
+          //   JSON.stringify(response?.result),
+          // );
           ref_RBSheet?.current?.open();
         } else {
           showAlert(response?.message);
@@ -87,13 +99,13 @@ const UpdateProfile = ({navigation, route}) => {
   };
 
   const get_customer_Details = async () => {
-    let customer_id = await AsyncStorage.getItem('customer_id');
+    // let customer_id = await AsyncStorage.getItem('customer_id');
     console.log('customer_id  :  ', customer_id);
     let details = await getCustomerDetail(customer_id);
     if (details) {
       setUserDetail(details);
-      dispatch(setCustomerDetail(details));
-      console.log('details  :  ', details);
+      // dispatch(setCustomerDetail(details));
+      // console.log('details  :  ', details);
       setName(details?.user_name);
       setPhoneNo(details?.phone_no);
       setEmail(details?.email);
@@ -111,8 +123,25 @@ const UpdateProfile = ({navigation, route}) => {
   };
 
   useEffect(() => {
-    setLoading(true);
-    get_customer_Details();
+    // setLoading(true);
+    setCustomer(prev => {
+      return {
+       ...prev,
+        name: customer_detail?.user_name,
+        phoneNo: customer_detail?.phone_no,
+        email: customer_detail?.email,
+      };
+    })
+    dispatch(setUpdateLocation({
+      latitude: customer_detail?.latitude,
+      longitude: customer_detail?.longitude,
+      address: customer_detail?.location,
+  }))
+    // setName(customer_detail?.user_name);
+    //   setPhoneNo(customer_detail?.phone_no);
+    //   setEmail(customer_detail?.email);
+    //   setUserDetail(customer_detail);
+    // get_customer_Details();
   }, []);
 
   return (
@@ -128,24 +157,34 @@ const UpdateProfile = ({navigation, route}) => {
           <CInput
             heading={'User name'}
             // placeholder="John Doe"
-            value={name}
-            onChangeText={text => setName(text)}
+            value={customer.name}
+            onChangeText={text => setCustomer(prev => {
+              return{
+                ...prev,
+                name: text
+              }
+            })}
             headingStyle={styles.headingStyle}
             height={textInput_HEIGHT}
           />
           <CInput
             heading={'Phone Number'}
-            // placeholder="0000 0000000"
+            placeholder="0000 0000000"
             keyboardType="numeric"
-            value={phoneNo}
-            onChangeText={text => setPhoneNo(text)}
+            value={customer.phoneNo}
+            onChangeText={text => setCustomer(prev => {
+              return{
+                ...prev,
+                phoneNo: text
+              }
+            })}
             headingStyle={styles.headingStyle}
             height={textInput_HEIGHT}
-            editable={userDetail?.signup_type == 'google' ? true : false}
+            editable={customer_detail?.signup_type == 'google' || customer_detail?.signup_type == 'email' ? true : false}
             disabled={true}
           />
 
-          {userDetail?.signup_type != 'google' && (
+          {customer_detail?.signup_type == 'phone_no'  && (
             <Text style={styles.errorText}>
               you can't change your phone number
             </Text>
@@ -153,23 +192,28 @@ const UpdateProfile = ({navigation, route}) => {
 
           <CInput
             heading={'Email Address'}
-            // placeholder="0000 0000000"
+            placeholder="example@example.com"
             keyboardType="email-address"
-            value={email}
-            onChangeText={text => setEmail(text)}
+            value={customer.email}
+            onChangeText={text => setCustomer(prev => {
+              return{
+                ...prev,
+                email: text
+              }
+            })}
             headingStyle={styles.headingStyle}
             height={textInput_HEIGHT}
-            editable={userDetail?.signup_type != 'google' ? true : false}
+            editable={customer_detail?.signup_type == 'google' ||  customer_detail?.signup_type == 'email' ? false : true}
             disabled={true}
           />
-          {userDetail?.signup_type == 'google' && (
+          {customer_detail?.signup_type == 'google' || customer_detail?.signup_type == 'email' && (
             <Text style={styles.errorText}>
               you can't change your email address
             </Text>
           )}
           <CInput
             heading={'Location'}
-            value={location?.address}
+            value={updateLocation?.address}
             // value={location}
             // onChangeText={text => setLocation(text)}
             headingStyle={styles.headingStyle}
@@ -178,7 +222,7 @@ const UpdateProfile = ({navigation, route}) => {
             editable={false}
             disabled={false}
             multiline
-            onPress={() => navigation.navigate('SelectLocation')}
+            onPress={() => navigation.navigate('ManageAddress')}
           />
           <View
             style={{
@@ -187,7 +231,7 @@ const UpdateProfile = ({navigation, route}) => {
               justifyContent: 'flex-end',
             }}>
             <CButton
-              title="Update"
+              title="Save"
               width={wp(85)}
               loading={updating}
               onPress={() => {

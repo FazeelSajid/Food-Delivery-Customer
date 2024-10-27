@@ -35,6 +35,8 @@ const CButton = ({
   borderColor
 }) => {
   let isDarkMode = false;
+  // console.log({marginTop});
+  
   return (
     <TouchableOpacity
       activeOpacity={activeOpacity ? activeOpacity : 0.8}

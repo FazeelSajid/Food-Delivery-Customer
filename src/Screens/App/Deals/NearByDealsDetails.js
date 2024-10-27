@@ -543,7 +543,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
                     ? BASE_URL_IMAGE + item?.images[0]
                     : ''
                 }
-                price={item?.price}
+                price={item?.variations?.price}
                 rating={item?.rating}
                 tag={item?.cuisineData?.cuisine_name}
                 isTagArray={false}

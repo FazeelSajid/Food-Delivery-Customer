@@ -132,7 +132,7 @@ const Onboarding = ({ navigation }) => {
 
         {/* PagerView for swiping */}
         <PagerView
-          style={[{ height: hp(60), backgroundColor: 'white' }, lastPage && { marginTop: wp(7) }]}
+          style={[{ height: hp(63), backgroundColor: 'white' }, lastPage && { marginTop: wp(7) }]}
           initialPage={0}
           onPageSelected={onPageSelected}
           ref={pagerRef} // Reference to control PagerView programmatically
@@ -153,15 +153,26 @@ const Onboarding = ({ navigation }) => {
           ))}
         </PagerView>
 
-        {lastPage && renderPaginationDots()}
+         {renderPaginationDots()}
       </View>
 
       {/* Continue button */}
 
       {!lastPage ? <View style={{ flex: 1, paddingHorizontal: wp(10), flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        {renderPaginationDots()}
+       
 
-        <CustomButton svg={<ChevronRightOrange />} containerStyle={{ paddingBottom: hp(8.5) }} onPress={handleContinue} />
+        {/* <CustomButton svg={<ChevronRightOrange />} containerStyle={{ paddingBottom: hp(8.5) }} onPress={handleContinue} /> */}
+
+        <CButton
+          title="Continue"
+          width={wp(85)}
+          // height={hp(6)}
+          // transparent={true}
+         onPress={handleContinue} 
+          bgColor={Colors.Orange}
+          // leftIcon={<ChevronRightOrange />}
+          
+        />
 
       </View> :
         <View >
@@ -218,13 +229,13 @@ const Onboarding = ({ navigation }) => {
               </View>
 
               <TouchableOpacity style={styles.rowView} onPress={() =>toggleSelection('phone')} >
-                <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/>
+                {/* <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/> */}
                 <Text
                   style={{
                     color: '#56585B',
                     fontFamily: Fonts.PlusJakartaSans_Regular,
-                    marginTop: -2,
                     fontSize: RFPercentage(2),
+                    marginLeft: wp(4)
                   }}>
                   Phone Number
                 </Text>
@@ -232,13 +243,13 @@ const Onboarding = ({ navigation }) => {
               </TouchableOpacity  >
               <ItemSeparator />
               <TouchableOpacity style={styles.rowView} onPress={() => toggleSelection('email')}>
-                <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} />
+                {/* <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} /> */}
                 <Text
                   style={{
                     color: '#56585B',
                     fontFamily: Fonts.PlusJakartaSans_Regular,
-                    marginTop: -2,
                     fontSize: RFPercentage(2),
+                    marginLeft: wp(4)
                   }}>
                   Email
                 </Text>

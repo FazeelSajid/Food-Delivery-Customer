@@ -67,6 +67,9 @@ const AddItems = ({ navigation, route }) => {
   const [restaurant_timings, setRestaurant_timings] = useState('');
   const {  customer_id, cuisines } = useSelector(store => store.store);
 
+  const [itemObj, setItemObj] = useState({})
+
+
 
   const setCusineNameByItemCusineId = (cusineId) => {
     const cuisineName = cuisines?.filter(item => item?.cuisine_id === cusineId)[0]?.cuisine_name;
@@ -84,13 +87,21 @@ const AddItems = ({ navigation, route }) => {
   // Function to handle radio button press
 
 
-  const showBtmSheet = () => {
+  const showBtmSheet = (item) => {
+    setSelectedVariation(null)
+
+    setItemObj({
+      id: item.item_id,
+      variations: item.item_prices,
+      name: item?.item_name,
+    })
+
     btmSheetRef?.current?.open()
   }
   const closeBtmSheet = () => {
     btmSheetRef?.current?.close()
+    setItemObj({})
   }
-
 
   const handleOnRemove = () => {
     setLoading(true);
@@ -299,7 +310,7 @@ const AddItems = ({ navigation, route }) => {
     setIsItemLoading(false);
   };
 
-  const add_item_to_cart = async item => {
+  const add_item_to_cart = async (item, variation_id) => {
     setLoading(true);
     // let customer_id = await AsyncStorage.getItem('customer_id');
     console.log('customer_Id :  ', customer_id);
@@ -310,7 +321,7 @@ const AddItems = ({ navigation, route }) => {
       item_type: 'item',
       comments: '',
       quantity: 1,
-      variation_id: selectedVariation
+      variation_id: variation_id
     };
     console.log('data   :  ', data);
 
@@ -339,16 +350,16 @@ const AddItems = ({ navigation, route }) => {
       });
   };
 
-  const handelAddItem = async item => {
-    add_item_to_cart(item);
-    // if (item?.restaurant_timings?.isClosed) {
-    //   setRestaurant_timings(item?.restaurant_timings);
-    //   ref_RBSheetResClosed.current.open();
-    //   return;
-    // } else if (validate(item?.restaurant_id)) {
-    //   add_item_to_cart(item);
-    // }
-  };
+  // const handelAddItem = async item => {
+  //   add_item_to_cart(item);
+  //   // if (item?.restaurant_timings?.isClosed) {
+  //   //   setRestaurant_timings(item?.restaurant_timings);
+  //   //   ref_RBSheetResClosed.current.open();
+  //   //   return;
+  //   // } else if (validate(item?.restaurant_id)) {
+  //   //   add_item_to_cart(item);
+  //   // }
+  // };
 
   const getData = () => {
     setLoading(true);
@@ -407,7 +418,7 @@ const AddItems = ({ navigation, route }) => {
       ref_RBSheetSuccess?.current?.open();
       closeBtmSheet()
     } else {
-      add_item_to_cart(item);
+      add_item_to_cart(item, id);
       closeBtmSheet()
 
     }
@@ -448,7 +459,7 @@ const AddItems = ({ navigation, route }) => {
                 item?.images?.length > 0 ? BASE_URL_IMAGE + item?.images[0] : ''
               }
               title={item?.item_name}
-              price={item?.item_variations[0]?.price}
+              price={item?.item_prices[0]?.price}
               showRating={false}
               rating={item?.rating}
               tag={setCusineNameByItemCusineId(item?.cuisine_id)}
@@ -536,7 +547,7 @@ const AddItems = ({ navigation, route }) => {
                     <TouchableOpacity
                       onPress={() => {
                         setItem(item)
-                        showBtmSheet()
+                        showBtmSheet(item)
                         // updateItemQuantity(item);
                         // setSelected_item(item);
                         // setSelected_restaurant_id(item?.restaurant_id);
@@ -585,7 +596,7 @@ const AddItems = ({ navigation, route }) => {
 
       <RBSheetSuccess
         refRBSheet={ref_RBSheetSuccess}
-        title={`"${Item?.item_name}" added to cart.`}
+        title={`${Item?.item_name} added to cart.`}
         btnText={'OK'}
         onPress={() => {
           ref_RBSheetSuccess?.current?.close();
@@ -601,7 +612,7 @@ const AddItems = ({ navigation, route }) => {
           }`}
       />
 
-      <CRBSheetComponent
+       <CRBSheetComponent
         height={230}
         refRBSheet={btmSheetRef}
         content={
@@ -613,35 +624,26 @@ const AddItems = ({ navigation, route }) => {
                 <Ionicons name={'close'} size={22} color={'#1E2022'} />
               </TouchableOpacity>
             </View>
-            {Item?.item_prices?.map((variation, i) => (
-
-
-
+            {itemObj.variations?.map((variation, i) => (
               <View key={i} style={styles.rowViewSB}>
-
                 <View style={styles.rowView} >
-
                   <RadioButton
                     color={Colors.Orange} // Custom color for selected button
                     uncheckedColor={Colors.Orange} // Color for unselected buttons
                     status={selectedVariation === variation.variation_id ? 'checked' : 'unchecked'}
-                    onPress={() => handlePress(Item, variation.variation_id)}
+                    onPress={() =>  handlePress(Item, variation.variation_id)}
                   />
                   <Text style={styles.variationText}>{variation.variation_name}</Text>
-
                 </View>
                 <Text style={styles.variationText}>£ {variation?.price}</Text>
-
-
               </View>
-
-
             ))}
 
           </View>
         }
 
       />
+
     </View>
   );
 };
