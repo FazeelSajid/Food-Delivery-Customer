@@ -40,11 +40,14 @@ import {
   addItemToCart,
   clearCartItems,
   getCustomerCart,
+  removeItemFromCart,
   updateCartItemQuantity,
 } from '../../../utils/helpers/cartapis';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {
   addItemToMYCart,
+  addToCart,
+  removeItemFromMyCart,
   setCartRestaurantId,
   updateMyCartList,
 } from '../../../redux/CartSlice';
@@ -55,6 +58,8 @@ import RBSheetRestaurantClosed from '../../../components/BottomSheet/RBSheetRest
 import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RadioButton } from 'react-native-paper';
+import Heart from '../../../Assets/svg/HeartWhite.svg';
+import HeartActive from '../../../Assets/svg/HeartActiveWhite.svg';
 
 
 const ItemDetails = ({ navigation, route }) => {
@@ -72,17 +77,49 @@ const ItemDetails = ({ navigation, route }) => {
   const btmSheetRef = useRef()
 
 
-  const [selectedVariation, setSelectedVariation] = useState(null);
+  const [selectedVariation, setSelectedVariation] = useState({
+    variation_id: '',
+    variation_name: '',
+    variation_price: '',
+  });
+  const [variationPrice, setVariationPrice] = useState(null);
+
+
 
   // Function to handle radio button press
 
 
   const showBtmSheet = () => {
-    setSelectedVariation(null)
+    // setSelectedVariation(null)
     btmSheetRef?.current?.open()
   }
   const closeBtmSheet = () => {
     btmSheetRef?.current?.close()
+  }
+
+  const checkVariationInCart = (variation_id) =>{
+    const filter = my_cart?.filter(
+      item => item?.item_id == route?.params?.id ,
+    );
+    // console.log(filter, 'filter');
+    // const OtherFilter = filter.filter(
+    //   item => item.variation_id === id
+    // )
+    
+    if (filter?.length > 0) {
+      const checkVariation = filter?.filter(
+        item =>
+          item?.variation_id == variation_id,
+      )
+      if (checkVariation.length > 0) {
+        console.log(checkVariation[0]?.quantity);
+        setCount(checkVariation[0]?.quantity)
+        return checkVariation
+      }else{
+        setCount(0)
+        return []
+      }
+    }  
   }
 
   const isItemFavorite = (id) => {    
@@ -93,7 +130,7 @@ const ItemDetails = ({ navigation, route }) => {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [count, setCount] = useState(my_cart.length);
+  const [count, setCount] = useState(0);
 
   const [itemDetail, setItemDetail] = useState('');
   const [restaurantDetails, setRestaurantDetails] = useState('');
@@ -179,47 +216,165 @@ const ItemDetails = ({ navigation, route }) => {
     }
   };
 
-  const handleOnRemove = () => {
-    setLoading(true);
-    // remove all items of previous restaurant
-    clearCartItems()
-      .then(response => {
-        //add new item
-        dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-        console.log(
-          'new cart restaurant_id : ',
-          restaurantDetails?.restaurant_id,
-        );
-        // //my_cart
-        // dispatch(clearMyCart());
-        //my_cart
-        dispatch(updateMyCartList([]));
+  // const handleDelete = async item => {
+  //   try {
+  //     setLoading(true);
+  //     console.log('item   :  ', item?.cart_item_id);
+  //     let cart = await getCustomerCart(customer_id);
+  //     console.log('cart  : ', cart);
 
-        add_item_to_cart();
+  //     removeItemFromCart(cart?.cart_id,item?.cart_item_id)
+  //       .then(response => {
+  //         if (response?.status == true) {
+  //           console.log('response  :  ', response);
+  //           const filter = data.filter(
+  //             element => element?.cart_item_id != item?.cart_item_id,
+  //           );
+  //           // console.log('filter, from remove from cart' ,filter );
+            
+  //           setData(filter);
+  //           dispatch(addToCart(filter));
+
+  //           //my_cart
+  //           // dispatch(removeItemFromMyCart(item?.cart_item_id));
+  //           dispatch(updateMyCartList(filter));
+
+  //           if (filter?.length == 0) {
+  //             dispatch(setCartRestaurantId(null));
+  //           }
+  //         } else {
+  //           setTimeout(() => {
+  //             showAlert(response?.message);
+  //           }, 500);
+  //         }
+  //       })
+  //       .catch(error => {
+  //         console.log('error: ', error);
+  //       })
+  //       .finally(() => {
+  //         setLoading(false);
+  //       });
+  //   } catch (error) {
+  //     setLoading(false);
+  //     console.log('error in delete item  :  ', error);
+  //   }
+  // };
+
+  const handleOnRemove =async () => {
+    // setLoading(true);
+
+   const checkVariation =  checkVariationInCart(selectedVariation.variation_id)
+  //  console.log(checkVariation);
+   
+    if (count === 0) {
+      return
+    }else if (count === 1 && checkVariation.length > 0) {
+      removeItemFromCart(checkVariation[0]?.cart_id,checkVariation[0]?.cart_item_id)
+      .then(response => {
+        if (response?.status == true) {
+          console.log('response  :  ', response);
+          const filter = my_cart.filter(
+            element => element?.cart_item_id != checkVariation?.cart_item_id,
+          );
+          // console.log('filter, from remove from cart' ,filter );
+          setCount(0)
+          dispatch(addToCart(filter));
+
+          //my_cart
+          dispatch(removeItemFromMyCart (item?.cart_item_id));
+          dispatch(updateMyCartList(filter));
+
+         
+        } else {
+          setTimeout(() => {
+            showAlert(response?.message);
+          }, 500);
+        }
       })
       .catch(error => {
-        console.log('error : ', error);
+        console.log('error: ', error);
       })
       .finally(() => {
         setLoading(false);
       });
+    }
+    else{
+      let obj = {
+        cart_item_id: checkVariation[0]?.cart_item_id,
+        quantity: count-1,
+      };
+
+      // console.log(obj);
+      
+       updateCartItemQuantity(obj)
+      .then (response => {
+        if (response.status === true) {
+          const newData = my_cart?.map(item => {
+            if (item?.item_id == route?.params?.id) {
+              return {
+                ...item,
+                quantity: checkVariation[0]?.quantity - 1,
+              };
+            } else {
+              return { ...item };
+            }
+          });
+          setCount(count-1)
+          dispatch(addToCart(newData));
+          dispatch(updateMyCartList(newData));    
+          showAlert(response.message, 'green')
+        } else {
+          showAlert(response.message)
+        }
+      })
+
+      // also update quantity in redux
+      
+      // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+      // ref_RBSheetSuccess?.current?.open();
+    }
+
+    
+
+    // // remove all items of previous restaurant
+    // clearCartItems()
+    //   .then(response => {
+    //     //add new item
+    //     dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+    //     console.log(
+    //       'new cart restaurant_id : ',
+    //       restaurantDetails?.restaurant_id,
+    //     );
+    //     // //my_cart
+    //     // dispatch(clearMyCart());
+    //     //my_cart
+    //     dispatch(updateMyCartList([]));
+
+    //     add_item_to_cart();
+    //   })
+    //   .catch(error => {
+    //     console.log('error : ', error);
+    //   })
+    //   .finally(() => {
+    //     setLoading(false);
+    //   });
   };
 
-  const validate = () => {
-    if (cart_restaurant_id == null) {
-      return true;
-    } else if (cart_restaurant_id != restaurantDetails?.restaurant_id) {
-      console.log(
-        'cart_restaurant_id  : ',
-        cart_restaurant_id,
-        restaurantDetails?.restaurant_id,
-      );
-      ref_cartAlert.current.open();
-      return false;
-    } else {
-      return true;
-    }
-  };
+  // const validate = () => {
+  //   if (cart_restaurant_id == null) {
+  //     return true;
+  //   } else if (cart_restaurant_id != restaurantDetails?.restaurant_id) {
+  //     console.log(
+  //       'cart_restaurant_id  : ',
+  //       cart_restaurant_id,
+  //       restaurantDetails?.restaurant_id,
+  //     );
+  //     ref_cartAlert.current.open();
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // };
 
   const add_item_to_cart = async (id) => {
     setLoading(true);
@@ -227,17 +382,13 @@ const ItemDetails = ({ navigation, route }) => {
     console.log('customer_Id :  ', customer_id);
     let cart = await getCustomerCart(customer_id);
     console.log('______cart    :  ', cart?.cart_id);
-    if (count == 0) {
-      showAlert('Please select quantity');
-      setLoading(false);
-    } else {
       let data = {
         item_id: route?.params?.id?.toString(),
         cart_id: cart?.cart_id?.toString(),
         item_type: 'item',
         comments: 'Adding item in cart',
         quantity: count?.toString(),
-        variation_id: id ? id : selectedVariation
+        variation_id: selectedVariation?.variation_id
       };
 
       console.log('data   :  ', data);
@@ -251,7 +402,7 @@ const ItemDetails = ({ navigation, route }) => {
             dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
             //my_cart
             dispatch(addItemToMYCart(response?.result));
-            setSelectedVariation(null)
+            // setSelectedVariation(null)
 
             ref_RBSheetSuccess?.current?.open();
           } else {
@@ -264,23 +415,24 @@ const ItemDetails = ({ navigation, route }) => {
         .finally(() => {
           setLoading(false);
         });
-    }
   };
 
   // const filter = my_cart?.filter(
   //   item => item?.item_id == route?.params?.id,
   // );
   // console.log(filter, 'filter');
+
   
   
 
-  const handleAddToCart = async (id) => {
+  const handleAddToCart = async () => {
     // console.log(id, 'id');
-    setSelectedVariation(id)
+    // setSelectedVariation(id)
 
-    if (id === null) {
-      showBtmSheet()
-    }else {
+    if (count == 0) {
+      showAlert('Please select quantity');
+      setLoading(false);
+    } else {
       const filter = my_cart?.filter(
         item => item?.item_id == route?.params?.id,
       );
@@ -289,24 +441,26 @@ const ItemDetails = ({ navigation, route }) => {
       //   item => item.variation_id === id
       // )
       
+      
+        // checkVariationInCart(selectedVariation.variation_id)
       if (filter?.length > 0) {
         const checkVariation = filter?.filter(
           item =>
-            item?.variation_id == id,
+            item?.variation_id == selectedVariation?.variation_id,
         )
 
         // console.log( 'checkVariation', checkVariation.length > 0);
         
 
         if (checkVariation.length === 0) {
-          add_item_to_cart(id);
-          closeBtmSheet()
+          add_item_to_cart();
+          // closeBtmSheet()
         } else {
           // console.log('check variation icon' , checkVariation);
           
           let obj = {
             cart_item_id: checkVariation[0]?.cart_item_id,
-            quantity: checkVariation[0]?.quantity + 1,
+            quantity: count,
           };
 
           await updateCartItemQuantity(obj);
@@ -328,8 +482,8 @@ const ItemDetails = ({ navigation, route }) => {
         }
        
       } else {
-        add_item_to_cart(id);
-        closeBtmSheet()
+        add_item_to_cart();
+        // closeBtmSheet()
   
       }
      
@@ -379,6 +533,9 @@ const ItemDetails = ({ navigation, route }) => {
     // }
   };
 
+ 
+
+  // console.log( checkVariationInCart(selectedVariation.variation_id), 'checkVariationInCart');
 
 
   const getItemDetails = async id => {
@@ -388,6 +545,16 @@ const ItemDetails = ({ navigation, route }) => {
       .then(async response => {
         let list = response?.result ? response?.result : {};
         setItemDetail(list);
+        setSelectedVariation({
+          variation_id:  list?.item_prices[0]?.variation_id,
+          variation_name: list?.item_prices[0]?.variation_name,
+          variation_price: list?.item_prices[0]?.price
+
+        })
+
+        checkVariationInCart(list?.item_prices[0]?.variation_id)
+
+      
         let restaurant_details = await getRestaurantDetail(list?.restaurant_id);
         setRestaurantDetails(restaurant_details);
         let imageList = [];
@@ -419,7 +586,7 @@ const ItemDetails = ({ navigation, route }) => {
 
 
   const handlePress = async (id) => {
-    setSelectedVariation(id);
+    // setSelectedVariation(id);
 
     const filter = my_cart?.filter(
       item => item?.item_id == route?.params?.id,
@@ -486,9 +653,9 @@ const ItemDetails = ({ navigation, route }) => {
               }}
             >
               {isFavorite ? (
-                <AntDesign name="heart" size={24} color={Colors.White} />
+                <HeartActive/>
               ) : (
-                <AntDesign name="hearto" size={24} color={Colors.White} />
+                <Heart/>
               )}
             </TouchableOpacity>
           }
@@ -544,7 +711,7 @@ const ItemDetails = ({ navigation, route }) => {
                   borderRadius: 15,
                 }}>
                 <TouchableOpacity
-                  onPress={() => onDecrement()}
+                  onPress={() => handleOnRemove()}
                   style={{paddingHorizontal: 10, paddingVertical: 5}}>
                   <AntDesign name="minus" color="white" size={16} />
                 </TouchableOpacity>
@@ -579,33 +746,45 @@ const ItemDetails = ({ navigation, route }) => {
             <ImageSliderCircle data={data} marginBottom={1} />
             <View style={{ paddingHorizontal: 20, flex: 1, }}>
               <View style={styles.AboutContainer}>
+                <View style={styles.rowViewSB} >
+                  <View style={styles.variationContainer} >
+                    <TouchableOpacity onPress={showBtmSheet}  style={[styles.rowViewSB, {alignItems: 'center'}]} >
+                      <Text style={styles.sizeText} >Size</Text>
+                      <Ionicons name={'chevron-down'} size={19} color={Colors.Orange} />
+                    </TouchableOpacity>
+                    <Text style={styles.variationName} >{selectedVariation?.variation_name}</Text>
+                  </View>
+                  <Text style={styles.priceTxt} >£ {selectedVariation?.variation_price}</Text>
+                </View>
 
-                <Text
+                {/* <Text
                   style={styles.variationTxt}>
                   Variations
-                </Text>
+                </Text> */}
 
-                {
+                {/* {
                   itemDetail?.item_prices?.map((item, i) => {
                     return (
-                      <View key={i} style={styles.variationContainer}>
+                      <View key={i} >
                         <Text
                           style={styles.variationName}>
                           {item.variation_name}
                         </Text>
                         <Text
-                          style={styles.priceTxt}>
+                          >
                           •  Price: £ {item.price}
                         </Text>
                       </View>
                     )
                   })
-                }
+                } */}
+
+                
 
 
                 <Text
                   style={styles.descriptionTxt}>
-                  Description
+                    About the Food
                 </Text>
                 <Text
                   style={styles.description}>
@@ -647,7 +826,7 @@ const ItemDetails = ({ navigation, route }) => {
                     if (join_as_guest) {
                       ref_RBSheet?.current?.open();
                     } else {
-                      showBtmSheet()
+                      handleAddToCart()
                     }
                   }}
                 />
@@ -760,13 +939,24 @@ const ItemDetails = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
             {itemDetail?.item_prices?.map((variation, i) => (
-              <View key={i} style={styles.rowViewSB}>
+              <View key={i} style={[styles.rowViewSB, {borderBottomColor: Colors.borderGray, borderBottomWidth: wp(0.3), paddingBottom: wp(1)}]}>
                 <View style={styles.rowView } > 
                 <RadioButton
                   color={Colors.Orange} // Custom color for selected button
                   uncheckedColor={Colors.Orange} // Color for unselected buttons
-                  status={selectedVariation === variation.variation_id ? 'checked' : 'unchecked'}
-                  onPress={() => handleAddToCart(variation.variation_id)}
+                  status={selectedVariation?.variation_id === variation?.variation_id ? 'checked' : 'unchecked'}
+                  onPress={() => {
+                    setSelectedVariation({
+                      variation_id: variation.variation_id,
+                      variation_name: variation.variation_name,
+                      variation_price: variation.price,
+                    });
+
+                    checkVariationInCart(variation.variation_id)
+                   
+                    closeBtmSheet()
+                    
+                  }}
                 />
                 <Text style={styles.variationText}>{variation.variation_name}</Text>
                 </View>
@@ -890,9 +1080,9 @@ const styles = StyleSheet.create({
   },
   priceTxt: {
 
-    color: '#00000099',
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(1.6),
+    color: Colors.Black,
+    fontFamily: Fonts.PlusJakartaSans_ExtraBold,
+    fontSize: RFPercentage(2.2),
     lineHeight: 20,
     marginLeft: wp(3),
     marginVertical: hp(1)
@@ -903,8 +1093,9 @@ const styles = StyleSheet.create({
     color: '#00000099',
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(1.6),
-    lineHeight: 20,
-    marginLeft: wp(2)
+    marginVertical: hp(0.5)
+    // lineHeight: 20,
+    // marginLeft: wp(2)
 
   },
   AboutContainer: {
@@ -914,6 +1105,14 @@ const styles = StyleSheet.create({
     paddingVertical: hp(1.5),
     borderRadius: 15,
 
+  },
+  variationContainer:{
+    borderColor: Colors.Orange,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: wp(2),
+    // alignItems: 'center',
+    
   },
   variationTxt: {
     color: '#02010E',
@@ -930,5 +1129,13 @@ const styles = StyleSheet.create({
     color: '#02010E',
     fontFamily: Fonts.PlusJakartaSans_Medium,
   },
+  sizeText:{
+    color: Colors.Orange,
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    fontSize: RFPercentage(2.2),
+    marginRight: wp(4)
+    
+
+  }
 
 });

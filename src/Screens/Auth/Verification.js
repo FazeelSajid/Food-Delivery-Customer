@@ -26,6 +26,7 @@ import api from '../../constants/api';
 import Loader from '../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch} from 'react-redux';
+import OrangeSuccessCheck from '../../Assets/svg/orangeSuccessCheck.svg';
 import {setCustomerDetail, setCustomerId, setJoinAsGuest} from '../../redux/AuthSlice';
 
 const Verification = ({navigation, route}) => {
@@ -260,6 +261,7 @@ const Verification = ({navigation, route}) => {
           refRBSheet={ref_RBSheet}
           title={'Account Verified  Successfully'}
           btnText={'OK'}
+          svg={<OrangeSuccessCheck/>}
           onPress={() => {
             ref_RBSheet?.current?.close();
             // navigation?.popToTop();

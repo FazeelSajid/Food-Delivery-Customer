@@ -9,8 +9,10 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp,
   } from 'react-native-responsive-screen';
+import Clipboard from '@react-native-community/clipboard'
 
 const Invite = () => {
+    const PROMO_CODE = 'EatlyPartnerMR';
   return (
     <View style={styles.container} >
          <StackHeader
@@ -20,14 +22,21 @@ const Invite = () => {
         <View style={{flex:1, alignItems: 'center',marginTop: hp(10)}} >
         <InviteSvg/>
 
-        <Text style={styles.heading} >Refer A Friend</Text>
+        <Text style={styles.heading} accessibilityRole="header">Refer A Friend</Text>
+
         <Text style={styles.text} >Share Your Promo Code & Get {`\n`} 1000 Coins For Each Friend</Text>
 
         <View style={styles.codeContainer} >
             <Text style={styles.code} >
-            EatlyPartnerMR
+            {PROMO_CODE}
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity 
+             accessible={true}
+             accessibilityLabel="Copy promo code"
+             accessibilityHint="Copies the promo code to your clipboard"
+            onPress={()=> {
+                  Clipboard.setString('EatlyPartnerMR');
+            }} >
                 <CopySvg/>
             </TouchableOpacity>
 

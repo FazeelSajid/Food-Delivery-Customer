@@ -26,6 +26,8 @@ import RBSheetSuccess from '../../components/BottomSheet/RBSheetSuccess';
 import {useKeyboard} from '../../utils/UseKeyboardHook';
 import {showAlert} from '../../utils/helpers';
 import api from '../../constants/api';
+import OrangeSuccessCheck from '../../Assets/svg/orangeSuccessCheck.svg';
+
 
 const ResetPassword = ({navigation, route}) => {
   const keyboardHeight = useKeyboard();
@@ -227,6 +229,7 @@ const ResetPassword = ({navigation, route}) => {
           refRBSheet={ref_RBSheet}
           title={'Password Reset Successfully'}
           btnText={'GO TO SIGN IN'}
+          svg={<OrangeSuccessCheck/>}
           onPress={() => {
             ref_RBSheet?.current?.close();
             navigation?.popToTop();

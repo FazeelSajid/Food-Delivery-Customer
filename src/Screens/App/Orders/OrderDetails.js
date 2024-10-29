@@ -326,38 +326,48 @@ const OrderDetails = ({navigation, route}) => {
     }
   };
 
-  const getDetail = id => {
-    console.log(api.get_order_by_id + id);
+  // const getDetail = id => {
+  //   console.log(api.get_order_by_id + id);
     
-    setLoading(true);
-    fetch(api.get_order_by_id + id)
-      .then(response => response.json())
-      .then(response => {
-        console.log('response :  ', response);
-        if (response.error == false) {
-          setOrderDetails(response.result);
-          let cart_item =
-            response.result?.cart_items_Data?.length > 0
-              ? response.result?.cart_items_Data[0]
-              : null;
-          setItemImages(cart_item?.itemData?.images);
-          setFistCartItemDetail(cart_item);
-        } else {
-          setOrderDetails(null);
-        }
-      })
-      .catch(err => console.log('error : ', err))
-      .finally(() => setLoading(false));
-  };
+  //   setLoading(true);
+  //   fetch(api.get_order_by_id + id)
+  //     .then(response => response.json())
+  //     .then(response => {
+  //       // console.log('response :  ', response);
+  //       if (response.error == false) {
+  //         setOrderDetails(response.result);
+  //         let cart_item =
+  //           response.result?.cart_items_Data?.length > 0
+  //             ? response.result?.cart_items_Data[0]
+  //             : null;
+  //         setItemImages(cart_item?.itemData?.images);
+  //         setFistCartItemDetail(cart_item);
+  //       } else {
+  //         setOrderDetails(null);
+  //       }
+  //     })
+  //     .catch(err => console.log('error : ', err))
+  //     .finally(() => setLoading(false));
+  // };
 
-  console.log(orderDetails, 'orderDetails')
+  // console.log(orderDetails, 'orderDetails') 
 
   useEffect(() => {
     let id = route?.params?.id;
+    let item = route?.params?.item;
     console.log('order details id :  ', id);
-    if (id) {
-      getDetail(id);
-    }
+    setOrderDetails(item)
+
+
+    let cart_item =
+              item?.cart_items_Data?.length > 0
+                ? item?.cart_items_Data[0]
+                : null;
+            setItemImages(cart_item?.itemData?.images);
+            setFistCartItemDetail(cart_item);
+    // if (id) {
+    //   getDetail(id);
+    // }
   }, []);
 
   const calculateSubTotal = (totalAmount, platform_fee, delivery_charges) => {
@@ -477,7 +487,10 @@ const OrderDetails = ({navigation, route}) => {
           <SectionSeparator />
           <View style={{padding: 20}}>
             {orderDetails?.cart_items_Data &&
-              orderDetails?.cart_items_Data?.map((item, key) => (
+              orderDetails?.cart_items_Data?.map((item, key) => {
+                console.log(item , item?.quantity);
+                
+                return(
                 <View style={{...styles.rowView, marginBottom: 5}}>
                   <Ionicons
                     name={'close'}
@@ -515,10 +528,10 @@ const OrderDetails = ({navigation, route}) => {
                       fontFamily: Fonts.PlusJakartaSans_SemiBold,
                       fontSize: RFPercentage(2),
                     }}>
-                    $ {item?.itemData?.price * item?.quantity}
+                    $ {item?.variationData?.price * item?.quantity}
                   </Text>
                 </View>
-              ))}
+              )})}
           </View>
           <SectionSeparator />
 

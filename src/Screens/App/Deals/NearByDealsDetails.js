@@ -65,19 +65,25 @@ const NearByDealsDetails = ({ navigation, route }) => {
   const { join_as_guest } = useSelector(store => store.store);
   const { cart, cart_restaurant_id, my_cart } = useSelector(store => store.cart);
   const customer_id = useSelector(store => store.store.customer_id)
-  const {favoriteDeals, favoriteItems} = useSelector(store => store.favorite);
+  const { favoriteDeals, favoriteItems } = useSelector(store => store.favorite);
+  
 
   const isDealFavorite = (id) => {
-    
+
     return favoriteDeals.some(item => item?.deal?.deal_id === id);
   };
 
-  const isItemFavorite = (id) => {    
+  const isItemFavorite = (id) => {
     return favoriteItems.some(item => item?.item?.item_id === id);
   };
 
 
   const isFavorite = isDealFavorite(route?.params?.id)
+
+
+
+  // console.log( route?.params?.id, 'deal id');
+  
 
 
 
@@ -263,7 +269,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
         .then(response => {
           // console.log('response ', response);
           if (response?.status == true) {
-            
+
             // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
             // navigation?.navigate('MyCart');
             //my_cart
@@ -305,33 +311,33 @@ const NearByDealsDetails = ({ navigation, route }) => {
     //   return;
     // } else 
     // if (validate()) {
-      // if item already exists in card then we will only update quantity of that item
-      const filter = my_cart?.filter(
-        item => item?.item_id == route?.params?.id,
-      );
-      if (filter?.length > 0) {
-        let obj = {
-          cart_item_id: filter[0]?.cart_item_id,
-          quantity: filter[0]?.quantity + count,
-        };
-        await updateCartItemQuantity(obj);
-        // also update quantity in redux
-        const newData = my_cart?.map(item => {
-          if (item?.item_id == route?.params?.id) {
-            return {
-              ...item,
-              quantity: filter[0]?.quantity + count,
-            };
-          } else {
-            return { ...item };
-          }
-        });
-        dispatch(updateMyCartList(newData));
-        // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-        ref_RBSheetSuccess?.current?.open();
-      } else {
-        add_item_to_cart();
-      }
+    // if item already exists in card then we will only update quantity of that item
+    const filter = my_cart?.filter(
+      item => item?.item_id == route?.params?.id,
+    );
+    if (filter?.length > 0) {
+      let obj = {
+        cart_item_id: filter[0]?.cart_item_id,
+        quantity: filter[0]?.quantity + count,
+      };
+      await updateCartItemQuantity(obj);
+      // also update quantity in redux
+      const newData = my_cart?.map(item => {
+        if (item?.item_id == route?.params?.id) {
+          return {
+            ...item,
+            quantity: filter[0]?.quantity + count,
+          };
+        } else {
+          return { ...item };
+        }
+      });
+      dispatch(updateMyCartList(newData));
+      // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+      ref_RBSheetSuccess?.current?.open();
+    } else {
+      add_item_to_cart();
+    }
     // }
   };
 
@@ -378,10 +384,10 @@ const NearByDealsDetails = ({ navigation, route }) => {
     }, []),
   );
 
- 
+
 
   // console.log(itemDetail);
-  
+
 
   return (
     <View style={styles.container}>
@@ -429,9 +435,9 @@ const NearByDealsDetails = ({ navigation, route }) => {
             {/* <ImageSliderCircle data={data} marginBottom={1} /> */}
           <View style={styles.sliderContainer}>
             <SwiperFlatList
-              // autoplay
-              // autoplayDelay={2}
-              // autoplayLoop
+              autoplay
+              autoplayDelay={2}
+              autoplayLoop
               // index={2}
               showPagination
               data={data}
@@ -447,8 +453,8 @@ const NearByDealsDetails = ({ navigation, route }) => {
                   >
                     <View style={styles.rowViewSB} >
                       <TouchableOpacity
-                        onPress={() => navigation?.goBack()}
-                        style={{ ...styles.iconContainer, }}>
+                        style={styles.iconContainer}
+                        onPress={() => navigation.goBack()}>
                         <Ionicons
                           name={'chevron-back'}
                           size={hp(3.5)}
@@ -463,9 +469,9 @@ const NearByDealsDetails = ({ navigation, route }) => {
                             ref_RBSheet?.current?.open();
                           } else {
                             isFavorite
-                           
-                              ?  removeFavoriteDeal( route?.params?.id,customer_id, favoriteDeals, dispatch, showAlert)
-                              : addFavoriteDeal( route?.params?.id, customer_id, dispatch, showAlert)
+
+                              ? removeFavoriteDeal(route?.params?.id, customer_id, favoriteDeals, dispatch, showAlert)
+                              : addFavoriteDeal(route?.params?.id, customer_id, dispatch, showAlert)
                           }
                         }}
                         style={{
@@ -495,73 +501,68 @@ const NearByDealsDetails = ({ navigation, route }) => {
 
           <View style={{ paddingHorizontal: 20 }}>
 
-          <View style={styles.rowViewSB}>
-              <Text style={{...styles.itemName, flex: 1}}>
+            <View style={styles.rowViewSB}>
+              <Text style={{ ...styles.itemName, flex: 1 }}>
                 {itemDetail?.name}
               </Text>
-              
-              <Text style={{...styles.itemName, flex: 1, textAlign: 'right'}}>
-              £  {itemDetail?.price}
+
+              <Text style={{ ...styles.itemName, flex: 1, textAlign: 'right' }}>
+                £  {itemDetail?.price}
               </Text>
-              
+
             </View>
-            {/* <View style={{ ...styles.rowViewSB, marginVertical: 7 }}>
-
-              <Text style={styles.title}>About the Food</Text>
+            <View style={styles.descriptionContainer}>
               <Text
-                style={{
-                  color: '#02010E',
-                  fontFamily: Fonts.PlusJakartaSans_Bold,
-                }}>
-                ${itemDetail?.price}
-              </Text>
-            </View> */}
-            <Text
-                  style={styles.description}>
-                  {itemDetail?.description}
-                </Text>
+                style={[styles.description, { fontFamily: Fonts.PlusJakartaSans_SemiBold }]}>{moment(itemDetail?.expiry_date).format("D MMMM YYYY")}</Text>
+              <Text style={[styles.description,]}>{itemDetail?.description}</Text>
+
+            </View>
+
           </View>
-          <View style={{paddingHorizontal: wp(6), marginTop: hp(3)}} >
+          <View style={{ paddingHorizontal: wp(6), marginTop: hp(3) }} >
 
 
-          {
-            itemDetail?.items?.map((item)=> {
-             const isFavoriteItem = isItemFavorite(item?.item_id)
+            {
+              itemDetail?.items?.map((item) => {
+                const isFavoriteItem = isItemFavorite(item?.item_id)
+                // console.log(item?.variations);
               
-              return (
-              <View style={{height: hp(15)}} >
-                 <FoodCardWithRating
-              onPress={() =>
-                navigation?.navigate('ItemDetails', {
-                  id: item?.item_id,
-                })
-              }
-                title={item?.item_name}
-                image={
-                  // item.image
-                  item?.images?.length > 0
-                    ? BASE_URL_IMAGE + item?.images[0]
-                    : ''
-                }
-                price={item?.variations?.price}
-                rating={item?.rating}
-                tag={item?.cuisineData?.cuisine_name}
-                isTagArray={false}
-                nextIconWidth={26}
-                cardStyle={{ marginHorizontal: 0, marginBottom: 15 }}
-                showNextButton={true}
-                showRating={false}
-                priceContainerStyle={{ marginTop: 0 }}
-                isFavorite={isFavoriteItem}
-                onRemove = {()=> removeFavoriteitem( item?.item_id,customer_id, favoriteItems, dispatch, showAlert)}
-                addFav={()=> addFavoriteitem( item?.item_id,customer_id, dispatch, showAlert)}
-              />
+                return (
+                  <View style={{ height: hp(15) }} >
+                    <FoodCardWithRating
+                      onPress={() =>
+                        navigation?.navigate('ItemDetails', {
+                          id: item?.item_id,
+                        })
+                      }
+                      title={item?.item_name}
+                      image={
+                        // item.image
+                        item?.images?.length > 0
+                          ? BASE_URL_IMAGE + item?.images[0]
+                          : ''
+                      }
+                      // price={item?.variations[0]?.price}
+                      quantity={`${item.variations[0].quantity} ${item.variations[0].variation_name} ${item?.item_name}  `}
+                      rating={item?.rating}
+                      tag={item?.cuisineData?.cuisine_name}
+                      isTagArray={false}
+                      nextIconWidth={26}
+                      cardStyle={{ marginHorizontal: 0, marginBottom: 15 }}
+                      showNextButton={true}
+                      showRating={false}
+                      priceContainerStyle={{ marginTop: 0 }}
+                      isFavorite={isFavoriteItem}
+                      onRemove={() => removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert)}
+                      addFav={() => addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
+                    />
 
 
-              </View>
-             
-            )})
-          }
+                  </View>
+
+                )
+              })
+            }
 
           </View>
 
@@ -771,6 +772,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: 10,
   },
+  iconContainer: { backgroundColor: Colors.White, marginTop: hp(0.5), marginLeft: wp(2), borderRadius: wp(100), paddingHorizontal: 2 },
   timeText: {
     color: '#191A26',
     fontFamily: Fonts.PlusJakartaSans_Medium,
@@ -789,14 +791,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  imageCard: {
-    width: wp(90),
-    height: hp(25),
-    // backgroundColor: '#ccc',
-    marginHorizontal: wp(4.5),
-    // borderRadius: 10,
-    overflow: 'hidden',
   },
   // sliderContainer: { marginVertical: 20, paddingHorizontal: 0, height: hp(30) },
   paginationStyle: {
@@ -821,12 +815,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
   imageCard: {
-    width: wp(90),
+    width: wp(100),
     height: hp(30),
 
-    marginHorizontal: wp(3.5),
-    borderRadius: 10,
-    overflow: 'hidden',
+    // marginHorizontal: wp(3.5),
+    // borderRadius: 10,
+    // overflow: 'hidden',
   },
   sliderContainer: {
     // marginVertical: 20,
@@ -855,14 +849,20 @@ const styles = StyleSheet.create({
     borderColor: Colors.Orange,
     opacity: 0.7,
     marginHorizontal: 2,
-  }, 
-   description: {
+  },
+  description: {
+    paddingVertical: hp(0.5),
+    color: '#00000099',
+    fontFamily: Fonts.PlusJakartaSans_Medium,
+    fontSize: RFPercentage(1.6),
+    lineHeight: 20,
+
+  },
+  descriptionContainer: {
     backgroundColor: '#FFF6F3',
     paddingHorizontal: wp(6),
     paddingVertical: hp(1.5),
     borderRadius: 15,
-    color: '#00000099',
-    fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(1.6),
     lineHeight: 20,
 

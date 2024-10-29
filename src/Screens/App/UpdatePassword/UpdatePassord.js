@@ -36,7 +36,7 @@ const UpdatePassord = ({ navigation }) => {
 
 
     const ref_RBSheet = useRef();
-    console.log({ password });
+    // console.log({ password });
 
 
     function validatePassword(password) {
@@ -51,10 +51,13 @@ const UpdatePassord = ({ navigation }) => {
         // Check if all required fields are filled
         if (!oldPassword) {
             setFormError(prev => ({ ...prev, oldPassword: 'Old password required' }));
+            return false;
 
         }
         if (!newPassword) {
             setFormError(prev => ({ ...prev, newPassword: 'New password required' }));
+            return false;
+
 
         }
         if (!confirmPassword) {

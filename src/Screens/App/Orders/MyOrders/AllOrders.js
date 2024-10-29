@@ -10,7 +10,11 @@ import Loader from '../../../../components/Loader';
 import {BASE_URL_IMAGE} from '../../../../utils/globalVariables';
 import {useSelector} from 'react-redux';
 import NoDataFound from '../../../../components/NotFound/NoDataFound';
-
+import OrderCard from '../../../../components/Cards/OrderCard';
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from 'react-native-responsive-screen';
 const AllOrders = ({data}) => {
   const orders = useSelector(store => store.order.all_orders);
 
@@ -113,16 +117,19 @@ const AllOrders = ({data}) => {
       navigation.navigate('OrderDetails', {
         type: 'completed',
         id: item?.order_id,
+        item: item,
       });
     } else if (item?.order_status == 'cancelled') {
       navigation.navigate('OrderDetails', {
         type: 'cancelled',
         id: item?.order_id,
+        item: item,
       });
     } else {
       navigation.navigate('OrderDetails', {
         type: 'all',
         id: item?.order_id,
+        item: item,
       });
     }
   };
@@ -130,9 +137,12 @@ const AllOrders = ({data}) => {
   return (
     <View style={{flex: 1}}>
       <Loader loading={loading} />
+     
+    
       <FlatList
-        // data={data}
         data={orders}
+        ItemSeparatorComponent={<View style={{height: hp(2)}} />}
+        contentContainerStyle={{flexGrow: 1,  width: '90%', alignSelf: 'center' }}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={() => <View style={{height: 10}} />}
         ListFooterComponent={() => <View style={{height: 10}} />}
@@ -141,45 +151,7 @@ const AllOrders = ({data}) => {
           let cart_item =
             item?.cart_items_Data?.length > 0 ? item?.cart_items_Data[0] : null;
           return (
-            <FoodCardWithRating
-              // onPress={() =>
-              //   navigation.navigate('OrderDetails', {
-              //     type: 'all',
-              //     id: item?.order_id,
-              //   })
-              // }
-              onPress={() => onOrderPress(item)}
-              // title={item?.title}
-              // image={item?.image}
-              image={
-                cart_item && cart_item?.itemData?.images?.length > 0
-                  ? BASE_URL_IMAGE + cart_item?.itemData?.images[0]
-                  : ''
-              }
-              title={
-                cart_item
-                  ? cart_item?.item_type == 'deal'
-                    ? cart_item?.itemData?.name
-                    : cart_item?.itemData?.item_name
-                  : ''
-              }
-              // price={cart_item ? cart_item?.itemData?.price : ''}
-              price={item?.total_amount}
-              showRating={false}
-              // description={item?.description}
-              // price={item?.price}
-              label={item?.order_status}
-              type={'all'}
-              // showRatingOnBottom={true}
-              // showNextButton={false}
-              cardStyle={{marginTop: 15}}
-              imageContainerStyle={{
-                // width: 30,
-                height: 60,
-                marginVertical: 1.5,
-                flex: 0.34,
-              }}
-            />
+            <OrderCard item={item} type = {item.order_status} onPress={()=> onOrderPress(item)} />
           );
         }}
       />

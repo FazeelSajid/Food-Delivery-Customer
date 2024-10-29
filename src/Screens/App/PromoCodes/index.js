@@ -1,12 +1,16 @@
-import {StyleSheet, Text, View, FlatList, TouchableOpacity} from 'react-native';
-import React, {useState, useEffect} from 'react';
-import {Colors, Images, Fonts, Icons} from '../../../constants';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Colors, Images, Fonts, Icons } from '../../../constants';
 import StackHeader from '../../../components/Header/StackHeader';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 import api from '../../../constants/api';
 import Loader from '../../../components/Loader';
-
-const PromoCodes = ({navigation, route}) => {
+import { BASE_URL_IMAGE } from '../../../utils/globalVariables';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
+const PromoCodes = ({ navigation, route }) => {
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([
@@ -88,26 +92,19 @@ const PromoCodes = ({navigation, route}) => {
   }, []);
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{ flex: 1, backgroundColor: Colors.White }}>
       <Loader loading={loading} />
       <FlatList
         ListHeaderComponent={() => <StackHeader title={'Promocodes'} />}
         data={data}
         showsVerticalScrollIndicator={false}
-        renderItem={({item, index}) => (
-          <TouchableOpacity
-            // onPress={() => handleSelect(item)}
-            style={{
-              ...styles.card,
-              borderColor: item.id == selectedId ? Colors.Orange : '#DADADA',
-            }}>
-            <View>
-              <Text style={styles.boldText}>{item.discount_in_perc}%OFF</Text>
-              <Text style={styles.description}>
-                Code expires {item?.expiry_date}
-              </Text>
-            </View>
-            <Text style={styles.codeText}>{item?.name}</Text>
+        renderItem={({ item, index }) => (
+          <TouchableOpacity style={{  paddingHorizontal: 25, marginVertical: 5, overflow: 'hidden' }}>
+            <Image
+              source={{ uri: BASE_URL_IMAGE + item.image }}
+              style={{ width: '100%', height: 190, borderRadius: wp(2.5)  }}  // Try setting a fixed height to test
+              onError={(error) => console.log('Image Load Error:', error.nativeEvent.error)}
+            />
           </TouchableOpacity>
         )}
       />

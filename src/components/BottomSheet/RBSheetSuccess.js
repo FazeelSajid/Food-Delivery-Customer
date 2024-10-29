@@ -26,6 +26,8 @@ const RBSheetSuccess = ({
   onPress,
   textColor,
   titleStyle,
+  svg
+  
 }) => {
   const navigation = useNavigation();
   return (
@@ -47,21 +49,31 @@ const RBSheetSuccess = ({
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled">
-          <View style={{width: wp(87), alignItems: 'center'}}>
-            <View
-              style={{
-                height: 150,
-                width: 150,
-                marginBottom: 10,
-                //   aspectRatio: 1,
-              }}>
-              <Lottie
-                source={Images.success_check}
-                autoPlay
-                loop={true}
-                resizeMode="cover"
-              />
-            </View>
+          <View style={{width: wp(87), alignItems: 'center',}}>
+              {
+                  svg ? <View style={{
+                    height: 120,
+                    alignItems : 'center',
+                    marginBottom: 10,
+                    //   aspectRatio: 1,
+                  }} >
+                    {svg}
+                  </View> :   
+                  <View style={{
+                    height: 150,
+                    width: 150,
+                    marginBottom: 10,
+                    //   aspectRatio: 1,
+                  }}>
+                     <Lottie
+                  source={Images.success_check}
+                  autoPlay
+                  loop={true}
+                  resizeMode="cover"
+                />
+                  </View>
+                 
+                }
             <Text
               style={{
                 color: textColor ? textColor : '#1D1D20',

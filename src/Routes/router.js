@@ -20,8 +20,8 @@ import Categories from '../Screens/Categories/Categories';
 
 import Discover from '../Assets/svg/discover.svg';
 import DiscoverActive from '../Assets/svg/discoverActive.svg';
-import Cart from '../Assets/svg/cart.svg';
-import CartActive from '../Assets/svg/cartActive.svg';
+// import Cart from '../Assets/svg/cart.svg';
+// import CartActive from '../Assets/svg/cartActive.svg';
 import Orders from '../Assets/svg/orders.svg';
 import OrdersActive from '../Assets/svg/ordersActive.svg';
 import Settings from '../Assets/svg/settings.svg';
@@ -30,7 +30,7 @@ import LogoutIcon from '../Assets/svg/logout.svg';
 
 //drawer svgs
 import WalletIcon from '../Assets/svg/wallet.svg';
-import ChatIcon from '../Assets/svg/chat.svg';
+// import ChatIcon from '../Assets/svg/chat.svg';
 import Heart from '../Assets/svg/heart.svg';
 import ScanBarCode from '../Assets/svg/scanbarcode.svg';
 

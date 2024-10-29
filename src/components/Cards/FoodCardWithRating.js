@@ -40,6 +40,7 @@ const FoodCardWithRating = ({
   label,
   isFavorite,
   addFav,
+  quantity,
   onRemove
 }) => {
   const navigation = useNavigation();
@@ -217,7 +218,9 @@ const FoodCardWithRating = ({
         </View> */}
 
         <View style={{...styles.rowViewSB, ...priceContainerStyle}}>
-          <Text style={styles.priceText}>￡{price}</Text>
+          {quantity && <Text style={styles.quantity} >{quantity}</Text>}
+          
+          {price && <Text style={styles.priceText}>￡{price}</Text>}
           {showNextButton == false ? null : (
             <TouchableOpacity onPress={isFavorite? onRemove : addFav}>
               {/* <View style={{height: 40, width: 40, backgroundColor: 'red'}} /> */}
@@ -350,4 +353,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.PlusJakartaSans_Regular,
     textTransform: 'capitalize',
   },
+  quantity:{
+    color: '#00000099' ,
+    fontFamily: Fonts.PlusJakartaSans_Regular,
+    fontSize: RFPercentage(1.5),
+    
+  }
 });

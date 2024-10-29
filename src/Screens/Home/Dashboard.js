@@ -219,7 +219,7 @@ const Dashboard = ({ navigation, route }) => {
     btmSheetRef?.current?.close()
     setItemObj({})
   }
-  const add_item_to_cart = async (id, type) => {
+  const add_item_to_cart = async (id, type, name) => {
 
     // let customer_id = await AsyncStorage.getItem('customer_id');
     // console.log('customer_Id :  ', customer_id);
@@ -242,7 +242,6 @@ const Dashboard = ({ navigation, route }) => {
       quantity: 1,
     };
 
-    console.log('data   :  ', data);
 
     await addItemToCart(data)
       .then(response => {
@@ -256,7 +255,7 @@ const Dashboard = ({ navigation, route }) => {
           setSelectedVariation(null)
 
           // ref_RBSheetSuccess?.current?.open();
-          showAlert(`${itemObj.name} is added to cart`, 'green');
+          showAlert(`${name ? name :itemObj.name} is added to cart`, 'green');
         } else {
           showAlert(response?.message);
         }
@@ -304,22 +303,28 @@ const Dashboard = ({ navigation, route }) => {
             quantity: checkVariation[0]?.quantity + 1,
           };
 
-          await updateCartItemQuantity(obj);
+          await updateCartItemQuantity(obj)
+          .then(response => {
+           if (response.status === true) {
+             showAlert(`${itemObj.name} quantity updated`, 'green')
+            
+             const newData = my_cart?.map(item => {
+              if (item?.item_id == item_id) {
+                return {
+                  ...item,
+                  quantity: checkVariation[0]?.quantity + 1,
+                };
+              } else {
+                return { ...item };
+              }
+            });
+            dispatch(updateMyCartList(newData));
+            // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+            ref_RBSheetSuccess?.current?.open();
+            }})
 
           // also update quantity in redux
-          const newData = my_cart?.map(item => {
-            if (item?.item_id == item_id) {
-              return {
-                ...item,
-                quantity: checkVariation[0]?.quantity + 1,
-              };
-            } else {
-              return { ...item };
-            }
-          });
-          dispatch(updateMyCartList(newData));
-          // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-          ref_RBSheetSuccess?.current?.open();
+         
         }
 
       } else {
@@ -377,8 +382,10 @@ const Dashboard = ({ navigation, route }) => {
 
     setItemObj({
       id: deal.deal_id,
-      name: deal?.item_name,
+      name: deal?.name,
     })
+   
+    
     // setLoading(true);
     // let time_obj = await checkRestaurantTimings(
     //   restaurantDetails?.restaurant_id,
@@ -399,25 +406,31 @@ const Dashboard = ({ navigation, route }) => {
         cart_item_id: filter[0]?.cart_item_id,
         quantity: filter[0]?.quantity + 1,
       };
-      await updateCartItemQuantity(obj);
+      await updateCartItemQuantity(obj)
+       .then(response => {
+        if (response.status === true) {
+          showAlert(`${itemObj.name} quantity updated`, 'green')
+          const newData = my_cart?.map(item => {
+            if (item?.item_id == deal.deal_id) {
+              return {
+                ...item,
+                quantity: filter[0]?.quantity + 1,
+              };
+            } else {
+              return { ...item };
+            }
+          });
+          dispatch(updateMyCartList(newData));
+
+        }})
       // also update quantity in redux
-      const newData = my_cart?.map(item => {
-        if (item?.item_id == deal.deal_id) {
-          return {
-            ...item,
-            quantity: filter[0]?.quantity + 1,
-          };
-        } else {
-          return { ...item };
-        }
-      });
-      dispatch(updateMyCartList(newData));
+     
 
 
       // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
       // ref_RBSheetSuccess?.current?.open();
     } else {
-      add_item_to_cart(deal.deal_id, 'deal');
+      add_item_to_cart(deal.deal_id, 'deal', deal?.name);
 
     }
     // }
@@ -473,23 +486,23 @@ const Dashboard = ({ navigation, route }) => {
     });
   };
 
-  const searchRestaurantByName = text => {
-    return new Promise((resolve, reject) => {
-      try {
-        fetch(api.search_restaurant_by_name + text)
-          .then(response => response.json())
-          .then(response => {
-            resolve(response?.result);
-          })
-          .catch(err => {
-            console.log('error : ', err);
-            resolve([]);
-          });
-      } catch (error) {
-        resolve([]);
-      }
-    });
-  };
+  // const searchRestaurantByName = text => {
+  //   return new Promise((resolve, reject) => {
+  //     try {
+  //       fetch(api.search_restaurant_by_name + text)
+  //         .then(response => response.json())
+  //         .then(response => {
+  //           resolve(response?.result);
+  //         })
+  //         .catch(err => {
+  //           console.log('error : ', err);
+  //           resolve([]);
+  //         });
+  //     } catch (error) {
+  //       resolve([]);
+  //     }
+  //   });
+  // };
 
   // Simulated search API function
   const searchApi = async query => {
@@ -526,10 +539,10 @@ const Dashboard = ({ navigation, route }) => {
 
   // const debouncedSearch = debounce(searchApi, 2000);
 
-  const handleSearch = text => {
-    console.log('text : ', text);
-    setSearchQuery(text);
-  };
+  // const handleSearch = text => {
+  //   console.log('text : ', text);
+  //   setSearchQuery(text);
+  // };
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -765,8 +778,6 @@ const Dashboard = ({ navigation, route }) => {
 
   }, []);
 
-  const str = 'A fresh mix of romaine lettuce, baby spinach, cucumber, cherry tomatoes, red onion, and avocado, drizzled with olive oil and lemon juice. Customizable with grilled chicken, feta cheese, or extra avocado. Vegan and gluten-free options available.'
-
 
   useEffect(() => {
     getFavoriteItem(customer_id, dispatch);
@@ -869,25 +880,28 @@ const Dashboard = ({ navigation, route }) => {
           backgroundColor={'white'}
           barStyle={'dark-content'}
         />
-        <View style={styles.headerContainer}>
-          <TouchableOpacity onPress={() => navigation?.openDrawer()}>
-            <Icons.MenuActive width={23} />
-          </TouchableOpacity>
-          <Text style={styles.headerLocation} >{currentLocation.shortAddress}</Text>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <TouchableOpacity
-              style={{ marginRight: 20 }}
-              onPress={() => handleOpenSearch()}>
-              <Feather name="search" size={RFPercentage(2.8)} color={Colors.Orange} />
-
+        {
+          !isSearch && <View style={styles.headerContainer}>
+            <TouchableOpacity onPress={() => navigation?.openDrawer()}>
+              <Icons.MenuActive width={23} />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => navigation?.navigate('Notification')}>
-              <Icons.NotificationWithDot />
-            </TouchableOpacity>
+            <Text style={styles.headerLocation} >{currentLocation.shortAddress}</Text>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity
+                style={{ marginRight: 20 }}
+                onPress={() => handleOpenSearch()}>
+                <Feather name="search" size={RFPercentage(2.8)} color={Colors.Orange} />
+
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation?.navigate('Notification')}>
+                <Icons.NotificationWithDot />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        }
+
         {/* <Text
           style={{
             color: '#02010E',
@@ -929,29 +943,43 @@ const Dashboard = ({ navigation, route }) => {
 
           {isSearch ? (
             <View style={{ paddingHorizontal: 20 }} >
-              <CInput
-                width={wp(88)}
-                height={42}
-                containerStyle={{ marginBottom: 0 }}
-                placeholder={'Search here'}
-                value={searchQuery}
-                onChangeText={text => setSearchQuery(text)}
-                leftContent={
-                  <Feather
-                    name="search"
-                    size={17}
-                    color="#9F9F9F"
-                    style={{ marginRight: 6 }}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }} >
+                <TouchableOpacity
+                  style={{}}
+                  onPress={() => handleCloseSearch()}>
+                  <Ionicons
+                    name={'chevron-back'}
+                    size={hp(3.5)}
+                    color={Colors.Orange}
                   />
-                }
-                rightContent={
-                  <TouchableOpacity
-                    style={{ padding: 10, paddingRight: 0 }}
-                    onPress={() => handleCloseSearch()}>
-                    <AntDesign name="close" size={18} color={'#838383'} />
-                  </TouchableOpacity>
-                }
-              />
+                </TouchableOpacity>
+
+                <CInput
+                  width={wp(80)}
+                  height={42}
+                  containerStyle={{ marginBottom: 0 }}
+                  placeholder={'Search here'}
+                  value={searchQuery}
+                  onChangeText={text => setSearchQuery(text)}
+                  leftContent={
+                    <Feather
+                      name="search"
+                      size={17}
+                      color="#9F9F9F"
+                      style={{ marginRight: 6 }}
+                    />
+                  }
+                  rightContent={
+                    <TouchableOpacity
+                      style={{ padding: 10, paddingRight: 0 }}>
+                      <AntDesign name="filter" size={18} color={'#838383'} />
+                    </TouchableOpacity>
+                  }
+
+
+                />
+              </View>
+
 
               <View style={{ flexDirection: 'row', marginVertical: hp(2) }} >
 
@@ -1012,17 +1040,17 @@ const Dashboard = ({ navigation, route }) => {
 
               </View>
 
-              {searchedItems.length > 0 &&  <View style={styles.headerTextView}>
-             <Text style={[styles.headerText]}>Items</Text>
+              {searchedItems.length > 0 && <View style={styles.headerTextView}>
+                <Text style={[styles.headerText]}>Items</Text>
 
               </View>}
               {searchQuery?.length == 0 && <Text style={{
-                  fontFamily: Fonts.PlusJakartaSans_Bold,
-                  color: '#0A212B',
-                  textAlign: 'center',
-                  fontSize: RFPercentage(1.8),
-                  lineHeight: 30,
-                }}>Search Your Favorite Food</Text> }
+                fontFamily: Fonts.PlusJakartaSans_Bold,
+                color: '#0A212B',
+                textAlign: 'center',
+                fontSize: RFPercentage(1.8),
+                lineHeight: 30,
+              }}>Search Your Favorite Food</Text>}
 
 
               <FlatList
@@ -1059,11 +1087,11 @@ const Dashboard = ({ navigation, route }) => {
 
 
 
-              {filteredDeals.length > 0 &&  <View style={styles.headerTextView}>
-             <Text style={[styles.headerText]}>Deals</Text>
+              {filteredDeals.length > 0 && <View style={styles.headerTextView}>
+                <Text style={[styles.headerText]}>Deals</Text>
 
               </View>}
-             
+
 
               <FlatList
                 // scrollEnabled={false}
@@ -1123,7 +1151,7 @@ const Dashboard = ({ navigation, route }) => {
 
                     return (
                       <TouchableOpacity key={index} style={{ backgroundColor: 'white' }} activeOpacity={0.7}>
-                        <Image source={{ uri: BASE_URL + promo.image }} style={{ width: wp(100), height: hp(25), resizeMode: 'cover' }} />
+                        <Image source={{ uri: BASE_URL_IMAGE + promo.image }} style={{ width: wp(100), height: hp(25), resizeMode: 'cover' }} />
                       </TouchableOpacity>
                     )
                   })}
@@ -1200,9 +1228,9 @@ const Dashboard = ({ navigation, route }) => {
               <FlatList
                 scrollEnabled={false}
                 data={item}
-                key={numColumns} 
-                keyExtractor={(item) => item.item_id.toString()}
+                key={numColumns}
                 numColumns={numColumns}
+                keyExtractor={(item) => item.item_id.toString()}
                 style={{ paddingHorizontal: 10 }}
                 ListEmptyComponent={() => <NoDataFound />}
                 renderItem={({ item, index }) => {
@@ -1276,7 +1304,7 @@ const Dashboard = ({ navigation, route }) => {
                 // scrollEnabled={false}
                 horizontal
                 data={Deals}
-                style={{ paddingHorizontal: 20 }}
+                contentContainerStyle={{ paddingHorizontal: 20 }}
                 ListEmptyComponent={() => <NoDataFound />}
                 renderItem={({ item, index }) => {
                   // console.log(item, 'deal');
@@ -1577,10 +1605,10 @@ const Dashboard = ({ navigation, route }) => {
             <Badge
               style={{
                 position: 'absolute',
-                top: -8,
-                right: -4,
-                backgroundColor: Colors.White,
-                color: Colors.Orange,
+                top: -10,
+                right: 6,
+                backgroundColor: Colors.OrangeLight,
+                color: Colors.White,
                 fontFamily: Fonts.PlusJakartaSans_Bold,
                 fontSize: RFPercentage(1.2),
 
@@ -1611,7 +1639,7 @@ const Dashboard = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
             {itemObj.variations?.map((variation, i) => (
-              <View key={i} style={styles.rowViewSB}>
+              <View key={i} style={[styles.rowViewSB, { borderBottomColor: Colors.borderGray, borderBottomWidth: wp(0.3), paddingBottom: wp(1) }]}>
                 <View style={styles.rowView} >
                   <RadioButton
                     color={Colors.Orange} // Custom color for selected button

@@ -19,7 +19,12 @@ export const Colors = {
   grayText: '#999999',
   borderGray: '#EAE9E9',
   favoriteHeart: '#B00020',
-  darkTextColor: '#545151'
+  darkTextColor: '#545151',
+  pending: '#C08C22',
+  preparing: '#22A3C0',
+  outForDelivery : '#225AC0',
+  completed:'#19BA46',
+  cancelled: 'red'
 };
 export const Fonts = {
   PlusJakartaSans_Bold: 'PlusJakartaSans-Bold',

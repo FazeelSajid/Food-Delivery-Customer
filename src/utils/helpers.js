@@ -1,7 +1,7 @@
 // helpers.js
 
 import messaging from '@react-native-firebase/messaging';
-import {Alert} from 'react-native';
+import {Alert, View} from 'react-native';
 
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
@@ -10,7 +10,6 @@ import api from '../constants/api';
 import moment from 'moment';
 import { BASE_URL } from './globalVariables';
 import { Fonts } from '../constants';
-showAlert
 
 export const chooseImageFromCamera = async () => {
   return new Promise(async (resolve, reject) => {
@@ -132,13 +131,16 @@ export const getUserFcmToken = async () => {
 
 ///
 export const showAlert = (message, bgColor, numberOfLines) => {
+
+ 
   Snackbar.show({
     text: message,
     duration: Snackbar.LENGTH_SHORT,
     backgroundColor: bgColor ? bgColor : 'red',
     numberOfLines: numberOfLines ? numberOfLines : 2,
-    fontFamily: Fonts.PlusJakartaSans_Regular
-    // marginBottom:20,
+    fontFamily: Fonts.PlusJakartaSans_Regular,
+    top: 0,
+    marginBottom:20,
   });
 };
 

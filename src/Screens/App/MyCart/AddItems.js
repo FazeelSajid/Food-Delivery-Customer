@@ -48,6 +48,10 @@ import RBSheetRestaurantClosed from '../../../components/BottomSheet/RBSheetRest
 import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RadioButton } from 'react-native-paper';
+import OrangeSuccessCheck from '../../../Assets/svg/orangeSuccessCheck.svg';
+import AddButton from '../../../Assets/svg/addButton.svg';
+import FoodCards from '../../../components/Cards/FoodCards';
+import { addFavoriteitem, removeFavoriteitem } from '../../../utils/helpers/FavoriteApis';
 
 const AddItems = ({ navigation, route }) => {
   const ref_RBSheetSuccess = useRef();
@@ -63,11 +67,13 @@ const AddItems = ({ navigation, route }) => {
   const [selected_restaurant_id, setSelected_restaurant_id] = useState('');
   const [selected_item, setSelected_item] = useState('');
   const [isItemLoading, setIsItemLoading] = useState(false);
-  const [Item , setItem] = useState()
+  const [Item, setItem] = useState()
   const [restaurant_timings, setRestaurant_timings] = useState('');
-  const {  customer_id, cuisines } = useSelector(store => store.store);
-
+  const { customer_id, cuisines } = useSelector(store => store.store);
+  const { favoriteItems } = useSelector(store => store.favorite);
   const [itemObj, setItemObj] = useState({})
+  const [numColumns, setNumColumns] = useState(2)
+
 
 
 
@@ -164,7 +170,7 @@ const AddItems = ({ navigation, route }) => {
     try {
       setIsItemLoading(true);
       console.log('item   :  ', item?.cart_item_id);
-      let customer_id = await AsyncStorage.getItem('customer_id');
+      // let customer_id = await AsyncStorage.getItem('customer_id');
       let cart = await getCustomerCart(customer_id);
       console.log('cart  : ', cart);
 
@@ -426,6 +432,10 @@ const AddItems = ({ navigation, route }) => {
 
   };
 
+  const isItemFavorite = (id) => {
+    return favoriteItems.some(item => item?.item?.item_id === id);
+  };
+
   return (
     <View style={styles.container}>
       <Loader loading={loading} />
@@ -437,6 +447,7 @@ const AddItems = ({ navigation, route }) => {
 
       <View style={{}}>
         <FlatList
+          ListFooterComponent={() => <View style={{ height: hp(3) }} />}
           ListHeaderComponent={() => <StackHeader title={'Add Items'} />}
           showsVerticalScrollIndicator={false}
           // numColumns={2}
@@ -446,8 +457,106 @@ const AddItems = ({ navigation, route }) => {
           // }}
           data={data}
           ItemSeparatorComponent={() => <View style={{ height: hp(3) }} />}
-          renderItem={({ item }) => (
-            <FoodCardWithRating
+          key={numColumns}
+          numColumns={numColumns}
+          renderItem={({ item }) => {
+            const fav = isItemFavorite(item?.item_id)
+            return (
+              <>
+
+                <FoodCards
+                  isFavorite={fav}
+                  image={BASE_URL_IMAGE + item?.images[0]}
+                  description={item.description}
+                  price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
+                  heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
+                  title={item?.item_name}
+                  item={item}
+                  id={item?.item_id}
+                  onPress={() =>
+                    navigation?.navigate('ItemDetails', {
+                      id: item?.item_id,
+                    })
+                  }
+                  addToCart={() => showBtmSheet(item)}
+                  newComponent={
+                    <>
+                      {isItemLoading && item?.item_id == selected_item?.item_id ? (
+                        <ItemLoading loading={isItemLoading} />
+                      ) : item?.quantity > 0 ? (
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            backgroundColor: '#FF57224F',
+                            borderRadius: 25,
+                            paddingVertical: 2,
+                            paddingHorizontal: 2,
+                          }}>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setSelected_item(item);
+                              setSelected_restaurant_id(item?.restaurant_id);
+                              onDecrement(item);
+                              setRestaurant_timings(item?.restaurant_timings);
+                            }}
+                            style={{
+                              paddingHorizontal: 10,
+                              paddingVertical: 5,
+                            }}>
+                            <AntDesign
+                              name="minus"
+                              color={Colors.Orange}
+                              size={16}
+                            />
+                          </TouchableOpacity>
+                          <Text
+                            style={{
+                              color: Colors.Orange,
+                              fontFamily: Fonts.PlusJakartaSans_Bold,
+                              fontSize: RFPercentage(2),
+                              marginTop: -2,
+                            }}>
+                            {item?.quantity}
+                          </Text>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setSelected_item(item);
+                              setSelected_restaurant_id(item?.restaurant_id);
+                              onIncrement(item);
+                              setRestaurant_timings(item?.restaurant_timings);
+                            }}
+                            style={{
+                              paddingHorizontal: 10,
+                              paddingVertical: 5,
+                            }}>
+                            <AntDesign
+                              name="plus"
+                              color={Colors.Orange}
+                              size={16}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setItem(item)
+                            showBtmSheet(item)
+                            // updateItemQuantity(item);
+                            // setSelected_item(item);
+                            // setSelected_restaurant_id(item?.restaurant_id);
+                            // handelAddItem(item);
+                            // setRestaurant_timings(item?.restaurant_timings);
+                          }}>
+                          <AddButton width={wp(10)} height={hp(5)} />
+                        </TouchableOpacity>
+                      )}
+                    </>
+                  }
+
+                />
+
+                {/* <FoodCardWithRatings
               disabled={true}
               // onPress={() =>
               //   navigation.navigate('MyOrdersDetail', {
@@ -473,17 +582,7 @@ const AddItems = ({ navigation, route }) => {
               showNextButton={true}
               // showRating={true}
               priceContainerStyle={{ marginTop: 0 }}
-              // nextComponent={
-              //   <TouchableOpacity
-              //     onPress={() => {
-              //       setSelected_item(item);
-              //       setSelected_restaurant_id(item?.restaurant_id);
-              //       handelAddItem(item);
-              //     }}>
-              //     {item?.quantity > 0 ? null : <Icons.AddCircle width={25} />}
-              //     {/* <Icons.AddCircle width={25} /> */}
-              //   </TouchableOpacity>
-              // }
+           
 
               nextComponent={
                 <>
@@ -559,21 +658,12 @@ const AddItems = ({ navigation, route }) => {
                   )}
                 </>
               }
-            />
+            /> */}
+              </>
+            )
+          }
+          }
 
-            // <FoodCard
-            //   image={item?.image}
-            //   title={item?.title}
-            //   //   description={item?.description}
-            //   price={item?.price}
-            //   onPress={() =>
-            //     navigation?.replace('NearByDealsDetails', {
-            //       nav_type: 'add_item',
-            //     })
-            //   }
-            // />
-          )}
-          ListFooterComponent={() => <View style={{ height: hp(3) }} />}
         />
       </View>
 
@@ -598,6 +688,7 @@ const AddItems = ({ navigation, route }) => {
         refRBSheet={ref_RBSheetSuccess}
         title={`${Item?.item_name} added to cart.`}
         btnText={'OK'}
+        svg={<OrangeSuccessCheck />}
         onPress={() => {
           ref_RBSheetSuccess?.current?.close();
           // navigation.goBack();
@@ -612,7 +703,7 @@ const AddItems = ({ navigation, route }) => {
           }`}
       />
 
-       <CRBSheetComponent
+      <CRBSheetComponent
         height={230}
         refRBSheet={btmSheetRef}
         content={
@@ -631,7 +722,7 @@ const AddItems = ({ navigation, route }) => {
                     color={Colors.Orange} // Custom color for selected button
                     uncheckedColor={Colors.Orange} // Color for unselected buttons
                     status={selectedVariation === variation.variation_id ? 'checked' : 'unchecked'}
-                    onPress={() =>  handlePress(Item, variation.variation_id)}
+                    onPress={() => handlePress(Item, variation.variation_id)}
                   />
                   <Text style={styles.variationText}>{variation.variation_name}</Text>
                 </View>

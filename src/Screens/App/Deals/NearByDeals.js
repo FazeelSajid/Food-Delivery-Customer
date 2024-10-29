@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,36 +15,42 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import StackHeader from '../../../components/Header/StackHeader';
-import {Colors, Fonts, Icons, Images} from '../../../constants';
+import { Colors, Fonts, Icons, Images } from '../../../constants';
 import FoodCard from '../../../components/Cards/FoodCard';
 import Chip from '../../../components/Chip.js';
 import FoodCardWithRating from '../../../components/Cards/FoodCardWithRating';
 import api from '../../../constants/api';
-import {BASE_URL, BASE_URL_IMAGE} from '../../../utils/globalVariables';
-import {useFocusEffect} from '@react-navigation/native';
+import { BASE_URL, BASE_URL_IMAGE } from '../../../utils/globalVariables';
+import { useFocusEffect } from '@react-navigation/native';
 import Loader from '../../../components/Loader';
-import {getCurrentLocation} from '../../../utils/helpers/location';
+import { getCurrentLocation } from '../../../utils/helpers/location';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
 import { useDispatch, useSelector } from 'react-redux';
 import { setdeals } from '../../../redux/AuthSlice';
 import { addFavoriteDeal, removeFavoriteDeal } from '../../../utils/helpers/FavoriteApis';
 import { showAlert } from '../../../utils/helpers';
+import DealCard from '../../../components/Cards/DealCard';
+import { addItemToCart, getCustomerCart, updateCartItemQuantity } from '../../../utils/helpers/cartapis';
+import { addItemToMYCart, updateMyCartList } from '../../../redux/CartSlice';
 
-const NearByDeals = ({navigation, route}) => {
+const NearByDeals = ({ navigation, route }) => {
   const [isSearch, setIsSearch] = useState(false);
   const [selected, setSelected] = useState('All');
   const { customer_id, cuisines, deals } = useSelector(store => store.store);
+  const [itemObj, setItemObj] = useState({})
+  const [numColumns, setNumColumns] = useState(2)
+  const {  my_cart } = useSelector(store => store.cart);
   // console.log(cuisines);
   const dispatch = useDispatch()
 
-  const {favoriteDeals} = useSelector(store => store.favorite);
+  const { favoriteDeals } = useSelector(store => store.favorite);
 
-  
+
   const isDealFavorite = (id) => {
-    
+
     return favoriteDeals.some(item => item?.deal?.deal_id === id);
   };
 
@@ -145,35 +151,56 @@ const NearByDeals = ({navigation, route}) => {
     dispatch(setdeals(list))
 
 
-        if (list?.length > 2) {
-          const slicedArray = list.slice(0, 2);
-          setData(slicedArray);
+    if (list?.length > 2) {
+      const slicedArray = list.slice(0, 2);
+      setData(slicedArray);
+    } else {
+      setData(list);
+    }
+    
+  };
+
+  const add_item_to_cart = async (id, type) => {
+
+    // let customer_id = await AsyncStorage.getItem('customer_id');
+    // console.log('customer_Id :  ', customer_id);
+    let cart = await getCustomerCart(customer_id);
+    console.log('______cart    :  ', cart?.cart_id);
+
+
+    let data =  {
+      item_id: id,
+      cart_id: cart?.cart_id?.toString(),
+      item_type: 'deal',
+      comments: '',
+      quantity: 1,
+    };
+
+    console.log('data   :  ', data);
+
+    await addItemToCart(data)
+      .then(response => {
+        console.log('response ', response);
+        if (response?.status == true) {
+          // navigation?.navigate('MyCart');
+          // cart_restaurant_id
+          // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+          //my_cart
+          dispatch(addItemToMYCart(response?.result));
+          // setSelectedVariation(null)
+
+          // ref_RBSheetSuccess?.current?.open();
+          showAlert(`${itemObj.name} is added to cart`, 'green');
         } else {
-          setData(list);
+          showAlert(response?.message);
         }
-    // let { latitude, longitude } = await getCurrentLocation();
-    // fetch(
-    //   api.get_all_deals,
-    // )
-    //   .then(response => response.json())
-    //   .then(response => {
-    //     let list = response?.result ? response?.result : [];
-    //     // console.log(list , 'get deals');
-
-
-    //     if (list?.length > 2) {
-    //       const slicedArray = list.slice(0, 2);
-    //       setDeals(slicedArray);
-    //     } else {
-    //       setDeals(list);
-    //     }
-    //   })
-    //   .catch(err => console.log('error  getDeals : ', err))
-    //   .finally(
-    //     () => setIsFetching(false),
-    //     setLoading(false),
-    //     setRefresh(false),
-    //   );
+      })
+      .catch(error => {
+        console.log('error  :  ', error);
+      })
+      .finally(() => {
+        setLoading(false)
+      });
   };
 
   useFocusEffect(
@@ -183,10 +210,67 @@ const NearByDeals = ({navigation, route}) => {
       } else {
         getDeals();
       }
-     
+
     }, []),
   );
+  const handleDealAddToCart = async (deal) => {
 
+
+    setItemObj({
+      id: deal.deal_id,
+      name: deal?.name,
+    })
+    console.log({
+      id: deal.deal_id,
+      name: deal?.name,
+    });
+    
+
+    const filter = my_cart?.filter(
+      item => item?.item_id == deal.deal_id,
+    );
+    if (filter?.length > 0) {
+      let obj = {
+        cart_item_id: filter[0]?.cart_item_id,
+        quantity: filter[0]?.quantity + 1,
+      };
+       await updateCartItemQuantity(obj)
+       .then(response => {
+        if (response.status === true) {
+         showAlert(`${deal?.name}'s quantity updated`, 'green')
+        }
+       })
+      // also update quantity in redux
+      const newData = my_cart?.map(item => {
+        if (item?.item_id == deal.deal_id) {
+          return {
+            ...item,
+            quantity: filter[0]?.quantity + 1,
+          };
+        } else {
+          return { ...item };
+        }
+      });
+      dispatch(updateMyCartList(newData));
+
+
+
+    } else {
+      add_item_to_cart(deal.deal_id, 'deal');
+
+    }
+    // }
+  };
+
+  const shortenString = (str) => {
+    // Check if the string length exceeds 50
+    if (str.length > 35) {
+      // Cut the string to 50 characters and append "..."
+      return str.substring(0, 20) + '...';
+    }
+    // If the string length is less than or equal to 50, return it as is
+    return str;
+  }
   return (
     <View style={styles.container}>
       <Loader loading={loading} />
@@ -196,7 +280,7 @@ const NearByDeals = ({navigation, route}) => {
         translucent={false}
       />
       {isSearch ? (
-        <ScrollView style={{flex: 1}}>
+        <ScrollView style={{ flex: 1 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -209,7 +293,7 @@ const NearByDeals = ({navigation, route}) => {
             <TextInput
               placeholder="What would you like to eat?"
               placeholderTextColor={'#757575'}
-              style={{flex: 1, fontSize: RFPercentage(2)}}
+              style={{ flex: 1, fontSize: RFPercentage(2) }}
             />
             <TouchableOpacity onPress={() => setIsSearch(!isSearch)}>
               <Text
@@ -229,12 +313,12 @@ const NearByDeals = ({navigation, route}) => {
               marginTop: 10,
             }}>
             <FlatList
-              ListHeaderComponent={() => <View style={{width: 20}} />}
-              ListFooterComponent={() => <View style={{width: 20}} />}
+              ListHeaderComponent={() => <View style={{ width: 20 }} />}
+              ListFooterComponent={() => <View style={{ width: 20 }} />}
               horizontal
               showsHorizontalScrollIndicator={false}
               data={searchFilters}
-              renderItem={({item}) => (
+              renderItem={({ item }) => (
                 <Chip
                   title={item}
                   selected={item == selected ? true : false}
@@ -274,7 +358,7 @@ const NearByDeals = ({navigation, route}) => {
                   }}
                 />
               )}
-              renderItem={({item}) => (
+              renderItem={({ item }) => (
                 <View style={styles.itemView}>
                   <ImageBackground
                     source={item.image}
@@ -284,7 +368,7 @@ const NearByDeals = ({navigation, route}) => {
                   </ImageBackground>
                   <View style={styles.textContainer}>
                     <Text style={styles.title}>{item?.name}</Text>
-                    <Text style={{...styles.title, color: Colors.Orange}}>
+                    <Text style={{ ...styles.title, color: Colors.Orange }}>
                       $ {item?.price}
                     </Text>
                     <View style={styles.rowViewSB}>
@@ -303,6 +387,9 @@ const NearByDeals = ({navigation, route}) => {
       ) : (
         <View style={{}}>
           <FlatList
+            contentContainerStyle= {{alignItems: 'center'}}
+            key={numColumns}
+            numColumns={numColumns}
             ListHeaderComponent={() => (
               <StackHeader
                 title={'Explore Deals'}
@@ -322,59 +409,89 @@ const NearByDeals = ({navigation, route}) => {
             //   paddingHorizontal: 20,
             // }}
             data={data}
-            ItemSeparatorComponent={() => <View style={{height: hp(3)}} />}
-            renderItem={({item}) => {
+            ItemSeparatorComponent={() => <View style={{ height: hp(3) }} />}
+            renderItem={({ item }) => {
               const cuisineIds = item?.items?.map(item => item?.cuisine_id);
-                  const cuisineNames = cuisineIds?.map(cuisineId =>
-                    setCusineNameByItemCusineId(cuisineId)
-                  );
+              const cuisineNames = cuisineIds?.map(cuisineId =>
+                setCusineNameByItemCusineId(cuisineId)
+              );
 
-                  const fav = isDealFavorite(item?.deal_id)
+              const fav = isDealFavorite(item?.deal_id)
 
-              return(
-              // <FoodCard
-              //   image={item?.image}
-              //   title={item?.title}
-              //   description={item?.description}
-              //   price={item?.price}
-              // />
+              return (
+                // <FoodCard
+                //   image={item?.image}
+                //   title={item?.title}
+                //   description={item?.description}
+                //   price={item?.price}
+                // />
+                <DealCard
 
-              <FoodCardWithRating
-                onPress={() => {
-                  navigation?.navigate('NearByDealsDetails', {
-                    id: item?.deal_id,
-                  });
-                }}
-                title={item?.name}
-                // image={item?.image}
-                image={
-                  item?.images?.length > 0
-                    ? BASE_URL_IMAGE + item?.images[0]
-                    : ''
-                }
-                // description={item?.description}
-                price={item?.price}
-                rating={item?.rating}
-                // tag={item?.tag}
-                // tag={['Burger', 'Pizza', 'Drinks']}
-                tag={cuisineNames}
-                isTagArray={true}
-                nextIconWidth={26}
-                cardStyle={{
-                  marginHorizontal: 0,
-                  marginBottom: -9,
-                  width: wp(90),
-                  alignSelf: 'center',
-                }}
-                showNextButton={true}
-                showRating={false}
-                priceContainerStyle={{marginTop: 0}}
-                isFavorite={fav}
-                onRemove = {()=> removeFavoriteDeal( item?.deal_id,customer_id, favoriteDeals, dispatch, showAlert)}
-                addFav={()=> addFavoriteDeal( item?.deal_id, customer_id, dispatch, showAlert)}
-              />
-            )}}
-            ListFooterComponent={() => <View style={{height: hp(3)}} />}
+
+
+                  image={
+                    item?.images?.length > 0
+                      ? BASE_URL_IMAGE + item?.images[0]
+                      : ''
+                  }
+                  description={shortenString(item?.description)}
+                  price={item?.price}
+                  title={item?.name}
+                  onPress={() => {
+                    navigation.navigate('NearByDealsDetails', {
+                      id: item?.deal_id,
+                      type: 'favorite',
+                    });
+                  }}
+                  isFavorite={true}
+                  heartPress={() => fav ? removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch, showAlert) : addFavoriteDeal(item?.deal_id, customer_id, dispatch, showAlert)}
+                  addToCartpress={() => handleDealAddToCart(item)} 
+                  imageStyle={{
+                    width: wp(42),
+                    height: hp('16.5%')
+                  }}
+                  nameStyle={{ fontSize: RFPercentage(1.8) }}
+                  descriptionStyle={{ fontSize: RFPercentage(1.5) }}
+                  priceStyle={{ fontSize: RFPercentage(2.2), color: Colors.Orange }}
+                  iconSize={19}
+                />
+                // <FoodCardWithRating
+                //   onPress={() => {
+                //     navigation?.navigate('NearByDealsDetails', {
+                //       id: item?.deal_id,
+                //     });
+                //   }}
+                //   title={item?.name}
+                //   // image={item?.image}
+                //   image={
+                //     item?.images?.length > 0
+                //       ? BASE_URL_IMAGE + item?.images[0]
+                //       : ''
+                //   }
+                //   // description={item?.description}
+                //   price={item?.price}
+                //   rating={item?.rating}
+                //   // tag={item?.tag}
+                //   // tag={['Burger', 'Pizza', 'Drinks']}
+                //   tag={cuisineNames}
+                //   isTagArray={true}
+                //   nextIconWidth={26}
+                //   cardStyle={{
+                //     marginHorizontal: 0,
+                //     marginBottom: -9,
+                //     width: wp(90),
+                //     alignSelf: 'center',
+                //   }}
+                //   showNextButton={true}
+                //   showRating={false}
+                //   priceContainerStyle={{marginTop: 0}}
+                //   isFavorite={fav}
+                //   onRemove = {()=> removeFavoriteDeal( item?.deal_id,customer_id, favoriteDeals, dispatch, showAlert)}
+                //   addFav={()=> addFavoriteDeal( item?.deal_id, customer_id, dispatch, showAlert)}
+                // />
+              )
+            }}
+            ListFooterComponent={() => <View style={{ height: hp(3) }} />}
             ListEmptyComponent={() => <NoDataFound />}
           />
         </View>

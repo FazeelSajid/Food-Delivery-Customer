@@ -392,7 +392,7 @@ const MyCart = ({navigation, route}) => {
             paddingBottom: 20,
           }}>
           <CButton
-            title="CheckOut"
+            title="Checkout"
             onPress={() => {
               // console.log('data?.length : ', data);
               if (data?.length == 0) {

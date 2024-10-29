@@ -80,7 +80,7 @@ import CustomButton from '../../../components/Buttons/customButton';
 const Checkout = ({ navigation, route }) => {
   const dispatch = useDispatch();
 
-  const { join_as_guest } = useSelector(store => store.store);
+  const { join_as_guest, promos } = useSelector(store => store.store);
   const {
     cart,
     cart_restaurant_id,
@@ -565,6 +565,7 @@ const Checkout = ({ navigation, route }) => {
     return itemsArray.map(item => item.cart_item_id);
   };
 
+console.log(promoCodeDetail?.promo_code_id );
 
   const calculateTotalAmount = () => {
 
@@ -701,13 +702,17 @@ const Checkout = ({ navigation, route }) => {
   );
 
   const handleVerifyPromoCode = async promoCode => {
+    console.log({promoCode});
+    
     setIsValidPromoCode(true);
     fetch(
       api.verify_promo_code +
-      `?promo_code=${promoCode}&restaurant_id=${cart_restaurant_id}`,
+      `?promo_code=${promoCode}`,
     )
       .then(response => response.json())
       .then(response => {
+        console.log(response);
+        
         Keyboard.dismiss();
         if (response.status == false) {
           // console.log(response);
@@ -740,6 +745,18 @@ const Checkout = ({ navigation, route }) => {
       .catch(err => console.log('error : ', err));
   };
 
+  const verifyPromoCode = (promoCode) => {
+    const checkPromoCode = promos.find(item => item.code === promoCode )
+  if (checkPromoCode) {
+    setIsPromocodeApplied(true);
+          setIsValidPromoCode(true);
+          setPromoCodeDetail(checkPromoCode);
+  }else{
+    setIsValidPromoCode(false);
+  }
+    
+    return checkPromoCode
+  }
   // useEffect(() => {
   //   const delayDebounceFn = setTimeout(() => {
   //     console.log('promocode : ', promoCode);
@@ -768,6 +785,7 @@ const Checkout = ({ navigation, route }) => {
     
     calculatePreOrderdetails(type)
   };
+
 
   const calculatePreOrderdetails = (paymentType ) => {
        const body = {
@@ -862,7 +880,7 @@ const Checkout = ({ navigation, route }) => {
         <ItemSeparator />
         <View style={[styles.rowViewSB, { width: wp(80), alignSelf: 'center', alignItems: 'center', marginTop: 10,marginBottom: 10 }]} >
           <TextInput placeholder='Promo Code' placeholderTextColor={'#B0B0B0'} style={{ borderRadius: 25, backgroundColor: '#F5F6FA', width: wp(60), paddingLeft: wp(5), marginRight: wp(2), color: Colors.Black  }} value={promoCode}  onChangeText={text => setPromoCode(text)} />
-          <CustomButton text={'Apply'} textStyle={{ color: Colors.White, fontSize: RFPercentage(2) }} containerStyle={{ backgroundColor: Colors.Orange, paddingHorizontal: wp(5), paddingVertical: hp(1.3), borderRadius: 25 }} onPress={()=> handleVerifyPromoCode(promoCode)} pressedRadius={25} />
+          <CustomButton text={'Apply'} textStyle={{ color: Colors.White, fontSize: RFPercentage(2) }} containerStyle={{ backgroundColor: Colors.Orange, paddingHorizontal: wp(5), paddingVertical: hp(1.3), borderRadius: 25 }} onPress={()=> verifyPromoCode(promoCode)} pressedRadius={25} />
         </View>
 
         {isPromocodeApplied && (
