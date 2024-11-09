@@ -136,7 +136,7 @@ const SignIn = ({navigation, route}) => {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\+?[0-9\s-]+$/;
-    console.log(emailRegex);
+    // console.log(emailRegex);
     
     let fcm_token = await getUserFcmToken();
     console.log({fcm_token});

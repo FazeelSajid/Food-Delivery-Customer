@@ -395,7 +395,6 @@ export const fetchApis = async (endPoint,method,setLoading, header, payload  ) =
   // const request = `${BASE_URL}${endPoint}`;
   setLoading(true)
 
-  console.log({payload}, 'calculatePreOrderDetails');
 
 
 

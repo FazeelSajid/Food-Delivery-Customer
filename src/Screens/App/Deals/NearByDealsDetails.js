@@ -274,6 +274,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
             // navigation?.navigate('MyCart');
             //my_cart
             dispatch(addItemToMYCart(response?.result));
+            
             ref_RBSheetSuccess?.current?.open();
           } else {
             showAlert(response?.message);
@@ -332,9 +333,13 @@ const NearByDealsDetails = ({ navigation, route }) => {
           return { ...item };
         }
       });
+      
       dispatch(updateMyCartList(newData));
       // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
       ref_RBSheetSuccess?.current?.open();
+        setLoading(false);
+        setCount(0)
+
     } else {
       add_item_to_cart();
     }

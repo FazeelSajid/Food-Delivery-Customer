@@ -197,7 +197,7 @@ const SignUpWithEmail = ({navigation, route}) => {
               let wallet = await createCustomerWallet(
                 response?.result?.customer_id,
               );
-              // console.log(wallet);
+              console.log(wallet);
               dispatch(
                 setCustomerId(response?.result?.customer_id?.toString()),
               );

@@ -1,12 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../constants/api';
 
-export const GetWalletAmount = async () => {
+export const GetWalletAmount = async (customer_id) => {
   return new Promise(async (resolve, reject) => {
-    let customer_id = await AsyncStorage.getItem('customer_id');
+    // let customer_id = await AsyncStorage.getItem('customer_id');
     fetch(api.get_available_payment_of_customer + customer_id)
       .then(response => response.json())
       .then(response => {
+        // console.log('wallet response: :',response);
+        
         if (response?.status == false) {
           resolve(0);
         } else {

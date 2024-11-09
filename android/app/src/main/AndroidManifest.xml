@@ -46,7 +46,6 @@
         <service
             android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationListenerService"
             android:exported="false" 
-            
             >
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

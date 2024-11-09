@@ -38,7 +38,6 @@ import { Badge, RadioButton } from 'react-native-paper';
 import CRBSheetComponent from '../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import PagerView from 'react-native-pager-view';
-// import Images from '../../Assets/png/Dashboard/Images';
 import { setcuisines, setitems, setdeals } from '../../redux/AuthSlice';
 import WhiteCart from '../../Assets/svg/WhiteCart.svg';
 import { addFavoriteDeal, addFavoriteitem, getFavoriteDeals, getFavoriteItem, removeFavoriteitem } from '../../utils/helpers/FavoriteApis';
@@ -58,6 +57,7 @@ const Dashboard = ({ navigation, route }) => {
   const [variations, setVariations] = useState([])
   const [itemName, setItemName] = useState('')
   const [itemObj, setItemObj] = useState({})
+
 
   // console.log(customer_detail);
 
@@ -101,6 +101,7 @@ const Dashboard = ({ navigation, route }) => {
     priceUp: false,
     priceDown: false,
   })
+  // console.log({item});
 
   const handlePriceSort = () => {
     let sortedItems = [...searchedItems]; // Copy the array
@@ -255,7 +256,7 @@ const Dashboard = ({ navigation, route }) => {
           setSelectedVariation(null)
 
           // ref_RBSheetSuccess?.current?.open();
-          showAlert(`${name ? name :itemObj.name} is added to cart`, 'green');
+          showAlert(`${name ? name : itemObj.name} is added to cart`, 'green');
         } else {
           showAlert(response?.message);
         }
@@ -302,29 +303,31 @@ const Dashboard = ({ navigation, route }) => {
             cart_item_id: checkVariation[0]?.cart_item_id,
             quantity: checkVariation[0]?.quantity + 1,
           };
-
+          closeBtmSheet()
           await updateCartItemQuantity(obj)
-          .then(response => {
-           if (response.status === true) {
-             showAlert(`${itemObj.name} quantity updated`, 'green')
-            
-             const newData = my_cart?.map(item => {
-              if (item?.item_id == item_id) {
-                return {
-                  ...item,
-                  quantity: checkVariation[0]?.quantity + 1,
-                };
-              } else {
-                return { ...item };
+            .then(response => {
+              if (response.status === true) {
+                showAlert(`${itemObj.name} quantity updated`, 'green')
+
+                const newData = my_cart?.map(item => {
+                  if (item?.item_id == item_id) {
+                    return {
+                      ...item,
+                      quantity: checkVariation[0]?.quantity + 1,
+                    };
+                  } else {
+                    return { ...item };
+                  }
+                });
+                dispatch(updateMyCartList(newData));
+
+                // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+                // ref_RBSheetSuccess?.current?.open();
               }
-            });
-            dispatch(updateMyCartList(newData));
-            // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-            ref_RBSheetSuccess?.current?.open();
-            }})
+            })
 
           // also update quantity in redux
-         
+
         }
 
       } else {
@@ -384,8 +387,8 @@ const Dashboard = ({ navigation, route }) => {
       id: deal.deal_id,
       name: deal?.name,
     })
-   
-    
+
+
     // setLoading(true);
     // let time_obj = await checkRestaurantTimings(
     //   restaurantDetails?.restaurant_id,
@@ -407,24 +410,25 @@ const Dashboard = ({ navigation, route }) => {
         quantity: filter[0]?.quantity + 1,
       };
       await updateCartItemQuantity(obj)
-       .then(response => {
-        if (response.status === true) {
-          showAlert(`${itemObj.name} quantity updated`, 'green')
-          const newData = my_cart?.map(item => {
-            if (item?.item_id == deal.deal_id) {
-              return {
-                ...item,
-                quantity: filter[0]?.quantity + 1,
-              };
-            } else {
-              return { ...item };
-            }
-          });
-          dispatch(updateMyCartList(newData));
+        .then(response => {
+          if (response.status === true) {
+            showAlert(`${itemObj.name} quantity updated`, 'green')
+            const newData = my_cart?.map(item => {
+              if (item?.item_id == deal.deal_id) {
+                return {
+                  ...item,
+                  quantity: filter[0]?.quantity + 1,
+                };
+              } else {
+                return { ...item };
+              }
+            });
+            dispatch(updateMyCartList(newData));
 
-        }})
+          }
+        })
       // also update quantity in redux
-     
+
 
 
       // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
@@ -686,9 +690,11 @@ const Dashboard = ({ navigation, route }) => {
   const getAllItems = async () => {
 
 
-    const response = await fetchApis(api.get_all_items_by_restaurant + 'res_4074614', 'GET', setLoading);
+    const response = await fetchApis(api.get_all_items, 'GET', setLoading);
 
     let list = response?.result ? response?.result : [];
+    // console.log({list});
+
     setItems(list);
 
     // let list = response?.result ? response?.result : [];
@@ -796,7 +802,7 @@ const Dashboard = ({ navigation, route }) => {
 
   const shortenString = (str) => {
     // Check if the string length exceeds 50
-    if (str.length > 35) {
+    if (str?.length > 35) {
       // Cut the string to 50 characters and append "..."
       return str.substring(0, 35) + '...';
     }
@@ -885,7 +891,7 @@ const Dashboard = ({ navigation, route }) => {
             <TouchableOpacity onPress={() => navigation?.openDrawer()}>
               <Icons.MenuActive width={23} />
             </TouchableOpacity>
-            <Text style={styles.headerLocation} >{currentLocation.shortAddress}</Text>
+            <Text style={styles.headerLocation} ellipsizeMode='tail' numberOfLines={1} >{currentLocation.shortAddress}</Text>
 
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
@@ -1067,7 +1073,7 @@ const Dashboard = ({ navigation, route }) => {
                     <FoodCards
                       isFavorite={fav}
                       image={BASE_URL_IMAGE + item?.images[0]}
-                      description={shortenString(item.description)}
+                      description={shortenString(item?.description)}
                       // price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
                       heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
                       title={item?.item_name}
@@ -1119,7 +1125,7 @@ const Dashboard = ({ navigation, route }) => {
 
                     <DealCard
                       image={item?.images?.length > 0 && BASE_URL_IMAGE + item?.images[0]}
-                      description={shortenString(item.description)}
+                      description={shortenString(item?.description)}
                       price={item?.price}
                       title={item?.name}
                       onPress={() =>
@@ -1237,14 +1243,15 @@ const Dashboard = ({ navigation, route }) => {
                   // console.log(item);
                   const fav = isItemFavorite(item?.item_id)
 
-                  // console.log(item, ); 
+                  // console.log(item?.cuisine_id, 'item id :'); 
+
 
                   return (
 
                     <FoodCards
                       isFavorite={fav}
-                      image={BASE_URL_IMAGE + item?.images[0]}
-                      description={shortenString(item.description)}
+                      image={item?.images?.length && BASE_URL_IMAGE + item?.images[0]}
+                      description={shortenString(item?.description)}
                       price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
                       heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
                       title={item?.item_name}
@@ -1326,7 +1333,7 @@ const Dashboard = ({ navigation, route }) => {
 
                     <DealCard
                       image={item?.images?.length > 0 && BASE_URL_IMAGE + item?.images[0]}
-                      description={shortenString(item.description)}
+                      description={shortenString(item?.description)}
                       price={item?.price}
                       title={item?.name}
                       onPress={() =>

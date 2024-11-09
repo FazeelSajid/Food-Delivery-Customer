@@ -47,54 +47,52 @@ const MyOrders = () => {
 
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
-    {key: 'first', title: 'All Orders'},
+    {key: 'first', title: 'Upcoming'},
     {key: 'second', title: 'Completed'},
     {key: 'third', title: 'Cancelled'},
   ]);
 
-  const getData = async () => {
+  // const getData = async () => {
     
-    fetch(api.get_all_order_by_customer_Id + customer_id)
-      .then(response => response.json())
-      .then(response => {
-        let list = response?.result ? response?.result : [];
-        // console.log(list, 'list');
+  //   fetch(api.get_all_order_by_customer_Id + customer_id)
+  //     .then(response => response.json())
+  //     .then(response => {
+  //       let list = response?.result ? response?.result : [];
+  //       console.log(response);
         
-        // const filter = list?.filter(item => item?.cart_items_Data?.length > 0);
-        const filter = list
-        // setData([...data, ...list]);
-        // console.log(filter, 'filter');
+  //       // console.log(list, 'list');
         
-        setData(filter);
-        dispatch(setAllOrders(filter?.reverse()));
-      })
-      .catch(err => console.log('error : ', err))
-      .finally(() => {
-        setLoading(false);
-        setRefreshing(false);
-      });
-  };
+  //       // const filter = list?.filter(item => item?.cart_items_Data?.length > 0);
+  //       const filter = list
+  //       // setData([...data, ...list]);
+  //       // console.log(filter, 'filter');
+        
+  //       dispatch(setAllOrders(filter?.reverse()));
+  //     })
+  //     .catch(err => console.log('error : ', err))
+  //     .finally(() => {
+  //       setLoading(false);
+  //       setRefreshing(false);
+  //     });
+  // };
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    getData();
-  };
-  // useEffect(() => {
+  // const onRefresh = () => {
+  //   setRefreshing(true);
   //   getData();
-  // }, []);
+  // };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      setLoading(true);
-      getData();
-    }, []),
-  );
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     setLoading(true);
+  //     getData();
+  //   }, []),
+  // );
 
   return (
     <View style={{flex: 1, backgroundColor: Colors.White}}>
       <Loader loading={loading} />
       <MenuHeader title={'My Orders'} />
-      <ScrollView
+      {/* <ScrollView
         refreshControl={
           <RefreshControl
             colors={[Colors.Orange, Colors.OrangeLight]}
@@ -102,7 +100,7 @@ const MyOrders = () => {
             onRefresh={() => onRefresh()}
           />
         }
-        style={{flex: 1}}>
+        style={{flex: 1}}> */}
         <TabView
           navigationState={{index, routes}}
           renderScene={renderScene}
@@ -132,6 +130,8 @@ const MyOrders = () => {
                       ? Fonts.Inter_Bold
                       : Fonts.Inter_Regular,
                     width: 68,
+                     alignItems: 'center',
+                    textAlign: 'center'
                   }}>
                   {route.title}
                 </Text>
@@ -160,7 +160,7 @@ const MyOrders = () => {
           }}
           style={{height: hp(83.7)}}
         />
-      </ScrollView>
+      {/* </ScrollView> */}
     </View>
   );
 };

@@ -8,85 +8,16 @@ import {useSelector} from 'react-redux';
 import {BASE_URL_IMAGE} from '../../../../utils/globalVariables';
 import NoDataFound from '../../../../components/NotFound/NoDataFound';
 import OrderCard from '../../../../components/Cards/OrderCard';
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from 'react-native-responsive-screen';
 
 const CancelledOrders = () => {
   const orders = useSelector(store => store.order.all_orders);
   const navigation = useNavigation();
   const [data, setData] = useState([]);
 
-  // const data = [
-  //   {
-  //     id: 0,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 1,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Preparing',
-  //   },
-  //   {
-  //     id: 2,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Ready to Deliver',
-  //   },
-  //   {
-  //     id: 3,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Out for Delivery',
-  //   },
-  //   {
-  //     id: 4,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 5,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 6,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 7,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  // ];
-
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     let filter = orders?.filter(item => item?.order_status == 'cancelled');
-  //     setData(filter);
-  //   }, []),
-  // );
 
   useEffect(() => {
     let filter = orders?.filter(item => item?.order_status == 'cancelled');
@@ -99,6 +30,7 @@ const CancelledOrders = () => {
         // data={orders}
         data={data}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{flexGrow: 1,  width: '90%', alignSelf: 'center', paddingVertical: wp(2) }}
         ListHeaderComponent={() => <View style={{height: 10}} />}
         ListFooterComponent={() => <View style={{height: 10}} />}
         ListEmptyComponent={() => <NoDataFound />}
@@ -107,69 +39,13 @@ const CancelledOrders = () => {
             item?.cart_items_Data?.length > 0 ? item?.cart_items_Data[0] : null;
           return (
 
-            <OrderCard item={item} type = {item.order_status}  onPress={() =>
+            <OrderCard item={item}  onPress={() =>
               navigation.navigate('OrderDetails', {
                 type: 'cancelled',
                 id: item?.order_id,
                 item: item
               })
             } />
-            // <FoodCardWithRating
-            //   onPress={() =>
-            //     navigation.navigate('OrderDetails', {
-            //       type: 'cancelled',
-            //       id: item?.order_id,
-            //     })
-            //   }
-            //   image={
-            //     cart_item && cart_item?.itemData?.images?.length > 0
-            //       ? BASE_URL_IMAGE + cart_item?.itemData?.images[0]
-            //       : ''
-            //   }
-            //   title={
-            //     cart_item
-            //       ? cart_item?.item_type == 'deal'
-            //         ? cart_item?.itemData?.name
-            //         : cart_item?.itemData?.item_name
-            //       : ''
-            //   }
-            //   // price={cart_item ? cart_item?.itemData?.price : ''}
-            //   price={item?.total_amount}
-            //   showRating={false}
-            //   label={item?.status}
-            //   type={'all'}
-            //   cardStyle={{marginTop: 15}}
-            //   imageContainerStyle={{
-            //     // width: 30,
-            //     height: 60,
-            //     marginVertical: 1.5,
-            //     flex: 0.34,
-            //   }}
-
-              // title={item?.title}
-              // image={item?.image}
-              // description={item?.description}
-              // price={item?.price}
-              // // label={item?.status}
-              // type={'cancelled'}
-              // showRatingOnBottom={true}
-              // showNextButton={false}
-              // cardStyle={{marginTop: 15}}
-              // imageContainerStyle={{
-              //   // width: 30,
-              //   height: 60,
-              //   marginVertical: 1.5,
-              //   flex: 0.34,
-              // }}
-            // />
-
-            // <OrdersCard
-            //   title={item?.title}
-            //   image={item?.image}
-            //   description={item?.description}
-            //   price={item?.price}
-            //   type={'cancelled'}
-            // />
           );
         }}
       />

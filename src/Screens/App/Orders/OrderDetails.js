@@ -49,9 +49,11 @@ import {
 import SectionSeparator from '../../../components/Separator/SectionSeparator';
 import ItemSeparator from '../../../components/Separator/ItemSeparator';
 import PaymentCard from '../../../components/Cards/PaymentCard';
+import { useSelector } from 'react-redux';
 
 const OrderDetails = ({navigation, route}) => {
   const [loading, setLoading] = useState(false);
+  const customer_id = useSelector(store => store.store.customer_id)
 
   const [orderDetails, setOrderDetails] = useState(null);
   const [fistCartItemDetail, setFistCartItemDetail] = useState(null);
@@ -137,7 +139,7 @@ const OrderDetails = ({navigation, route}) => {
 
   const handleRateRestaurant = async () => {
     setLoading(true);
-    let customer_id = await AsyncStorage.getItem('customer_id');
+    // let customer_id = await AsyncStorage.getItem('customer_id');
     //send notification to restaurant
     // handleSendPushNotification(`Customer gives you ${rating} star rating`);
     let data = {
@@ -201,16 +203,16 @@ const OrderDetails = ({navigation, route}) => {
 
   const handleRateRider = async () => {
     setLoading(true);
-    let customer_id = await AsyncStorage.getItem('customer_id');
+    // let customer_id = await AsyncStorage.getItem('customer_id');
     //send notification to restaurant
     // handleSendPushNotification(`Customer gives you ${rating} star rating`);
     let data = {
       rider_id: orderDetails?.rider_id,
       rating: rating,
       customer_id: customer_id,
-      comment: ratingComment,
+      comments: ratingComment,
     };
-    console.log('data in rate rider  : ', data);
+    console.log('Body in rate rider  : ', data);
 
     fetch(api.rate_rider, {
       method: 'POST',
@@ -221,7 +223,7 @@ const OrderDetails = ({navigation, route}) => {
     })
       .then(response => response.json())
       .then(async response => {
-        console.log('response  :   ', response);
+        console.log('response Rate Rider  :   ', response);
         if (response?.status == false) {
           // showAlert(response?.message);
           setLoading(false);
@@ -488,7 +490,8 @@ const OrderDetails = ({navigation, route}) => {
           <View style={{padding: 20}}>
             {orderDetails?.cart_items_Data &&
               orderDetails?.cart_items_Data?.map((item, key) => {
-                console.log(item , item?.quantity);
+                // console.log(item.price);
+                // {item?.item_type == 'deal' ? item.price * item?.quantity : item?.variationData?.price * item?.quantity}
                 
                 return(
                 <View style={{...styles.rowView, marginBottom: 5}}>
@@ -528,7 +531,7 @@ const OrderDetails = ({navigation, route}) => {
                       fontFamily: Fonts.PlusJakartaSans_SemiBold,
                       fontSize: RFPercentage(2),
                     }}>
-                    $ {item?.variationData?.price * item?.quantity}
+                    $ {item?.item_type == 'deal' ? item.sub_total * item?.quantity : item?.variationData?.price * item?.quantity}
                   </Text>
                 </View>
               )})}

@@ -67,7 +67,7 @@ const CInputWithCountryCode = ({
         </TouchableOpacity>
 
         <TextInput
-          style={[styles.TextField]}
+          style={[styles.TextField,countryCode.length > 4 ? {marginLeft: wp(2)} :'' ]}
           placeholder={placeholder}
           value={phoneNo}
           onChangeText={text => setPhoneNo(text)}

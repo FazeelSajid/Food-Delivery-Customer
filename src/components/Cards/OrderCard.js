@@ -9,22 +9,17 @@ import ItemSeparator from '../Separator/ItemSeparator';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { BASE_URL } from '../../utils/globalVariables';
 import moment from 'moment';
-const OrderCard = ({item, onPress , type}) => {
-    console.log(type);
+const OrderCard = ({item, onPress }) => {
     
     return (
         <TouchableOpacity onPress={onPress} style={styles.container} >
          <Text 
             style={[
                 styles.statusTxt,
-                type === 'pending' ? 
-                { color: Colors.pending } : 
-                type === 'cancelled' ? 
-                    { color: Colors.cancelled } : 
-                    { color: Colors.completed } 
+            item?.order_status === 'out_for_delivery'? {color: '#09275E', backgroundColor: '#B9D7FF'} : item?.order_status === 'delivered'? {color: '#384308', backgroundColor: '#F2FFB9'} :item?.order_status === 'cancelled'? {color: '#88260D', backgroundColor: '#FEB6B6' } : {color: '#5E3A09', backgroundColor: '#FFD7B0'}
             ]}
             >
-  {item?.order_status}
+                         {item?.order_status === 'out_for_delivery'? 'Out For Delivery' : item?.order_status === 'placed' ? 'Preparing': item?.order_status === 'delivered'? "Delivered" : item?.order_status === 'cancelled'? 'Cancelled' : item?.order_status === 'pending'? 'Pending': ''}
 </Text>
             <ItemSeparator width={'100%'} style={styles.ItemSeparator} />
             <View style={styles.contentContainer} >
@@ -67,6 +62,9 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.PlusJakartaSans_SemiBold,
         fontSize: RFPercentage(1.7),
         marginBottom: wp(1),
+        width: wp(20),
+        textAlign: 'center',
+        borderRadius: wp(6)
     },
     ItemSeparator: {
         marginVertical: 5

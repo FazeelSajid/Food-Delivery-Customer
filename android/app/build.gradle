@@ -91,15 +91,11 @@ def reactNativeArchitectures() {
 }
 
 android {
-    // -----------------
-    tasks.whenTaskAdded { task ->
+     tasks.whenTaskAdded { task ->
     if (task.name == "lintVitalAnalyzeRelease") {
         task.dependsOn(":app:copyReactNativeVectorIconFonts")
     }
 }
-    // -----------------
-
-
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -128,13 +124,6 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-        release {
-            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
-                storeFile file(MYAPP_UPLOAD_STORE_FILE)
-                storePassword MYAPP_UPLOAD_STORE_PASSWORD
-                keyAlias MYAPP_UPLOAD_KEY_ALIAS
-                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
-            }}
     }
     buildTypes {
         debug {
@@ -164,14 +153,12 @@ android {
 
         }
     }
-
 }
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
-implementation project(':react-native-reanimated')
      //stripe cardForm
         //  implementation 'com.google.android.material:material:1.11.0-alpha03'
         // implementation 'com.google.android.material:material:1.5.0'

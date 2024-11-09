@@ -122,7 +122,7 @@ const api = {
     BASE_URL + 'favourites/deleteFavouriteRestaurants?favourite_restaurant_id=',
 
   // complaint
-  add_complaint: BASE_URL + 'complaint/addComplaint',
+  add_complaint: BASE_URL + 'orderComplaint/Add',
 
   update_receive_notification_status:
     BASE_URL + 'customer/updateNotificationStatus',

@@ -1,29 +1,71 @@
 import {StyleSheet, Text, View, FlatList} from 'react-native';
 import React, {memo, useState, useEffect} from 'react';
-import {Images} from '../../../../constants';
+import {Colors, Images} from '../../../../constants';
 import OrdersCard from '../../../../components/Cards/OrdersCard';
 import FoodCardWithRating from '../../../../components/Cards/FoodCardWithRating';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../../../constants/api';
 import Loader from '../../../../components/Loader';
 import {BASE_URL_IMAGE} from '../../../../utils/globalVariables';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import NoDataFound from '../../../../components/NotFound/NoDataFound';
 import OrderCard from '../../../../components/Cards/OrderCard';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
+import { RefreshControl } from 'react-native-gesture-handler';
+import { setAllOrders } from '../../../../redux/OrderSlice';
 const AllOrders = ({data}) => {
   const orders = useSelector(store => store.order.all_orders);
+  const [UpcomingOrders, setUpcomingOrders] = useState()
+  const [refreshing, setRefreshing] = useState(false);
+  const customer_id = useSelector(store => store.store.customer_id)
+  const dispatch = useDispatch();
+ 
+
+  const getData = async () => {
+    setRefreshing(true)
+    
+    fetch(api.get_all_order_by_customer_Id + customer_id)
+      .then(response => response.json())
+      .then(response => {
+        let list = response?.result ? response?.result : [];
+        // console.log(response);
+        
+        // console.log(list, 'list');
+        
+        // const filter = list?.filter(item => item?.cart_items_Data?.length > 0);
+        const filter = list
+        // setData([...data, ...list]);
+        // console.log(filter, 'filter');
+        
+        dispatch(setAllOrders(filter?.reverse()));
+      })
+      .catch(err => console.log('error : ', err))
+      .finally(() => {
+        // setLoading(false);
+        setRefreshing(false);
+      });
+  };
+  
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getData();
+      const filteredItems = orders.filter(
+        item => item.order_status !== "cancelled" && item.order_status !== "delivered"
+    );
+    setUpcomingOrders(filteredItems);
+
+    }, []),
+  );
+
 
   const navigation = useNavigation();
-  // const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  // const data = [
-  //   {
+
   //     id: 0,
   //     image: Images.salad,
   //     title: 'Green Salad',
@@ -127,22 +169,34 @@ const AllOrders = ({data}) => {
       });
     } else {
       navigation.navigate('OrderDetails', {
-        type: 'all',
+        type: 'completed',
         id: item?.order_id,
         item: item,
       });
     }
   };
+  const onRefresh = () => {
+    setRefreshing(true);
+    getData();
+  };
+  
 
   return (
     <View style={{flex: 1}}>
-      <Loader loading={loading} />
+      {/* <Loader loading={loading} /> */}
      
     
       <FlatList
-        data={orders}
+       refreshControl={
+        <RefreshControl
+          colors={[Colors.Orange, Colors.OrangeLight]}
+          refreshing={refreshing}
+          onRefresh={() => onRefresh()}
+        />
+      }
+        data={UpcomingOrders}
         ItemSeparatorComponent={<View style={{height: hp(2)}} />}
-        contentContainerStyle={{flexGrow: 1,  width: '90%', alignSelf: 'center' }}
+        contentContainerStyle={{flexGrow: 1,  width: '90%', alignSelf: 'center', paddingVertical: wp(2) }}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={() => <View style={{height: 10}} />}
         ListFooterComponent={() => <View style={{height: 10}} />}
@@ -151,7 +205,7 @@ const AllOrders = ({data}) => {
           let cart_item =
             item?.cart_items_Data?.length > 0 ? item?.cart_items_Data[0] : null;
           return (
-            <OrderCard item={item} type = {item.order_status} onPress={()=> onOrderPress(item)} />
+            <OrderCard item={item} onPress={()=> onOrderPress(item)} />
           );
         }}
       />

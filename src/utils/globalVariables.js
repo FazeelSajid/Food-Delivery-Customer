@@ -7,19 +7,21 @@ export const firebase_server_key =
 // export const BASE_URL_IMAGE = 'https://food-delivery-be.caprover-demo.mtechub.com/';
 
 // Room
-// export const BASE_URL = 'http://192.168.100.177:3017/';
-// export const BASE_URL_IMAGE = 'http://192.168.100.177:3017/';
+export const BASE_URL = 'http://192.168.100.199:3017/';
+export const BASE_URL_IMAGE = 'http://192.168.100.199:3017/';
 
 // Office
-// export const BASE_URL = 'http://192.168.18.90:3017/';
-export const BASE_URL_IMAGE = 'http://192.168.18.90:3017/';
+// export const BASE_URL = 'http://192.168.18.61:3017/';
+// export const BASE_URL_IMAGE = 'http://192.168.18.61:3017/';
 
 // BackEnd Dev
-export const BASE_URL = 'http://192.168.18.120:3017/';
+// export const BASE_URL = 'http://192.168.18.120:3017/';
 // export const BASE_URL_IMAGE = 'http://192.168.18.120:3017/';
 
 // export const BASE_URL = 'https://staging-fooddelivery-be.mtechub.com/';
 // export const BASE_URL_IMAGE = 'https://staging-fooddelivery-be.mtechub.com/';
 
+// export const STRIPE_PUBLISH_KEY =
+//   'pk_test_51Ml3wJGui44lwdb4K6apO4rnFrF2ckySwM1TfDcj0lVdSekGOVGrB1uHNlmaO7wZPxwHfRZani73KlHQKOiX4JmK00E0l7opJO';
 export const STRIPE_PUBLISH_KEY =
-  'pk_test_51Ml3wJGui44lwdb4K6apO4rnFrF2ckySwM1TfDcj0lVdSekGOVGrB1uHNlmaO7wZPxwHfRZani73KlHQKOiX4JmK00E0l7opJO';
+  'pk_test_51QHIivKCCSlOa5hxX3GnNf9oEz0C69YlZ5ox3Gb8zfCVKKREkJZeHPJzjnKjRJUjlAILxVYeG5tvqCnKvjn9G6GK00eVgI3ut2';

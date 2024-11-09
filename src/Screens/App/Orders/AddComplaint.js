@@ -192,7 +192,7 @@ const AddComplaint = ({navigation, route}) => {
       let data = {
         customer_id: customer_id,
         order_id: route?.params?.id,
-        description: complaint,
+        complaint_text: complaint,
         complaint_for: complaintFor,
       };
       if (images?.length > 0) {
@@ -214,7 +214,7 @@ const AddComplaint = ({navigation, route}) => {
         .then(response => response.json())
         .then(async response => {
           console.log('response  :  ', response);
-          if (response?.status == true) {
+          if (response?.error == false) {
             ref_RBSheet?.current?.open();
           } else {
             showAlert(response?.message);
