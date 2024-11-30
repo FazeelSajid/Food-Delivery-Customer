@@ -11,14 +11,15 @@ import { Colors, Fonts } from '../../../constants';
 import { RadioButton } from 'react-native-paper';
 import api from '../../../constants/api';
 import { useDispatch, useSelector } from 'react-redux';
-import { showAlert } from '../../../utils/helpers';
+import { handlePopup, showAlert } from '../../../utils/helpers';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import Ionicons from 'react-native-vector-icons/Ionicons';  // For delete icon (optional)
-import { setLocation, setUpdateLocation } from '../../../redux/AuthSlice';
+import { setLocation, setSetAllLocation, setUpdateLocation } from '../../../redux/AuthSlice';
 import { setSelectedPaymentString, setSelectedPaymentType } from '../../../redux/CartSlice';
 import { ScrollView } from 'react-native-gesture-handler';
 import CButton from '../../../components/Buttons/CButton';
 import Loader from '../../../components/Loader';
+import NoDataFound from '../../../components/NotFound/NoDataFound';
 
 
 
@@ -35,10 +36,6 @@ const ManageAddress = ({navigation}) => {
         getLocation()
     }, [customer_id])
 
-
-
-
-
     const deleteItem = (id) => {
 
         fetch(api.delete_location + id, {
@@ -51,13 +48,13 @@ const ManageAddress = ({navigation}) => {
             .then(response => {
                 console.log(response);
                 if (response.status === false) {
-                    showAlert(response.message)
+                    handlePopup(dispatch,response.message, 'red')
                     return;
                 }
                 else {
-                    showAlert('Location deleted successfully!', 'green')
+                    handlePopup(dispatch,'Location deleted successfully!', 'green')
                     setLocations((prevLocations) => prevLocations.filter((item) => item.location_id !== id));
-                    console.log(response.message, id);
+                    // console.log(response.message, id);
 
                 }
             })
@@ -82,24 +79,25 @@ const ManageAddress = ({navigation}) => {
             .then(response => {
 
                 if (response.status === false) {
-                    showAlert(response.message)
+                    handlePopup(dispatch,response?.message, 'red')
                     setIsLoading(false)
                 }
                 else {
-                    setLocations(response.customerData.locations)
+                    setLocations(response?.customerData?.locations)
                     // console.log(api.get_customer_location + customer_id);
 
                     setIsLoading(false)
                     // console.log(response.customerData.locations[0]);
                     dispatch(setLocation({
-                        latitude: response.customerData.locations[0].latitude,
-                        longitude: response.customerData.locations[0].longitude,
-                        address: response.customerData.locations[0].address,
-                        id: response.customerData.locations[0].location_id
+                        latitude: response?.customerData?.locations[0]?.latitude,
+                        longitude: response?.customerData?.locations[0]?.longitude,
+                        address: response?.customerData?.locations[0]?.address,
+                        id: response?.customerData?.locations[0]?.location_id
                     }))
+                    dispatch(setSetAllLocation(response?.customerData?.locations))
 
                     dispatch(setSelectedPaymentType(''));
-                    dispatch(setSelectedPaymentString(''));
+                    // dispatch(setSelectedPaymentString(''));
 
                 }
 
@@ -107,7 +105,7 @@ const ManageAddress = ({navigation}) => {
             })
             .catch(err => {
                 console.log('Error in Login :  ', err);
-                showAlert('Something went wrong!');
+                handlePopup(dispatch,'Something went wrong!', 'red');
             })
             .finally(() => {
                 setIsLoading(false);
@@ -140,9 +138,9 @@ const ManageAddress = ({navigation}) => {
             <FlatList
                 data={locations}
                 contentContainerStyle={{ alignItems: 'center' }}
+                ListEmptyComponent={() => !isLoading && <NoDataFound text={'No Location Found Kindly Add Locations'} />}
                 keyExtractor={(item) => item.location_id.toString()} // Ensure each item has a unique id
                 renderItem={({ item }) => {
-
                     return (
                         <Swipeable
                             renderRightActions={() => renderRightActions(item.location_id)} // Pass the item's id to delete

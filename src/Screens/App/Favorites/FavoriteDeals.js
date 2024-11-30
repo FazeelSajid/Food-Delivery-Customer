@@ -19,12 +19,13 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import { RFPercentage } from 'react-native-responsive-fontsize';
+import PopUp from '../../../components/Popup/PopUp';
 
 const FavoriteDeals = ({}) => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   // const [data, setData] = useState([]);
-  const customer_id = useSelector(store => store.store.customer_id)
+  const {customer_id, showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store)
   const { favoriteDeals} = useSelector(store => store.favorite);
   const dispatch = useDispatch()
   const [itemObj, setItemObj] = useState({})
@@ -152,7 +153,7 @@ const FavoriteDeals = ({}) => {
 
     // let customer_id = await AsyncStorage.getItem('customer_id');
     // console.log('customer_Id :  ', customer_id);
-    let cart = await getCustomerCart(customer_id);
+    let cart = await getCustomerCart(customer_id, dispatch);
     console.log('______cart    :  ', cart?.cart_id);
 
 
@@ -166,7 +167,7 @@ const FavoriteDeals = ({}) => {
 
     console.log('data   :  ', data);
 
-    await addItemToCart(data)
+    await addItemToCart(data, dispatch)
       .then(response => {
         console.log('response ', response);
         if (response?.status == true) {
@@ -226,7 +227,7 @@ const FavoriteDeals = ({}) => {
         cart_item_id: filter[0]?.cart_item_id,
         quantity: filter[0]?.quantity + 1,
       };
-      await updateCartItemQuantity(obj)
+      await updateCartItemQuantity(obj, dispatch)
        .then(response => {
         if (response.status === true) {
          showAlert('Item quantity updated', 'green')
@@ -255,6 +256,7 @@ const FavoriteDeals = ({}) => {
   return (
     <View style={{flex: 1,}}>
       <Loader loading={loading} />
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <FlatList
         data={favoriteDeals}
         key={numColumns}

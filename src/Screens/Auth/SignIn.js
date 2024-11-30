@@ -27,7 +27,7 @@ import {
   setSignUpWith,
   setPassword
 } from '../../redux/AuthSlice';
-import {getUserFcmToken, showAlert} from '../../utils/helpers';
+import {getUserFcmToken, handlePopup, showAlert} from '../../utils/helpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../constants/api';
 import CInputWithCountryCode from '../../components/TextInput/CInputWithCountryCode';
@@ -40,12 +40,15 @@ import CRBSheetComponent from '../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RadioButton } from 'react-native-paper';
 import Google from '../../Assets/svg/Googlee.svg';
+import PopUp from '../../components/Popup/PopUp';
 
 
 const SignIn = ({navigation, route}) => {
   const dispatch = useDispatch();
   const btmSheetRef = useRef()
   const { signUpWith } = useSelector(store => store.store)
+  const {showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store);
+
 
   const showBtmSheet = () => {
     btmSheetRef?.current?.open()
@@ -78,10 +81,10 @@ const SignIn = ({navigation, route}) => {
 
   const keyboardHeight = useKeyboard();
   const scrollViewRef = useRef();
-  useEffect(() => {
-    // scrollViewRef.current?.scrollToEnd();
-    scrollViewRef.current?.scrollTo({y: 180});
-  }, [keyboardHeight]);
+  // useEffect(() => {
+  //   // scrollViewRef.current?.scrollToEnd();
+  //   scrollViewRef.current?.scrollTo({y: 180});
+  // }, [keyboardHeight]);
 
   const [loading, setLoading] = useState(false);
   const [userValue, setUserValue] = useState(null);
@@ -100,18 +103,27 @@ const SignIn = ({navigation, route}) => {
 
   const validate = () => {
     if (!userValue || userValue.length === 0) {
-      showAlert('Please Enter email address');
-      return false;
-    } else if (!/\S+@\S+\.\S+/.test(userValue)) {
-      showAlert('Please Enter a valid email address');
+      handlePopup(dispatch, 'Please Enter email address', 'red');
       return false;
     } 
-    else if (password?.length == 0) {
-      showAlert('Please Enter Password');
+    // Check if userValue is a valid email
+    const isEmail = /\S+@\S+\.\S+/.test(userValue);
+    // Check if userValue is a valid phone number
+    const isPhone = /^[+]?[0-9]{10,15}$/.test(userValue);
+  
+    if (!isEmail && !isPhone) {
+      handlePopup(dispatch, 'Please enter a valid email or phone number', 'red');
       return false;
-    } else {
-      return true;
     }
+  
+    // Check if password is empty
+    if (!password || password.length === 0) {
+      handlePopup(dispatch, 'Please Enter Password', 'red');
+      return false;
+    }
+  
+    // All validations passed
+    return true;
   };
   // const validate = () => {
   //   if (countryCode?.length == 0) {
@@ -146,7 +158,7 @@ const SignIn = ({navigation, route}) => {
       const data = {
         email: userValue.toLowerCase(),
         password: password,
-        fcm_token: fcm_token,
+       fcm_token,
         login_type: "email"
     }
 
@@ -162,7 +174,7 @@ const SignIn = ({navigation, route}) => {
     })
       .then(response => response.json())
       .then(async response => {
-        // console.log('login response   : ', response);
+       
         if (
           response?.verified == false ||
           response?.message == 'User is not verified'
@@ -172,6 +184,7 @@ const SignIn = ({navigation, route}) => {
           //   customer_id: response?.user?.customer_id,
           //   phone_no: countryCode + phone_no,
           // });
+          // console.log('login response   : ', response.result);
           navigation?.replace('Drawer');
           dispatch(setJoinAsGuest(false));
           dispatch(
@@ -179,10 +192,15 @@ const SignIn = ({navigation, route}) => {
           );
           dispatch(setCustomerDetail(response?.user));
 
+          // dispatch(
+          //   setCustomerId(response?.result?.customer_id?.toString()),
+          // );
+          // dispatch(setCustomerDetail(response?.result));
+
           clearFields();
         } else if (response?.status == false) {
           // showAlert(response?.message);
-          showAlert('Invalid Credentials');
+          handlePopup(dispatch,'Invalid Credentials', 'red');
         } else {
           // await AsyncStorage.setItem(
           //   'customer_id',
@@ -195,10 +213,15 @@ const SignIn = ({navigation, route}) => {
           // console.log(response?.user?.customer_id?.toString(), 'id signin');
           
           dispatch(setJoinAsGuest(false));
+          // dispatch(
+          //   setCustomerId(response?.result?.customer_id?.toString()),
+          // );
+          // dispatch(setCustomerDetail(response?.result));
           dispatch(
             setCustomerId(response?.user?.customer_id?.toString()),
           );
           dispatch(setCustomerDetail(response?.user));
+         console.log('user', data)
           dispatch(setPassword(password))
           // navigation?.popToTop()
           navigation?.replace('Drawer');
@@ -207,7 +230,7 @@ const SignIn = ({navigation, route}) => {
       })
       .catch(err => {
         console.log('Error in Login :  ', err);
-        showAlert('Something went wrong!');
+        handlePopup(dispatch,'Something went wrong!', 'red');
       })
       .finally(() => {
         setLoading(false);
@@ -221,6 +244,8 @@ const SignIn = ({navigation, route}) => {
         password: password,
         fcm_token: fcm_token,
       };
+      console.log(data);
+      
 
       fetch(api.login, {
         method: 'POST',
@@ -253,7 +278,7 @@ const SignIn = ({navigation, route}) => {
             clearFields();
           } else if (response?.status == false) {
             // showAlert(response?.message);
-            showAlert('Invalid Credentials');
+            handlePopup(dispatch,'Invalid Credentials', 'red');
           } else {
             // await AsyncStorage.setItem(
             //   'customer_id',
@@ -278,7 +303,7 @@ const SignIn = ({navigation, route}) => {
         })
         .catch(err => {
           console.log('Error in Login :  ', err);
-          showAlert('Something went wrong!');
+          handlePopup(dispatch,'Something went wrong!', 'red');
           setLoading(false);
         })
         .finally(() => {
@@ -288,7 +313,7 @@ const SignIn = ({navigation, route}) => {
       console.log("Signing in with phone number:", userValue);
       // Add phone sign-in logic here
     } else {
-      showAlert("Invalid input. Please enter a valid email or phone number.");
+      handlePopup(dispatch,"Invalid input. Please enter a valid email or phone number.", 'red');
       setLoading(false);
       // Optionally handle invalid input case
     }
@@ -376,7 +401,7 @@ const SignIn = ({navigation, route}) => {
 
               clearFields();
             } else if (response?.status == false) {
-              showAlert(response?.message);
+              handlePopup(dispatch,response?.message, 'red');
             setLoading(false);
             clearFields();
 
@@ -402,7 +427,7 @@ const SignIn = ({navigation, route}) => {
           })
           .catch(err => {
             console.log('Error in Login :  ', err);
-            showAlert('Something went wrong!');
+            handlePopup(dispatch,'Something went wrong!', 'red');
           })
           .finally(() => {
             setLoading(false);
@@ -417,7 +442,7 @@ const SignIn = ({navigation, route}) => {
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         //alert('Play Services Not Available or Outdated');
       } else {
-        showAlert('Something went wrong!');
+        handlePopup(dispatch,'Something went wrong!', 'red');
       }
     }
   };
@@ -425,10 +450,12 @@ const SignIn = ({navigation, route}) => {
   return (
     <View style={STYLE.container}>
       <StatusBar translucent={true} backgroundColor={'transparent'} barStyle={'dark-content'} />
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={{flexGrow: 1}}
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+        >
         <View style={STYLE.authBGContainer}>
           <Image source={Images.authBG} style={STYLE.authBGImage} />
         </View>
@@ -486,28 +513,6 @@ const SignIn = ({navigation, route}) => {
             <Text style={STYLE.txtForgotPassword}>Forget Password?</Text>
           </TouchableOpacity>
 
-          {/* <CInput
-            placeholder="Password"
-            secureTextEntry={!showPass}
-            rightContent={
-              <TouchableOpacity onPress={() => setShowPass(!showPass)}>
-                <Feather
-                  name={!showPass ? 'eye' : 'eye-off'}
-                  size={20}
-                  color={'#39393999'}
-                />
-              </TouchableOpacity>
-            }
-          /> */}
-          {/* <TouchableOpacity
-            onPress={() => navigation.navigate('ForgetPassword')}
-            style={{
-              width: 190,
-              alignSelf: 'flex-end',
-            }}>
-            <Text style={STYLE.txtForgotPassword}>Forget Password?</Text>
-          </TouchableOpacity> */}
-
           <CButton
             title="SIGN IN"
             height={hp(6.2)}
@@ -544,17 +549,7 @@ const SignIn = ({navigation, route}) => {
             style={{marginTop: 0}}
           />
           </View>
-          {/* <View style={STYLE.socialIconContainer}>
-            <TouchableOpacity
-              onPress={() => handleGoogleSignIn()}
-              activeOpacity={0.7}
-              style={STYLE.googleIconContainer}>
-              <Image source={Images.google} />
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.7}>
-              <Icons.Facebook width={wp(13)} />
-            </TouchableOpacity>
-          </View> */}
+       
         </View>
         <CRBSheetComponent
           height={170}

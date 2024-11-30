@@ -22,10 +22,10 @@ export const GetWalletAmount = async (customer_id) => {
   });
 };
 
-export const AddPaymentToCustomerWallet = amount => {
+export const AddPaymentToCustomerWallet = (amount,customer_id ) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let customer_id = await AsyncStorage.getItem('customer_id');
+      // let customer_id = await AsyncStorage.getItem('customer_id');
       let data = {
         customer_id: customer_id,
         amount: amount,
@@ -51,15 +51,15 @@ export const AddPaymentToCustomerWallet = amount => {
   });
 };
 
-export const MakeOrderPayment = order_id => {
+export const MakeOrderPayment = (order_id,customer_id ) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let customer_id = await AsyncStorage.getItem('customer_id');
+      // let customer_id = await AsyncStorage.getItem('customer_id');
       let data = {
         customer_id: customer_id,
         order_id: order_id,
       };
-      console.log(' MakeOrderPayment data  : ', data);
+      // console.log(' MakeOrderPayment data  : ', data);
       fetch(api.make_order_payment_for_customer, {
         method: 'PUT',
         body: JSON.stringify(data),

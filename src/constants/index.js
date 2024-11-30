@@ -13,6 +13,7 @@ export const Colors = {
   // background
   Orange: '#FF5722',
   OrangeLight: '#F99145',
+  OrangeExtraLight: '#FFF6F3',
   White: '#FFFFFF',
   Black: '#000000',
   Text: '#0A212B',
@@ -254,6 +255,7 @@ import RatingWhite from '../Assets/svg/RatingWhite.svg';
 import Video from '../Assets/svg/video.svg';
 import AddSimple from '../Assets/svg/addSimple.svg';
 import LocationLogo from '../Assets/svg/LocationLogo.svg';
+import Chat from '../Assets/svg/chat.svg';
 
 export const Icons = {
   AddSimple,
@@ -348,7 +350,7 @@ export const Icons = {
   RatingWhite,
   Video,
   LocationLogo,
-
+  Chat,
   CheckCircle,
   UncheckCircle,
 };

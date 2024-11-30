@@ -35,7 +35,21 @@ const initialState = {
   customer_detail: null,
   selectedLanguage: 'English',
   signUpWith: '',
-  password : ''
+  password : '',
+  showPopUp: false,
+  popUpColor: '',
+  PopUpMesage: '',
+  walletTotalAmount: 0,
+  setAllLocation: [],
+  Bill: {
+    total_amount: 0,
+    subtotal: 0,
+    cartItemIds: [],
+    delivery_charges: 0,
+    gst_charges: 0,
+    total_amount: 0
+  },
+  contacts: [],
 }
 const AuthSlice = createSlice({
   name: 'authSlice',
@@ -99,6 +113,27 @@ const AuthSlice = createSlice({
         (query) => query!== action.payload
       );
     },
+    setShowPopUp(state, action) {
+      state.showPopUp = action.payload;
+    },
+    setPopUpColor(state, action) {
+      state.popUpColor = action.payload;
+    }, 
+    setPopUpMesage(state, action) {
+      state.PopUpMesage = action.payload;
+    },
+    setWalletTotalAmount(state, action) {
+      state.walletTotalAmount = action.payload;
+    },
+    setSetAllLocation(state, action) {
+      state.setAllLocation = action.payload;
+    },
+    setBill (state, action) {
+      state.Bill = {...state.Bill, ...action.payload}
+    },
+    setContacts (state, action) {
+      state.contacts = action.payload;
+    },
     
     resetState(state, action) {
       return initialState;
@@ -124,7 +159,14 @@ export const {
   setPromos,
   setDealsResearch,
   removeDealResearch,
-  setPassword
+  setPassword,
+  setShowPopUp,
+  setPopUpColor,
+  setPopUpMesage,
+  setWalletTotalAmount,
+  setSetAllLocation,
+  setBill,
+  setContacts,
 } = AuthSlice.actions;
 
 export default AuthSlice.reducer;

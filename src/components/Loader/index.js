@@ -6,12 +6,12 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 
-const Loader = ({loading, size, color}) => {
+const Loader = ({loading, size, color, bgColor}) => {
   return (
     <Modal visible={loading} transparent={true}>
       <View
-        style={styles.container}>
-        <ActivityIndicator size={size || "large"} color={color || Colors.Orange} />
+        style={[{backgroundColor: bgColor}, styles.container]}>
+        <ActivityIndicator  size={size || "large"} color={color || Colors.Orange} />
       </View>
     </Modal>
   );
@@ -23,8 +23,9 @@ const styles = StyleSheet.create({
   container : {
     height: hp(100),
     width: wp(100),
-    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+
   }
 });

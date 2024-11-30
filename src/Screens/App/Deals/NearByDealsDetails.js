@@ -58,13 +58,13 @@ import RBSheetRestaurantClosed from '../../../components/BottomSheet/RBSheetRest
 import { BASE_URL_IMAGE } from '../../../utils/globalVariables';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FoodCardWithRating from '../../../components/Cards/FoodCardWithRating';
+import PopUp from '../../../components/Popup/PopUp';
 
 
 const NearByDealsDetails = ({ navigation, route }) => {
   const dispatch = useDispatch();
-  const { join_as_guest } = useSelector(store => store.store);
+  const { join_as_guest,  showPopUp, popUpColor, PopUpMesage, customer_id } = useSelector(store => store.store);
   const { cart, cart_restaurant_id, my_cart } = useSelector(store => store.cart);
-  const customer_id = useSelector(store => store.store.customer_id)
   const { favoriteDeals, favoriteItems } = useSelector(store => store.favorite);
   
 
@@ -250,7 +250,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
   const add_item_to_cart = async () => {
     setLoading(true);
     // let customer_id = await AsyncStorage.getItem('customer_id');
-    let cart = await getCustomerCart(customer_id);
+    let cart = await getCustomerCart(customer_id, dispatch);
 
     if (count == 0) {
       showAlert('Please select quantity');
@@ -265,7 +265,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
       };
       console.log('data   :  ', data);
 
-      await addItemToCart(data)
+      await addItemToCart(data, dispatch)
         .then(response => {
           // console.log('response ', response);
           if (response?.status == true) {
@@ -321,7 +321,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
         cart_item_id: filter[0]?.cart_item_id,
         quantity: filter[0]?.quantity + count,
       };
-      await updateCartItemQuantity(obj);
+      await updateCartItemQuantity(obj, dispatch);
       // also update quantity in redux
       const newData = my_cart?.map(item => {
         if (item?.item_id == route?.params?.id) {
@@ -408,6 +408,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
           showTitle={false}
           title={'Details'}
         /> */}
+              {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
 
         <StatusBar backgroundColor={Colors.White} barStyle={'light-content'} />
         <View style={{ flex: 1 }}>

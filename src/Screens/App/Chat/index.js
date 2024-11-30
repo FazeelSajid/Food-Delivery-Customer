@@ -10,26 +10,26 @@ import {
 
 import StackHeader from '../../../components/Header/StackHeader';
 import Riders from './Riders';
-import Restaurants from './Restaurants';
+import Restaurants from './Messages';
 import {Badge} from 'react-native-paper';
 
 const Chat = () => {
-  const renderScene = SceneMap({
-    first: Riders,
-    second: Restaurants,
-  });
+  // const renderScene = SceneMap({
+  //   first: Riders,
+  //   second: Restaurants,
+  // });
 
-  const layout = useWindowDimensions();
+  // const layout = useWindowDimensions();
 
-  const [index, setIndex] = React.useState(0);
-  const [routes] = React.useState([
-    {key: 'first', title: 'Riders'},
-    {key: 'second', title: 'Restaurants'},
-  ]);
+  // const [index, setIndex] = React.useState(0);
+  // const [routes] = React.useState([
+  //   {key: 'first', title: 'Riders'},
+  //   {key: 'second', title: 'Restaurants'},
+  // ]);
   return (
     <View style={{flex: 1, backgroundColor: Colors.White}}>
-      <StackHeader title={'My Chats'} />
-      <TabView
+      {/* <StackHeader title={'My Chats'} /> */}
+      {/* <TabView
         navigationState={{index, routes}}
         renderScene={renderScene}
         onIndexChange={setIndex}
@@ -84,7 +84,8 @@ const Chat = () => {
             }}
           />
         )}
-      />
+      /> */}
+      <Restaurants/>
     </View>
   );
 };

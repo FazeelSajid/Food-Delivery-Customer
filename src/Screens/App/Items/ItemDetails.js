@@ -30,6 +30,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   checkRestaurantTimings,
   getRestaurantDetail,
+  handlePopup,
   showAlert,
 } from '../../../utils/helpers';
 import CButton from '../../../components/Buttons/CButton';
@@ -60,19 +61,35 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RadioButton } from 'react-native-paper';
 import Heart from '../../../Assets/svg/HeartWhite.svg';
 import HeartActive from '../../../Assets/svg/HeartActiveWhite.svg';
+import PopUp from '../../../components/Popup/PopUp';
+import NoDataFound from '../../../components/NotFound/NoDataFound';
 
 
 const ItemDetails = ({ navigation, route }) => {
   const ref_RBSheetSuccess = useRef();
   const dispatch = useDispatch();
-  const { join_as_guest } = useSelector(store => store.store);
+  const { customer_id, showPopUp, popUpColor, PopUpMesage, join_as_guest } = useSelector(store => store.store)
+
   const { cart, cart_restaurant_id, my_cart } = useSelector(store => store.cart);
   const ref_RBSheet = useRef();
   const ref_cartAlert = useRef();
   const ref_RBSheetResClosed = useRef();
-  const { customer_id } = useSelector(store => store.store);
-  const { favoriteItems} = useSelector(store => store.favorite);
+  const { favoriteItems } = useSelector(store => store.favorite);
 
+  const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+
+  const [count, setCount] = useState(0);
+
+  const [itemDetail, setItemDetail] = useState('');
+  const [restaurantDetails, setRestaurantDetails] = useState('');
+
+  const [data, setData] = useState([]);
+
+  // const [isFavorite, setIsFavorite] = useState(false);
+
+  const [restaurant_timings, setRestaurant_timings] = useState('')
 
   const btmSheetRef = useRef()
 
@@ -84,6 +101,7 @@ const ItemDetails = ({ navigation, route }) => {
   });
   const [variationPrice, setVariationPrice] = useState(null);
 
+  // console.log(route?.params?.id);
 
 
   // Function to handle radio button press
@@ -92,54 +110,42 @@ const ItemDetails = ({ navigation, route }) => {
   const showBtmSheet = () => {
     // setSelectedVariation(null)
     btmSheetRef?.current?.open()
+
+
+
   }
   const closeBtmSheet = () => {
     btmSheetRef?.current?.close()
   }
+  // console.log(my_cart);
 
-  const checkVariationInCart = (variation_id) =>{
+  const checkVariationInCart = (variation_id) => {
     const filter = my_cart?.filter(
-      item => item?.item_id == route?.params?.id ,
+      item => item?.item_id == route?.params?.id,
     );
-    // console.log(filter, 'filter');
-    // const OtherFilter = filter.filter(
-    //   item => item.variation_id === id
-    // )
-    
     if (filter?.length > 0) {
-      const checkVariation = filter?.filter(
-        item =>
-          item?.variation_id == variation_id,
-      )
-      if (checkVariation.length > 0) {
-        console.log(checkVariation[0]?.quantity);
-        setCount(checkVariation[0]?.quantity)
-        return checkVariation
-      }else{
-        setCount(0)
-        return []
-      }
-    }  
+      const totalQuantity = filter.reduce((sum, item) => sum + item.quantity, 0);
+      setCount(totalQuantity)
+      // const checkVariation = filter?.filter(
+      //   item =>
+      //     item?.variation_id == variation_id,
+      // )
+      // if (checkVariation.length > 0) {
+      //   console.log(checkVariation[0]?.quantity);
+      //   setCount(checkVariation[0]?.quantity)
+      //   return checkVariation
+      // }else{
+      //   setCount(0)
+      //   return []
+      // }
+    }
   }
 
-  const isItemFavorite = (id) => {    
+  const isItemFavorite = (id) => {
     return favoriteItems.some(item => item?.item?.item_id === id);
   };
   const isFavorite = isItemFavorite(route?.params?.id)
-
-  const [visible, setVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const [count, setCount] = useState(0);
-
-  const [itemDetail, setItemDetail] = useState('');
-  const [restaurantDetails, setRestaurantDetails] = useState('');
-
-  const [data, setData] = useState([]);
-
-  // const [isFavorite, setIsFavorite] = useState(false);
-
-  const [restaurant_timings, setRestaurant_timings] = useState('');
+    ;
 
   // const removeFavorite = async id => {
   //   setLoading(true);
@@ -231,7 +237,7 @@ const ItemDetails = ({ navigation, route }) => {
   //             element => element?.cart_item_id != item?.cart_item_id,
   //           );
   //           // console.log('filter, from remove from cart' ,filter );
-            
+
   //           setData(filter);
   //           dispatch(addToCart(filter));
 
@@ -260,81 +266,79 @@ const ItemDetails = ({ navigation, route }) => {
   //   }
   // };
 
-  const handleOnRemove =async () => {
+  const handleOnRemove = async () => {
     // setLoading(true);
 
-   const checkVariation =  checkVariationInCart(selectedVariation.variation_id)
-  //  console.log(checkVariation);
-   
+    const checkVariation = checkVariationInCart(selectedVariation.variation_id)
+    //  console.log(checkVariation);
+
     if (count === 0) {
       return
-    }else if (count === 1 && checkVariation.length > 0) {
-      removeItemFromCart(checkVariation[0]?.cart_id,checkVariation[0]?.cart_item_id)
-      .then(response => {
-        if (response?.status == true) {
-          console.log('response  :  ', response);
-          const filter = my_cart.filter(
-            element => element?.cart_item_id != checkVariation?.cart_item_id,
-          );
-          // console.log('filter, from remove from cart' ,filter );
-          setCount(0)
-          dispatch(addToCart(filter));
+    } else if (count === 1 && checkVariation.length > 0) {
+      removeItemFromCart(checkVariation[0]?.cart_id, checkVariation[0]?.cart_item_id, dispatch)
+        .then(response => {
+          if (response?.status == true) {
+            console.log('response  :  ', response);
+            const filter = my_cart.filter(
+              element => element?.cart_item_id != checkVariation?.cart_item_id,
+            );
+            // console.log('filter, from remove from cart' ,filter );
+            setCount(0)
+            dispatch(addToCart(filter));
 
-          //my_cart
-          dispatch(removeItemFromMyCart (item?.cart_item_id));
-          dispatch(updateMyCartList(filter));
+            //my_cart
+            dispatch(removeItemFromMyCart(item?.cart_item_id));
+            dispatch(updateMyCartList(filter));
 
-         
-        } else {
-          setTimeout(() => {
-            showAlert(response?.message);
-          }, 500);
-        }
-      })
-      .catch(error => {
-        console.log('error: ', error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+
+          } else {
+            handlePopup(dispatch, response?.message, 'red');
+          }
+        })
+        .catch(error => {
+          console.log('error: ', error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
-    else{
+    else {
       let obj = {
         cart_item_id: checkVariation[0]?.cart_item_id,
-        quantity: count-1,
+        quantity: count - 1,
       };
 
       // console.log(obj);
-      
-       updateCartItemQuantity(obj)
-      .then (response => {
-        if (response.status === true) {
-          const newData = my_cart?.map(item => {
-            if (item?.item_id == route?.params?.id) {
-              return {
-                ...item,
-                quantity: checkVariation[0]?.quantity - 1,
-              };
-            } else {
-              return { ...item };
-            }
-          });
-          setCount(count-1)
-          dispatch(addToCart(newData));
-          dispatch(updateMyCartList(newData));    
-          showAlert(response.message, 'green')
-        } else {
-          showAlert(response.message)
-        }
-      })
+
+      updateCartItemQuantity(obj, dispatch)
+        .then(response => {
+          if (response.status === true) {
+            const newData = my_cart?.map(item => {
+              if (item?.item_id == route?.params?.id) {
+                return {
+                  ...item,
+                  quantity: checkVariation[0]?.quantity - 1,
+                };
+              } else {
+                return { ...item };
+              }
+            });
+            setCount(count - 1)
+            dispatch(addToCart(newData));
+            dispatch(updateMyCartList(newData));
+            handlePopup(dispatch, response.message, 'green')
+          } else {
+            handlePopup(dispatch, response.message, 'red')
+          }
+        })
 
       // also update quantity in redux
-      
+
       // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
       // ref_RBSheetSuccess?.current?.open();
     }
 
-    
+
 
     // // remove all items of previous restaurant
     // clearCartItems()
@@ -380,41 +384,41 @@ const ItemDetails = ({ navigation, route }) => {
     setLoading(true);
     // let customer_id = await AsyncStorage.getItem('customer_id');
     console.log('customer_Id :  ', customer_id);
-    let cart = await getCustomerCart(customer_id);
+    let cart = await getCustomerCart(customer_id, dispatch);
     console.log('______cart    :  ', cart?.cart_id);
-      let data = {
-        item_id: route?.params?.id?.toString(),
-        cart_id: cart?.cart_id?.toString(),
-        item_type: 'item',
-        comments: 'Adding item in cart',
-        quantity: count?.toString(),
-        variation_id: selectedVariation?.variation_id
-      };
+    let data = {
+      item_id: route?.params?.id?.toString(),
+      cart_id: cart?.cart_id?.toString(),
+      item_type: 'item',
+      comments: 'Adding item in cart',
+      quantity: count?.toString(),
+      variation_id: selectedVariation?.variation_id
+    };
 
-      console.log('data   :  ', data);
+    console.log('data   :  ', data);
 
-      await addItemToCart(data)
-        .then(response => {
-          console.log('response ', response);
-          if (response?.status == true) {
-            // navigation?.navigate('MyCart');
-            // cart_restaurant_id
-            dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-            //my_cart
-            dispatch(addItemToMYCart(response?.result));
-            // setSelectedVariation(null)
+    await addItemToCart(data, dispatch)
+      .then(response => {
+        console.log('response ', response);
+        if (response?.status == true) {
+          // navigation?.navigate('MyCart');
+          // cart_restaurant_id
+          dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+          //my_cart
+          dispatch(addItemToMYCart(response?.result));
+          // setSelectedVariation(null)
 
-            ref_RBSheetSuccess?.current?.open();
-          } else {
-            showAlert(response?.message);
-          }
-        })
-        .catch(error => {
-          console.log('error  :  ', error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+          ref_RBSheetSuccess?.current?.open();
+        } else {
+          handlePopup(dispatch, response?.message, 'red');
+        }
+      })
+      .catch(error => {
+        console.log('error  :  ', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   // const filter = my_cart?.filter(
@@ -422,15 +426,29 @@ const ItemDetails = ({ navigation, route }) => {
   // );
   // console.log(filter, 'filter');
 
-  
-  
+useEffect(()=> {
 
-  const handleAddToCart = async () => {
+  if (itemDetail?.item_prices?.length === 1) {
+  //  console.log(itemDetail.item_prices[0]);
+   setSelectedVariation({
+    variation_id: itemDetail.item_prices[0].variation_id,
+    variation_name: itemDetail.item_prices[0].variation_name,
+    variation_price: itemDetail.item_prices[0].price,
+  });
+
+  checkVariationInCart(itemDetail.item_prices[0].variation_id)
+
+   
+  }
+}, [itemDetail])
+
+
+  const handleAddToCart = async (variation_id,) => {
     // console.log(id, 'id');
     // setSelectedVariation(id)
 
     if (count == 0) {
-      showAlert('Please select quantity');
+      handlePopup(dispatch, 'Please select quantity', 'red');
       setLoading(false);
     } else {
       const filter = my_cart?.filter(
@@ -440,9 +458,9 @@ const ItemDetails = ({ navigation, route }) => {
       // const OtherFilter = filter.filter(
       //   item => item.variation_id === id
       // )
-      
-      
-        // checkVariationInCart(selectedVariation.variation_id)
+
+
+      // checkVariationInCart(selectedVariation.variation_id)
       if (filter?.length > 0) {
         const checkVariation = filter?.filter(
           item =>
@@ -450,20 +468,20 @@ const ItemDetails = ({ navigation, route }) => {
         )
 
         // console.log( 'checkVariation', checkVariation.length > 0);
-        
+
 
         if (checkVariation.length === 0) {
           add_item_to_cart();
           // closeBtmSheet()
         } else {
           // console.log('check variation icon' , checkVariation);
-          
+
           let obj = {
             cart_item_id: checkVariation[0]?.cart_item_id,
             quantity: count,
           };
 
-          await updateCartItemQuantity(obj);
+          await updateCartItemQuantity(obj, dispatch);
 
           // also update quantity in redux
           const newData = my_cart?.map(item => {
@@ -480,18 +498,18 @@ const ItemDetails = ({ navigation, route }) => {
           dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
           ref_RBSheetSuccess?.current?.open();
         }
-       
+
       } else {
         add_item_to_cart();
         // closeBtmSheet()
-  
+
       }
-     
+
     }
-    
+
 
     // if item already exists in card then we will only update quantity of that item
-   
+
     // setLoading(true);
     // let time_obj = await checkRestaurantTimings(
     //   restaurantDetails?.restaurant_id,
@@ -533,32 +551,32 @@ const ItemDetails = ({ navigation, route }) => {
     // }
   };
 
- 
+
 
   // console.log( checkVariationInCart(selectedVariation.variation_id), 'checkVariationInCart');
 
 
   const getItemDetails = async id => {
-    setLoading(true);
+    setFetching(true);
     fetch(api.get_item_detail + id)
       .then(response => response.json())
       .then(async response => {
-        let list = response?.result ? response?.result : {};
-        setItemDetail(list);
+        let food = response?.result ? response?.result : {};
+        setItemDetail(response?.result ? response?.result : {});
         setSelectedVariation({
-          variation_id:  list?.item_prices[0]?.variation_id,
-          variation_name: list?.item_prices[0]?.variation_name,
-          variation_price: list?.item_prices[0]?.price
+          variation_id: food?.item_prices[0]?.variation_id,
+          variation_name: food?.item_prices[0]?.variation_name,
+          variation_price: food?.item_prices[0]?.price
 
         })
 
-        checkVariationInCart(list?.item_prices[0]?.variation_id)
+        checkVariationInCart(food?.item_prices[0]?.variation_id)
 
-      
-        let restaurant_details = await getRestaurantDetail(list?.restaurant_id);
-        setRestaurantDetails(restaurant_details);
+
+        // let restaurant_details = await getRestaurantDetail(food?.restaurant_id);
+        // setRestaurantDetails(restaurant_details);
         let imageList = [];
-        for (const item of list?.images) {
+        for (const item of food?.images) {
           let obj = {
             image: item,
           };
@@ -567,7 +585,7 @@ const ItemDetails = ({ navigation, route }) => {
         setData(imageList);
       })
       .catch(err => console.log('error : ', err))
-      .finally(() => setLoading(false));
+      .finally(() => setFetching(false));
   };
 
   // useEffect(() => {
@@ -575,13 +593,14 @@ const ItemDetails = ({ navigation, route }) => {
   // }, [route?.params]);
 
   useEffect(() => {
+    setFetching(true)
     let item_id = route?.params?.id;
     if (item_id) {
       getItemDetails(item_id);
 
     }
 
-    
+
   }, []);
 
 
@@ -596,7 +615,7 @@ const ItemDetails = ({ navigation, route }) => {
         cart_item_id: filter[0]?.cart_item_id,
         quantity: filter[0]?.quantity + count,
       };
-      await updateCartItemQuantity(obj);
+      await updateCartItemQuantity(obj, dispatch);
       // also update quantity in redux
       const newData = my_cart?.map(item => {
         if (item?.item_id == route?.params?.id) {
@@ -618,7 +637,7 @@ const ItemDetails = ({ navigation, route }) => {
 
     }
 
-    
+
   };
   // useFocusEffect(
   //   React.useCallback(() => {
@@ -631,214 +650,163 @@ const ItemDetails = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <Loader loading={loading} />
+      <Loader loading={fetching} bgColor={Colors.White} />
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, backgroundColor: Colors.Orange }}>
-        <StatusBar backgroundColor={Colors.Orange} barStyle={'light-content'} />
-        <StackHeader
-          enableStatusBar={false}
-          titleColor={'white'}
-          backIconColor={'white'}
-          title={'Details'}
-          rightIcon={
-            <TouchableOpacity
-              onPress={() => {
-                if (join_as_guest) {
-                  ref_RBSheet?.current?.open();
-                } else {
-                  isFavorite
-                    ? removeFavoriteitem( route?.params?.id ,customer_id, favoriteItems, dispatch, showAlert)
-                    : addFavoriteitem( route?.params?.id ,customer_id, dispatch, showAlert)
+        contentContainerStyle={{ flexGrow: 1, }}>
+        {
+          itemDetail ?
+            <View style={{ flexGrow: 1, backgroundColor: Colors.Orange }} >
+              <StatusBar backgroundColor={loading ? Colors.White : Colors.Orange} barStyle={'light-content'} />
+              <StackHeader
+                enableStatusBar={false}
+                titleColor={'white'}
+                backIconColor={'white'}
+                title={'Details'}
+                rightIcon={
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (join_as_guest) {
+                        ref_RBSheet?.current?.open();
+                      } else {
+                        isFavorite
+                          ? removeFavoriteitem(route?.params?.id, customer_id, favoriteItems, dispatch)
+                          : addFavoriteitem(route?.params?.id, customer_id, dispatch)
+                      }
+                    }}
+                  >
+                    {isFavorite ? (
+                      <HeartActive />
+                    ) : (
+                      <Heart />
+                    )}
+                  </TouchableOpacity>
                 }
-              }}
-            >
-              {isFavorite ? (
-                <HeartActive/>
-              ) : (
-                <Heart/>
-              )}
-            </TouchableOpacity>
-          }
-        //   rightIcon={
-        //     <View
-        //       style={{
-        //         flexDirection: 'row',
-        //         alignItems: 'center',
-        //         justifyContent: 'space-between',
-        //         width: 60,
-        //         height: route?.params?.nav_screen == 'home' ? 80 : 0,
-        //       }}>
-        //       <TouchableOpacity
-        //         onPress={() =>
-        //           navigation.navigate('UpdateItem', {
-        //             id: route?.params?.id,
-        //           })
-        //         }>
-        //         <Icons.EditWhite />
-        //       </TouchableOpacity>
-        //       <TouchableOpacity
-        //         onPress={() => {
-        //           // setVisible(!visible);
-        //           ref_RBSheet?.current?.open();
-        //         }}>
-        //         <Icons.DeleteWhite />
-        //       </TouchableOpacity>
-        //     </View>
-        //   }
-        />
-        <View style={{ flex: 1 }}>
-          <View style={{ paddingHorizontal: 25 }}>
-            {/* <Text style={styles.restaurantName}>
-              {restaurantDetails?.user_name}
-            </Text> */}
-            <View style={styles.rowViewSB}>
-              <Text style={{ ...styles.restaurantName, flex: 1 }}>
-                {restaurantDetails?.user_name}
-              </Text>
-              {/* <Text style={{...styles.restaurantName, flex: 0.3}}>
-                Quantity
-              </Text> */}
-            </View>
-            {/* <Text style={styles.itemName}>{itemDetail?.item_name}</Text> */}
-            <View style={styles.rowViewSB}>
-              <Text style={{ ...styles.itemName, flex: 1 }}>
-                {itemDetail?.item_name}
-              </Text>
-              <View
-                style={{
-                  ...styles.rowView,
-                  backgroundColor: '#FFFFFF4F',
-                  borderRadius: 15,
-                }}>
-                <TouchableOpacity
-                  onPress={() => handleOnRemove()}
-                  style={{paddingHorizontal: 10, paddingVertical: 5}}>
-                  <AntDesign name="minus" color="white" size={16} />
-                </TouchableOpacity>
-                <Text
-                  style={{
-                    color: '#FFFFFF',
-                    fontFamily: Fonts.PlusJakartaSans_Bold,
-                    fontSize: RFPercentage(1.7),
-                    marginTop: -2,
-                  }}>
-                  {count}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => onIncrement()}
-                  style={{paddingHorizontal: 10, paddingVertical: 5}}>
-                  <AntDesign name="plus" color="white" size={16} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: 'white',
-              borderTopLeftRadius: 30,
-              borderTopRightRadius: 30,
-              marginTop: 5,
-            }}>
-
-
-            {/* <ImageSlider data={data} marginBottom={1} /> */}
-            <ImageSliderCircle data={data} marginBottom={1} />
-            <View style={{ paddingHorizontal: 20, flex: 1, }}>
-              <View style={styles.AboutContainer}>
-                <View style={styles.rowViewSB} >
-                  <View style={styles.variationContainer} >
-                    <TouchableOpacity onPress={showBtmSheet}  style={[styles.rowViewSB, {alignItems: 'center'}]} >
-                      <Text style={styles.sizeText} >Size</Text>
-                      <Ionicons name={'chevron-down'} size={19} color={Colors.Orange} />
-                    </TouchableOpacity>
-                    <Text style={styles.variationName} >{selectedVariation?.variation_name}</Text>
+              />
+              <View style={{ flex: 1 }}>
+                <View style={{ paddingHorizontal: 25 }}>
+                  <View style={styles.rowViewSB}>
+                    <Text style={{ ...styles.itemName, flex: 1 }}>
+                      {itemDetail?.item_name}
+                    </Text>
+                    <View
+                      style={{
+                        ...styles.rowView,
+                        backgroundColor: '#FFFFFF4F',
+                        borderRadius: 15,
+                      }}>
+                      <TouchableOpacity
+                        onPress={() => handleOnRemove()}
+                        style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
+                        <AntDesign name="minus" color="white" size={16} />
+                      </TouchableOpacity>
+                      <Text
+                        style={{
+                          color: '#FFFFFF',
+                          fontFamily: Fonts.PlusJakartaSans_Bold,
+                          fontSize: RFPercentage(1.7),
+                          marginTop: -2,
+                        }}>
+                        {count}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => onIncrement()}
+                        style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
+                        <AntDesign name="plus" color="white" size={16} />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <Text style={styles.priceTxt} >£ {selectedVariation?.variation_price}</Text>
                 </View>
-
-                {/* <Text
-                  style={styles.variationTxt}>
-                  Variations
-                </Text> */}
-
-                {/* {
-                  itemDetail?.item_prices?.map((item, i) => {
-                    return (
-                      <View key={i} >
-                        <Text
-                          style={styles.variationName}>
-                          {item.variation_name}
-                        </Text>
-                        <Text
-                          >
-                          •  Price: £ {item.price}
-                        </Text>
-                      </View>
-                    )
-                  })
-                } */}
-
-                
-
-
-                <Text
-                  style={styles.descriptionTxt}>
-                    About the Food
-                </Text>
-                <Text
-                  style={styles.description}>
-                  {itemDetail?.description}
-                </Text>
-
-              </View>
-              {/* <View style={{...styles.rowViewSB, marginVertical: 7}}>
-                <Text style={styles.title}>About the Food</Text>
-                <Text
+                <View
                   style={{
-                    color: '#02010E',
-                    fontFamily: Fonts.PlusJakartaSans_Bold,
-                    fontSize: RFPercentage(2.5),
+                    flex: 1,
+                    backgroundColor: 'white',
+                    borderTopLeftRadius: 30,
+                    borderTopRightRadius: 30,
+                    marginTop: 5,
                   }}>
-                  ${itemDetail?.price}
-                </Text>
-              </View> */}
 
-            </View>
-            <ItemSeparator width={wp(100)} />
-            {/* <View
-              style={{
-                ...styles.rowViewSB,
-                marginVertical: 10,
-                paddingHorizontal: 20,
-              }}> */}
-              <View style={{marginBottom: wp(2)}} >
-                <CButton
-                  title="Add to Cart"
-                  // width={wp(70)}
-                  width={wp(90)}
-                  height={hp(6)}
-                  marginTop={-2}
-                  marginBottom={1}
-                  textStyle={{ textTransform: 'none' }}
-                  onPress={() => {
-                    console.log('join_as_guest  : ____ ', join_as_guest);
-                    if (join_as_guest) {
-                      ref_RBSheet?.current?.open();
-                    } else {
-                      handleAddToCart()
+
+                  {/* <ImageSlider data={data} marginBottom={1} /> */}
+                  <ImageSliderCircle data={data} marginBottom={1} />
+                  <View style={{ paddingHorizontal: 20, flex: 1, }}>
+                    {
+                      itemDetail?.item_prices?.length > 1 ? <View style={styles.AboutContainer}>
+                        <View style={styles.rowViewSB} >
+
+                          <View style={styles.variationContainer} >
+                            <TouchableOpacity onPress={showBtmSheet} style={[styles.rowViewSB, { alignItems: 'center' }]} >
+                              <Text style={styles.sizeText} >Variations</Text>
+                              <Ionicons name={'chevron-down'} size={19} color={Colors.Orange} />
+                            </TouchableOpacity>
+                            <Text style={styles.variationName} >{selectedVariation?.variation_name}</Text>
+                          </View>
+                          <Text style={styles.priceTxt} >£ {selectedVariation?.variation_price}</Text>
+                        </View>
+                        {/* <Vi></Vi> */}
+
+                        <Text
+                          style={styles.descriptionTxt}>
+                          About the Food
+                        </Text>
+                        <Text
+                          style={styles.description}>
+                          {itemDetail?.description}
+                        </Text>
+
+                      </View>
+                        : <View style={styles.AboutContainer} >
+                          <View style={styles.rowViewSB}>
+                          <Text
+                            style={[styles.descriptionTxt, {marginTop: 0}]}>
+                            About the Food
+                          </Text>
+                          <Text style={[styles.priceTxt]} >£ {selectedVariation?.variation_price}</Text>
+                          </View>
+                          <Text
+                          style={styles.description}>
+                          {itemDetail?.description}
+                        </Text>
+                        
+
+                        </View>
                     }
-                  }}
-                />
-              {/* </View> */}
-              {/* <TouchableOpacity onPress={() => navigation.navigate('Checkout')}>
-                <Icons.Checkout />
-              </TouchableOpacity> */}
-            
+
+                  </View>
+                  <ItemSeparator width={wp(100)} />
+                  <View style={{ marginBottom: wp(2) }} >
+                    <CButton
+                      title="Add to Cart"
+                      // width={wp(70)}
+                      loading={loading}
+                      width={wp(90)}
+                      height={hp(6)}
+                      marginTop={-2}
+                      marginBottom={1}
+                      textStyle={{ textTransform: 'none' }}
+                      onPress={() => {
+                        console.log('join_as_guest  : ____ ', join_as_guest);
+                        if (join_as_guest) {
+                          ref_RBSheet?.current?.open();
+                        } else {
+                          handleAddToCart()
+                        }
+                      }}
+                    />
+                  </View>
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
+            : <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }} >
+              <StackHeader
+                enableStatusBar={false}
+                titleColor={Colors.Orange}
+                backIconColor={Colors.Orange}
+                title={'Details'}
+              /><NoDataFound text={'Oops Something went wrong'} svgHeight={hp(20)} /></View>
+        }
       </ScrollView>
+
 
       <RBSheetOtherRestaurantCartItem
         refRBSheet={ref_cartAlert}
@@ -859,20 +827,16 @@ const ItemDetails = ({ navigation, route }) => {
 
       <RBSheetGuestUser
         refRBSheet={ref_RBSheet}
-        // title={'Attention'}
-        // description={'Please Sign up before ordering'}
         btnText={'OK'}
         onSignIn={() => {
           ref_RBSheet?.current?.close();
           navigation?.popToTop();
           navigation?.replace('SignIn');
-          // navigation?.goBack();
         }}
         onSignUp={() => {
           ref_RBSheet?.current?.close();
           navigation?.popToTop();
           navigation?.replace('SignUp');
-          // navigation?.goBack();
         }}
       />
 
@@ -882,7 +846,6 @@ const ItemDetails = ({ navigation, route }) => {
         btnText={'OK'}
         onPress={() => {
           ref_RBSheetSuccess?.current?.close();
-          // navigation.goBack();
         }}
       />
 
@@ -903,8 +866,6 @@ const ItemDetails = ({ navigation, route }) => {
             style={{
               height: 110,
               width: 110,
-              //   marginBottom: 10,
-              //   aspectRatio: 1,
             }}>
             <Lottie
               source={Images.success_check}
@@ -939,27 +900,27 @@ const ItemDetails = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
             {itemDetail?.item_prices?.map((variation, i) => (
-              <View key={i} style={[styles.rowViewSB, {borderBottomColor: Colors.borderGray, borderBottomWidth: wp(0.3), paddingBottom: wp(1)}]}>
-                <View style={styles.rowView } > 
-                <RadioButton
-                  color={Colors.Orange} // Custom color for selected button
-                  uncheckedColor={Colors.Orange} // Color for unselected buttons
-                  status={selectedVariation?.variation_id === variation?.variation_id ? 'checked' : 'unchecked'}
-                  onPress={() => {
-                    setSelectedVariation({
-                      variation_id: variation.variation_id,
-                      variation_name: variation.variation_name,
-                      variation_price: variation.price,
-                    });
+              <View key={i} style={[styles.rowViewSB, { borderBottomColor: Colors.borderGray, borderBottomWidth: wp(0.3), paddingBottom: wp(1) }]}>
+                <TouchableOpacity style={styles.rowView} >
+                  <RadioButton
+                    color={Colors.Orange} // Custom color for selected button
+                    uncheckedColor={Colors.Orange} // Color for unselected buttons
+                    status={selectedVariation?.variation_id === variation?.variation_id ? 'checked' : 'unchecked'}
+                    onPress={() => {
+                      setSelectedVariation({
+                        variation_id: variation.variation_id,
+                        variation_name: variation.variation_name,
+                        variation_price: variation.price,
+                      });
 
-                    checkVariationInCart(variation.variation_id)
-                   
-                    closeBtmSheet()
-                    
-                  }}
-                />
-                <Text style={styles.variationText}>{variation.variation_name}</Text>
-                </View>
+                      checkVariationInCart(variation.variation_id)
+
+                      closeBtmSheet()
+
+                    }}
+                  />
+                  <Text style={styles.variationText}>{variation.variation_name}</Text>
+                </TouchableOpacity>
                 <Text style={styles.variationText}>£ {variation?.price}</Text>
               </View>
             ))}
@@ -1106,13 +1067,13 @@ const styles = StyleSheet.create({
     borderRadius: 15,
 
   },
-  variationContainer:{
+  variationContainer: {
     borderColor: Colors.Orange,
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: wp(2),
     // alignItems: 'center',
-    
+
   },
   variationTxt: {
     color: '#02010E',
@@ -1129,12 +1090,12 @@ const styles = StyleSheet.create({
     color: '#02010E',
     fontFamily: Fonts.PlusJakartaSans_Medium,
   },
-  sizeText:{
+  sizeText: {
     color: Colors.Orange,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.2),
     marginRight: wp(4)
-    
+
 
   }
 

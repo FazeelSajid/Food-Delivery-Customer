@@ -8,6 +8,7 @@ import {
   ScrollView,
   RefreshControl,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { RFPercentage } from 'react-native-responsive-fontsize';
@@ -30,10 +31,10 @@ import {
   getEstimatedDeliveryTime,
 } from '../../utils/helpers/location';
 import NoDataFound from '../../components/NotFound/NoDataFound';
-import { fetchApis, getCustomerDetail, showAlert } from '../../utils/helpers';
+import { fetchApis, fetchApisGet, getCustomerDetail, handlePopup, showAlert } from '../../utils/helpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
-import { resetState, setLocation, setPromos, setCurrentLocation } from '../../redux/AuthSlice';
+import { resetState, setLocation, setPromos, setCurrentLocation, setWalletTotalAmount, setSetAllLocation, setContacts } from '../../redux/AuthSlice';
 import { Badge, RadioButton } from 'react-native-paper';
 import CRBSheetComponent from '../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -43,41 +44,35 @@ import WhiteCart from '../../Assets/svg/WhiteCart.svg';
 import { addFavoriteDeal, addFavoriteitem, getFavoriteDeals, getFavoriteItem, removeFavoriteitem } from '../../utils/helpers/FavoriteApis';
 import { removeFavoriteDeal } from '../../utils/helpers/FavoriteApis';
 import FoodCards from '../../components/Cards/FoodCards';
-import { addItemToCart, getCustomerCart, updateCartItemQuantity } from '../../utils/helpers/cartapis';
-import { addItemToMYCart, updateMyCartList } from '../../redux/CartSlice';
+import { addItemToCart, getCartItems, getCustomerCart, updateCartItemQuantity } from '../../utils/helpers/cartapis';
+import { addItemToMYCart, addToCart, setCartRestaurantId, setSelectedPaymentString, setSelectedPaymentType, updateMyCartList } from '../../redux/CartSlice';
 import RBSheetSuccess from '../../components/BottomSheet/RBSheetSuccess';
 import DealCard from '../../components/Cards/DealCard';
+import ItemLoading from '../../components/Loader/ItemLoading';
+import { GetWalletAmount } from '../../utils/helpers/walletApis';
+import PopUp from '../../components/Popup/PopUp';
+import RBSheetGuestUser from '../../components/BottomSheet/RBSheetGuestUser';
+import { io } from 'socket.io-client';
 
 
 const Dashboard = ({ navigation, route }) => {
   const dispatch = useDispatch();
-  const { location, customer_detail, customer_id, cuisines, items, deals, promos, currentLocation } = useSelector(store => store.store);
-  const { cart, my_cart } = useSelector(store => store.cart);
+  const { location, customer_detail, customer_id, cuisines, items, deals, promos, currentLocation, walletTotalAmount, showPopUp, popUpColor, PopUpMesage, join_as_guest } = useSelector(store => store.store);
+  const { cart_restaurant_id, my_cart } = useSelector(store => store.cart);
   const { favoriteItems, favoriteDeals } = useSelector(store => store.favorite);
   const [variations, setVariations] = useState([])
   const [itemName, setItemName] = useState('')
   const [itemObj, setItemObj] = useState({})
-
-
-  // console.log(customer_detail);
-
-
-
-
-
-
-  // console.log(customer_id, 'stte');
-
   const isFocused = useIsFocused();
   const [isSearch, setIsSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [itemLoading, setItemLoading] = useState(false);
+  const [dealLoading, setDealLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [refresh, setRefresh] = useState(false);
-
   const [showFilteredData, setShowFilteredData] = useState(false);
   const [searchedItems, setSearchedItems] = useState([]);
-  // search
   const [showSearchedData, setShowSearchedData] = useState(false);
   const [filteredDeals, setFilteredDeals] = useState([]);
   const [filteredRestaurant, setFilteredRestaurant] = useState([]);
@@ -87,12 +82,22 @@ const Dashboard = ({ navigation, route }) => {
   const [Cuisine, setCuisine] = useState([]);
   const [promoCodes, setPromoCodes] = useState([])
   const [Deals, setDeals] = useState([]);
-  const pagerRef = useRef(null); // Ref to control pager
-  const [currentPage, setCurrentPage] = useState(0); // Track the current page index
-  const onPageSelected = (e) => {
-    // Update the page when the user swipes
-    setCurrentPage(e.nativeEvent.position);
+  const pagerRef = useRef(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const btmSheetRef = useRef()
+  const ref_RBSheetSuccess = useRef();
+  const [selectedVariation, setSelectedVariation] = useState(null);
+  const [numColumns, setNumColumns] = useState(2)
+  const [searchLoading, setSearchLoading] = useState()
+  const ref_RBSheetGuestUser = useRef(null);
 
+
+const socketUrl = 'http://192.168.100.239:3017'
+  // console.log(customer_detail.rest_id);
+
+
+  const onPageSelected = (e) => {
+    setCurrentPage(e.nativeEvent.position);
   };
   const [searchBtns, setSearchBtns] = useState({
     all: true,
@@ -101,21 +106,16 @@ const Dashboard = ({ navigation, route }) => {
     priceUp: false,
     priceDown: false,
   })
-  // console.log({item});
-
   const handlePriceSort = () => {
-    let sortedItems = [...searchedItems]; // Copy the array
+    let sortedItems = [...searchedItems];
 
     if (searchBtns.priceUp) {
-      sortedItems.sort((a, b) => a.price - b.price); // Ascending order
+      sortedItems.sort((a, b) => a.price - b.price);
     } else if (searchBtns.priceDown) {
-      sortedItems.sort((a, b) => b.price - a.price); // Descending order
+      sortedItems.sort((a, b) => b.price - a.price);
     }
-    setSearchedItems(sortedItems); // Update the state with sorted data
+    setSearchedItems(sortedItems);
   };
-
-
-
   const handlePriceToggle = () => {
     if (!searchBtns.price) {
       setSearchBtns({ price: true, priceUp: true, priceDown: false });
@@ -125,11 +125,8 @@ const Dashboard = ({ navigation, route }) => {
       setSearchBtns({ price: false, priceUp: false, priceDown: false });
     }
 
-    handlePriceSort(); // Sort the list whenever the state changes
+    handlePriceSort();
   };
-
-
-
   const renderPaginationDots = () => {
     return (
       <View
@@ -149,15 +146,12 @@ const Dashboard = ({ navigation, route }) => {
       </View>
     );
   };
-
-
   const showLocationBtmSheet = () => {
     locationBtmSheetRef?.current?.open()
   }
   const closeLocationBtmSheet = () => {
     locationBtmSheetRef?.current?.close()
   }
-
   const ItemSeparator = () => (
     <View
       style={{
@@ -167,69 +161,44 @@ const Dashboard = ({ navigation, route }) => {
       }}
     />
   );
+  const showBtmSheet = async (item) => {
 
-
-  const getPromo = async () => {
-    const response = await fetchApis(api.get_all_promocodes, 'GET', setLoading);
-    let list = response?.result ? response?.result : [];
-    // console.log(list, 'badges');
-    dispatch(setPromos(list))
-    setPromoCodes(list);
-    // fetch(api.get_all_promocodes)
-    //   .then(response => response.json())
-    //   .then(response => {
-    //     let list = response?.result ? response?.result : [];
-    //     // console.log(list, 'badges');
-    //     setPromoCodes(list);
-    //   })
-    //   .catch(err => console.log('error getAllCuisines : ', err));
-  };
-
-  // const getVariationsByItemId = async (item_id) => {
-  //   return new Promise((resolve, reject) => {
-  //     const itam = item.find(item => item.item_id === item_id); 
-  //     if (itam) {
-  //       resolve(itam.variations); 
-  //     } else {
-  //       reject(new Error("Item not found"))
-  //     }
-  //   });
-  // };
-
-
-
-  const btmSheetRef = useRef()
-  const ref_RBSheetSuccess = useRef();
-
-
-
-  const [selectedVariation, setSelectedVariation] = useState(null);
-
-
-  const showBtmSheet = (item) => {
     setSelectedVariation(null)
+    if (join_as_guest) {
+      ref_RBSheetGuestUser?.current?.open()
+    } else {
 
-    setItemObj({
-      id: item.item_id,
-      variations: item.item_prices,
-      name: item?.item_name,
-    })
-    btmSheetRef?.current?.open()
+
+      setItemObj({
+        id: item.item_id,
+        variations: item.item_prices,
+        name: item?.item_name,
+      })
+      console.log(itemObj)
+
+      if (item.item_prices.length > 1) {
+        btmSheetRef?.current?.open()
+      } else {
+        handleAddToCart(item.item_prices[0].variation_id, item.item_id, item?.item_name,)
+        // console.log('ASDASD',item.item_id);
+
+      }
+    }
+
   }
   const closeBtmSheet = () => {
     btmSheetRef?.current?.close()
     setItemObj({})
   }
-  const add_item_to_cart = async (id, type, name) => {
+  const add_item_to_cart = async (id, type, name, item_id) => {
+    let cart = await getCustomerCart(customer_id, dispatch);
+    // console.log('______cart    :  ', cart?.cart_id);
+    // console.log({cart});
 
-    // let customer_id = await AsyncStorage.getItem('customer_id');
-    // console.log('customer_Id :  ', customer_id);
-    let cart = await getCustomerCart(customer_id);
-    console.log('______cart    :  ', cart?.cart_id);
 
 
     let data = type === 'item' ? {
-      item_id: itemObj.id?.toString(),
+      item_id: item_id ? item_id : itemObj.id,
       cart_id: cart?.cart_id?.toString(),
       item_type: type,
       comments: 'Adding item in cart',
@@ -243,22 +212,22 @@ const Dashboard = ({ navigation, route }) => {
       quantity: 1,
     };
 
+    console.log(data);
 
-    await addItemToCart(data)
+
+
+    await addItemToCart(data, dispatch)
       .then(response => {
         console.log('response ', response);
         if (response?.status == true) {
-          // navigation?.navigate('MyCart');
-          // cart_restaurant_id
-          // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-          //my_cart
+
           dispatch(addItemToMYCart(response?.result));
           setSelectedVariation(null)
 
-          // ref_RBSheetSuccess?.current?.open();
-          showAlert(`${name ? name : itemObj.name} is added to cart`, 'green');
+          handlePopup(dispatch, `${name ? name : itemObj.name} is added to cart`, 'green');
+
         } else {
-          showAlert(response?.message);
+          handlePopup(dispatch, response?.message, 'red');
         }
       })
       .catch(error => {
@@ -268,10 +237,10 @@ const Dashboard = ({ navigation, route }) => {
         setLoading(false)
       });
   };
-
-  const handleAddToCart = async (variation_id, item_id) => {
-    // console.log(id, 'id');
+  const handleAddToCart = async (variation_id, item_id, name) => {
     setSelectedVariation(variation_id)
+    console.log(variation_id, item_id);
+
 
     if (variation_id === null) {
       showBtmSheet()
@@ -279,10 +248,7 @@ const Dashboard = ({ navigation, route }) => {
       const filter = my_cart?.filter(
         item => item?.item_id == item_id
       );
-      // console.log(filter, 'filter');
-      // const OtherFilter = filter.filter(
-      //   item => item.variation_id === id
-      // )
+
 
       if (filter?.length > 0) {
         const checkVariation = filter?.filter(
@@ -290,161 +256,91 @@ const Dashboard = ({ navigation, route }) => {
             item?.variation_id == variation_id,
         )
 
-        // console.log( 'checkVariation', checkVariation.length > 0);
+        console.log({ checkVariation });
 
 
         if (checkVariation.length === 0) {
-          add_item_to_cart(variation_id, 'item');
+          add_item_to_cart(variation_id, 'item', name, item_id);
           closeBtmSheet()
         } else {
-          // console.log('check variation icon' , checkVariation);
 
           let obj = {
             cart_item_id: checkVariation[0]?.cart_item_id,
             quantity: checkVariation[0]?.quantity + 1,
           };
           closeBtmSheet()
-          await updateCartItemQuantity(obj)
-            .then(response => {
+          await updateCartItemQuantity(obj, dispatch)
+            .then(async (response) => {
               if (response.status === true) {
-                showAlert(`${itemObj.name} quantity updated`, 'green')
+                handlePopup(dispatch, `${name ? name : itemObj.name} quantity updated`, 'green')
 
-                const newData = my_cart?.map(item => {
-                  if (item?.item_id == item_id) {
-                    return {
-                      ...item,
-                      quantity: checkVariation[0]?.quantity + 1,
-                    };
-                  } else {
-                    return { ...item };
-                  }
-                });
-                dispatch(updateMyCartList(newData));
-
-                // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-                // ref_RBSheetSuccess?.current?.open();
+                let cartItems = await getCartItems(checkVariation[0]?.cart_id, dispatch);
+                dispatch(updateMyCartList(cartItems));
               }
             })
-
-          // also update quantity in redux
-
         }
-
       } else {
-        add_item_to_cart(variation_id, 'item');
+        add_item_to_cart(variation_id, 'item', name, item_id);
         closeBtmSheet()
       }
-
     }
-
-
-    // if item already exists in card then we will only update quantity of that item
-
-    // setLoading(true);
-    // let time_obj = await checkRestaurantTimings(
-    //   restaurantDetails?.restaurant_id,
-    // );
-    // console.log('time_obj?.isClosed : ', time_obj?.isClosed);
-    // setLoading(false);
-    // if (time_obj?.isClosed) {
-    //   setRestaurant_timings(time_obj);
-    //   ref_RBSheetResClosed.current.open();
-    //   return;
-    // } else if (validate()) {
-    //   // if item already exists in card then we will only update quantity of that item
-    //   const filter = my_cart?.filter(
-    //     item => item?.item_id == item_id
-    //   );
-    //   if (filter?.length > 0) {
-    //     let obj = {
-    //       cart_item_id: filter[0]?.cart_item_id,
-    //       quantity: filter[0]?.quantity + count,
-    //     };
-    //     await updateCartItemQuantity(obj);
-    //     // also update quantity in redux
-    //     const newData = my_cart?.map(item => {
-    //       if (item?.item_id == item_id) {
-    //         return {
-    //           ...item,
-    //           quantity: filter[0]?.quantity + count,
-    //         };
-    //       } else {
-    //         return {...item};
-    //       }
-    //     });
-    //     dispatch(updateMyCartList(newData));
-    //     dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-    //     ref_RBSheetSuccess?.current?.open();
-    //   } else {
-    //     add_item_to_cart();
-    //   }
-    // }
   };
-
   const handleDealAddToCart = async (deal) => {
 
     setItemObj({
       id: deal.deal_id,
       name: deal?.name,
     })
-
-
-    // setLoading(true);
-    // let time_obj = await checkRestaurantTimings(
-    //   restaurantDetails?.restaurant_id,
-    // );
-    // setLoading(false);
-    // if (time_obj?.isClosed) {
-    //   setRestaurant_timings(time_obj);
-    //   ref_RBSheetResClosed.current.open();
-    //   return;
-    // } else 
-    // if (validate()) {
-    // if item already exists in card then we will only update quantity of that item
-    const filter = my_cart?.filter(
-      item => item?.item_id == deal.deal_id,
-    );
-    if (filter?.length > 0) {
-      let obj = {
-        cart_item_id: filter[0]?.cart_item_id,
-        quantity: filter[0]?.quantity + 1,
-      };
-      await updateCartItemQuantity(obj)
-        .then(response => {
-          if (response.status === true) {
-            showAlert(`${itemObj.name} quantity updated`, 'green')
-            const newData = my_cart?.map(item => {
-              if (item?.item_id == deal.deal_id) {
-                return {
-                  ...item,
-                  quantity: filter[0]?.quantity + 1,
-                };
-              } else {
-                return { ...item };
-              }
-            });
-            dispatch(updateMyCartList(newData));
-
-          }
-        })
-      // also update quantity in redux
-
-
-
-      // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-      // ref_RBSheetSuccess?.current?.open();
+    if (join_as_guest) {
+      ref_RBSheetGuestUser?.current?.open()
     } else {
-      add_item_to_cart(deal.deal_id, 'deal', deal?.name);
 
+
+
+
+      // setLoading(true);
+      // let time_obj = await checkRestaurantTimings(
+      //   restaurantDetails?.restaurant_id,
+      // );
+      // setLoading(false);
+      // if (time_obj?.isClosed) {
+      //   setRestaurant_timings(time_obj);
+      //   ref_RBSheetResClosed.current.open();
+      //   return;
+      // } else 
+      // if (validate()) {
+      // if item already exists in card then we will only update quantity of that item
+      const filter = my_cart?.filter(
+        item => item?.item_id == deal.deal_id,
+      );
+      if (filter?.length > 0) {
+        let obj = {
+          cart_item_id: filter[0]?.cart_item_id,
+          quantity: filter[0]?.quantity + 1,
+        };
+        await updateCartItemQuantity(obj, dispatch)
+          .then(response => {
+            if (response.status === true) {
+              handlePopup(dispatch, `${itemObj.name} quantity updated`, 'green')
+              const newData = my_cart?.map(item => {
+                if (item?.item_id == deal.deal_id) {
+                  return {
+                    ...item,
+                    quantity: filter[0]?.quantity + 1,
+                  };
+                } else {
+                  return { ...item };
+                }
+              });
+              dispatch(updateMyCartList(newData));
+
+            }
+          })
+      } else {
+        add_item_to_cart(deal.deal_id, 'deal', deal?.name)
+      }
     }
-    // }
   };
-
-
-
-  // console.log(Deals);
-
-  // ______________________ handle search  items,deals and restaurant  by name ____________________
   const handleOpenSearch = () => {
     setSearchQuery('');
     setShowSearchedData(true);
@@ -456,6 +352,7 @@ const Dashboard = ({ navigation, route }) => {
   };
   const searchItemsByName = text => {
     return new Promise((resolve, reject) => {
+      setSearchLoading(true)
       try {
         fetch(api.search_item + text)
           .then(response => response.json())
@@ -468,12 +365,17 @@ const Dashboard = ({ navigation, route }) => {
           });
       } catch (error) {
         resolve([]);
+        handlePopup(dispatch, 'Something is went wrong', 'red')
+      }
+      finally {
+        setSearchLoading(false)
       }
     });
   };
-
   const searchDealsByName = text => {
+
     return new Promise((resolve, reject) => {
+      setSearchLoading(true)
       try {
         fetch(api.search_deal_by_name + text)
           .then(response => response.json())
@@ -483,40 +385,23 @@ const Dashboard = ({ navigation, route }) => {
           .catch(err => {
             console.log('error : ', err);
             resolve([]);
+            handlePopup(dispatch, 'Something is went wrong', 'red')
           });
       } catch (error) {
         resolve([]);
+        handlePopup(dispatch, 'Something is went wrong', 'red')
+      } finally {
+        setSearchLoading(false);
       }
     });
   };
-
-  // const searchRestaurantByName = text => {
-  //   return new Promise((resolve, reject) => {
-  //     try {
-  //       fetch(api.search_restaurant_by_name + text)
-  //         .then(response => response.json())
-  //         .then(response => {
-  //           resolve(response?.result);
-  //         })
-  //         .catch(err => {
-  //           console.log('error : ', err);
-  //           resolve([]);
-  //         });
-  //     } catch (error) {
-  //       resolve([]);
-  //     }
-  //   });
-  // };
-
-  // Simulated search API function
   const searchApi = async query => {
     setShowSearchedData(true);
+    setSearchLoading(true)
     if (query) {
       // setLoading(true);
       let items = await searchItemsByName(query);
       let deals = await searchDealsByName(query);
-      // let restaurants = await searchRestaurantByName(query);
-      // console.log(items, 'item');
 
       console.log(typeof (deals));
       // console.log(deals);
@@ -534,41 +419,75 @@ const Dashboard = ({ navigation, route }) => {
       }
 
 
-      // setFilteredRestaurant(restaurants);
       setShowSearchedData(true);
 
       setLoading(false);
     }
   };
-
-  // const debouncedSearch = debounce(searchApi, 2000);
-
+  const setCusineNameByItemCusineId = (cusineId) => {
+    const cuisineName = Cuisine?.filter(item => item?.cuisine_id === cusineId)[0]?.cuisine_name;
+    return cuisineName;
+  }
   // const handleSearch = text => {
   //   console.log('text : ', text);
   //   setSearchQuery(text);
   // };
 
+  // useEffect(() => {
+  //   const delayDebounceFn = setTimeout(() => {
+  //     if (searchQuery?.length == 0) {
+  //       setLoading(false);
+  //       // handleSelect(false, false, true)
+  //       setSearchedItems([]);
+  //       setFilteredDeals([]);
+  //       setFilteredRestaurant([]);
+  //     } else {
+  //       searchApi(searchQuery);
+  //     }
+  //   }, 1000);
+  //   return () => clearTimeout(delayDebounceFn);
+  // }, [searchQuery]);
+
+
+  const handleSearch = () => {
+    if (searchQuery?.length === 0) {
+      setLoading(false);
+      setSearchedItems([]);
+      setFilteredDeals([]);
+      setFilteredRestaurant([]);
+    } else {
+      searchApi(searchQuery);
+    }
+  };
+
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (searchQuery?.length == 0) {
-        setLoading(false);
-        // handleSelect(false, false, true)
-        setSearchedItems([]);
-        setFilteredDeals([]);
-        setFilteredRestaurant([]);
-      } else {
-        // setLoading(true);
-        searchApi(searchQuery);
-      }
-      // Send Axios request here
-    }, 1000);
+    const newSocket = io(BASE_URL);
+    // setSocket(newSocket);
 
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery]);
+    // Fetch contacts on socket connection
+    newSocket.on('connect', () => {
+        newSocket.emit('getContacts', { customer_id }); 
+    });
 
+    // Listen for contacts data
+    newSocket.on('contacts', (contactsData) => {
+        dispatch(setContacts(contactsData));  
+        
+    });
+
+  
+    newSocket.on('error', (error) => {
+        console.error('Socket Error:', error.message);
+    });
+
+    // Cleanup on component unmount
+    return () => {
+        newSocket.disconnect();
+    };
+}, []);
 
   const getAllItemByCuisine = async cuisine_id => {
-    const response = await fetchApis(api.get_all_item_by_cuisine + cuisine_id, 'GET', setLoading);
+    const response = await fetchApisGet(api.get_all_item_by_cuisine + cuisine_id, setLoading, dispatch);
     let list = response?.result ? response?.result : [];
     setItems(list);
     // console.log(list, 'list');
@@ -587,8 +506,6 @@ const Dashboard = ({ navigation, route }) => {
     setShowSearchedData(false);
 
     if (all) {
-      // console.log('all selected');
-
       setAllSelected(true);
       getAllItems();
       const newData = Cuisine?.map(element => ({
@@ -598,17 +515,11 @@ const Dashboard = ({ navigation, route }) => {
       setCuisine(newData);
     } else {
       setAllSelected(false);
-
       if (!selected) {
-
         getAllItemByCuisine(id);
-        // console.log(id, 'cusine selected');
-
-        // setShowFilteredData(true); 
       } else {
         handleSelect(false, false, true)
       }
-
       const newData = Cuisine?.map(item => {
         if (item?.cuisine_id == id) {
           return {
@@ -626,30 +537,41 @@ const Dashboard = ({ navigation, route }) => {
     }
   };
 
+  const func = async () => {
+    let amount = await GetWalletAmount(customer_id);
+    dispatch(setWalletTotalAmount(amount))
+  }
+
+  const getPromo = async () => {
+    const response = await fetchApisGet(api.get_all_promocodes, setLoading, dispatch);
+    let list = response?.result ? response?.result : [];
+    dispatch(setPromos(list))
+    setPromoCodes(list);
+    // fetch(api.get_all_promocodes)
+    //   .then(response => response.json())
+    //   .then(response => {
+    //     let list = response?.result ? response?.result : [];
+    //     // console.log(list, 'badges');
+    //     setPromoCodes(list);
+    //   })
+    //   .catch(err => console.log('error getAllCuisines : ', err));
+  };
   const getAllCuisines = async () => {
-    const response = await fetchApis(api.get_all_cuisines, 'GET', setLoading);
+    const response = await fetchApisGet(api.get_all_cuisines, setLoading, dispatch);
     let list = response?.result ? response?.result : [];
     dispatch(setcuisines(list))
     setCuisine(list);
-
   };
-
   const getDeals = async () => {
-    // fetch(api.get_all_deals + `?page=1&limit=2`)
-
-    const response = await fetchApis(api.get_all_deals, 'GET', setLoading);
+    setDealLoading(true)
+    const response = await fetchApisGet(api.get_all_deals, setDealLoading, dispatch);
     let list = response?.result ? response?.result : [];
-    // console.log(list , 'deals list');
-
     dispatch(setdeals(list))
+    // console.log(list);
 
+    // console.log({response});
+    // setDeals(list);
 
-    if (list?.length > 2) {
-      const slicedArray = list.slice(0, 2);
-      setDeals(slicedArray);
-    } else {
-      setDeals(list);
-    }
     // let { latitude, longitude } = await getCurrentLocation();
     // fetch(
     //   api.get_all_deals,
@@ -674,7 +596,6 @@ const Dashboard = ({ navigation, route }) => {
     //     setRefresh(false),
     //   );
   };
-
   const getCurrentLocatin = async () => {
     const { latitude, longitude, address, shortAdress } = await getCurrentLocation()
     dispatch(setCurrentLocation({
@@ -684,19 +605,28 @@ const Dashboard = ({ navigation, route }) => {
       shortAddress: shortAdress
     }))
   }
-
-  // console.log(items);
-
   const getAllItems = async () => {
-
-
-    const response = await fetchApis(api.get_all_items, 'GET', setLoading);
-
+    setItemLoading(true)
+    const response = await fetchApisGet(api.get_all_items, setItemLoading, dispatch);
+    // let list = response?.result ? response?.result : [];
+    //     dispatch(setitems(list))
+    //     setItems(list)
+    //     setRefresh(false)
     let list = response?.result ? response?.result : [];
-    // console.log({list});
-
-    setItems(list);
-
+    // setData(list);
+    let newList = [];
+    for (const item of list) {
+      const filter = my_cart?.filter(e => e?.item_id == item?.item_id);
+      // getting restaurant timings
+      // let time_obj = await checkRestaurantTimings(item?.restaurant_id);
+      let obj = {
+        ...item,
+        quantity: filter?.length > 0 ? filter[0]?.quantity : 0,
+        // restaurant_timings: time_obj,
+      };
+      newList.push(obj);
+    }
+    setItems(newList);
     // let list = response?.result ? response?.result : [];
     // console.log(list);
 
@@ -732,83 +662,83 @@ const Dashboard = ({ navigation, route }) => {
     //     setRefresh(false),
     //   );
   };
-  const setCusineNameByItemCusineId = (cusineId) => {
-    const cuisineName = Cuisine?.filter(item => item?.cuisine_id === cusineId)[0]?.cuisine_name;
-    // console.log(cuisineName);
-
-    return cuisineName;
-  }
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefresh(true);
-    // getRestaurants();
-    // getCurrentLocatin()
     getAllItems()
-
-    getFavoriteItem(customer_id, dispatch);
-    getFavoriteDeals(customer_id, dispatch);
+    getDeals();
     getPromo()
     getAllCuisines()
-
-
-    getDeals();
-    // if (deals.length > 0 && promos.length > 0 && items.length > 0 && cuisines.length > 0) {
-    //   setRefresh(false)
-    // }
+    getFavoriteItem(customer_id, dispatch);
+    getFavoriteDeals(customer_id, dispatch);
+    func()
+    setRefresh(false)
   };
-
   useEffect(() => {
-    if (deals.length > 0) {
-      setDeals(deals.slice(0, 2));
-    } else {
-      getDeals();
-    }
-    if (items.length > 0) {
-      setItems(items.slice(0, 2))
-    } else {
-      handleSelect(false, false, true)
-    }
-    if (promos.length > 0) {
-      setPromoCodes(promos)
-    } else {
-      getPromo()
-    }
-    if (cuisines.length > 0) {
-      setCuisine(cuisines)
-    } else {
-      getAllCuisines();
-    }
 
-
+    setDeals(deals);
+    setItems(items)
+    setPromoCodes(promos)
+    setCuisine(cuisines)
+    getDeals();
+    handleSelect(false, false, true)
+    getAllCuisines();
+    get_Cart_Items()
     getCurrentLocatin()
-    // getRestaurants();
-
+    // getLocation()
+    // getCustomerLocations()
+    // if (deals.length < 0) {
+    //   getDeals();
+    // } 
+    // if (items.length < 0) {
+    //   handleSelect(false, false, true)
+    // }
+    // if (promos.length < 0) {
+    //   getPromo()
+    // } 
+    // if (cuisines.length < 0) {
+    //   getAllCuisines();
+    // } 
+    // get_Cart_Items()
+    // getCurrentLocatin()
   }, []);
 
+  useEffect(() => {
+    setItems(items)
+  }, [items])
 
   useEffect(() => {
     getFavoriteItem(customer_id, dispatch);
     getFavoriteDeals(customer_id, dispatch);
+    func()
   }, [customer_id]);
 
   const isItemFavorite = (id) => {
     return favoriteItems.some(item => item?.item?.item_id === id);
   };
   const isDealFavorite = (id) => {
-
     return favoriteDeals.some(item => item?.deal?.deal_id === id);
   };
-
-  const [numColumns, setNumColumns] = useState(2)
-
   const shortenString = (str) => {
-    // Check if the string length exceeds 50
     if (str?.length > 35) {
-      // Cut the string to 50 characters and append "..."
       return str.substring(0, 35) + '...';
     }
-    // If the string length is less than or equal to 50, return it as is
     return str;
   }
+  // console.log({itemLoading, dealLoading, loading, refresh});
+  // console.log({loading} || {itemLoading} || {dealLoading} || {refresh});
+
+
+  // const getVariationsByItemId = async (item_id) => {
+  //   return new Promise((resolve, reject) => {
+  //     const itam = item.find(item => item.item_id === item_id); 
+  //     if (itam) {
+  //       resolve(itam.variations); 
+  //     } else {
+  //       reject(new Error("Item not found"))
+  //     }
+  //   });
+  // };
+
 
   // console.log(Cuisine,'promos');
 
@@ -835,12 +765,205 @@ const Dashboard = ({ navigation, route }) => {
   //   }, []),
   // );
   // console.log(searchedItems, "isFetching");
+  // const searchRestaurantByName = text => {
+  //   return new Promise((resolve, reject) => {
+  //     try {
+  //       fetch(api.search_restaurant_by_name + text)
+  //         .then(response => response.json())
+  //         .then(response => {
+  //           resolve(response?.result);
+  //         })
+  //         .catch(err => {
+  //           console.log('error : ', err);
+  //           resolve([]);
+  //         });
+  //     } catch (error) {
+  //       resolve([]);
+  //     }
+  //   });
+  // };
+
+  // Simulated search API function
+  // const debouncedSearch = debounce(searchApi, 2000);
+  const get_Cart_Items = async () => {
+    try {
+      setLoading(true);
+      // let customer_id = await AsyncStorage.getItem('customer_id');
+      let cart = await getCustomerCart(customer_id, dispatch);
+      let cartItems = await getCartItems(cart?.cart_id, dispatch);
+      // console.log(cartItems);
+
+      if (cartItems) {
+        dispatch(addToCart(cartItems));
+        // setData(cartItems);
+        //my_cart
+        dispatch(updateMyCartList(cartItems));
+        if (!cart_restaurant_id && cartItems?.length > 0) {
+          dispatch(setCartRestaurantId(cartItems[0]?.itemData?.restaurant_id));
+        }
+        // getDeliveryTime(cartItems);
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log('Error in getCartItems :  ', error);
+    }
+  };
+  // console.log(deals.length < 0);
+
+  // const getLocation = () => {
+  //   fetch(api.get_customer_location + customer_id, {
+  //     method: 'GET',
+  //     headers: {
+  //       // 'Content-Type': 'application/json'
+  //     }
+  //   })
+  //     .then(response => response.json())
+  //     .then(response => {
+
+  //       if (response.status === false) {
+  //         handlePopup(dispatch, response?.message, 'red')
+  //         // setIsLoading(false)
+  //       }
+  //       else {
+  //         // setLocations(response?.customerData?.locations)
+  //         // console.log(api.get_customer_location + customer_id);
+
+  //         // setIsLoading(false)
+  //         // console.log(response.customerData.locations[0]);
+  //         dispatch(setLocation({
+  //           latitude: response?.customerData?.locations[0]?.latitude,
+  //           longitude: response?.customerData?.locations[0]?.longitude,
+  //           address: response?.customerData?.locations[0]?.address,
+  //           id: response?.customerData?.locations[0]?.location_id
+  //         }))
+  //         dispatch(setSetAllLocation(response?.customerData?.locations))
+
+  //         dispatch(setSelectedPaymentType(''));
+  //         dispatch(setSelectedPaymentString(''));
+
+  //       }
+
+  //       // update state with fetched data
+  //     })
+  //     .catch(err => {
+  //       // console.log('Error in Login :  ', err);
+  //       // handlePopup(dispatch,'Something went wrong!', 'red');
+  //     })
+  //     .finally(() => {
+  //       // setIsLoading(false);
+  //     });
+  // }
+  const handleSubmit = async () => {
+
+    // setIsLoading(true)
+    const data = {
+      house_number: '',
+      street_number: '',
+      area: '',
+      floor: '',
+      instructions: '',
+      customer_id: customer_id,
+      label: "Home",
+      address: currentLocation?.shortAddress,
+      longitude: currentLocation?.longitude,
+      latitude: currentLocation?.latitude,
+
+    }
+    console.log(data, 'data');
+
+    fetch(api.add_location, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => response.json())
+      .then(async response => {
+        // console.log(response);
+        console.log({response}, 'Submit customer_location');
+
+
+        if (response.status === false) {
+          handlePopup(dispatch, 'Something is went wrong', 'red')
+          return;
+
+        } else {
+          handlePopup(dispatch, 'Address added successfully', 'green');
+          // clearFields()
+          // navigation.navigate('ManageAddress')
+          // closeBtmSheet()
+          dispatch(setLocation({
+            address: currentLocation?.shortAddress,
+            longitude: currentLocation?.longitude,
+            latitude: currentLocation?.latitude,
+            shortAddress: currentLocation?.shortAddress,
+            id: response?.result?.location_id
+          }))
+        }
+      })
+      .catch(err => {
+        // console.log('Error in Login :  ', err);
+        // handlePopup(dispatch, 'Something went wrong!', 'red');
+      })
+      .finally(() => {
+        // setIsLoading(false);
+      });
+
+  }
+  const getCustomerLocations = () => {
+    fetch(api.get_customer_location + customer_id, {
+      method: 'GET',
+      headers: {
+        // 'Content-Type': 'application/json'
+      }
+    })
+      .then(response => response.json())
+      .then(response => {
+        if (response.status === false) {
+          handlePopup(dispatch, response?.message, 'red');
+          // setIsLoading(false)
+          getCurrentLocatin();  // Fetch and dispatch current location
+          handleSubmit(); 
+        } else {
+          const locations = response?.customerData?.locations || [];
+
+          console.log({response}, 'getcustomer_locations');
+          
+
+          if (locations.length === 0) {
+            // If no locations found, get the current location and add it to the backend
+            getCurrentLocatin();  // Fetch and dispatch current location
+            handleSubmit();  // Post current location to the backend
+          } else {
+            // If locations exist, dispatch the first location
+            dispatch(setLocation({
+              latitude: locations[0]?.latitude,
+              longitude: locations[0]?.longitude,
+              address: locations[0]?.address,
+              id: locations[0]?.location_id,
+            }));
+            dispatch(setSetAllLocation(locations));
+
+            // dispatch(setSelectedPaymentType(''));
+            // dispatch(setSelectedPaymentString(''));
+          }
+        }
+      })
+      .catch(err => {
+        console.log('Error in getCustomerLocations: ', err);
+        // handlePopup(dispatch, 'Something went wrong!', 'red');
+      })
+      .finally(() => {
+        // setIsLoading(false);
+      });
+  };
+
 
   return (
     <View style={styles.container}>
-      <Loader loading={loading} />
-
-
+      <Loader loading={loading || itemLoading || dealLoading || refresh} />
       {/* <View
         style={{
           position: 'absolute',
@@ -870,6 +993,7 @@ const Dashboard = ({ navigation, route }) => {
           <Text>$ 234</Text>
         </View>
       </View> */}
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -877,7 +1001,7 @@ const Dashboard = ({ navigation, route }) => {
         refreshControl={
           <RefreshControl
             colors={[Colors.Orange, Colors.OrangeLight]}
-            refreshing={loading}
+            refreshing={false}
             onRefresh={() => onRefresh()}
           />
         }>
@@ -886,6 +1010,7 @@ const Dashboard = ({ navigation, route }) => {
           backgroundColor={'white'}
           barStyle={'dark-content'}
         />
+
         {
           !isSearch && <View style={styles.headerContainer}>
             <TouchableOpacity onPress={() => navigation?.openDrawer()}>
@@ -907,7 +1032,6 @@ const Dashboard = ({ navigation, route }) => {
             </View>
           </View>
         }
-
         {/* <Text
           style={{
             color: '#02010E',
@@ -918,13 +1042,6 @@ const Dashboard = ({ navigation, route }) => {
           }}>
           Let’s find your favorite food!
         </Text> */}
-
-
-
-
-
-
-
         {/* {location?.address && (
           <TouchableOpacity
             onPress={() =>
@@ -944,9 +1061,7 @@ const Dashboard = ({ navigation, route }) => {
             </Text>
           </TouchableOpacity>
         )} */}
-
         <View style={{ marginVertical: 15 }}>
-
           {isSearch ? (
             <View style={{ paddingHorizontal: 20 }} >
               <View style={{ flexDirection: 'row', alignItems: 'center' }} >
@@ -977,18 +1092,20 @@ const Dashboard = ({ navigation, route }) => {
                   }
                   rightContent={
                     <TouchableOpacity
-                      style={{ padding: 10, paddingRight: 0 }}>
-                      <AntDesign name="filter" size={18} color={'#838383'} />
+                      style={{ padding: 10, paddingRight: 0 }} onPress={handleSearch}  >
+                      <Feather
+                        name="search"
+                        size={17}
+                        color="#9F9F9F"
+                        style={{ marginRight: 6 }}
+                      />
                     </TouchableOpacity>
                   }
-
-
                 />
               </View>
 
 
               <View style={{ flexDirection: 'row', marginVertical: hp(2) }} >
-
                 <TouchableOpacity
                   onPress={() =>
                     handleSelect(false, false, true)
@@ -1046,35 +1163,32 @@ const Dashboard = ({ navigation, route }) => {
 
               </View>
 
-              {searchedItems.length > 0 && <View style={styles.headerTextView}>
+              <View style={styles.headerTextView}>
                 <Text style={[styles.headerText]}>Items</Text>
-
-              </View>}
+              </View>
+              {/* 
               {searchQuery?.length == 0 && <Text style={{
                 fontFamily: Fonts.PlusJakartaSans_Bold,
                 color: '#0A212B',
                 textAlign: 'center',
                 fontSize: RFPercentage(1.8),
                 lineHeight: 30,
-              }}>Search Your Favorite Food</Text>}
-
+              }}>Search Your Favorite Food</Text>}  */}
 
               <FlatList
                 scrollEnabled={false}
                 data={searchedItems}
-                // ListEmptyComponent={() =>  <NoDataFound />}
+                numColumns={numColumns}
+                key={numColumns}
+                ListEmptyComponent={() => searchLoading ? <ItemLoading size={'large'} /> : <NoDataFound text={'No Items'} />}
                 renderItem={({ item, index }) => {
-
                   const fav = isItemFavorite(item?.item_id)
-
-
-
                   return (
                     <FoodCards
                       isFavorite={fav}
                       image={BASE_URL_IMAGE + item?.images[0]}
                       description={shortenString(item?.description)}
-                      // price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
+                      price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
                       heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
                       title={item?.item_name}
                       item={item}
@@ -1084,27 +1198,29 @@ const Dashboard = ({ navigation, route }) => {
                           id: item?.item_id,
                         })
                       }
-                    // addToCart={() => showBtmSheet(item)}
-
+                      addToCart={() => showBtmSheet(item)}
                     />
                   );
                 }}
               />
-
-
-
-              {filteredDeals.length > 0 && <View style={styles.headerTextView}>
+              <View style={styles.headerTextView}>
                 <Text style={[styles.headerText]}>Deals</Text>
-
-              </View>}
-
-
+              </View>
               <FlatList
-                // scrollEnabled={false}
-                horizontal
+                horizontal={filteredDeals.length > 0 ? true : false}
                 data={filteredDeals}
+                showsHorizontalScrollIndicator={false}
+                // numColumns={numColumns}
+                // key={numColumns}
                 style={{ paddingHorizontal: 20 }}
-                // ListEmptyComponent={() => <NoDataFound />}
+                ListEmptyComponent={() => {
+                  return searchQuery.length > 0 && searchLoading ? (
+                    <ItemLoading size="large" />
+                  ) : (
+                    <NoDataFound text="No Deals" />
+                  );
+                }
+                }
                 renderItem={({ item, index }) => {
                   // console.log(item, 'deal');
                   const cuisineIds = item?.items?.map(item => item?.cuisine_id);
@@ -1115,14 +1231,7 @@ const Dashboard = ({ navigation, route }) => {
                   // console.log(cuisineIds);
                   // console.log(fav ,'fav Deal')
                   // console.log(favoriteDeals[0], 'deal as favorite');
-
-
-
-
-
-
                   return (
-
                     <DealCard
                       image={item?.images?.length > 0 && BASE_URL_IMAGE + item?.images[0]}
                       description={shortenString(item?.description)}
@@ -1141,8 +1250,6 @@ const Dashboard = ({ navigation, route }) => {
                 }}
               />
             </View>
-
-
           ) : (
             <>
               <View style={{ alignItems: 'center', marginTop: wp(0) }} >
@@ -1150,17 +1257,16 @@ const Dashboard = ({ navigation, route }) => {
                   style={[{ height: hp(25), backgroundColor: 'white', width: wp(100), }]}
                   initialPage={0}
                   onPageSelected={onPageSelected}
-                  ref={pagerRef} // Reference to control PagerView programmatically
+                  ref={pagerRef}
                 >
-                  {promoCodes.map((promo, index) => {
-                    // console.log(promo);
 
+                  {promos.length > 0 ? promos.map((promo, index) => {
                     return (
                       <TouchableOpacity key={index} style={{ backgroundColor: 'white' }} activeOpacity={0.7}>
                         <Image source={{ uri: BASE_URL_IMAGE + promo.image }} style={{ width: wp(100), height: hp(25), resizeMode: 'cover' }} />
                       </TouchableOpacity>
                     )
-                  })}
+                  }) : <NoDataFound text={'No Promo Codes'} />}
                 </PagerView>
 
                 {renderPaginationDots()}
@@ -1169,7 +1275,7 @@ const Dashboard = ({ navigation, route }) => {
                   data={Cuisine}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  style={{ marginVertical: hp(2), marginHorizontal: 20 }}
+                  style={{ marginTop: hp(2), marginHorizontal: 20 }}
                   ListHeaderComponent={() => (
                     <View style={{ flexDirection: 'row', }} >
                       {/* <TouchableOpacity
@@ -1177,7 +1283,6 @@ const Dashboard = ({ navigation, route }) => {
                         style={styles.topChip}>
                         <Feather name="search" size={17} color="#9F9F9F" />
                       </TouchableOpacity> */}
-
                       <TouchableOpacity
                         onPress={() =>
                           handleSelect(false, false, true)
@@ -1197,11 +1302,8 @@ const Dashboard = ({ navigation, route }) => {
                         </Text>
                       </TouchableOpacity>
                     </View>
-
                   )}
                   renderItem={({ item, index }) => {
-                    // console.log(item, 'item');
-
                     return (
                       <TouchableOpacity
                         onPress={() =>
@@ -1225,29 +1327,26 @@ const Dashboard = ({ navigation, route }) => {
                   }}
                 />
               </View>
-
-              {/* <View style={styles.rowViewSB1} >
-                <FoodCards description={shortenString(str)} image={BASE_URL_IMAGE + 'images/1729497777802--cheeseFries.jpg'} price={'250'} />
-                <FoodCards isFavorite={true} image={BASE_URL_IMAGE + 'images/1729497777802--cheeseFries.jpg'} description={shortenString(str)} price={'200'} />
-              </View> */}
-
+              <View style={[styles.headerTextView]}>
+                <Text style={styles.headerText}>Explore Items</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('SeeAllitems');
+                  }}>
+                  <Text style={styles.viewAllText}>See All</Text>
+                </TouchableOpacity>
+              </View>
               <FlatList
                 scrollEnabled={false}
-                data={item}
+                data={item ? item : items}
                 key={numColumns}
                 numColumns={numColumns}
                 keyExtractor={(item) => item.item_id.toString()}
                 style={{ paddingHorizontal: 10 }}
-                ListEmptyComponent={() => <NoDataFound />}
+                ListEmptyComponent={() => !loading && <NoDataFound text={'No Items'} />}
                 renderItem={({ item, index }) => {
-                  // console.log(item);
                   const fav = isItemFavorite(item?.item_id)
-
-                  // console.log(item?.cuisine_id, 'item id :'); 
-
-
                   return (
-
                     <FoodCards
                       isFavorite={fav}
                       image={item?.images?.length && BASE_URL_IMAGE + item?.images[0]}
@@ -1263,35 +1362,7 @@ const Dashboard = ({ navigation, route }) => {
                         })
                       }
                       addToCart={() => showBtmSheet(item)}
-
                     />
-                    // <FoodCardWithRating
-                    //   onPress={() =>
-                    //     navigation?.navigate('ItemDetails', {
-                    //       id: item?.item_id,
-                    //     })
-                    //   }
-                    //   title={item?.item_name}
-                    //   image={
-                    //     // item.image
-                    //     item?.images?.length > 0
-                    //       ? BASE_URL_IMAGE + item?.images[0]
-                    //       : ''
-                    //   }
-                    //   price={item?.item_prices[0]?.price}
-                    //   rating={item?.rating}
-                    //   tag={setCusineNameByItemCusineId(item?.cuisine_id)}
-                    //   isTagArray={false}
-                    //   nextIconWidth={26}
-                    //   cardStyle={{ marginHorizontal: 0, marginBottom: 15 }}
-                    //   showNextButton={true}
-                    //   showRating={false}
-                    //   priceContainerStyle={{ marginTop: 0 }}
-                    //   isFavorite={fav}
-                    //   onRemove={() => removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert)}
-                    //   addFav={() => addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
-
-                    // />
                   );
                 }}
               />
@@ -1304,33 +1375,18 @@ const Dashboard = ({ navigation, route }) => {
                   <Text style={styles.viewAllText}>See All</Text>
                 </TouchableOpacity>
               </View>
-
-
-
               <FlatList
-                // scrollEnabled={false}
-                horizontal
-                data={Deals}
+                horizontal={deals.length > 0 ? true : false}
+                data={deals}
                 contentContainerStyle={{ paddingHorizontal: 20 }}
-                ListEmptyComponent={() => <NoDataFound />}
+                ListEmptyComponent={() => !loading && <NoDataFound text={'No Deals'} />}
                 renderItem={({ item, index }) => {
-                  // console.log(item, 'deal');
                   const cuisineIds = item?.items?.map(item => item?.cuisine_id);
                   const cuisineNames = cuisineIds?.map(cuisineId =>
                     setCusineNameByItemCusineId(cuisineId)
                   );
                   const fav = isDealFavorite(item?.deal_id)
-                  // console.log(cuisineIds);
-                  // console.log(fav ,'fav Deal')
-                  // console.log(favoriteDeals[0], 'deal as favorite');
-
-
-
-
-
-
                   return (
-
                     <DealCard
                       image={item?.images?.length > 0 && BASE_URL_IMAGE + item?.images[0]}
                       description={shortenString(item?.description)}
@@ -1345,45 +1401,11 @@ const Dashboard = ({ navigation, route }) => {
                       heartPress={() => fav ? removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch, showAlert) : addFavoriteDeal(item?.deal_id, customer_id, dispatch, showAlert)}
                       addToCartpress={() => handleDealAddToCart(item)}
                     />
-
-                    // <FoodCardWithRating
-                    //   onPress={() =>
-                    //     navigation?.navigate('NearByDealsDetails', {
-                    //       id: item?.deal_id,
-                    //     })
-                    //   }
-                    //   title={item?.name}
-                    //   image={
-                    //     // item.image
-                    //     item?.images?.length > 0
-                    //       ? BASE_URL_IMAGE + item?.images[0]
-                    //       : ''
-                    //   }
-                    //   price={item?.price}
-                    //   rating={item?.rating}
-                    //   tag={cuisineNames
-                    //     // item.tag
-                    //     // item?.items ? item?.items : []
-
-                    //   }
-                    //   isFavorite={fav}
-                    //   isTagArray={true}
-                    //   nextIconWidth={26}
-                    //   cardStyle={{ marginHorizontal: 0, marginBottom: 15 }}
-                    //   showNextButton={true}
-                    //   showRating={false}
-                    //   priceContainerStyle={{ marginTop: 0 }}
-                    //   onRemove={() => removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch, showAlert)}
-                    //   addFav={() => addFavoriteDeal(item?.deal_id, customer_id, dispatch, showAlert)}
-
-                    // />
                   );
                 }}
               />
             </>
-
           )}
-
         </View>
         {/* <View>
           <Text style={styles.welcomeText}>Welcome!</Text>
@@ -1647,7 +1669,7 @@ const Dashboard = ({ navigation, route }) => {
             </View>
             {itemObj.variations?.map((variation, i) => (
               <View key={i} style={[styles.rowViewSB, { borderBottomColor: Colors.borderGray, borderBottomWidth: wp(0.3), paddingBottom: wp(1) }]}>
-                <View style={styles.rowView} >
+                <TouchableOpacity onPress={() => handleAddToCart(variation.variation_id, itemObj.id)} style={styles.rowView} >
                   <RadioButton
                     color={Colors.Orange} // Custom color for selected button
                     uncheckedColor={Colors.Orange} // Color for unselected buttons
@@ -1655,16 +1677,14 @@ const Dashboard = ({ navigation, route }) => {
                     onPress={() => handleAddToCart(variation.variation_id, itemObj.id)}
                   />
                   <Text style={styles.variationText}>{variation.variation_name}</Text>
-                </View>
+                </TouchableOpacity>
                 <Text style={styles.variationText}>£ {variation?.price}</Text>
               </View>
             ))}
 
           </View>
         }
-
       />
-
       <RBSheetSuccess
         refRBSheet={ref_RBSheetSuccess}
         title={`${itemObj.name} added to cart.`}
@@ -1672,6 +1692,26 @@ const Dashboard = ({ navigation, route }) => {
         onPress={() => {
           ref_RBSheetSuccess?.current?.close();
           // navigation.goBack();
+        }}
+      />
+
+      <RBSheetGuestUser
+        refRBSheet={ref_RBSheetGuestUser}
+
+        // title={'Attention'}
+        // description={'Please Sign up before ordering'}
+        btnText={'OK'}
+        onSignIn={() => {
+          ref_RBSheetGuestUser?.current?.close();
+          navigation?.popToTop();
+          navigation?.replace('SignIn');
+          // navigation?.goBack();
+        }}
+        onSignUp={() => {
+          ref_RBSheetGuestUser?.current?.close();
+          navigation?.popToTop();
+          navigation?.replace('SignUp');
+          // navigation?.goBack();
         }}
       />
     </View>
@@ -1695,7 +1735,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    marginRight: 15,
+    marginRight: 7,
   },
   topChipText: {
     color: '#9F9F9F',
@@ -1720,7 +1760,8 @@ const styles = StyleSheet.create({
     height: hp(4),
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 0,
+    marginTop: hp(2),
     paddingHorizontal: 20
   },
   headerText: {

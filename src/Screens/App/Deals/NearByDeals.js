@@ -31,19 +31,21 @@ import NoDataFound from '../../../components/NotFound/NoDataFound';
 import { useDispatch, useSelector } from 'react-redux';
 import { setdeals } from '../../../redux/AuthSlice';
 import { addFavoriteDeal, removeFavoriteDeal } from '../../../utils/helpers/FavoriteApis';
-import { showAlert } from '../../../utils/helpers';
+import { fetchApisGet, showAlert } from '../../../utils/helpers';
 import DealCard from '../../../components/Cards/DealCard';
 import { addItemToCart, getCustomerCart, updateCartItemQuantity } from '../../../utils/helpers/cartapis';
 import { addItemToMYCart, updateMyCartList } from '../../../redux/CartSlice';
+import PopUp from '../../../components/Popup/PopUp';
+import { RefreshControl } from 'react-native-gesture-handler';
 
 const NearByDeals = ({ navigation, route }) => {
   const [isSearch, setIsSearch] = useState(false);
   const [selected, setSelected] = useState('All');
-  const { customer_id, cuisines, deals } = useSelector(store => store.store);
+  const { customer_id, cuisines, deals, showPopUp, popUpColor, PopUpMesage } = useSelector(store => store.store);
+
   const [itemObj, setItemObj] = useState({})
   const [numColumns, setNumColumns] = useState(2)
-  const {  my_cart } = useSelector(store => store.cart);
-  // console.log(cuisines);
+  const { my_cart } = useSelector(store => store.cart);
   const dispatch = useDispatch()
 
   const { favoriteDeals } = useSelector(store => store.favorite);
@@ -144,31 +146,20 @@ const NearByDeals = ({ navigation, route }) => {
   ];
 
   const getDeals = async () => {
-    // fetch(api.get_all_deals + `?page=1&limit=2`)
-
-    const response = await fetchApis(api.get_all_deals, 'GET', setLoading);
+    const response = await fetchApisGet(api.get_all_deals, setLoading, dispatch);
     let list = response?.result ? response?.result : [];
     dispatch(setdeals(list))
 
-
-    if (list?.length > 2) {
-      const slicedArray = list.slice(0, 2);
-      setData(slicedArray);
-    } else {
-      setData(list);
-    }
-    
   };
 
-  const add_item_to_cart = async (id, type) => {
+  const add_item_to_cart = async (id, name) => {
 
-    // let customer_id = await AsyncStorage.getItem('customer_id');
-    // console.log('customer_Id :  ', customer_id);
-    let cart = await getCustomerCart(customer_id);
+    
+    let cart = await getCustomerCart(customer_id, dispatch);
     console.log('______cart    :  ', cart?.cart_id);
 
 
-    let data =  {
+    let data = {
       item_id: id,
       cart_id: cart?.cart_id?.toString(),
       item_type: 'deal',
@@ -176,9 +167,8 @@ const NearByDeals = ({ navigation, route }) => {
       quantity: 1,
     };
 
-    console.log('data   :  ', data);
 
-    await addItemToCart(data)
+    await addItemToCart(data, dispatch)
       .then(response => {
         console.log('response ', response);
         if (response?.status == true) {
@@ -190,7 +180,7 @@ const NearByDeals = ({ navigation, route }) => {
           // setSelectedVariation(null)
 
           // ref_RBSheetSuccess?.current?.open();
-          showAlert(`${itemObj.name} is added to cart`, 'green');
+          showAlert(`${name} is added to cart`, 'green');
         } else {
           showAlert(response?.message);
         }
@@ -205,11 +195,9 @@ const NearByDeals = ({ navigation, route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      if (deals.length > 0) {
-        setData(deals)
-      } else {
+      if (deals.length === 0) {
         getDeals();
-      }
+      } 
 
     }, []),
   );
@@ -224,7 +212,7 @@ const NearByDeals = ({ navigation, route }) => {
       id: deal.deal_id,
       name: deal?.name,
     });
-    
+
 
     const filter = my_cart?.filter(
       item => item?.item_id == deal.deal_id,
@@ -234,12 +222,16 @@ const NearByDeals = ({ navigation, route }) => {
         cart_item_id: filter[0]?.cart_item_id,
         quantity: filter[0]?.quantity + 1,
       };
-       await updateCartItemQuantity(obj)
-       .then(response => {
-        if (response.status === true) {
-         showAlert(`${deal?.name}'s quantity updated`, 'green')
-        }
-       })
+      await updateCartItemQuantity(obj, dispatch)
+        .then(response => {
+          if (response.status === true) {
+            handlePopup(dispatch, `${deal?.name}'s quantity updated`, 'green')
+          }
+         else {
+            handlePopup(dispatch, response.message, 'red')
+            return
+          }
+        })
       // also update quantity in redux
       const newData = my_cart?.map(item => {
         if (item?.item_id == deal.deal_id) {
@@ -256,7 +248,7 @@ const NearByDeals = ({ navigation, route }) => {
 
 
     } else {
-      add_item_to_cart(deal.deal_id, 'deal');
+      add_item_to_cart(deal.deal_id, deal?.name);
 
     }
     // }
@@ -273,12 +265,13 @@ const NearByDeals = ({ navigation, route }) => {
   }
   return (
     <View style={styles.container}>
-      <Loader loading={loading} />
+      {/* <Loader loading={loading} /> */}
       <StatusBar
         backgroundColor={'#FFFFFF'}
         barStyle={'dark-content'}
         translucent={false}
       />
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       {isSearch ? (
         <ScrollView style={{ flex: 1 }}>
           <View
@@ -387,7 +380,7 @@ const NearByDeals = ({ navigation, route }) => {
       ) : (
         <View style={{}}>
           <FlatList
-            contentContainerStyle= {{alignItems: 'center'}}
+            contentContainerStyle={{ alignItems: 'center', flexGrow: 1 }}
             key={numColumns}
             numColumns={numColumns}
             ListHeaderComponent={() => (
@@ -408,16 +401,16 @@ const NearByDeals = ({ navigation, route }) => {
             //   justifyContent: 'space-between',
             //   paddingHorizontal: 20,
             // }}
-            data={data}
+            data={deals}
+            refreshControl={<RefreshControl refreshing={loading} onRefresh={() => getDeals()} colors={[Colors.Orange]} />}
+            ListEmptyComponent={() => !loading && <NoDataFound svgHeight={hp(15)} text={'No Deals'} textStyle={{ fontSize: RFPercentage(2.5) }} />}
             ItemSeparatorComponent={() => <View style={{ height: hp(3) }} />}
             renderItem={({ item }) => {
               const cuisineIds = item?.items?.map(item => item?.cuisine_id);
               const cuisineNames = cuisineIds?.map(cuisineId =>
                 setCusineNameByItemCusineId(cuisineId)
               );
-
               const fav = isDealFavorite(item?.deal_id)
-
               return (
                 // <FoodCard
                 //   image={item?.image}
@@ -426,9 +419,6 @@ const NearByDeals = ({ navigation, route }) => {
                 //   price={item?.price}
                 // />
                 <DealCard
-
-
-
                   image={
                     item?.images?.length > 0
                       ? BASE_URL_IMAGE + item?.images[0]
@@ -443,9 +433,9 @@ const NearByDeals = ({ navigation, route }) => {
                       type: 'favorite',
                     });
                   }}
-                  isFavorite={true}
+                  isFavorite={fav}
                   heartPress={() => fav ? removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch, showAlert) : addFavoriteDeal(item?.deal_id, customer_id, dispatch, showAlert)}
-                  addToCartpress={() => handleDealAddToCart(item)} 
+                  addToCartpress={() => handleDealAddToCart(item)}
                   imageStyle={{
                     width: wp(42),
                     height: hp('16.5%')
@@ -492,7 +482,6 @@ const NearByDeals = ({ navigation, route }) => {
               )
             }}
             ListFooterComponent={() => <View style={{ height: hp(3) }} />}
-            ListEmptyComponent={() => <NoDataFound />}
           />
         </View>
       )}

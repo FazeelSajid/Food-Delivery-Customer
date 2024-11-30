@@ -19,6 +19,7 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import {
   chooseImageFromCamera,
   chooseVideoFromCamera,
+  handlePopup,
   showAlert,
   uploadImage,
 } from '../../../utils/helpers';
@@ -29,7 +30,8 @@ import RBSheetSuccess from '../../../components/BottomSheet/RBSheetSuccess';
 import Loader from '../../../components/Loader';
 import api from '../../../constants/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import PopUp from '../../../components/Popup/PopUp';
 
 const AddComplaint = ({navigation, route}) => {
   const ref_RBSheet = useRef();
@@ -37,7 +39,8 @@ const AddComplaint = ({navigation, route}) => {
   const [videoFile, setVideoFile] = useState(null);
   const [videoName, setVideoName] = useState(null);
   const [videoType, setVideoType] = useState(null);
-  const customer_id = useSelector(store => store.store.customer_id)
+  const {customer_id,  showPopUp, popUpColor, PopUpMesage,} = useSelector(store => store.store)
+  const dispatch = useDispatch()
 
   const [complaintFor, setComplaintFor] = useState('rider');
   const [loading, setLoading] = useState(false);
@@ -176,7 +179,7 @@ const AddComplaint = ({navigation, route}) => {
 
   const validate = () => {
     if (complaint?.length == 0) {
-      showAlert('Please enter complaint');
+      handlePopup(dispatch,'Please enter complaint','red');
       return false;
     } else {
       return true;
@@ -217,12 +220,12 @@ const AddComplaint = ({navigation, route}) => {
           if (response?.error == false) {
             ref_RBSheet?.current?.open();
           } else {
-            showAlert(response?.message);
+            handlePopup(dispatch, response?.message, 'red');
           }
         })
         .catch(err => {
           console.log('Error in Login :  ', err);
-          showAlert('Something went wrong');
+          handlePopup(dispatch, 'Something went worng', 'red');
         })
         .finally(() => {
           setLoading(false);
@@ -233,6 +236,7 @@ const AddComplaint = ({navigation, route}) => {
   return (
     <View style={{flex: 1, backgroundColor: Colors.White}}>
       {/* <Loader loading={loading} /> */}
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView
         contentContainerStyle={{flexGrow: 1}}
         keyboardShouldPersistTaps="handled">
@@ -324,7 +328,7 @@ const AddComplaint = ({navigation, route}) => {
             />
           </View>
 
-          <View
+          {/* <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -347,7 +351,7 @@ const AddComplaint = ({navigation, route}) => {
               {' '}
               (optional)
             </Text>
-          </View>
+          </View> */}
 
           <View style={{marginVertical: 15}}>
             <Text
@@ -389,7 +393,7 @@ const AddComplaint = ({navigation, route}) => {
             </View>
           </View>
 
-          {videoFile ? (
+          {/* {videoFile ? (
             <TouchableOpacity
               onPress={() => handleUploadVideo()}
               style={{
@@ -423,7 +427,7 @@ const AddComplaint = ({navigation, route}) => {
               }}>
               <Icons.Video width={28} />
             </TouchableOpacity>
-          )}
+          )} */}
 
           <CButton
             title="ADD"

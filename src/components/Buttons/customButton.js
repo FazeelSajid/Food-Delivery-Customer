@@ -28,7 +28,8 @@ const CustomButton = ({
   vertical,
   rightSvg,
   contentContainer,
-  loaderColor
+  loaderColor,
+  LoaderSize
 }) => {
   
   return (
@@ -47,7 +48,7 @@ const CustomButton = ({
       disabled={isLoading}
       >
        {isLoading ?
-        <Loader color={loaderColor} /> :
+        <Loader color={loaderColor} size={LoaderSize} /> :
       icon ? (
         <>
           <Icon name={icon} size={iconSize} color={iconColor} />

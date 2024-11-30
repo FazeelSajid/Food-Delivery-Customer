@@ -21,17 +21,18 @@ import STYLE from './STYLE';
 import RBSheetSuccess from '../../components/BottomSheet/RBSheetSuccess';
 import {useKeyboard} from '../../utils/UseKeyboardHook';
 import {firebase} from '@react-native-firebase/auth';
-import {showAlert, showAlertLongLength} from '../../utils/helpers';
+import {handlePopup, showAlert, showAlertLongLength} from '../../utils/helpers';
 import api from '../../constants/api';
 import Loader from '../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import OrangeSuccessCheck from '../../Assets/svg/orangeSuccessCheck.svg';
 import {setCustomerDetail, setCustomerId, setJoinAsGuest} from '../../redux/AuthSlice';
+import PopUp from '../../components/Popup/PopUp';
 
 const Verification = ({navigation, route}) => {
   const dispatch = useDispatch();
-
+  const {showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store);
   const keyboardHeight = useKeyboard();
   const scrollViewRef = useRef();
 
@@ -156,7 +157,8 @@ const Verification = ({navigation, route}) => {
       .then(async response => {
         // console.log('response  :  ', response); 
         if (response?.status == false) {
-          showAlert(response?.message);
+          // showAlert(response?.message);
+          handlePopup(dispatch, response?.message, 'red')
           // showAlert('Invalid Credentials');
         } else {
           // showAlert(response.message, 'green');
@@ -179,7 +181,9 @@ const Verification = ({navigation, route}) => {
       })
       .catch(err => {
         console.log('Error in Login :  ', err);
-        showAlert('Something went wrong!');
+        // showAlert('Something went wrong!');
+        handlePopup(dispatch, 'Something went wrong!', 'red')
+
       })
       .finally(() => {
         setLoading(false);
@@ -188,6 +192,7 @@ const Verification = ({navigation, route}) => {
   };
   return (
     <View style={{flex: 1, backgroundColor: Colors.White}}>
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <StackHeader title={''} backIconColor={'#1D1D20'} />
       <Loader loading={loader} />
       <ScrollView

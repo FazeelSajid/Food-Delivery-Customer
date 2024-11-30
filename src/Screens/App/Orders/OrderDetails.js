@@ -6,31 +6,32 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import React, {useState, useEffect, useRef} from 'react';
-import {Colors, Fonts, Icons, Images} from '../../../constants';
+import React, { useState, useEffect, useRef } from 'react';
+import { Colors, Fonts, Icons, Images } from '../../../constants';
 import StackHeader from '../../../components/Header/StackHeader';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {SwiperFlatList} from 'react-native-swiper-flatlist';
+import { SwiperFlatList } from 'react-native-swiper-flatlist';
 import ImageSlider from '../../../components/Slider/ImageSlider';
 import CButton from '../../../components/Buttons/CButton';
 import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
 import CInput from '../../../components/TextInput/CInput';
-import {Avatar} from 'react-native-paper';
+import { Avatar } from 'react-native-paper';
 import Entypo from 'react-native-vector-icons/Entypo';
 
-import {Rating, AirbnbRating} from 'react-native-ratings';
+import { Rating, AirbnbRating } from 'react-native-ratings';
 import PriceText from '../../../components/Text';
 import SuccessModal from '../../../components/Modal/SuccessModal';
 import HeaderImageSlider from '../../../components/Slider/HeaderImageSlider';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import RBSheetSuccess from '../../../components/BottomSheet/RBSheetSuccess';
-import {RadioButton} from 'react-native-paper';
+import { RadioButton } from 'react-native-paper';
 import {
   getUserFcmToken,
+  handlePopup,
   showAlert,
   showAlertLongLength,
 } from '../../../utils/helpers';
@@ -49,11 +50,15 @@ import {
 import SectionSeparator from '../../../components/Separator/SectionSeparator';
 import ItemSeparator from '../../../components/Separator/ItemSeparator';
 import PaymentCard from '../../../components/Cards/PaymentCard';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import PopUp from '../../../components/Popup/PopUp';
 
-const OrderDetails = ({navigation, route}) => {
+const OrderDetails = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const customer_id = useSelector(store => store.store.customer_id)
+  const { showPopUp, popUpColor, PopUpMesage, contacts } = useSelector(store => store.store)
+
+  const dispatch = useDispatch()
 
   const [orderDetails, setOrderDetails] = useState(null);
   const [fistCartItemDetail, setFistCartItemDetail] = useState(null);
@@ -91,6 +96,46 @@ const OrderDetails = ({navigation, route}) => {
     // },
   ]);
 
+  // console.log(orderDetails.riderData);
+  // console.log(orderDetails.restaurantData.restaurant_id);
+
+
+  function getRoomIdByRestaurantId(restaurantId) {
+    for (const item of contacts) {
+        if (item.restaurant_id === restaurantId) {
+            return item.room_id; // Return the room_id if the restaurant_id matches
+        }
+    }
+    return null; // Return null if no match is found
+  }
+
+  function getRoomIdByRiderId(riderId) {
+    for (const item of contacts) {
+        if (item.rider_id === riderId) {
+            return item.room_id; // Return the room_id if the rider_id matches
+        }
+    }
+    return null; // Return null if no match is found
+}
+
+  
+
+  const RestaruantContact = { "customer_id": customer_id, "receiver_id": orderDetails?.restaurantData?.restaurant_id, "receiver_type": "restaurant", "restaurant_id": orderDetails?.restaurantData?.restaurant_id, "rider_id": null, "room_id": getRoomIdByRestaurantId(orderDetails?.restaurantData?.restaurant_id), "sender_id": customer_id, "sender_type": "customer", "restaurant_name": orderDetails?.restaurantData?.user_name }
+  const riderContact = { "customer_id": customer_id, "receiver_id": orderDetails?.riderData?.rider_id, "receiver_type": "rider", "restaurant_id": null, "rider_id": orderDetails?.riderData?.rider_id, "room_id": getRoomIdByRiderId(orderDetails?.riderData?.rider_id), "sender_id": customer_id, "sender_type": "customer", "rider_name": orderDetails?.riderData?.name }
+
+  const handleSelectContact = async (contact) => {
+
+    // setRoomId(contact.room_id); 
+    // setMessages([]); 
+
+    navigation.navigate('Conversation', {
+      contact: contact,
+      name: contact?.restaurant_name || contact?.rider_name
+    })
+  };
+
+  
+
   const handleCancelOrder = () => {
     setLoading(true);
     let data = {
@@ -111,12 +156,14 @@ const OrderDetails = ({navigation, route}) => {
         if (response?.error == false) {
           setVisible(true);
         } else {
-          showAlert(response?.message);
+
+          // showAlert(response?.message);
+          handlePopup(dispatch, response?.message, 'red')
         }
       })
       .catch(err => {
         console.log('Error in accept/reject order :  ', err);
-        showAlert('Something went wrong');
+        handlePopup(dispatch, 'Something went wrong', 'red')
       })
       .finally(() => {
         setLoading(false);
@@ -161,11 +208,12 @@ const OrderDetails = ({navigation, route}) => {
       .then(async response => {
         console.log('response  :   ', response);
         if (response?.status == false) {
-          // showAlert(response?.message);
           setLoading(false);
-          setTimeout(() => {
-            showAlertLongLength(response?.message);
-          }, 1000);
+          handlePopup(dispatch, response?.message, 'red')
+          // setTimeout(() => {
+          //   showAlertLongLength(response?.message);
+
+          // }, 1000);
         } else {
           let fcm_token = orderDetails?.restaurantData?.fcm_token;
           let restaurant_id = orderDetails?.restaurant_id;
@@ -189,14 +237,13 @@ const OrderDetails = ({navigation, route}) => {
 
           setLoading(false);
           setRatingComment('');
-          setTimeout(() => {
-            showAlertLongLength('Rating Submitted successfully', 'green');
-          }, 1000);
+          handlePopup(dispatch, 'Rating Submitted successfully', 'green')
+
         }
       })
       .catch(err => {
-        console.log('Error in Login :  ', err);
-        showAlert('Something went wrong!');
+
+        handlePopup(dispatch, 'Something went wrong', 'red')
         setLoading(false);
       });
   };
@@ -211,6 +258,7 @@ const OrderDetails = ({navigation, route}) => {
       rating: rating,
       customer_id: customer_id,
       comments: ratingComment,
+      order_id: route?.params?.id,
     };
     console.log('Body in rate rider  : ', data);
 
@@ -225,12 +273,9 @@ const OrderDetails = ({navigation, route}) => {
       .then(async response => {
         console.log('response Rate Rider  :   ', response);
         if (response?.status == false) {
-          // showAlert(response?.message);
           setLoading(false);
+          handlePopup(dispatch, 'Something went wrong', 'red')
 
-          setTimeout(() => {
-            showAlertLongLength(response?.message);
-          }, 1000);
         } else {
           let fcm_token = orderDetails?.riderData?.fcm_token;
           let rider_id = orderDetails?.rider_id;
@@ -251,16 +296,16 @@ const OrderDetails = ({navigation, route}) => {
 
           setLoading(false);
           setRatingComment('');
-          setTimeout(() => {
-            showAlertLongLength('Rating Submitted successfully', 'green');
-          }, 1000);
+          handlePopup(dispatch, 'Rating Submitted successfully', 'green')
+
         }
       })
       .catch(err => {
-        console.log('Error in Login :  ', err);
-        showAlert('Something went wrong!');
+        console.log('Error in Rider Rating :  ', err);
+        handlePopup(dispatch, 'Something went wrong', 'red')
         setLoading(false);
       });
+
   };
 
   const handleSubmitRating = async () => {
@@ -287,7 +332,7 @@ const OrderDetails = ({navigation, route}) => {
   };
 
   const handleSendPushNotification = async (text, receiver_fcm) => {
-    console.log({text, receiver_fcm});
+    console.log({ text, receiver_fcm });
     // const receiver_fcm = await getUserFcmToken();
     if (receiver_fcm) {
       let body = {
@@ -330,7 +375,7 @@ const OrderDetails = ({navigation, route}) => {
 
   // const getDetail = id => {
   //   console.log(api.get_order_by_id + id);
-    
+
   //   setLoading(true);
   //   fetch(api.get_order_by_id + id)
   //     .then(response => response.json())
@@ -357,20 +402,34 @@ const OrderDetails = ({navigation, route}) => {
   useEffect(() => {
     let id = route?.params?.id;
     let item = route?.params?.item;
-    console.log('order details id :  ', id);
+    // console.log('order details id :  ', item);
     setOrderDetails(item)
 
 
     let cart_item =
-              item?.cart_items_Data?.length > 0
-                ? item?.cart_items_Data[0]
-                : null;
-            setItemImages(cart_item?.itemData?.images);
-            setFistCartItemDetail(cart_item);
+      item?.cart_items_Data?.length > 0
+        ? item?.cart_items_Data[0]
+        : null;
+    setItemImages(cart_item?.itemData?.images);
+    setFistCartItemDetail(cart_item);
     // if (id) {
     //   getDetail(id);
     // }
   }, []);
+
+  function getInitials(input) {
+    // Split the string into words
+    const words = input.trim().split(' ');
+
+    // Check the number of words
+    if (words.length === 1) {
+      // If only one word, return the first letter in uppercase
+      return words[0][0].toUpperCase();
+    } else {
+      // If two or more words, return the first letters of the first two words in uppercase
+      return words[0][0].toUpperCase() + words[1][0].toUpperCase();
+    }
+  }
 
   const calculateSubTotal = (totalAmount, platform_fee, delivery_charges) => {
     let service_charges = platform_fee + delivery_charges;
@@ -383,12 +442,16 @@ const OrderDetails = ({navigation, route}) => {
   return (
     <View style={styles.container}>
       <Loader loading={loading} />
-      <ScrollView contentContainerStyle={{flexGrow: 1}}>
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         {/* <StackHeader title={'Order Details'} /> */}
         {/* <HeaderImageSlider data={data} /> */}
+        {/* <TouchableOpacity style={{position: 'absolute'}} >
+          <></>
+        </TouchableOpacity> */}
         <HeaderImageSlider data={itemImages && itemImages} />
 
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1, backgroundColor: Colors.OrangeExtraLight, width: '90%', overflow: 'hidden', alignSelf: 'center' }}>
           {/* <View
             style={{
               alignItems: 'center',
@@ -402,7 +465,7 @@ const OrderDetails = ({navigation, route}) => {
           </View>
           <ImageSlider data={data} /> */}
 
-          <View style={{...styles.rowViewSB, paddingHorizontal: 20}}>
+          <View style={{ ...styles.rowViewSB, paddingHorizontal: 20 }}>
             <View>
               <Text
                 style={{
@@ -465,21 +528,21 @@ const OrderDetails = ({navigation, route}) => {
           </View>
 
           <View style={styles.location_container}>
-            <View style={{flexDirection: 'row'}}>
-              <Icons.MapPinActive />
-              <View style={{marginTop: 0}}>
-                <Text style={styles.location_description}>Order from</Text>
-                <Text style={styles.location_heading}>
+            <View style={{ flexDirection: 'row' }}>
+              <Icons.MapMarker width={wp(6)} />
+              <View style={{ marginTop: 0 }}>
+                <Text style={styles.location_heading}>Order from</Text>
+                <Text style={styles.location_description}>
                   {orderDetails?.restaurantData?.user_name}
                 </Text>
               </View>
             </View>
             <View style={styles.verticalDottedLine} />
-            <View style={{flexDirection: 'row', marginTop: 25}}>
-              <Icons.MapPinActive />
+            <View style={{ flexDirection: 'row', marginTop: hp(0) }}>
+              <Icons.MapMarker width={wp(6)} />
               <View style={{}}>
-                <Text style={styles.location_description}>Delivered to</Text>
-                <Text style={styles.location_heading}>
+                <Text style={styles.location_heading}>Delivered to</Text>
+                <Text style={styles.location_description}>
                   {orderDetails?.locationData?.address}
                 </Text>
               </View>
@@ -487,112 +550,122 @@ const OrderDetails = ({navigation, route}) => {
           </View>
 
           <SectionSeparator />
-          <View style={{padding: 20}}>
+          <View style={{ padding: 20 }}>
             {orderDetails?.cart_items_Data &&
               orderDetails?.cart_items_Data?.map((item, key) => {
                 // console.log(item.price);
                 // {item?.item_type == 'deal' ? item.price * item?.quantity : item?.variationData?.price * item?.quantity}
-                
-                return(
-                <View style={{...styles.rowView, marginBottom: 5}}>
-                  <Ionicons
-                    name={'close'}
-                    size={15}
-                    color={Colors.Orange}
-                    style={{marginBottom: -3}}
-                  />
-                  <Text
-                    style={{
-                      color: Colors.Orange,
-                      fontFamily: Fonts.PlusJakartaSans_Bold,
-                      fontSize: RFPercentage(2),
-                      marginLeft: 5,
-                      marginHorizontal: 10,
-                    }}>
-                    {item?.quantity}
-                  </Text>
-                  <Text
-                    style={{
-                      color: '#191A26',
-                      fontFamily: Fonts.PlusJakartaSans_Bold,
-                      fontSize: RFPercentage(2),
-                    }}>
-                    {item
-                      ? item?.item_type == 'deal'
-                        ? item?.itemData?.name
-                        : item?.itemData?.item_name
-                      : ''}
-                  </Text>
-                  <Text
-                    style={{
-                      flex: 1,
-                      textAlign: 'right',
-                      color: Colors.Orange,
-                      fontFamily: Fonts.PlusJakartaSans_SemiBold,
-                      fontSize: RFPercentage(2),
-                    }}>
-                    $ {item?.item_type == 'deal' ? item.sub_total * item?.quantity : item?.variationData?.price * item?.quantity}
-                  </Text>
-                </View>
-              )})}
+
+                return (
+                  <View style={{ ...styles.rowView, marginBottom: 5 }}>
+                    <Ionicons
+                      name={'close'}
+                      size={15}
+                      color={Colors.Orange}
+                      style={{ marginBottom: -3 }}
+                    />
+                    <Text
+                      style={{
+                        color: Colors.Orange,
+                        fontFamily: Fonts.PlusJakartaSans_Bold,
+                        fontSize: RFPercentage(2),
+                        marginLeft: 5,
+                        marginHorizontal: 10,
+                      }}>
+                      {item?.quantity}
+                    </Text>
+                    <Text
+                      style={{
+                        color: '#191A26',
+                        fontFamily: Fonts.PlusJakartaSans_Bold,
+                        fontSize: RFPercentage(2),
+                      }}>
+                      {item
+                        ? item?.item_type == 'deal'
+                          ? item?.itemData?.name
+                          : item?.itemData?.item_name
+                        : ''}
+                    </Text>
+                    <Text
+                      style={{
+                        flex: 1,
+                        textAlign: 'right',
+                        color: Colors.Orange,
+                        fontFamily: Fonts.PlusJakartaSans_SemiBold,
+                        fontSize: RFPercentage(2),
+                      }}>
+                      $ {item?.item_type == 'deal' ? item.sub_total * item?.quantity : item?.variationData?.price * item?.quantity}
+                    </Text>
+                  </View>
+                )
+              })}
           </View>
           <SectionSeparator />
 
-          {route?.params?.type == 'cancelled' ? null : (
-            <>
-              <View style={{padding: 20}}>
-                <View style={styles.rowViewSB}>
-                  <Text style={styles.subText2}>Subtotal</Text>
-                  <Text style={styles.subText2}>
-                    ${orderDetails?.sub_total}
-                    {/* ${' '}
+
+          <>
+            <View style={{ padding: 20 }}>
+              <View style={styles.rowViewSB}>
+                <Text style={styles.subText2}>Subtotal</Text>
+                <Text style={styles.subText2}>
+                  ${orderDetails?.sub_total}
+                  {/* ${' '}
                     {calculateSubTotal(
                       orderDetails?.total_amount,
                       orderDetails?.platform_fees,
                       orderDetails?.delivery_charges,
                     )} */}
-                    {/* {parseInt(orderDetails?.total_amount) -
+                  {/* {parseInt(orderDetails?.total_amount) -
                       (parseInt(orderDetails?.platform_fees) +
                         parseInt(orderDetails?.delivery_charges))} */}
-                  </Text>
-                </View>
-
-                <View style={styles.rowViewSB}>
-                  <Text style={styles.subText2}>Delivery Charges</Text>
-                  <Text style={styles.subText2}>
-                    $ {orderDetails?.delivery_charges}
-                    {/* ${' '}
-                    {parseInt(orderDetails?.platform_fees) +
-                      parseInt(orderDetails?.delivery_charges)} */}
-                  </Text>
-                </View>
-                <View style={styles.rowViewSB}>
-                  <Text style={styles.subText2}>Gst Charges</Text>
-                  <Text style={styles.subText2}>
-                    $ {orderDetails?.gst}
-                    {/* ${' '}
-                    {parseInt(orderDetails?.platform_fees) +
-                      parseInt(orderDetails?.delivery_charges)} */}
-                  </Text>
-                </View>
-                <ItemSeparator />
-                <View style={{...styles.rowViewSB, marginTop: -5}}>
-                  <Text style={styles.total_amountText}>Total</Text>
-                  <Text style={styles.total_amountText}>
-                    $ {orderDetails?.total_amount}
-                  </Text>
-                </View>
+                </Text>
               </View>
-              <Text
-                style={{
-                  color: Colors.Orange,
-                  fontFamily: Fonts.PlusJakartaSans_Bold,
-                  fontSize: RFPercentage(2.3),
-                  marginHorizontal: 20,
-                }}>
-                Payment Methods
-              </Text>
-              {/* <View
+
+              <View style={styles.rowViewSB}>
+                <Text style={styles.subText2}>Delivery Charges</Text>
+                <Text style={styles.subText2}>
+                  $ {orderDetails?.delivery_charges}
+                  {/* ${' '}
+                    {parseInt(orderDetails?.platform_fees) +
+                      parseInt(orderDetails?.delivery_charges)} */}
+                </Text>
+              </View>
+              <View style={styles.rowViewSB}>
+                <Text style={styles.subText2}>Gst Charges</Text>
+                <Text style={styles.subText2}>
+                  $ {orderDetails?.gst}
+                  {/* ${' '}
+                    {parseInt(orderDetails?.platform_fees) +
+                      parseInt(orderDetails?.delivery_charges)} */}
+                </Text>
+              </View>
+              <ItemSeparator />
+              <View style={{ ...styles.rowViewSB, marginTop: -5 }}>
+                <Text style={styles.total_amountText}>Total</Text>
+                <Text style={styles.total_amountText}>
+                  $ {orderDetails?.total_amount}
+                </Text>
+              </View>
+              {
+                orderDetails?.comments && <View style={{ marginTop: hp(2) }} >
+                  <Text style={[styles.total_amountText, { fontFamily: Fonts.PlusJakartaSans_Bold, marginBottom: hp(1), color: Colors.Orange }]}>Special Instructions: </Text>
+                  <Text style={[styles.subText2, { fontFamily: Fonts.PlusJakartaSans_Regular, fontSize: RFPercentage(1.6) }]}>Please drop the food at the reception desk. I’ll collect it later. </Text>
+                </View>
+              }
+
+            </View>
+
+
+            <Text
+              style={{
+                color: Colors.Orange,
+                fontFamily: Fonts.PlusJakartaSans_Bold,
+                fontSize: RFPercentage(2.3),
+                marginHorizontal: 20,
+              }}>
+              Payment Methods
+            </Text>
+            {/* <View
                 style={{
                   borderWidth: 1,
                   borderColor: '#E6E7EB',
@@ -620,106 +693,75 @@ const OrderDetails = ({navigation, route}) => {
                   Master Card
                 </Text>
               </View> */}
-              {orderDetails?.payment_option == 'cash' ? (
-                <PaymentCard type="cash" title="Cash On Delivery" />
-              ) : (
-                <PaymentCard />
-              )}
+            {orderDetails?.payment_option == 'cash' ? (
+              <PaymentCard type="cash" title="Cash On Delivery" />
+            ) : (
+              <PaymentCard />
+            )}
 
-              {route?.params?.type == 'completed' ? null : (
-                <View style={{paddingHorizontal: 20}}>
-                  <View style={styles.itemView}>
-                    <View style={styles.imageContainer}>
-                      <Icons.Van />
-                    </View>
-                    <View style={styles.textContainer}>
-                      <Text style={{...styles.title, marginBottom: 5}}>
-                        Estimate Delivery Time
-                      </Text>
-                      <Text
-                        style={{
-                          ...styles.title,
-                          color: Colors.Orange,
-                          fontFamily: Fonts.Inter_SemiBold,
-                        }}>
-                        {/* 40 mins */}
-                        {orderDetails?.estimated_delivery_time
-                          ? `${orderDetails?.estimated_delivery_time} mins`
-                          : '0 mins'}
-                      </Text>
-                    </View>
+
+            <View style={{ paddingHorizontal: 20 }}>
+              {route?.params?.type == 'all' && <View style={styles.itemView}>
+                <View style={styles.imageContainer}>
+                  <Icons.Van />
+                </View>
+                <View style={styles.textContainer}>
+                  <Text style={{ ...styles.title, marginBottom: 5 }}>
+                    Estimate Delivery Time
+                  </Text>
+                  <Text
+                    style={{
+                      ...styles.title,
+                      color: Colors.Orange,
+                      fontFamily: Fonts.Inter_SemiBold,
+                    }}>
+                    {/* 40 mins */}
+                    {orderDetails?.estimated_delivery_time
+                      ? `${orderDetails?.estimated_delivery_time} mins`
+                      : '0 mins'}
+                  </Text>
+                </View>
+              </View>}
+
+              {orderDetails?.restaurantData?.restaurant_id && (
+                <View style={styles.itemView}>
+                  <View style={{ backgroundColor: Colors.Orange, paddingHorizontal: wp(4), paddingVertical: wp(2.2), borderRadius: wp(10), }} ><Text style={{ color: Colors.White, fontSize: RFPercentage(2.4), padding: 0 }} >{getInitials(orderDetails?.restaurantData?.user_name)}</Text></View>
+                  <View style={styles.textContainer}>
+                    <Text style={{ ...styles.subText, marginLeft: 5 }}>
+                      {/* Rider's name here */}
+                      {orderDetails?.restaurantData?.user_name}
+                    </Text>
                   </View>
-                  {orderDetails?.restaurantData?.restaurant_id && (
-                    <View style={styles.itemView}>
-                      <Avatar.Image
-                        style={{backgroundColor: Colors.Orange}}
-                        size={45}
-                        // source={Images.user}
-                        // source={{
-                        //   uri:
-                        //     BASE_URL_IMAGE +
-                        //     orderDetails?.restaurantData?.images[0],
-                        // }}
-                      />
-                      <View style={styles.textContainer}>
-                        <Text style={{...styles.subText, marginLeft: 5}}>
-                          {/* Rider's name here */}
-                          {orderDetails?.restaurantData?.user_name}
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        onPress={() =>
-                          navigation.navigate('Conversation', {
-                            type: 'restaurant',
-                            userId: orderDetails?.restaurantData?.restaurant_id,
-                            name: orderDetails?.restaurantData?.user_name,
-                            image:
-                              BASE_URL_IMAGE +
-                              orderDetails?.restaurantData?.images[0],
-                            fcm_token: orderDetails?.restaurantData?.fcm_token,
-                          })
-                        }>
-                        <Icons.ChatActive />
-                      </TouchableOpacity>
-                    </View>
-                  )}
 
-                  {orderDetails?.riderData?.rider_id &&
-                    orderDetails?.order_status == 'out_for_delivery' && (
-                      <View style={styles.itemView}>
-                        <Avatar.Image
-                          style={{backgroundColor: Colors.Orange}}
-                          size={45}
-                          source={{
-                            uri:
-                              BASE_URL_IMAGE + orderDetails?.riderData?.photo,
-                          }}
-                        />
-                        <View style={styles.textContainer}>
-                          <Text style={{...styles.subText, marginLeft: 5}}>
-                            {orderDetails?.riderData?.name}
-                          </Text>
-                        </View>
-
-                        <TouchableOpacity
-                          onPress={() =>
-                            navigation.navigate('Conversation', {
-                              type: 'rider',
-                              userId: orderDetails?.riderData?.rider_id,
-                              name: orderDetails?.riderData?.name,
-                              image:
-                                BASE_URL_IMAGE + orderDetails?.riderData?.photo,
-                              fcm_token: orderDetails?.riderData?.fcm_token,
-                            })
-                          }>
-                          <Icons.ChatActive />
-                        </TouchableOpacity>
-                      </View>
-                    )}
+                  <TouchableOpacity
+                    onPress={() => handleSelectContact(RestaruantContact)}>
+                    <Icons.ChatActive />
+                  </TouchableOpacity>
                 </View>
               )}
-            </>
-          )}
+
+              {orderDetails?.riderData?.rider_id && (
+                <View style={styles.itemView}>
+                  <View style={{ backgroundColor: Colors.Orange, paddingHorizontal: wp(4), paddingVertical: wp(2.2), borderRadius: wp(10), }} ><Text style={{ color: Colors.White, fontSize: RFPercentage(2.4), padding: 0 }} >{getInitials(orderDetails?.riderData?.name)}</Text></View>
+
+                  <View style={styles.textContainer}>
+                    <Text style={{ ...styles.subText, marginLeft: 5 }}>
+                      {orderDetails?.riderData?.name}
+                    </Text>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleSelectContact(riderContact)
+                    }>
+                    <Icons.ChatActive />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+
+          </>
+
 
           {route?.params?.type == 'history' && (
             <View
@@ -940,7 +982,7 @@ const OrderDetails = ({navigation, route}) => {
             refRBSheet={ref_ComplaintSheet}
             content={
               <ScrollView keyboardShouldPersistTaps="handled">
-                <View style={{...styles.rowViewSB, marginBottom: 20}}>
+                <View style={{ ...styles.rowViewSB, marginBottom: 20 }}>
                   <Text style={styles.rbSheetHeading}>Add Complaint</Text>
                   <TouchableOpacity
                     onPress={() => ref_ComplaintSheet?.current?.close()}>
@@ -969,8 +1011,8 @@ const OrderDetails = ({navigation, route}) => {
             refRBSheet={ref_RatingOptionSheet}
             height={190}
             content={
-              <View style={{width: wp(90)}}>
-                <View style={{...styles.rowViewSB, marginBottom: 18}}>
+              <View style={{ width: wp(90) }}>
+                <View style={{ ...styles.rowViewSB, marginBottom: 18 }}>
                   <Text style={styles.rbSheetHeading}>
                     Who you wants to Rate
                   </Text>
@@ -979,7 +1021,7 @@ const OrderDetails = ({navigation, route}) => {
                     <Ionicons name={'close'} size={22} color={'#1E2022'} />
                   </TouchableOpacity>
                 </View>
-                <View style={{flex: 1}}>
+                <View style={{ flex: 1 }}>
                   <TouchableOpacity
                     onPress={() => onRiderSelect()}
                     style={styles.rowView}>
@@ -1044,7 +1086,7 @@ const OrderDetails = ({navigation, route}) => {
             refRBSheet={ref_RatingSheet}
             height={370}
             content={
-              <View style={{width: wp(90)}}>
+              <View style={{ width: wp(90) }}>
                 <Text
                   style={{
                     color: Colors.Text,
@@ -1065,7 +1107,7 @@ const OrderDetails = ({navigation, route}) => {
                   <Ionicons name={'close'} size={22} color={'#1E2022'} />
                 </TouchableOpacity>
 
-                <View style={{flex: 1}}>
+                <View style={{ flex: 1 }}>
                   {/* <AirbnbRating
                   count={5}
                   //   reviews={['Terrible', 'Bad', 'Meh', 'OK', 'Good']}
@@ -1079,7 +1121,7 @@ const OrderDetails = ({navigation, route}) => {
                     defaultRating={1}
                     size={30}
                     // starImage={<Images.food1 />}
-                    ratingContainerStyle={{marginBottom: 20}}
+                    ratingContainerStyle={{ marginBottom: 20 }}
                     onFinishRating={value => {
                       setRating(value);
                     }}
@@ -1120,21 +1162,43 @@ const OrderDetails = ({navigation, route}) => {
             }
           />
         </View>
-        <View style={{height: hp(15)}} />
+        <View style={route?.params?.type == 'cancelled' ? { height: hp(2) } : { height: hp(10) }} />
       </ScrollView>
       {route?.params?.type == 'all' && (
-        <CButton
+        orderDetails?.order_status === 'out_for_delivery' ? (
+          <View
+            style={{
+              position: 'absolute',
+              top: hp(93),
+              zIndex: 999,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: wp(90),
+            }}>
+            <CButton
+              title="Cancel Order"
+              onPress={() => handleCancelOrder()}
+              width={wp(42)}
+            />
+            <CButton
+              title="Track Order"
+              width={wp(42)}
+            onPress={() => navigation.navigate('TrackOrder')}
+            />
+          </View>
+
+        ) : <CButton
           title="Cancel Order"
           onPress={() => handleCancelOrder()}
-          style={{position: 'absolute', top: hp(90), zIndex: 999}}
+          style={{ position: 'absolute', top: hp(95), zIndex: 999 }}
         />
       )}
-
       {route?.params?.type == 'completed' && (
         <View
           style={{
             position: 'absolute',
-            top: hp(90),
+            top: hp(93),
             zIndex: 999,
             flexDirection: 'row',
             alignItems: 'center',
@@ -1304,7 +1368,7 @@ const styles = StyleSheet.create({
 
   verticalDottedLine: {
     // height: 45,
-    minHeight: 47,
+    minHeight: 30,
     flex: 1,
     borderWidth: 1,
     borderColor: Colors.Orange,
@@ -1313,8 +1377,8 @@ const styles = StyleSheet.create({
     // marginLeft: 19,
     marginLeft: 8,
     position: 'absolute',
-    left: 19.5,
-    top: 13,
+    left: 22,
+    top: 33,
   },
   location_heading: {
     color: Colors.Orange,
@@ -1357,7 +1421,7 @@ const styles = StyleSheet.create({
 // import StackHeader from '../../../components/Header/StackHeader';
 // import {RFPercentage} from 'react-native-responsive-fontsize';
 // import {
-//   widthPercentageToDP as wp,
+//   wp as wp,
 //   heightPercentageToDP as hp,
 // } from 'react-native-responsive-screen';
 // import {SwiperFlatList} from 'react-native-swiper-flatlist';

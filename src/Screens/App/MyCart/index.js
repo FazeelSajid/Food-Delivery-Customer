@@ -8,15 +8,15 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import React, {useState, useEffect, useRef} from 'react';
-import {Colors, Icons, Images, Fonts} from '../../../constants';
+import React, { useState, useEffect, useRef } from 'react';
+import { Colors, Icons, Images, Fonts } from '../../../constants';
 import MenuHeader from '../../../components/Header/MenuHeader';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-import {SwipeListView} from 'react-native-swipe-list-view';
+import { SwipeListView } from 'react-native-swipe-list-view';
 import CButton from '../../../components/Buttons/CButton';
 import CartSwipeListView from '../../../components/Lists/CartSwipeListView';
 import PriceText from '../../../components/Text';
@@ -24,7 +24,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import CInput from '../../../components/TextInput/CInput';
-import {useKeyboard} from '../../../utils/UseKeyboardHook';
+import { useKeyboard } from '../../../utils/UseKeyboardHook';
 import StackHeader from '../../../components/Header/StackHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -35,10 +35,10 @@ import {
 } from '../../../utils/helpers/cartapis';
 
 import Loader from '../../../components/Loader';
-import {getRestaurantDetail, showAlert} from '../../../utils/helpers';
-import {useFocusEffect} from '@react-navigation/native';
-import {BASE_URL_IMAGE} from '../../../utils/globalVariables';
-import {useDispatch, useSelector} from 'react-redux';
+import { getRestaurantDetail, handlePopup, showAlert } from '../../../utils/helpers';
+import { useFocusEffect } from '@react-navigation/native';
+import { BASE_URL_IMAGE } from '../../../utils/globalVariables';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   addToCart,
   removeItemFromMyCart,
@@ -46,29 +46,49 @@ import {
   setOrderComment,
   updateMyCartList,
 } from '../../../redux/CartSlice';
-import {getEstimatedDeliveryTime} from '../../../utils/helpers/location';
-import {getShippingAddress} from '../../../utils/helpers/localStorage';
+import { getEstimatedDeliveryTime } from '../../../utils/helpers/location';
+import { getShippingAddress } from '../../../utils/helpers/localStorage';
+import PopUp from '../../../components/Popup/PopUp';
+import { setBill } from '../../../redux/AuthSlice';
+import api from '../../../constants/api';
+import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
+import ItemSeparator from '../../../components/Separator/ItemSeparator';
 
-const MyCart = ({navigation, route}) => {
-  const {cart_restaurant_id, my_cart} = useSelector(store => store.cart);
-  const { customer_id } = useSelector(store => store.store);
+const MyCart = ({ navigation, route }) => {
+  const { cart_restaurant_id, my_cart, cart, selected_payment_type,
+    selected_payment_string } = useSelector(store => store.cart);
 
-
+  const { customer_id, showPopUp, popUpColor, PopUpMesage, promos, Bill, location } = useSelector(store => store.store)
+  const [selectedItem, setSelectedItem] = useState()
+  const [itemLoading, setItemLoading] = useState()
+  const [checkOutLoading, setCheckOutLoading] = useState()
   const dispatch = useDispatch();
-
   const keyboardHeight = useKeyboard();
   const scrollViewRef = useRef();
+  const btmSheetRef = useRef();
+  const location_id = location?.id
+  const [loading, setLoading] = useState(false);
+
+  // console.log({promos});
+  // console.log({Bill}); 
+
 
   useEffect(() => {
-    console.log('keyboardHeight  : ', keyboardHeight);
+    // console.log('keyboardHeight  : ', keyboardHeight);
     scrollViewRef.current?.scrollToEnd();
     // scrollViewRef.current?.scrollTo({y: 1180});
   }, [keyboardHeight]);
 
-  const [loading, setLoading] = useState(false);
 
   // const [estimated_delivery_time, setEstimated_delivery_time] = useState(0);
 
+
+  const showBtmSheet = () => {
+    btmSheetRef?.current?.open()
+  }
+  const closeBtmSheet = () => {
+    btmSheetRef?.current?.close()
+  }
   const [data, setData] = useState([
     // {
     //   id: 0,
@@ -104,7 +124,7 @@ const MyCart = ({navigation, route}) => {
         quantity: item?.quantity + 1,
       };
       console.log('data   :  ', obj);
-      await updateCartItemQuantity(obj);
+      await updateCartItemQuantity(obj, dispatch);
       const newData = data?.map(element => {
         if (element?.cart_item_id == item.cart_item_id) {
           return {
@@ -135,7 +155,7 @@ const MyCart = ({navigation, route}) => {
           cart_item_id: item?.cart_item_id,
           quantity: item?.quantity - 1,
         };
-        await updateCartItemQuantity(obj);
+        await updateCartItemQuantity(obj, dispatch);
         const newData = data?.map(element => {
           if (element?.item_id == item.item_id) {
             return {
@@ -163,15 +183,22 @@ const MyCart = ({navigation, route}) => {
     }
   };
 
+  // console.log(itemLoading);
+
+
   const handleDelete = async item => {
+    // console.log(item);
+    setSelectedItem(item?.cart_item_id)
+    setItemLoading(true)
+
     try {
-      setLoading(true);
+      // setLoading(true);
       console.log('item   :  ', item?.cart_item_id);
       // let customer_id = await AsyncStorage.getItem('customer_id');
-      let cart = await getCustomerCart(customer_id);
+      let cart = await getCustomerCart(customer_id, dispatch);
       console.log('cart  : ', cart);
 
-      removeItemFromCart(cart?.cart_id,item?.cart_item_id)
+      removeItemFromCart(cart?.cart_id, item?.cart_item_id, dispatch)
         .then(response => {
           if (response?.status == true) {
             console.log('response  :  ', response);
@@ -179,7 +206,7 @@ const MyCart = ({navigation, route}) => {
               element => element?.cart_item_id != item?.cart_item_id,
             );
             // console.log('filter, from remove from cart' ,filter );
-            
+
             setData(filter);
             dispatch(addToCart(filter));
 
@@ -201,6 +228,7 @@ const MyCart = ({navigation, route}) => {
         })
         .finally(() => {
           setLoading(false);
+          setItemLoading(false);
         });
     } catch (error) {
       setLoading(false);
@@ -232,8 +260,10 @@ const MyCart = ({navigation, route}) => {
     try {
       setLoading(true);
       // let customer_id = await AsyncStorage.getItem('customer_id');
-      let cart = await getCustomerCart(customer_id);
-      let cartItems = await getCartItems(cart?.cart_id);
+      let cart = await getCustomerCart(customer_id, dispatch);
+      let cartItems = await getCartItems(cart?.cart_id, dispatch);
+      // console.log(cartItems);
+
       if (cartItems) {
         dispatch(addToCart(cartItems));
         setData(cartItems);
@@ -251,6 +281,173 @@ const MyCart = ({navigation, route}) => {
     }
   };
 
+  const calculatePreOrderDetails = (paymentType, promoCode) => {
+    if (!location_id) {
+      showBtmSheet();
+    } else {
+      setCheckOutLoading(true);
+
+      try {
+        // Calculate subtotal
+        let subtotal = 0;
+        const cartItemIds = cart.map(item => {
+          const price = parseInt(
+            item?.itemData?.variationData?.price
+              ? item?.itemData?.variationData?.price
+              : item?.itemData?.price
+          );
+          const quantity = item?.quantity ? parseInt(item?.quantity) : 1;
+          subtotal += price * quantity;
+          return item.cart_item_id;
+        });
+
+        // console.log({cartItemIds});
+
+        // Update Redux store with calculated data
+        dispatch(setBill({ cartItemIds, subtotal: subtotal.toFixed(2) }));
+
+        // Prepare request body
+        const body = {
+          customer_id: customer_id,
+          cart_items_ids: cartItemIds,
+          promo_code: promoCode ? promoCode : '', // optional
+          payment_option: selected_payment_type ? selected_payment_type: 'cash',
+          sub_total: subtotal.toFixed(2),
+          location_id: location.id,
+        };
+
+        console.log({ body });
+
+        // API call to calculate pre-order details
+        fetch(api.calculatePreOrder, {
+          method: 'POST',
+          body: JSON.stringify(body),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        })
+          .then(response => response.json())
+          .then(response => {
+            if (!response.error) {
+              console.log({ response });
+
+              dispatch(
+                setBill({
+                  delivery_charges: response?.result?.delivery_charges,
+                  gst_charges: response?.result?.gst_charges,
+                  total_amount: response?.result?.total_amount,
+                })
+              );
+              navigation?.navigate('Checkout');
+            }
+            else{
+            handlePopup(dispatch, 'Something went wrong', 'red')
+            console.log({ response });
+
+            }
+          }
+        
+        )
+          .catch(error => {
+            // console.log('Error in calculatePreOrderDetails API call: ', error);
+            handlePopup(dispatch, 'Something went wrong', 'red')
+          });
+      } catch (error) {
+        // console.log('Error in calculating subtotal or API request: ', error);
+        handlePopup(dispatch, 'Something went wrong', 'red')
+      }
+      finally {
+        setCheckOutLoading(false);
+      }
+    }
+  };
+
+
+  // const extractCartItemIds = (itemsArray) => {
+  //   return itemsArray.map(item => item.cart_item_id);
+  // };
+
+  // // console.log(promoCodeDetail?.promo_code_id );
+
+  // const calculatePreOrderdetails = (paymentType, promoCode) => {
+  //   // console.log('handlePaymentTypeChange');
+
+  //   if (!location_id) {
+  //     showBtmSheet()
+  //   } else {
+
+  //     const cartItemIds = extractCartItemIds(cart)
+  //     dispatch(setBill({ cartItemIds: cartItemIds }))
+  //     console.log({ cartItemIds});
+
+
+
+  //     const body = {
+  //       customer_id: customer_id,
+  //       cart_items_ids: cartItemIds,
+  //       promo_code: promoCode? promoCode: '', // optional
+  //       payment_option: 'cash',
+  //       sub_total: Bill.subtotal,
+  //       location_id: location.id
+  //     }
+  //     console.log({ body });
+
+
+  //     fetch(api.calculatePreOrder, {
+  //       method: 'POST',
+  //       body: JSON.stringify(body),
+  //       headers: {
+  //         'Content-type': 'application/json; charset=UTF-8',
+  //       },
+  //     })
+  //       .then(response => response.json())
+  //       .then(response => {
+  //         // console.log({response});
+  //         // console.log(body);x
+
+  //         if (response.error == false) {
+  //           dispatch(setBill({
+  //             delivery_charges: response?.result?.delivery_charges,
+  //             gst_charges: response?.result?.gst_charges,
+  //             total_amount: response?.result?.total_amount
+  //           }
+  //           ))
+
+  //         }
+  //       })
+
+  //   }
+  //   // const response =  fetchApis(api.calculatePreOrder, 'POST', setLoading, 'application/json', body )
+
+  //   //  console.log({response});
+  // }
+
+  // const calculateTotalAmount = () => {
+
+  //   const cartItemIds = extractCartItemIds(cart)
+  //   dispatch(setBill({ cartItemIds: cartItemIds }))
+
+  //   try {
+  //     let total = 0;
+  //     for (const item of cart) {
+  //       // console.log(item);
+
+  //       // console.log('item?.itemData?.price :  ', item?.itemData?.variationData?.price);
+  //       // let price = item?.itemData?.price ? parseInt(item?.itemData?.variationData?.price) : 0
+  //       let price = parseInt(item?.itemData?.variationData?.price ? item?.itemData?.variationData?.price : item?.itemData?.price)
+  //       let quantity = item?.quantity ? parseInt(item?.quantity) : 1;
+  //       total = total + price * quantity;
+  //     }
+
+  //     dispatch(setBill({ subtotal: total.toFixed(2) })
+  //     )      // setSubtotal(total.toFixed(2));
+
+  //     // setTotal_amount(total.toFixed(2));
+  //   } catch (error) {
+  //     console.log('error in calculating total amount : ', error);
+  //   }
+  // };
+
   // useEffect(() => {
   //   get_Cart_Items();
   // }, []);
@@ -262,22 +459,15 @@ const MyCart = ({navigation, route}) => {
   );
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{ flex: 1, backgroundColor: Colors.White }}>
       <Loader loading={loading} />
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView
         ref={scrollViewRef}
         scrollToOverflowEnabled={true}
-        contentContainerStyle={{flexGrow: 1}}>
-        {/* <MenuHeader
-          title={'My Cart'}
-          // rightIcon={
-          //   <TouchableOpacity onPress={() => navigation.navigate('AddItems')}>
-          //     <Icons.AddActive />
-          //   </TouchableOpacity>
-          // }
-        /> */}
+        contentContainerStyle={{ flexGrow: 1 }}>
         <StackHeader title={'My Cart'} />
-        <View style={{paddingHorizontal: 20}}>
+        <View style={{ paddingHorizontal: 20 }}>
           <View style={styles.itemView}>
             <View style={styles.imageContainer}>
               <Icons.Van />
@@ -306,10 +496,13 @@ const MyCart = ({navigation, route}) => {
           }}
         />
         <View>
-          <FlatList
+
+          {/* <FlatList
             data={data}
             scrollEnabled={false}
             renderItem={({item, index}) => {
+              console.log(item);
+              
               return (
                 <>
                   <View style={styles.itemCard}>
@@ -335,10 +528,9 @@ const MyCart = ({navigation, route}) => {
                       <View style={styles.rowViewSB}>
                         <PriceText text={item?.itemData?.variationData ? item?.itemData?.variationData.price * item?.quantity : item?.itemData?.price * item?.quantity  } />
                         <TouchableOpacity onPress={() => handleDelete(item)}>
-                          <Ionicons name="close" size={22} color={'#000'} />
+                          <Ionicons name="close-circle-outline" size={25} color={'#000'} />
                         </TouchableOpacity>
-                      </View>
-                      <View style={styles.rowView}>
+                         <View style={styles.rowView}>
                         <TouchableOpacity
                           onPress={() => handleRemoveQuantity(item)}>
                           <Icons.Remove width={18} height={18} />
@@ -349,6 +541,8 @@ const MyCart = ({navigation, route}) => {
                           <Icons.AddFilled width={22} height={22} />
                         </TouchableOpacity>
                       </View>
+                      </View>
+                     
                     </View>
                   </View>
                 </>
@@ -375,16 +569,75 @@ const MyCart = ({navigation, route}) => {
                 </TouchableOpacity>
               );
             }}
-          />
+          /> */}
         </View>
-
-        {/* <CartSwipeListView
-          data={data}
+        <CartSwipeListView
+          data={my_cart}
           onDecrement={item => handleRemoveQuantity(item)}
           onIncrement={item => handleAddQuantity(item)}
           onDelete={item => handleDelete(item)}
-        /> */}
+          itemLoading={itemLoading}
+          selectedItem={selectedItem}
+          ListFooterComponent={() => <TouchableOpacity
+            onPress={() => navigation.navigate('AddItems')}
+            style={{
+              ...styles.rowView,
+              paddingHorizontal: wp(4),
+              marginVertical: 10,
+              justifyContent: 'flex-start'
+            }}>
+            <Feather name="plus" color={Colors.Orange} size={16} />
+            <Text
+              style={{
+                color: Colors.Orange,
+                fontFamily: Fonts.Inter_Medium,
+                fontSize: RFPercentage(2.1),
+              }}>
+              {data.length > 0 ? 'Add more items' : 'Add items'}
+            </Text>
+          </TouchableOpacity>}
+        />
 
+
+        <CRBSheetComponent
+          height={170}
+          refRBSheet={btmSheetRef}
+          content={
+            <View style={{ width: wp(90) }} >
+              <View style={styles.rowViewSB1}>
+                <Text style={styles.rbSheetHeading}>Select an option</Text>
+                <TouchableOpacity
+                  onPress={() => closeBtmSheet()}>
+                  <Ionicons name={'close'} size={22} color={'#1E2022'} />
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity style={styles.rowView} onPress={async () => {
+
+                // getRestaurants();
+                // getDeals();
+                // console.log(address);
+                navigation.navigate('ManageAddress')
+                closeBtmSheet()
+
+                // navigation.navigate('AddAddress', { address })
+
+
+              }} >
+                <Icons.MarkerOutlineActive />
+                <Text style={styles.btmsheettext} >Manage Address</Text>
+              </TouchableOpacity>
+              <ItemSeparator />
+              <TouchableOpacity style={styles.rowView} onPress={() => {
+                closeBtmSheet()
+                navigation.navigate('Map')
+              }} >
+                <Icons.AddSimple />
+                <Text style={styles.btmsheettext} >Add Location</Text>
+              </TouchableOpacity>
+
+            </View>
+          }
+        />
         <View
           style={{
             flex: 1,
@@ -393,14 +646,15 @@ const MyCart = ({navigation, route}) => {
           }}>
           <CButton
             title="Checkout"
+            loading={checkOutLoading}
             onPress={() => {
               // console.log('data?.length : ', data);
               if (data?.length == 0) {
-                showAlert('Please Add Items in cart to checkout');
+                handlePopup(dispatch, 'Please Add Items in cart to checkout', 'red');
               } else {
                 // dispatch(setOrderComment(comments));
-
-                navigation?.navigate('Checkout');
+                calculatePreOrderDetails()
+                // navigation?.navigate('Checkout');
                 // navigation?.navigate('Checkout', {
                 //   items: data,
                 //   comments: comments,
@@ -409,7 +663,9 @@ const MyCart = ({navigation, route}) => {
             }}
           />
         </View>
+
       </ScrollView>
+
     </View>
   );
 };
@@ -486,6 +742,25 @@ const styles = StyleSheet.create({
   rowView: {
     flexDirection: 'row',
     alignItems: 'center',
+    // justifyContent: 'space-between'
+  },
+  rowViewSB1: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  rbSheetHeading: {
+    color: Colors.Text,
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    fontSize: RFPercentage(1.9),
+  },
+  btmsheettext: {
+    color: '#56585B',
+    fontFamily: Fonts.PlusJakartaSans_Regular,
+    marginLeft: wp(5),
+    fontSize: RFPercentage(1.9),
   },
   countText: {
     color: Colors.Text,

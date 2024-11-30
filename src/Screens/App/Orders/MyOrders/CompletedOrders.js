@@ -12,6 +12,7 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 
 const CompletedOrders = () => {
   const orders = useSelector(store => store.order.all_orders);
@@ -35,9 +36,9 @@ const CompletedOrders = () => {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={() => <View style={{height: 10}} />}
         ListFooterComponent={() => <View style={{height: 10}} />}
-        ListEmptyComponent={() => <NoDataFound />}
+        ListEmptyComponent={() => <NoDataFound   text={"No Completed Orders"} textStyle={{fontSize: RFPercentage(3)}} />}
         renderItem={({item}) => {
-          console.log(item?.cart_items_Data);
+          // console.log(item?.cart_items_Data);
           
           let cart_item =
             item?.cart_items_Data?.length > 0 ? item?.cart_items_Data[0] : null;

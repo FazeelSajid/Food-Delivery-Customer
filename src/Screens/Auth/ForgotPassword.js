@@ -18,7 +18,7 @@ import CButton from '../../components/Buttons/CButton';
 import CInput from '../../components/TextInput/CInput';
 import STYLE from './STYLE';
 import {useKeyboard} from '../../utils/UseKeyboardHook';
-import {showAlert} from '../../utils/helpers';
+import {handlePopup, showAlert} from '../../utils/helpers';
 import api from '../../constants/api';
 import {firebase} from '@react-native-firebase/auth';
 import {useDispatch} from 'react-redux';
@@ -45,10 +45,12 @@ const ForgotPassword = ({navigation, route}) => {
 
   const validate = () => {
     if (!userValue || userValue.length === 0) {
-      showAlert('Please Enter email address');
+      // showAlert('Please Enter email address');
+      handlePopup(dispatch, 'Please Enter email address', 'red');
       return false;
     } else if (!/\S+@\S+\.\S+/.test(userValue)) {
-      showAlert('Please Enter a valid email address');
+
+      handlePopup(dispatch,'Please Enter a valid email address','red');
       return false;
     }
        else {
@@ -85,9 +87,11 @@ const ForgotPassword = ({navigation, route}) => {
       .then(async response => {
         console.log('response  :  ', response);
         if (response?.error == true) {
-          showAlert(response?.msg);
+          // showAlert(response?.msg);
+          handlePopup(dispatch, response?.msg, 'red')
         } else {
-          showAlert(response?.message, 'green');
+          // showAlert(response?.message, 'green');
+          handlePopup(dispatch, response?.message, 'green')
          navigation.navigate('EmailVerification', {
           otp : response?.otp,
           email : response?.userID?.email
@@ -97,7 +101,7 @@ const ForgotPassword = ({navigation, route}) => {
       })
       .catch(err => {
         console.log('Error in Login :  ', err);
-        showAlert('Something went wrong!');
+        handlePopup(dispatch,'Something went wrong!', 'red');
       })
       .finally(() => {
         setLoading(false);

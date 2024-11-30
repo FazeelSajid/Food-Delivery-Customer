@@ -100,12 +100,11 @@ const Notification = ({navigation, route}) => {
   const getData = async () => {
     let list = await GetAllNotifications(customer_id);
     setData(list);
-    setLoading(false);
     setRefreshing(false);
   };
 
   useEffect(() => {
-    setLoading(true);
+    setRefreshing(true);
     getData();
   }, []);
 
@@ -127,7 +126,7 @@ const Notification = ({navigation, route}) => {
 
   return (
     <View style={{flex: 1, backgroundColor: Colors.White}}>
-      <Loader loading={loading} />
+      {/* <Loader loading={loading} /> */}
       <FlatList
         refreshControl={
           <RefreshControl
@@ -141,7 +140,13 @@ const Notification = ({navigation, route}) => {
         ListEmptyComponent={() => <NoDataFound loading={loading} />}
         ItemSeparatorComponent={() => <ItemSeparator />}
         contentContainerStyle={{paddingBottom: 30}}
-        renderItem={({item, index}) => (
+        renderItem={({item, index}) => {
+          console.log(item);
+          
+          
+          
+          
+          return(
           <View style={styles.card}>
             {item?.orderData?.order_status == 'in_process' ||
             item?.orderData?.order_status == 'preparing_food' ? (
@@ -188,7 +193,7 @@ const Notification = ({navigation, route}) => {
               <Text style={styles.description}>{item?.description}</Text>
             </View>
           </View>
-        )}
+        )}}
       />
     </View>
   );

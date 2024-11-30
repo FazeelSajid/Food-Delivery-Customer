@@ -178,7 +178,7 @@ const Onboarding = ({ navigation }) => {
         <View >
          
             
-             <View
+             {/* <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -200,9 +200,16 @@ const Onboarding = ({ navigation }) => {
             width={wp(38)}
             onPress={() => showBtmSheet()}
           />
-        </View>
+        </View> */}
         <CButton
-          title="JOIN AS GUEST"
+          title="Sign Up"
+          width={wp(85)}
+          // height={hp(6)}
+          // transparent={true}
+          onPress={() => showBtmSheet()}
+        />
+        <CButton
+          title="Skip"
           width={wp(85)}
           // height={hp(6)}
           transparent={true}
@@ -216,7 +223,7 @@ const Onboarding = ({ navigation }) => {
         </View>
       }
        <CRBSheetComponent
-          height={180}
+          height={145}
           refRBSheet={btmSheetRef}
           content={
             <View style={{ width: wp(90) }} >

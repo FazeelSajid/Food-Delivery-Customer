@@ -2,10 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../constants/api';
 import { useSelector } from 'react-redux';
 import { setFavoriteItems, setFavoriteDeals, removeFavoriteItem, addFavoriteItem } from '../../redux/FavoriteSlice';
+import { handlePopup } from '../helpers';
 
 
 export const getFavoriteItem = async (customer_id, dispatch) => {
-  console.log(customer_id);
+  // console.log(customer_id);
 
   try {
     const response = await fetch(api.get_all_favorite_items + `?customer_id=${customer_id}`);
@@ -16,7 +17,7 @@ export const getFavoriteItem = async (customer_id, dispatch) => {
       dispatch(setFavoriteItems([]))
     }
   } catch (error) {
-    console.error('Error fetching favorite items:', error);
+    handlePopup(dispatch, 'Something is went wrong', 'red')
   }
 };
 
@@ -32,7 +33,7 @@ export const getFavoriteDeals = async (customer_id, dispatch) => {
       dispatch(setFavoriteDeals(data.result))
     }
   } catch (error) {
-    console.log('error:', error);
+    handlePopup(dispatch, 'Something is went wrong', 'red')
     return [];
   }
 };
@@ -60,14 +61,16 @@ export const removeFavoriteitem = async (id, customer_id, favoriteItems, dispatc
         console.log('response : ', response);
         if (response?.status == true) {
           getFavoriteItem(customer_id, dispatch)
-          showAlert(response?.message);
+          // showAlert(response?.message);
+          handlePopup(dispatch,'Item removed from Favorites', 'green')
         } else {
-          showAlert(response?.message);
+          // showAlert(response?.message);
+          handlePopup(dispatch,  response?.message, 'red')
         }
       })
       .catch(err => {
         console.log('Error   ', err);
-        showAlert('Something Went Wrong');
+        handlePopup(dispatch, 'Something is went wrong', 'red')
       })
       .finally(() => {
         setLoading && setLoading(false);
@@ -103,14 +106,14 @@ export const removeFavoriteDeal = async (id, customer_id, favoriteDeals, dispatc
         console.log('response : ', response);
         if (response?.status == true) {
           getFavoriteDeals(customer_id, dispatch)
-          showAlert(response?.message);
+          handlePopup(dispatch,'Deal removed from Favorites', 'green')
         } else {
-          showAlert(response?.message);
+          handlePopup(dispatch,response?.message, 'red')
         }
       })
       .catch(err => {
         console.log('Error   ', err);
-        showAlert('Something Went Wrong');
+        handlePopup(dispatch, 'Something is went wrong', 'red')
       })
       .finally(() => {
         setLoading && setLoading(false);
@@ -147,14 +150,14 @@ export const addFavoriteitem = async (id, customer_id, dispatch, showAlert, setL
       if (response?.status == true) {
         // dispatch(addFavoriteItem(item))
         getFavoriteItem(customer_id, dispatch)
-        showAlert(response?.message, 'green');
+        handlePopup(dispatch,response?.message, 'green')
       } else {
-        showAlert(response?.message);
+        handlePopup(dispatch,response?.message, 'red')
       }
     })
     .catch(err => {
       console.log('Error   ', err);
-      showAlert('Something Went Wrong', 'green');
+      handlePopup(dispatch, 'Something is went wrong', 'red')
     })
     .finally(() => {
       setLoading && setLoading(false);
@@ -183,14 +186,14 @@ export const addFavoriteDeal = async (id, customer_id, dispatch, showAlert, setL
       if (response?.status == true) {
         // dispatch(addFavoriteItem(item))
         getFavoriteDeals(customer_id, dispatch)
-        showAlert(response?.message, 'green');
+        handlePopup(dispatch,response?.message, 'green')
       } else {
-        showAlert(response?.message);
+        handlePopup(dispatch,response?.message, 'red')
       }
     })
     .catch(err => {
       console.log('Error   ', err);
-      showAlert('Something Went Wrong', 'green');
+      handlePopup(dispatch, 'Something is went wrong', 'red')
     })
     .finally(() => {
       setLoading && setLoading(false);

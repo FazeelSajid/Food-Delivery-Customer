@@ -113,11 +113,15 @@ const HeaderImageSlider = ({
           position: 'absolute',
           top: StatusBar.currentHeight + hp(2.5),
           marginLeft: wp(8),
+          backgroundColor: Colors.White,
+          borderRadius: wp(5),
+          padding: wp(1),
+          paddingHorizontal: wp(1.3)
         }}>
         <Ionicons
           name={'chevron-back'}
           size={hp(3)}
-          color={backIconColor ? backIconColor : Colors.White}
+          color={backIconColor ? backIconColor : '#747272'}
         />
       </TouchableOpacity>
     </View>

@@ -11,7 +11,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {Colors} from '../../constants';
+import {Colors, Fonts} from '../../constants';
 
 const CButton = ({
   title = '',
@@ -122,5 +122,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginHorizontal: wp(3),
+    fontFamily: Fonts.PlusJakartaSans_Regular
   },
 });

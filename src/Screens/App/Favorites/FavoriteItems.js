@@ -22,12 +22,13 @@ import { RadioButton } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { addItemToMYCart, updateMyCartList } from '../../../redux/CartSlice';
 import { addItemToCart, getCustomerCart, updateCartItemQuantity } from '../../../utils/helpers/cartapis';
+import PopUp from '../../../components/Popup/PopUp';
 
 
 const FavoriteItems = ({}) => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
-  const customer_id = useSelector(store => store.store.customer_id)
+  const {customer_id, showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store)
   const { favoriteItems} = useSelector(store => store.favorite);
   const dispatch = useDispatch()
   const btmSheetRef = useRef()
@@ -149,7 +150,7 @@ const FavoriteItems = ({}) => {
             quantity: checkVariation[0]?.quantity + 1,
           };
 
-          await updateCartItemQuantity(obj)
+          await updateCartItemQuantity(obj, dispatch)
           .then(response => {
            if (response.status === true) {
            
@@ -185,7 +186,7 @@ const FavoriteItems = ({}) => {
 
     // let customer_id = await AsyncStorage.getItem('customer_id');
     // console.log('customer_Id :  ', customer_id);
-    let cart = await getCustomerCart(customer_id);
+    let cart = await getCustomerCart(customer_id, dispatch);
     console.log('______cart    :  ', cart?.cart_id);
 
 
@@ -206,7 +207,7 @@ const FavoriteItems = ({}) => {
 
     console.log('data   :  ', data);
 
-    await addItemToCart(data)
+    await addItemToCart(data, dispatch)
       .then(response => {
         console.log('response ', response);
         if (response?.status == true) {
@@ -233,6 +234,7 @@ const FavoriteItems = ({}) => {
   return (
     <View style={{flex: 1}}>
       <Loader loading={loading} />
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <FlatList
         data={favoriteItems}
         key={numColumns}

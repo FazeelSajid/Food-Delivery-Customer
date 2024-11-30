@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   FlatList,
   Keyboard,
-  Alert,
   TextInput,
 } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
@@ -32,6 +31,7 @@ import {
   getCustomerShippingAddress,
   getRestaurantDetail,
   getUserFcmToken,
+  handlePopup,
   showAlert,
   showAlertLongLength,
 } from '../../../utils/helpers';
@@ -57,7 +57,7 @@ import {
   updateMyCartList,
 } from '../../../redux/CartSlice';
 import { firebase } from '@react-native-firebase/auth';
-import { setOtpConfirm } from '../../../redux/AuthSlice';
+import { setBill, setOtpConfirm, setWalletTotalAmount } from '../../../redux/AuthSlice';
 import CInputWithCountryCode from '../../../components/TextInput/CInputWithCountryCode';
 import {
   AddPaymentToCustomerWallet,
@@ -77,70 +77,59 @@ import {
 import PaymentCard from '../../../components/Cards/PaymentCard';
 import CustomButton from '../../../components/Buttons/customButton';
 import { GetCustomerStripeId } from '../../../utils/helpers/stripeCardApis';
+import PopUp from '../../../components/Popup/PopUp';
+import Alert from '../../../Assets/svg/alert.svg';
+import WalletActive from '../../../Assets/svg/WalletActiveBg.svg';
 
 const Checkout = ({ navigation, route }) => {
   const dispatch = useDispatch();
-
-  const { join_as_guest, promos } = useSelector(store => store.store);
+  const { showPopUp, popUpColor, PopUpMesage, walletTotalAmount, join_as_guest, promos, Bill, customer_detail } = useSelector(store => store.store)
+  const [topUpAmount, setTopUpAmount] = useState('');
   const {
     cart,
     cart_restaurant_id,
     selected_payment_type,
-    selected_payment_string,
   } = useSelector(store => store.cart);
-
   const btmSheetRef = useRef()
-
-
+  const WithDrawBtmSheet = useRef()
   const ref_RBSheet = useRef();
   const ref_RBSheetPhoneNo = useRef(null);
   const ref_RBSheetPaymentOption = useRef(null);
   const ref_RBSheetGuestUser = useRef(null);
-
+  const ref_RBTopUpSheet = useRef(null);
   const [loading, setLoading] = useState(false);
-  const [phoneNo, setPhoneNo] = useState('');
+  const [phoneNo, setPhoneNo] = useState();
   // const [location, setLocation] = useState('');
   // const [location_id, setLocation_id] = useState('');
   const [promoCode, setPromoCode] = useState('');
-  const [checked, setChecked] = React.useState('cash');
-  const [selectPaymentMethod, setSelectPaymentMethod] = useState('');
-
-  const [newPhoneNO, setNewPhoneNO] = useState('');
+  // const [checked, setChecked] = React.useState('cash');
+  // const [selectPaymentMethod, setSelectPaymentMethod] = useState('');
+  const [newPhoneNO, setNewPhoneNO] = useState(customer_detail?.phone_no);
   const [countryCode, setCountryCode] = useState('+92');
-
-  const [total_amount, setTotal_amount] = useState(0);
-  const [subtotal, setSubtotal] = useState(0);
+  // const [total_amount, setTotal_amount] = useState(0);
+  // const [subtotal, setSubtotal] = useState(0);
   // const [platform_fee, setPlatform_fee] = useState(0);
   // const [delivery_charges, setDelivery_charges] = useState(0);
   // const [service_fee, setService_fee] = useState(4);
   const [service_fee, setService_fee] = useState(0);
-
-  const [isValidPromoCode, setIsValidPromoCode] = useState(false);
+  const [inValidPromoCode, setInValidPromoCode] = useState(false);
   const [promoCodeDetail, setPromoCodeDetail] = useState(null);
   const [isPromocodeApplied, setIsPromocodeApplied] = useState(false);
   const [comments, setComments] = useState('');
-
-
   const [selected_card, setSelected_card] = useState('');
   const { customer_id, location } = useSelector(store => store.store);
   const [cartItemIds, setCartItemIds] = useState([])
-
   const location_id = location.id
+  const [ bill, setbill] = useState({})
 
-
-
-  const [Bill, setBill] = useState({
-    total_amount: 0,
-    subtotal: 0,
-    cartItemIds: [],
-    delivery_charges: 0,
-    gst_charges: 0,
-    total_amount: 0
-
-  })
-
-
-
+  // const [Bill, setBill] = useState({
+  //   total_amount: 0,
+  //   subtotal: 0,
+  //   cartItemIds: [],
+  //   delivery_charges: 0,
+  //   gst_charges: 0,
+  //   total_amount: 0
+  // })
   const [data, setData] = useState([
     // {
     //   id: 0,
@@ -167,11 +156,17 @@ const Checkout = ({ navigation, route }) => {
     //   count: 1,
     // },
   ]);
-
+  const addPaymentToWallet = async amount => {
+    await AddPaymentToCustomerWallet(amount, customer_id)
+      .then(response => {
+        console.log('AddPaymentToCustomerWallet : ', response);
+        dispatch(setWalletTotalAmount(response?.result?.available_amount))
+      })
+      .catch(error => console.log(error));
+  };
   // ____________________________ stripe payment ________________________________
-
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const fetchPaymentSheetParams = async () => {
+  const fetchPaymentSheetParams = async (total_amount) => {
     // console.log('fetchPaymentSheetParams called...');
 
     let customer_stripe_id = await GetCustomerStripeId(customer_id);
@@ -186,15 +181,17 @@ const Checkout = ({ navigation, route }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          amount: Bill.total_amount * 100,  // Amount in cents
+          amount: total_amount * 100,  // Amount in cents
           currency: 'usd',
-          customerId: customer_stripe_id
+          stripe_customer_id: customer_stripe_id
         }),
       });
 
       // Check if the response is successful
       if (!response.ok) {
         console.error('Failed to fetch payment sheet parameters:', response.statusText);
+        setLoading(false);
+        handlePopup(dispatch, 'Something is went wrong', 'red');
         return null;
       }
 
@@ -204,6 +201,8 @@ const Checkout = ({ navigation, route }) => {
       // Check if the API returned an error status in the response JSON
       if (responseData.status === false) {
         console.error('Error in response:', responseData.message);
+        setLoading(false);
+        handlePopup(dispatch, 'Something is went wrong', 'red');
         return null;
       }
 
@@ -219,43 +218,126 @@ const Checkout = ({ navigation, route }) => {
       };
     } catch (error) {
       console.error('Error in getting Stripe params from wallet screen:', error);
+      setLoading(false);
+      handlePopup(dispatch, 'Something is went wrong', 'red');
       return null;
     }
   };
 
+  // console.log({Bill});
+  
 
 
-  const openPaymentSheet = async () => {
-    console.log('openpaymentSheet');
+  const openPaymentSheetForTopUp = async () => {
+    // console.log('openpaymentSheet');
     const { error } = await presentPaymentSheet();
 
 
     setLoading(false);
     if (error) {
-      Alert.alert(`Error code: ${error.code}`, error.message);
+      // Alert.alert(`Error code: ${error.code}`, error.message);
+      handlePopup(dispatch, 'Something went wrong', 'red')
       console.log(error);
 
       if (error.code == 'Canceled') {
         // user cancel payment
         // for now we do nothing...
       } else {
-        showAlertLongLength(error.message);
+        // showAlertLongLength(error.message);
+        handlePopup(dispatch, error.message, 'red')
       }
     } else {
       // handle success
       console.log('Success', 'Your order is confirmed!');
-      placeOrder();
+      addPaymentToWallet(topUpAmount)
     }
   };
+  // const openPaymentSheet = async () => {
+  //   // console.log('openpaymentSheet');
+  //   const { error } = await presentPaymentSheet();
 
-  const initializePaymentSheet = async () => {
 
-    if (!newPhoneNO) {
-      ref_RBSheetPhoneNo?.current?.open()
-    } else {
+  //   setLoading(false);
+  //   if (error) {
+  //     Alert.alert(`Error code: ${error.code}`, error.message);
+  //     console.log(error);
+
+  //     if (error.code == 'Canceled') {
+  //       // user cancel payment
+  //       // for now we do nothing...
+  //     } else {
+  //       handlePopup(dispatch,error.message , 'red' )
+  //     }
+  //   } else {
+  //     // handle success
+  //     console.log('Success', 'Your order is confirmed!');
+  //     placeOrder();
+  //   }
+  // };
+
+  // const initializePaymentSheet = async () => {
+
+  //   if (!newPhoneNO) {
+  //     ref_RBSheetPhoneNo?.current?.open()
+  //   } else if (walletTotalAmount < Bill.total_amount) {
+  //     WithDrawBtmSheet?.current?.open();
+  //     return
+  // }else {
+  //   setLoading(true);
+  //   const { paymentIntent, ephemeralKey, customer } =
+  //     await fetchPaymentSheetParams(Bill.total_amount);
+  //   initStripe({
+  //     publishableKey: STRIPE_PUBLISH_KEY,
+  //   });
+
+  //   console.log({ paymentIntent, ephemeralKey, customer });
+
+
+  //   const { error } = await initPaymentSheet({
+  //     appearance: {
+  //       // shapes: {
+  //       //   borderRadius: 12,
+  //       //   borderWidth: 0.5,
+  //       // },
+  //       // primaryButton: {
+  //       //   shapes: {
+  //       //     borderRadius: 20,
+  //       //   },
+  //       // },
+  //       // colors: {
+  //       //   primary: Colors.Orange,
+  //       //   background: '#FFFFFF',
+  //       //   componentBackground: '#FFFFFF',
+  //       //   componentBorder: '#000000',
+  //       //   componentDivider: '#000000',
+  //       //   primaryText: Colors.Orange,
+  //       //   secondaryText: Colors.Orange,
+  //       //   componentText: Colors.Orange,
+  //       //   placeholderText: '#000000',
+  //       // },
+  //     },
+  //     merchantDisplayName: 'Food Delivery',
+  //     customerId: customer,
+  //     customerEphemeralKeySecret: ephemeralKey,
+  //     paymentIntentClientSecret: paymentIntent,
+  //     // Set `allowsDelayedPaymentMethods` to true if your business can handle payment
+  //     //methods that complete payment after a delay, like SEPA Debit and Sofort.
+  //     // allowsDelayedPaymentMethods: true,
+  //     // defaultBillingDetails: {
+  //     //   name: 'Jane Doe',
+  //     // },
+  //   });
+  //   setLoading(false);
+  //   if (!error) {
+  //     // setLoading(true);
+  //     // console.log('setLoading');
+  //     openPaymentSheet();
+  //   }
+  // }};
+  const initializePaymentSheetForTopUp = async () => {
     setLoading(true);
     const { paymentIntent, ephemeralKey, customer } =
-      await fetchPaymentSheetParams();
+      await fetchPaymentSheetParams(topUpAmount);
     initStripe({
       publishableKey: STRIPE_PUBLISH_KEY,
     });
@@ -286,7 +368,6 @@ const Checkout = ({ navigation, route }) => {
         //   placeholderText: '#000000',
         // },
       },
-
       merchantDisplayName: 'Food Delivery',
       customerId: customer,
       customerEphemeralKeySecret: ephemeralKey,
@@ -301,11 +382,10 @@ const Checkout = ({ navigation, route }) => {
     setLoading(false);
     if (!error) {
       // setLoading(true);
-      console.log('setLoading');
-      openPaymentSheet();
+      // console.log('setLoading');
+      openPaymentSheetForTopUp()
     }
-  }};
-
+  };
   //________________________________________________________________
 
   const handleAddQuantity = async item => {
@@ -323,7 +403,6 @@ const Checkout = ({ navigation, route }) => {
     });
     setData(newData);
   };
-
   const handleRemoveQuantity = async item => {
     const newData = data?.map(element => {
       if (element?.id == item.id) {
@@ -339,12 +418,10 @@ const Checkout = ({ navigation, route }) => {
     });
     setData(newData);
   };
-
   const handleDelete = async item => {
     const filter = data.filter(element => element?.id != item?.id);
     setData(filter);
   };
-
   const ItemSeparator = () => (
     <View
       style={{
@@ -366,7 +443,6 @@ const Checkout = ({ navigation, route }) => {
     //send notification to restaurant and rider both that new order is placed
     handleSendPushNotification(`Customer placed a new order`);
   };
-
   // handle update phone :  for that we send otp to user number and then after verify we update the user phone number
   const handleSendCode = async () => {
     try {
@@ -408,7 +484,6 @@ const Checkout = ({ navigation, route }) => {
       console.log('error :  ', error);
     }
   };
-
   const handleSendPushNotification = async text => {
     const receiver_fcm = await getUserFcmToken();
     if (receiver_fcm) {
@@ -449,7 +524,6 @@ const Checkout = ({ navigation, route }) => {
       console.log('receiver_fcm not found');
     }
   };
-
   const clear_Cart_items = () => {
     clearCartItems()
       .then(response => {
@@ -461,34 +535,27 @@ const Checkout = ({ navigation, route }) => {
         console.log('error : ', error);
       });
   };
-
-  const addPaymentToWallet = async amount => {
-    await AddPaymentToCustomerWallet(amount)
-      .then(response => {
-        console.log('AddPaymentToCustomerWallet : ', response);
-      })
-      .catch(error => console.log(error));
-  };
-
   const makeOrderPayment = async order_id => {
-    console.log('order_id  : ', order_id);
-    await MakeOrderPayment(order_id)
+    // console.log('order_id  : ', order_id);
+    await MakeOrderPayment(order_id, customer_id)
       .then(response => {
-        console.log('makeOrderPayment : ', response);
+        console.log({ response }, { order_id, customer_id }, 'make orderPayment');
+        dispatch(setWalletTotalAmount(walletTotalAmount - Bill.total_amount))
+
+
+        if (response.status === true) {
+          handlePopup(dispatch, response.message, 'green')
+        } else {
+          handlePopup(dispatch, response.error, 'red')
+        }
       })
       .catch(error => console.log('makeOrderPayment', error));
   };
-
   // console.log(location_id);
-
   const placeOrder = async () => {
-
     if (!newPhoneNO) {
       ref_RBSheetPhoneNo?.current?.open()
     } else {
-
-
-
       // // addPaymentToWallet(6);
       // makeOrderPayment(200832);
       // return;
@@ -502,7 +569,7 @@ const Checkout = ({ navigation, route }) => {
       // "message": "customer_id , cart_items_ids , restaurant_id , phone_no ,
       // payment_option, total_amount must be Provided ", "status": false
       if (!location_id) {
-        navigation.navigate('ManageAddress');
+        showBtmSheet()
       } else {
         setLoading(true);
         // let customer_Id = await AsyncStorage.getItem('customer_id');
@@ -534,11 +601,11 @@ const Checkout = ({ navigation, route }) => {
           address: location.address,
           restaurant_id: cart_restaurant_id,
           phone_no: countryCode + newPhoneNO,
-          promo_code: isValidPromoCode ? promoCodeDetail?.promo_code_id : '',
+          promo_code: isPromocodeApplied ? promoCode : '',
           payment_option: selected_payment_type,
           // payment_option: 'card',
-          // customer_payment: 1, // card -> total amount :  cash->0
-          sub_total: parseInt(Bill.subtotal),
+          customer_payment: selected_payment_type === 'card' ? parseInt(Bill.total_amount, 10) : 0, // card -> total amount :  cash->0
+          sub_total: parseInt(Bill.subtotal, 10),
           comments: comments,
           Estimated_delivery_time: 45,
           // Estimated_delivery_time: delivery_time,
@@ -574,34 +641,34 @@ const Checkout = ({ navigation, route }) => {
         })
           .then(response => response.json())
           .then(async response => {
-            console.log(response);
+            console.log(data);
+
+            console.log(response.result);
 
             if (response.error == false) {
               // clear_Cart_items(); //remove all items from cart
-              dispatch(setSelectedPaymentType(''));
+              // dispatch(setSelectedPaymentType(''));
               dispatch(setCartRestaurantId(null));
               dispatch(addToCart([]));
               dispatch(updateMyCartList([]));
               dispatch(setOrderComment(''));
               if (selected_payment_type == 'card') {
-                addPaymentToWallet(parseInt(total_amount));
-                makeOrderPayment(response?.result?.order_id);
+                // addPaymentToWallet(parseInt(Bill.total_amount));
+                makeOrderPayment(response?.result?.order_id,);
               }
               ref_RBSheet?.current?.open();
-              setTimeout(() => {
-                //  navigation.navigate('Dashboard')s
-              }, 20000);
+
             } else {
-              dispatch(setSelectedPaymentType(''));
+              // dispatch(setSelectedPaymentType(''));
               setTimeout(() => {
-                showAlert(response.message, 'red');
+                handlePopup(dispatch, response.message, 'red');
               }, 200);
             }
             // console.log('create order response  :  ', response);
           })
           .catch(err => {
             console.log('Error in create order :  ', err);
-            showAlert('Something went wrong ');
+            handlePopup(dispatch, 'Something went wrong', 'red');
           })
           .finally(() => {
             setLoading(false);
@@ -619,12 +686,7 @@ const Checkout = ({ navigation, route }) => {
   const calculateTotalAmount = () => {
 
     const cartItemIds = extractCartItemIds(cart)
-    setBill(prev => {
-      return {
-        ...prev,
-        cartItemIds: cartItemIds
-      };
-    })
+    dispatch(setBill({ cartItemIds: cartItemIds }))
 
     try {
       let total = 0;
@@ -642,13 +704,8 @@ const Checkout = ({ navigation, route }) => {
         // console.log('total : ', total);
       }
 
-      setBill(prev => {
-        return {
-          ...prev,
-          subtotal: total.toFixed(2),
-        };
-      })
-      // setSubtotal(total.toFixed(2));
+      dispatch(setBill({ subtotal: total.toFixed(2) })
+      )      // setSubtotal(total.toFixed(2));
       // let totalAmount = total + service_fee;
       // let totalAmount = total + delivery_charges + platform_fee;
       // console.log(totalAmount, 'total amount');
@@ -688,124 +745,244 @@ const Checkout = ({ navigation, route }) => {
   //   // navigation.navigate('ShippingAddressList');
   // };
 
-  const getCustomerData = async () => {
-    setLoading(true);
-    // let customer_Id = await AsyncStorage.getItem('customer_id');
-    await getCustomerDetail(customer_id)
-      .then(async response => {
-        setPhoneNo(response?.phone_no);
-        // setLocation(response?.location);
-        // //also getting shipping address details
-        // getCustomerShippingAddress(customer_Id).then(res => {
-        //   if (res?.status == true) {
-        //     let result = res?.result[0];
-        //     setLocation_id(result?.location_id);
-        //   }
-        // });
-        // let shipping_address = await getShippingAddress();
-        // let delivery_charges1 = await getDeliveryCharges(
-        //   shipping_address?.area,
-        // );
-        // let platform_fee1 = await getPlatformFee(shipping_address?.area);
+  // const getCustomerData = async () => {
+  //   setLoading(true);
+  //   // let customer_Id = await AsyncStorage.getItem('customer_id');
+  //   await getCustomerDetail(customer_id)
+  //     .then(async response => {
+  //       setPhoneNo(response?.phone_no);
+  //       // setLocation(response?.location);
+  //       // //also getting shipping address details
+  //       // getCustomerShippingAddress(customer_Id).then(res => {
+  //       //   if (res?.status == true) {
+  //       //     let result = res?.result[0];
+  //       //     setLocation_id(result?.location_id);
+  //       //   }
+  //       // });
+  //       // let shipping_address = await getShippingAddress();
+  //       // let delivery_charges1 = await getDeliveryCharges(
+  //       //   shipping_address?.area,
+  //       // );
+  //       // let platform_fee1 = await getPlatformFee(shipping_address?.area);
 
-        // setDelivery_charges(delivery_charges1);
-        // setPlatform_fee(platform_fee1);
-        // setService_fee(delivery_charges1 + platform_fee)
-        // let location_id = shipping_address?.location_id;
-        // setLocation_id(location_id);
-        // setLocation(shipping_address?.address);
-      })
-      .catch(err => {
-        console.log('err : ', err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+  //       // setDelivery_charges(delivery_charges1);
+  //       // setPlatform_fee(platform_fee1);
+  //       // setService_fee(delivery_charges1 + platform_fee)
+  //       // let location_id = shipping_address?.location_id;
+  //       // setLocation_id(location_id);
+  //       // setLocation(shipping_address?.address);
+  //     })
+  //     .catch(err => {
+  //       console.log('err : ', err);
+  //     })
+  //     .finally(() => {
+  //       setLoading(false);
+  //     });
+  // };
+  
 
   // useEffect(() => {
   //   getCustomerData();
   // }, []);
 
   useEffect(() => {
-    calculateTotalAmount();
-    dispatch(setSelectedPaymentType(''));
-  }, [service_fee]);
+   setbill(Bill)
+  }, [Bill]);
 
-  const getSelectedCard = async () => {
-    let card = await AsyncStorage.getItem('selected_card');
-    if (card) {
-      card = JSON.parse(card);
-      setSelected_card(card);
-    }
-  };
+  // const getSelectedCard = async () => {
+  //   let card = await AsyncStorage.getItem('selected_card');
+  //   if (card) {
+  //     card = JSON.parse(card);
+  //     // setSelected_card(card);
+  //   }
+  // };
   useFocusEffect(
     React.useCallback(() => {
+      calculateTotalAmount();
       // dispatch(setSelectedPaymentType(''));
       // dispatch(setSelectedPaymentString(''));
-
-      // calculateTotalAmount();
-      getCustomerData();
+      // getCustomerData();
       //
       // getSelectedCard();
     }, []),
   );
 
-  const handleVerifyPromoCode = async promoCode => {
-    console.log({ promoCode });
+  // const handleVerifyPromoCode = async promoCode => {
+  //   console.log({ promoCode });
 
-    setIsValidPromoCode(true);
-    fetch(
-      api.verify_promo_code +
-      `?promo_code=${promoCode}`,
-    )
-      .then(response => response.json())
-      .then(response => {
-        console.log(response);
+  //   setInValidPromoCode(true);
+  //   fetch(
+  //     api.verify_promo_code +
+  //     `?promo_code=${promoCode}`,
+  //   )
+  //     .then(response => response.json())
+  //     .then(response => {
+  //       console.log(response);
 
-        Keyboard.dismiss();
-        if (response.status == false) {
-          // console.log(response);
+  //       Keyboard.dismiss();
+  //       if (response.status == false) {
+  //         // console.log(response);
 
-          setIsValidPromoCode(false);
-          calculateTotalAmount();
-        } else {
-          setIsPromocodeApplied(true);
-          setIsValidPromoCode(true);
-          setPromoCodeDetail(response?.result[0]);
-          // Input: Total amount
-          const totalAmount = subtotal; // Replace this with your actual total amount
+  //         setInValidPromoCode(false);
+  //         // calculateTotalAmount();
+  //       } else {
+  //         setIsPromocodeApplied(true);
+  //         setInValidPromoCode(true);
+  //         setPromoCodeDetail(response?.result[0]);
+  //         // Input: Total amount
+  //         const totalAmount = subtotal; // Replace this with your actual total amount
 
-          // Calculate the discount
-          const discountPercentage = 30 / 100; // 30 percent as a decimal
-          const discount = totalAmount * discountPercentage;
+  //         // Calculate the discount
+  //         const discountPercentage = 30 / 100; // 30 percent as a decimal
+  //         const discount = totalAmount * discountPercentage;
 
-          // Calculate the discounted price
-          const discountedPrice = totalAmount - discount;
+  //         // Calculate the discounted price
+  //         const discountedPrice = totalAmount - discount;
 
-          // Output the result
-          // console.log(`Total amount: $${totalAmount}`);
-          // console.log(`Discounted amount: $${discountedPrice}`);
+  //         // Output the result
+  //         // console.log(`Total amount: $${totalAmount}`);
+  //         // console.log(`Discounted amount: $${discountedPrice}`);
 
-          setSubtotal(discountedPrice.toFixed(2));
-          let totalAmount1 = discountedPrice + service_fee;
-          setTotal_amount(totalAmount1.toFixed(2));
-        }
-      })
-      .catch(err => console.log('error : ', err));
-  };
+  //         setSubtotal(discountedPrice.toFixed(2));
+  //         let totalAmount1 = discountedPrice + service_fee;
+  //         setTotal_amount(totalAmount1.toFixed(2));
+  //       }
+  //     })
+  //     .catch(err => console.log('error : ', err));
+  // };
 
-  const verifyPromoCode = (promoCode) => {
-    const checkPromoCode = promos.find(item => item.code === promoCode)
-    if (checkPromoCode) {
-      setIsPromocodeApplied(true);
-      setIsValidPromoCode(true);
-      setPromoCodeDetail(checkPromoCode);
+  const verifyPromoCode = async (promoCodee) => {
+    if (selected_payment_type.length === 0 ) {
+      handlePopup(dispatch, 'Please select a payment type', 'red')
     } else {
-      setIsValidPromoCode(false);
-    }
+    const checkPromoCode = promos.find(item => item.code === promoCode)
+    
+    if (checkPromoCode) {
 
-    return checkPromoCode
+      // calculatePreOrderdetails(selected_payment_type, promoCode)
+      // setInValidPromoCode(false);
+      // setIsPromocodeApplied(true)
+
+      try {
+        // Calculate subtotal
+        let subtotal = 0;
+        const cartItemIds = cart.map(item => {
+          const price = parseInt(
+            item?.itemData?.variationData?.price
+              ? item?.itemData?.variationData?.price
+              : item?.itemData?.price
+          );
+          const quantity = item?.quantity ? parseInt(item?.quantity) : 1;
+          subtotal += price * quantity;
+          return item.cart_item_id;
+        });
+
+        // console.log({cartItemIds});
+
+        // Update Redux store with calculated data
+        dispatch(setBill({ cartItemIds, subtotal: subtotal.toFixed(2) }));
+
+        // Prepare request body
+        const body = {
+          customer_id: customer_id,
+          cart_items_ids: cartItemIds,
+          promo_code: promoCode, // optional
+          payment_option: selected_payment_type,
+          sub_total: subtotal.toFixed(2),
+          location_id: location.id,
+        };
+        
+
+        // console.log({ cartItemIds, body });
+
+        // API call to calculate pre-order details
+        fetch(api.calculatePreOrder, {
+          method: 'POST',
+          body: JSON.stringify(body),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        })
+          .then(response => response.json())
+          .then(response => {
+            if (!response.error) {
+              console.log({ response });
+
+              dispatch(
+                setBill({
+                  delivery_charges: response?.result?.delivery_charges.toFixed(2),
+                  gst_charges: response?.result?.gst_charges.toFixed(2),
+                  total_amount: response?.result?.total_amount.toFixed(2),
+                  // subtotal: response?.result?.sub_total.toFixed(2),
+                })
+              );
+              setInValidPromoCode(false);
+      setIsPromocodeApplied(true)
+              // navigation?.navigate('Checkout');
+            }else{
+              calculatePreOrderdetails()
+              handlePopup(dispatch, response.message, 'red')
+              setInValidPromoCode(true);
+              setIsPromocodeApplied(false)
+            }
+          })
+          .catch(error => {
+            // console.log('Error in calculatePreOrderDetails API call: ', error);
+            handlePopup(dispatch, 'Something went wrong', 'red')
+          });
+      } catch (error) {
+        console.log('Error in calculating subtotal or API request: ', error);
+        handlePopup(dispatch, 'Something went wrong', 'red')
+      }
+      finally{
+        // setCheckOutLoading(false);
+      }
+      // try {
+      //   fetch(BASE_URL + 'promoCode/getDiscountByPromoCode?promo_code=' + promoCode)
+      //     .then(response => response.json())
+      //     .then(response => {
+      //       if (response.status) {
+      //         setIsPromocodeApplied(true);
+      //         setInValidPromoCode(true);
+      //         setPromoCodeDetail(checkPromoCode);
+      //         const discountPercentage = response.discount
+
+      //         const discountAmount = discountPercentage / 100;
+
+      //         const finalAmount = Bill.subtotal - discountAmount;
+
+      //         setBill(prev => {
+      //           return {
+      //             ...prev,
+      //             subtotal: finalAmount,
+      //             total_amount: finalAmount + Bill.delivery_charges + Bill.gst_charges
+
+
+      //           };
+      //         })
+      //       } else {
+      //         handlePopup(dispatch, 'Invalid Promo Code', 'red')
+      //         setInValidPromoCode(false);
+      //         setIsPromocodeApplied(false)
+      //       }
+      //     })
+      //     .catch(err => {
+      //       handlePopup(dispatch, 'Something is went wrong', 'red')
+      //       setInValidPromoCode(false);
+      //       setIsPromocodeApplied(false)
+
+      //     });
+      // } catch (error) {
+      //   handlePopup(dispatch, 'Something is went wrong', 'red')
+      //   setInValidPromoCode(false);
+      //   setIsPromocodeApplied(false)
+      // }
+    } else {
+      handlePopup(dispatch, 'Invalid Promo Code', 'red')
+      setInValidPromoCode(true);
+      setIsPromocodeApplied(false)
+    }
+  }
   }
   // useEffect(() => {
   //   const delayDebounceFn = setTimeout(() => {
@@ -826,60 +1003,101 @@ const Checkout = ({ navigation, route }) => {
 
 
   const handlePaymentTypeChange = (type, string) => {
+    // console.log('selectPaymentMethod');
+
     dispatch(setSelectedPaymentType(type));
     dispatch(setSelectedPaymentString(string));
-    setChecked(type);
-    setSelectPaymentMethod(string);
+    // setChecked(type);
+    // setSelectPaymentMethod(string);
     ref_RBSheetPaymentOption?.current?.close();
-    console.log('handlePaymentTypeChange');
 
     calculatePreOrderdetails(type)
   };
 
 
-  const calculatePreOrderdetails = (paymentType) => {
-    const body = {
-      customer_id: customer_id,
-      cart_items_ids: Bill.cartItemIds,
-      // "promo_code": "", // optional
-      payment_option: paymentType,
-      sub_total: Bill.subtotal,
-      location_id: location.id
-    }
 
-    fetch(api.calculatePreOrder, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
-    })
-      .then(response => response.json())
-      .then(response => {
-        // console.log({response});
-        // console.log(body);
+  const calculatePreOrderdetails = (paymentType, promoCod) => {
+    if (!location_id) {
+      showBtmSheet();
+    } else {
+      // setCheckOutLoading(true);
 
-        if (response.error == false) {
-          setBill(prev => {
-            return {
-              ...prev,
-              delivery_charges: response?.result?.delivery_charges,
-              gst_charges: response?.result?.gst_charges,
-              total_amount: response?.result?.total_amount
-            };
+
+      try {
+        // Calculate subtotal
+        let subtotal = 0;
+        const cartItemIds = cart.map(item => {
+          const price = parseInt(
+            item?.itemData?.variationData?.price
+              ? item?.itemData?.variationData?.price
+              : item?.itemData?.price
+          );
+          const quantity = item?.quantity ? parseInt(item?.quantity) : 1;
+          subtotal += price * quantity;
+          return item.cart_item_id;
+        });
+
+        // console.log({cartItemIds});
+
+        // Update Redux store with calculated data
+        dispatch(setBill({ cartItemIds, subtotal: subtotal.toFixed(2) }));
+
+        // Prepare request body
+        const body = {
+          customer_id: customer_id,
+          cart_items_ids: cartItemIds,
+          promo_code: isPromocodeApplied && promoCode, // optional
+          payment_option: paymentType || selected_payment_type,
+          sub_total: subtotal.toFixed(2),
+          location_id: location.id,
+        };
+
+        console.log({ cartItemIds, body });
+
+        // API call to calculate pre-order details
+        fetch(api.calculatePreOrder, {
+          method: 'POST',
+          body: JSON.stringify(body),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        })
+          .then(response => response.json())
+          .then(response => {
+            if (!response.error) {
+              console.log({ response });
+
+              dispatch(
+                setBill({
+                  delivery_charges: response?.result?.delivery_charges.toFixed(2),
+                  gst_charges: response?.result?.gst_charges.toFixed(2),
+                  total_amount: response?.result?.total_amount.toFixed(2),
+                  // subtotal: response?.result?.sub_total.toFixed(2),
+                })
+              );
+              // navigation?.navigate('Checkout');
+            }
           })
+          .catch(error => {
+            // console.log('Error in calculatePreOrderDetails API call: ', error);
+            handlePopup(dispatch, 'Something went wrong', 'red')
+          });
+      } catch (error) {
+        // console.log('Error in calculating subtotal or API request: ', error);
+        handlePopup(dispatch, 'Something went wrong', 'red')
+      }
+      finally{
+        // setCheckOutLoading(false);
+      }
+    }
+  };
 
-        }
-      })
-
-    // const response =  fetchApis(api.calculatePreOrder, 'POST', setLoading, 'application/json', body )
-
-    //  console.log({response});
-  }
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.White }}>
       <Loader loading={loading} />
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
+
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <StackHeader title={'Checkout'} />
         <View style={{ paddingHorizontal: 20 }}>
@@ -929,8 +1147,8 @@ const Checkout = ({ navigation, route }) => {
         </View>
         <ItemSeparator />
         <View style={[styles.rowViewSB, { width: wp(80), alignSelf: 'center', alignItems: 'center', marginTop: 10, marginBottom: 10 }]} >
-          <TextInput placeholder='Promo Code' placeholderTextColor={'#B0B0B0'} style={{ borderRadius: 25, backgroundColor: '#F5F6FA', width: wp(60), paddingLeft: wp(5), marginRight: wp(2), color: Colors.Black }} value={promoCode} onChangeText={text => setPromoCode(text)} />
-          <CustomButton text={'Apply'} textStyle={{ color: Colors.White, fontSize: RFPercentage(2) }} containerStyle={{ backgroundColor: Colors.Orange, paddingHorizontal: wp(5), paddingVertical: hp(1.3), borderRadius: 25 }} onPress={() => verifyPromoCode(promoCode)} pressedRadius={25} />
+          <TextInput placeholder='Promo Code' placeholderTextColor={'#B0B0B0'} style={{ borderRadius: 10, backgroundColor: '#F5F6FA', width: wp(60), paddingLeft: wp(5), marginRight: wp(2), color: Colors.Black }} value={promoCode} onChangeText={text => setPromoCode(text)} />
+          <CustomButton text={'Apply'} textStyle={{ color: Colors.White, fontSize: RFPercentage(2) }} containerStyle={{ backgroundColor: Colors.Orange, paddingHorizontal: wp(5), paddingVertical: hp(1.3), borderRadius: 10 }} onPress={() => verifyPromoCode(promoCode)} pressedRadius={10} isLoading={false} loaderColor={Colors.White}  />
         </View>
 
         {isPromocodeApplied && (
@@ -947,7 +1165,7 @@ const Checkout = ({ navigation, route }) => {
           </Text>
         )}
 
-        {!isValidPromoCode && promoCode?.length > 0 && (
+        {inValidPromoCode && (
           <Text
             style={{
               color: 'red',
@@ -967,11 +1185,12 @@ const Checkout = ({ navigation, route }) => {
           numberOfLines={6}
           textAlignVertical="top"
           value={comments}
+          containerStyle={{ borderRadius: 10 }}
           onChangeText={text => setComments(text)}
         />
 
         <View style={{ paddingHorizontal: 20 }}>
-          {selected_payment_string?.length == 0 ? (
+          {selected_payment_type?.length == 0 ? (
             <TouchableOpacity
               onPress={() => {
                 if (join_as_guest) {
@@ -988,9 +1207,7 @@ const Checkout = ({ navigation, route }) => {
                   fontSize: RFPercentage(1.8),
                   textTransform: 'capitalize',
                 }}>
-                {selected_payment_string?.length == 0
-                  ? 'Select Payment Option'
-                  : `${selected_payment_string}`}
+                Select Payment Option
               </Text>
               <Ionicons
                 name="chevron-forward"
@@ -998,67 +1215,70 @@ const Checkout = ({ navigation, route }) => {
                 size={18}
               />
             </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={() => {
-              if (join_as_guest) {
-                ref_RBSheetGuestUser?.current?.open();
-              } else {
-                ref_RBSheetPaymentOption?.current?.open();
-              }
-            }}>
+          ) : selected_payment_type === 'card' ? (
+            <View >
               <Text
                 style={{
                   color: Colors.Orange,
                   fontFamily: Fonts.PlusJakartaSans_Bold,
-                  fontSize: RFPercentage(2),
+                  fontSize: RFPercentage(2.4),
                 }}>
                 Payment Method
               </Text>
-              {selected_payment_type == 'cash' ? (
-                <>
-                  <Text
-                    style={{
-                      color: '#02010E',
-                      fontFamily: Fonts.PlusJakartaSans_Medium,
-                      fontSize: RFPercentage(2),
-                    }}>
-                    Cash on Delivery
-                  </Text>
-                </>
-              ) : selected_payment_type == 'card' ? (
-                <>
-                  <PaymentCard
-                    // title="Card Payment"
-                    title={selected_card?.card?.brand}
-                    style={{
-                      width: wp(90),
-                      // borderWidth: 1,
-                      // paddingLeft: 0,
-                      marginLeft: -1,
-                      // marginTop: 1,
-                    }}
-                    showEditButton={true}
-                    onEditPress={() =>
-                      navigation.navigate('SelectPaymentMethod')
-                    }
-                  />
-                </>
-              ) : (
-                <>
-                  <Text
-                    style={{
-                      color: '#02010E',
-                      fontFamily: Fonts.PlusJakartaSans_Medium,
-                      fontSize: RFPercentage(2),
-                    }}>
-                    Wallet Payment
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
-          )}
+              <View style={styles.rowViewSB} >
+                <TouchableOpacity style={styles.wallet} onPress={() => {
+                  if (join_as_guest) {
+                    ref_RBSheetGuestUser?.current?.open();
+                  } else {
+                    ref_RBSheetPaymentOption?.current?.open();
+                  }
+                }}>
+                  <WalletActive />
+                  <Text style={styles.paymentType}>Wallet Payment</Text>
+                </TouchableOpacity>
+                <View>
+                  <Text style={styles.subText1} >Total Balance</Text>
+                  <Text style={[styles.walletBalance, { lineHeight: 15, textAlign: 'center' }]} >${walletTotalAmount}</Text>
+                </View>
 
-          <View style={{ height: hp(14) }} />
+
+
+
+              </View>
+
+            </View>
+
+          ) : <View >
+            <Text
+              style={{
+                color: Colors.Orange,
+                fontFamily: Fonts.PlusJakartaSans_Bold,
+                fontSize: RFPercentage(2.4),
+              }}>
+              Payment Method
+            </Text>
+            <View style={styles.rowViewSB} >
+              <TouchableOpacity style={styles.wallet} onPress={() => {
+                if (join_as_guest) {
+                  ref_RBSheetGuestUser?.current?.open();
+                } else {
+                  ref_RBSheetPaymentOption?.current?.open();
+                }
+              }}>
+                {/* <WalletActive /> */}
+                <Text style={styles.paymentType}>Cash On Delivery</Text>
+              </TouchableOpacity>
+
+
+            </View>
+
+          </View>
+
+          }
+
+</View>
+
+          {/* <View style={{ height: hp(14), }} /> */}
           {/* <Text style={styles.heading}>Detail Order</Text>
           <CartSwipeListView
             data={data}
@@ -1067,19 +1287,26 @@ const Checkout = ({ navigation, route }) => {
             onDelete={item => handleDelete(item)}
           /> */}
 
-          <View style={{ marginVertical: 10 }}>
+          <View style={{ marginBottom: 10,marginTop: wp(15), marginHorizontal: 20, backgroundColor: '#F5F6FA', paddingHorizontal: 15, borderRadius: 10,paddingBottom: 5 }}>
             <View style={styles.rowViewSB}>
               <Text style={styles.subText1}>Subtotal</Text>
-              <Text style={styles.subText1}>£{Bill.subtotal}</Text>
+              <Text style={styles.subText1}>£{bill.subtotal}</Text>
             </View>
             <View style={styles.rowViewSB}>
               <Text style={styles.subText1}>Delivery Charges</Text>
-              <Text style={styles.subText1}>£{Bill.delivery_charges}</Text>
+              <Text style={styles.subText1}>£{bill.delivery_charges}</Text>
             </View>
             <View style={styles.rowViewSB}>
-              <Text style={styles.subText1}>Gst Charges</Text>
-              <Text style={styles.subText1}>£{Bill.gst_charges}</Text>
+              <Text style={styles.subText1}>GST Charges</Text>
+              <Text style={styles.subText1}>£{bill.gst_charges}</Text>
             </View>
+            {
+              isPromocodeApplied &&  <View style={styles.rowViewSB}>
+              <Text style={styles.subText1}>Discount</Text>
+              <Text style={styles.subText1}>£{bill.gst_charges}</Text>
+            </View>
+            }
+          
             {/* <View style={styles.rowViewSB}>
               <Text style={styles.subText1}>Service Charges</Text>
               <Text style={styles.subText1}>£{service_fee}</Text>
@@ -1088,10 +1315,9 @@ const Checkout = ({ navigation, route }) => {
             <ItemSeparator />
             <View style={styles.rowViewSB}>
               <Text style={styles.title}>Total</Text>
-              <Text style={styles.title}>£{Bill.total_amount}</Text>
+              <Text style={styles.title}>£{bill.total_amount}</Text>
             </View>
           </View>
-        </View>
         <View
           style={{
             flex: 1,
@@ -1104,16 +1330,34 @@ const Checkout = ({ navigation, route }) => {
             onPress={() => {
               if (join_as_guest) {
                 ref_RBSheetGuestUser?.current?.open();
-              } else if (selected_payment_string?.length > 0) {
-                if (selected_payment_type == 'card') {
-                  initializePaymentSheet(); // stripe payment
-                } else {
-                  placeOrder();
-                }
+              } else if (selected_payment_type == 'card') {
+                if (walletTotalAmount < Bill.total_amount) {
+                  WithDrawBtmSheet?.current?.open();
+                  return
+                } else placeOrder()
               } else {
-                ref_RBSheetPaymentOption?.current?.open();
+                placeOrder();
               }
+              // else {
+              //   ref_RBSheetPaymentOption?.current?.open();
+              // }
             }}
+          // onPress={() => {
+          //   if (join_as_guest) {
+          //     ref_RBSheetGuestUser?.current?.open();
+          //   } else if (selected_payment_string?.length > 0) {
+          //     if (selected_payment_type == 'card') {
+          //       if (walletTotalAmount < Bill.total_amount) {
+          //         WithDrawBtmSheet?.current?.open();
+          //         return
+          //     }else placeOrder()
+          //     } else {
+          //       placeOrder();
+          //     }
+          //   } else {
+          //     ref_RBSheetPaymentOption?.current?.open();
+          //   }
+          // }}
           />
         </View>
 
@@ -1182,7 +1426,7 @@ const Checkout = ({ navigation, route }) => {
         />
         <CRBSheetComponent
           refRBSheet={ref_RBSheetPaymentOption}
-          height={250}
+          height={180}
           content={
             <View style={{ width: wp(90) }}>
               <View style={styles.rowViewSB1}>
@@ -1223,9 +1467,7 @@ const Checkout = ({ navigation, route }) => {
                 <ItemSeparator />
                 <TouchableOpacity
                   onPress={() => {
-                    dispatch(setSelectedPaymentType('card'));
-                    dispatch(setSelectedPaymentString('Card Payment'));
-                    ref_RBSheetPaymentOption?.current?.close();
+                    handlePaymentTypeChange('card', 'Wallet Payment')
                   }}
                   style={styles.rowView}>
                   <RadioButton
@@ -1236,9 +1478,7 @@ const Checkout = ({ navigation, route }) => {
                       selected_payment_type === 'card' ? 'checked' : 'unchecked'
                     }
                     onPress={() => {
-                      dispatch(setSelectedPaymentType('card'));
-                      dispatch(setSelectedPaymentString('Card Payment'));
-                      ref_RBSheetPaymentOption?.current?.close();
+                      handlePaymentTypeChange('card', 'Wallet Payment')
                     }}
                   />
                   <Text
@@ -1248,15 +1488,14 @@ const Checkout = ({ navigation, route }) => {
                       marginTop: -2,
                       fontSize: RFPercentage(1.8),
                     }}>
-                    Card Payment
+                    Wallet Payment
                   </Text>
                 </TouchableOpacity>
-                <ItemSeparator />
+                {/* <ItemSeparator />
                 <TouchableOpacity
                   onPress={() => {
-                    dispatch(setSelectedPaymentType('wallet'));
-                    dispatch(setSelectedPaymentString('Wallet Payment'));
-                    ref_RBSheetPaymentOption?.current?.close();
+                    handlePaymentTypeChange('wallet', 'Wallet Payment')
+                 
                   }}
                   style={styles.rowView}>
                   <RadioButton
@@ -1283,7 +1522,7 @@ const Checkout = ({ navigation, route }) => {
                     }}>
                     Wallet Payment
                   </Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
             </View>
           }
@@ -1307,20 +1546,20 @@ const Checkout = ({ navigation, route }) => {
           // description={'Please Sign up before ordering'}
           btnText={'OK'}
           onSignIn={() => {
-            ref_RBSheet?.current?.close();
+            ref_RBSheetGuestUser?.current?.close();
             navigation?.popToTop();
             navigation?.replace('SignIn');
             // navigation?.goBack();
           }}
           onSignUp={() => {
-            ref_RBSheet?.current?.close();
+            ref_RBSheetGuestUser?.current?.close();
             navigation?.popToTop();
             navigation?.replace('SignUp');
             // navigation?.goBack();
           }}
         />
         <CRBSheetComponent
-          height={170}
+          // height={170}
           refRBSheet={btmSheetRef}
           content={
             <View style={{ width: wp(90) }} >
@@ -1356,6 +1595,136 @@ const Checkout = ({ navigation, route }) => {
               </TouchableOpacity>
 
             </View>
+          }
+        />
+        <CRBSheetComponent
+          height={310}
+          refRBSheet={WithDrawBtmSheet}
+          content={
+            <View style={{ width: wp(90) }} >
+              <View style={[styles.rowViewSB1, { alignItems: 'flex-end' }]}>
+                <TouchableOpacity
+                  onPress={() => WithDrawBtmSheet?.current?.close()}>
+                  <Ionicons name={'close'} size={22} color={'#1E2022'} />
+                </TouchableOpacity>
+              </View>
+              <View style={{ alignItems: 'center' }} >
+                <Alert height={80} />
+                <Text style={{ marginTop: hp(3), fontSize: RFPercentage(2.4), color: Colors.Black, textAlign: 'center' }}>
+                  You don't have enough amount in wallet</Text>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  width: wp(80),
+                  alignSelf: 'center'
+                }}>
+                <CButton
+                  title={'Cancel'}
+                  width={wp(36)}
+                  height={hp(5.5)}
+                  marginTop={hp(5)}
+                  onPress={() => WithDrawBtmSheet?.current?.close()}
+                  transparent={true}
+                />
+                <CButton
+                  title={'Top-Up'}
+                  width={wp(36)}
+                  height={hp(5.5)}
+                  marginTop={hp(5)}
+                  onPress={() => {
+                    WithDrawBtmSheet?.current?.close()
+                    setTimeout(() => {
+                      ref_RBTopUpSheet?.current?.open()
+                    }, 200);
+
+                  }}
+                />
+              </View>
+
+
+            </View>
+          }
+        />
+        <CRBSheetComponent
+          refRBSheet={ref_RBTopUpSheet}
+          height={hp(38)}
+          content={
+            <ScrollView keyboardShouldPersistTaps="handled">
+              <View style={{ paddingHorizontal: 20 }}>
+                <View style={{ ...styles.rowViewSB, marginBottom: 20 }}>
+                  <Text
+                    style={{
+                      color: '#0A212B',
+                      fontFamily: Fonts.PlusJakartaSans_Bold,
+                      fontSize: RFPercentage(2.5),
+                    }}>
+                    Top-up
+                  </Text>
+                </View>
+                <View style={{ paddingHorizontal: 10 }}>
+                  <Text
+                    style={{
+                      color: Colors.Orange,
+                      fontFamily: Fonts.PlusJakartaSans_Bold,
+                      fontSize: RFPercentage(2.2),
+                      marginBottom: 14,
+                    }}>
+                    Current Balance: $ {walletTotalAmount}
+                  </Text>
+                  <CInput
+                    placeholder="Top-up Amount"
+                    textAlignVertical="top"
+                    keyboardType="numeric"
+                    value={topUpAmount}
+                    onChangeText={text => setTopUpAmount(text)}
+                  />
+                  <Text
+                    style={{
+                      color: '#A2A2A2',
+                      marginTop: -15,
+                      fontSize: RFPercentage(1.5),
+                      marginLeft: 14,
+                    }}>
+                    Enter an amount from $ 100-$1,000
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flex: 1,
+                      paddingHorizontal: 10,
+                      marginTop: 15,
+                    }}>
+                    <CButton
+                      title="CANCEL"
+                      transparent={true}
+                      width={wp(35)}
+                      height={hp(5.5)}
+                      onPress={() => ref_RBTopUpSheet?.current?.close()}
+                    />
+                    <CButton
+                      title="NEXT"
+                      width={wp(35)}
+                      height={hp(5.5)}
+                      onPress={() => {
+                        ref_RBTopUpSheet?.current?.close();
+                        initializePaymentSheetForTopUp()
+
+
+                        // navigation.navigate('CardInfo', {
+                        //   type: 'top_up',
+                        // });
+                      }}
+                    />
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
           }
         />
       </ScrollView>
@@ -1411,10 +1780,24 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2),
     lineHeight: 30,
   },
+  walletBalance: {
+    color: '#0C0B0B',
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    fontSize: RFPercentage(2),
+    lineHeight: 15,
+    letterSpacing: wp(0.3)
+  },
   title: {
     color: '#191A26',
     fontSize: RFPercentage(2.3),
     fontFamily: Fonts.Inter_Bold,
+  },
+  paymentType: {
+    color: Colors.Black,
+    fontSize: RFPercentage(2.3),
+    fontFamily: Fonts.PlusJakartaSans_Medium,
+    marginLeft: wp(4),
+    textAlign: 'center'
   },
   rowView: {
     flexDirection: 'row',
@@ -1443,4 +1826,8 @@ const styles = StyleSheet.create({
     marginLeft: wp(5),
     fontSize: RFPercentage(1.9),
   },
+  wallet: {
+    marginTop: hp(1.5),
+    flexDirection: 'row'
+  }
 });

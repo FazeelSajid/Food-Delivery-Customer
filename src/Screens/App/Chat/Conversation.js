@@ -1,471 +1,472 @@
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  Image,
-  StyleSheet,
-  Text,
   View,
+  Text,
+  StyleSheet,
+  FlatList,
   TextInput,
   TouchableOpacity,
-  Keyboard,
+  Image,
 } from 'react-native';
-import React, {useState, useEffect, useCallback, memo, useRef} from 'react';
 import ChatHeader from '../../../components/Header/ChatHeader';
-import {Colors, Fonts, Icons, Images} from '../../../constants';
-
-import {GiftedChat, Bubble, InputToolbar} from 'react-native-gifted-chat';
-import {RFPercentage} from 'react-native-responsive-fontsize';
-
-import uuid from 'react-native-uuid';
-import firestore from '@react-native-firebase/firestore';
-import {firebase} from '@react-native-firebase/firestore';
 import Loader from '../../../components/Loader';
-import {getUserFcmToken} from '../../../utils/helpers';
-import {firebase_server_key} from '../../../utils/globalVariables';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { io } from 'socket.io-client';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { useSelector } from 'react-redux';
+import { Colors } from '../../../constants';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import CameraBottomSheet from '../../../components/BottomSheet/CameraBottomSheet';
+import { BASE_URL } from '../../../utils/globalVariables';
 
-const Conversation = ({navigation, route}) => {
+const Conversation = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
+  const contact = route?.params?.contact;
+  const { customer_id } = useSelector(store => store.store);
+  const cameraBtmSheetRef = useRef()
+  const [image, setImage] = useState()
+  const [imagePreview, setImagePreview] = useState(null);
+
+  // console.log(typeof(customer_id));
+
+  // console.log({ contact });
+
+
+
+
+  // const socketUrl = 'https://food-delivery-be.caprover-demo.mtechub.com/';
+
+  const socketUrl = 'http://192.168.100.239:3017'
+  // const customer_id = 202028;
+  // const rest_ID = 'res_4074614';
+  // const rider_id = "rider_1673186";
+
+
+  const [socket, setSocket] = useState(null);
+  const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
+  const [roomId, setRoomId] = useState(null);
 
-  const ref = useRef('');
-  const inputRef = useRef('');
+  // const ref = useRef('');
 
-  // let docId = 'restaurant-customer';
-  // const [user_id, setUser_id] = useState('customer');
-  // const [userId, setUserId] = useState('customer');
+  // useEffect(() => {
+  //   const newSocket = io(socketUrl);
+  //   setSocket(newSocket);
 
-  const [userId, setUserId] = useState('');
-  const [docId, setDocId] = useState('');
+  //   // Join room and fetch previous messages
+  //   newSocket.emit('joinRoom', {
+  //     room_id: contact.room_id,
+  //     rest_ID: contact.restaurant_id || '',
+  //     customer_id: contact.customer_id,
+  //     rider_id: contact.rider_id || '',
+  //   });
 
-  const handleDocId = async () => {
-    console.log('handleDocId called...');
-    if (route?.params?.userId) {
-      let customer_id = await AsyncStorage.getItem('customer_id'); //current user
-      let doc = '';
-      if (route?.params?.type == 'restaurant') {
-        doc = route?.params?.userId + '-' + customer_id;
+  //   // newSocket.emit('joinRoom', customer_id);
+  //   // newSocket.on('roomJoined', ({ roomId }) => {
+  //   //     setRoomId(roomId);
+  //   //     console.log(`Joined room: ${roomId}`);
+  //   // });
+
+  //   // setRoomId(contact.room_id);
+
+  //   newSocket.on('previousMessages', ({ messages }) => {
+  //     const formattedMessages = messages.map((msg, index) => ({
+  //       ...msg,
+  //       createdAt: new Date(msg.created_at),
+  //     }));
+  //     setMessages(formattedMessages.reverse());
+  //   });
+
+  //   newSocket.on('newMessage', (message) => {
+  //     setMessages((prevMessages) => [message, ...prevMessages]);
+  //   });
+
+  //   return () => {
+  //     newSocket.disconnect();
+  //   };
+  // }, []);
+
+  const room_id = contact.room_id; // Use the room ID from the contact details
+    // console.log({room_id});
+
+  useEffect(() => {
+    
+    
+    const newSocket = io(BASE_URL);
+    setSocket(newSocket);
+    newSocket.on('connect', () => {
+      // if (contact.rider_id) {
+      //   newSocket.emit('joinRoom', {
+      //     room_id,
+      //     // rest_ID: null,
+      //     customer_id: customer_id, // Example customer ID
+      //     rider_id: contact.rider_id,
+      //   });
+      //   newSocket.on('roomJoined', ({ roomId }) => {
+      //     console.log(`Joined room: ${roomId}, Conversations screen`);
+      //     setRoomId(roomId);
+      //   });
+
+        
+    
+      // } else if (roomId) {
+      //   newSocket.emit('joinRoom', {
+      //     room_id,
+      //     rest_ID: contact.restaurant_id,
+      //     customer_id: customer_id, // Example customer ID
+      //     rider_id: null
+      //   });
+      //   newSocket.on('roomJoined', ({ roomId }) => {
+      //     console.log(`Joined room: ${roomId}, conversations`);
+      //     setRoomId(roomId);
+      //   });
+
+      //   console.log('somewhere', {
+      //     room_id,
+      //     rest_ID: contact.restaurant_id,
+      //     customer_id: customer_id, // Example customer ID
+      //     rider_id: null
+      //   });
+    
+      // }
+      //  else {
+      //   newSocket.emit('joinRoom', customer_id);
+      //   newSocket.on('roomJoined', ({ roomId }) => {
+      //     console.log(`Joined room: ${roomId}, conversation Screen`);
+      //     setRoomId(roomId);
+      //   });
+      //   console.log('else from customer conversation screen useeffect unexpectedly');
+      // }
+// console.log(room_id);
+
+      if (room_id) {
+        newSocket.emit('joinRoom', {
+              room_id,
+              rest_ID: contact.restaurant_id,
+              customer_id: customer_id, // Example customer ID
+              rider_id: contact.rider_id
+            });
+            newSocket.on('roomJoined', ({ roomId }) => {
+              console.log(`Joined room: ${roomId}, conversations`);
+              setRoomId(roomId);
+            });
+    
+            // console.log('somewhere', {
+            //   room_id,
+            //   rest_ID: contact.restaurant_id,
+            //   customer_id: customer_id, // Example customer ID
+            //   rider_id: null
+            // });
       } else {
-        doc = customer_id + '-' + route?.params?.userId;
-      }
-      console.log('new doc : ', doc);
-      setDocId(doc);
-      // setUser_id(customer_id);
-      setUserId(customer_id);
-    } else {
-      console.log('else userId not found');
-    }
-  };
+          newSocket.emit('joinRoom', customer_id);
+          newSocket.on('roomJoined', ({ roomId }) => {
+            console.log(`Joined room: ${roomId}, conversation Screen`);
+            setRoomId(roomId);
+          });
+          // console.log('else from customer conversation screen useeffect unexpectedly');
+        }
+  });
 
-  useEffect(() => {
-    handleDocId();
-  }, [route?.params, docId]);
+    // Join the room
+   
+   
 
-  useEffect(() => {
-    ref.current = '';
-  }, []);
+    // Listen for room join confirmation and previous messages
+    // newSocket.on('roomJoined', ({ roomId }) => {
+    //   console.log(`Joined room: ${roomId}`);
+    //   setRoomId(roomId);
+    // });
 
-  useEffect(() => {
-    setLoading(true);
-    initializeConversation(docId); // Create conversation if not exist
-    const unsubscribeMessages = firebase
-      .firestore()
-      .collection('conversations')
-      .doc(docId)
-      .collection('messages')
-      .orderBy('createdAt', 'desc')
-      .onSnapshot(snapshot => {
-        const messageList = snapshot?.docs?.map(doc => {
-          let data = doc.data();
-          //update message read status
-          console.log('update message status read : ', data?.user?._id, userId);
-          if (
-            data?.user?._id != userId &&
-            typeof data?.user?._id != 'undefined' &&
-            userId?.length !== 0
-          ) {
-            console.log('updated.....');
-            doc?.ref
-              .update({
-                received: true,
-              })
-              .catch(err => {
-                console.log('err while updating message read status');
-              });
-          }
-          // --------------------------
+    newSocket.on('previousMessages', ({ messages }) => {
+      const formattedMessages = messages.map((msg, index) => ({
+        ...msg,
+        createdAt: new Date(msg.created_at),
+      }));
+      setMessages(formattedMessages.reverse());
+    });
 
-          if (data.createdAt) {
-            return {
-              ...doc.data(),
-              createdAt: doc.data().createdAt.toDate(),
-            };
-          } else {
-            return {
-              ...doc.data(),
-              createdAt: new Date(),
-            };
-          }
-        });
-        setMessages(messageList);
-        setLoading(false);
-      });
+    // Listen for new messages
+    newSocket.on('newMessage', (message) => {
+      console.log(' new message received', message);
+      
+      setMessages((prevMessages) => [message, ...prevMessages]);
+    });
 
-    return () => unsubscribeMessages();
-  }, [docId]);
-
-  const handleReadMessage = async messageId => {
-    // Update the message to mark it as read by the current user
-    // await firebase
-    //   .firestore()
-    //   .collection('conversations')
-    //   .doc(docId)
-    //   .collection('messages')
-    //   .doc(messageId)
-    //   .update({
-    //     readBy: firebase.firestore.FieldValue.arrayUnion(user.uid),
-    //   });
-  };
-
-  const initializeConversation = async docId => {
-    // Check if the conversation exists
-    const conversationRef = firebase
-      .firestore()
-      .collection('conversations')
-      .doc(docId);
-    // const conversationDoc = await conversationRef.get();
-
-    // if (!conversationDoc.exists) {
-    //   // Create the conversation document
-    //   await conversationRef.set({
-    //     participants: [userId], // You can add more data here
-    //   });
-    // }
-  };
-
-  const onSend = async text => {
-    if (text?.trim()?.length == 0) return; //don't want to send empty string
-    ref.current = '';
-    inputRef.current = '';
-
-    let obj = {
-      _id: uuid.v4(),
-      text: text?.trim(),
-      // createdAt: new Date(),
-      user: {
-        _id: userId,
-        name: 'React Native',
-        avatar: 'https://placeimg.com/140/140/any',
-      },
-      sent: true,
-      received: false,
+    // Cleanup listeners on unmount
+    return () => {
+      newSocket.off('roomJoined');
+      newSocket.off('previousMessages');
+      newSocket.off('newMessage');
     };
+  }, [contact]);
 
-    // Add the new message to Firestore
 
-    const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-    console.log('docId  :  ', docId);
-    firestore()
-      .collection('conversations')
-      .doc(docId)
-      .collection('messages')
-      .add({
-        ...obj,
-        createdAt: new Date(),
-        // createdAt: firestore.FieldValue.serverTimestamp(),
-      })
-      .then(() => {
-        //message sended successfully
-        handleSendPushNotification(obj.text);
-      })
-      .catch(err => {
-        console.log('error while sending new message : ', err);
-      });
-  };
+// console.log(image.base64, 'base64');
 
-  const handleSendPushNotification = async text => {
-    // const receiver_fcm = await getUserFcmToken();
-    const receiver_fcm = route?.params?.fcm_token;
-    let customer_detail = await AsyncStorage.getItem('customer_detail');
-    if (customer_detail) {
-      let parsed = JSON.parse(customer_detail);
-      current_user_name = parsed?.user_name;
-    }
+  const sendMessage = () => {
+    if (message.trim()) {
 
-    if (receiver_fcm) {
-      let body = {
-        to: receiver_fcm,
-        notification: {
-          title: current_user_name,
-          body: text ? text : 'sended a message',
-          // mutable_content: true,
-          sound: 'default',
-        },
-        data: {
-          // user_id: user,
-          type: 'chat',
-        },
-        priority: 'high',
-      };
-
-      var requestOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `key=${firebase_server_key}`,
-        },
-        body: JSON.stringify(body),
-      };
-
-      fetch('https://fcm.googleapis.com/fcm/send', requestOptions)
-        .then(response => response.text())
-        .then(response => {
-          let res = JSON.parse(response);
-          console.log('push notification response :  ', res);
-        })
-        .catch(err => {
-          console.log('error :  ', err);
+      if (image) {
+        socket.emit('sendMessage', {
+          roomId,
+          sender_type: 'customer',
+          senderId: customer_id,
+          receiver_type: contact.rider_id ? 'rider' : 'restaurant',
+          receiverId: contact.rider_id || contact.restaurant_id,
+          message,
+          image_url: image.base64,
         });
-    } else {
-      console.log('receiver_fcm not found');
+       
+        
+        setImagePreview(image.base64)
+      } else {
+        socket.emit('sendMessage', {
+          roomId,
+          sender_type: 'customer',
+          senderId: customer_id,
+          receiver_type: contact.rider_id ? 'rider' : 'restaurant',
+          receiverId: contact.rider_id || contact.restaurant_id,
+          message,
+        });
+        console.log({
+          roomId,
+          sender_type: 'customer',
+          senderId: customer_id,
+          receiver_type: contact.rider_id ? 'rider' : 'restaurant',
+          receiverId: contact.rider_id || contact.restaurant_id,
+          message,
+         
+        });
+
+        console.log('only text');
+        
+      }
+     
+
+      
+      
+
+      // const newMessage = {
+      //   sender_type: 'customer',
+      //   sender_id: customer_id,
+      //   receiver_type: 'restaurant',
+      //   receiver_id: rest_ID,
+      //   message,
+      //   created_at: new Date().toISOString(),
+      // };
+
+      // setMessages((prevMessages) => [newMessage, ...prevMessages]);
+
+      setMessage('');
+      setImage(null)
+
     }
   };
 
-  const CustomBubble = props => {
-    return (
-      <View>
-        <Bubble
-          {...props}
-          wrapperStyle={{
-            right: {
-              backgroundColor: Colors.Orange,
-              borderBottomRightRadius: 15,
-              borderBottomLeftRadius: 15,
-              borderTopRightRadius: 5,
-              borderTopLeftRadius: 15,
-              marginBottom: 35,
-              marginRight: 10,
-              alignItems: 'flex-end', // Align the content to the right
-              paddingTop: 10,
-              paddingBottom: 5,
-              paddingHorizontal: 5,
-              marginRight: 20,
-            },
-            left: {
-              backgroundColor: '#F1F1F1',
-              borderBottomRightRadius: 15,
-              borderBottomLeftRadius: 15,
-              borderTopRightRadius: 15,
-              borderTopLeftRadius: 5,
-              marginBottom: 35,
-              marginLeft: 10,
-              alignItems: 'flex-start', // Align the content to the left
-              paddingTop: 10,
-              paddingBottom: 5,
-              paddingHorizontal: 5,
-              marginLeft: 20,
-            },
-          }}
-          containerStyle={{
-            backgroundColor: 'red',
-          }}
-          timeTextStyle={{
-            left: {
-              color: '#000000',
-              fontFamily: Fonts.Inter_Medium,
-              fontSize: RFPercentage(1.4),
-              marginBottom: -35,
-              top: 18,
-              position: 'relative',
-              left: -8,
-            },
-            right: {
-              color: '#000000',
-              fontFamily: Fonts.Inter_Medium,
-              fontSize: RFPercentage(1.4),
-              marginBottom: -35,
-              top: 18,
-              position: 'relative',
-              right: -20,
-            },
-          }}
-        />
 
-        {props?.currentMessage?.user?._id != userId ? (
-          <View
-            style={{
-              backgroundColor: '#F1F1F1',
-              height: 10,
-              width: 20,
-              borderTopLeftRadiusRadius: 2,
-              borderBottomLeftRadius: 8,
-              position: 'absolute',
-              top: 0,
-              left: 15,
-            }}
-          />
-        ) : (
-          <View
-            style={{
-              backgroundColor: Colors.Orange,
-              height: 10,
-              width: 20,
-              borderTopRightRadius: 2,
-              borderBottomRightRadius: 8,
-              position: 'absolute',
-              top: 0,
-              right: 15,
-            }}
-          />
-        )}
-      </View>
-    );
-  };
+  // console.log({roomId});
+  
 
-  const CustomTicks = currentMessage => {
-    // console.log('props::::   ', currentMessage);
-    // console.log('currentMessage?.sent  : ', !!currentMessage?.sent);
-    // console.log('currentMessage?.received  : ', !!currentMessage?.received);
+  const renderItem = ({ item }) => {
+
+
+
+    const isCustomer = item.sender_type === 'customer';
+
+    // console.log("Xchcek  kkķ",item.receiver_type)
+    // console.log( item?.image_url );
 
     return (
-      <View style={{position: 'relative', top: 21, left: -50}}>
-        {/* <Text style={[{color: Colors.Orange}]}>✓✓</Text> */}
-        {/* {!!currentMessage?.sent && !!currentMessage?.received && ( */}
-        {currentMessage?.sent == true &&
-          !!currentMessage?.received == true &&
-          currentMessage?.user?._id == userId && <Icons.DoubleTick />}
-      </View>
-    );
-  };
-
-  const CustomInputToolbar = props => {
-    return (
-      <InputToolbar
-        {...props}
-        containerStyle={{
-          paddingVertical: 20,
-          paddingTop: 8,
-          borderTopWidth: 0,
-          width: '90%',
-          marginHorizontal: 20,
-        }}
-        // renderComposer={props => renderComposer(props)}
-        renderComposer={props => {
-          return <RenderComposer {...props} />;
-        }}
-        renderSend={props => {
-          return <RenderSend {...props} />;
-        }}
-      />
-    );
-  };
-
-  const RenderSend = props => {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          console.log('ref :: ', inputRef.current);
-          onSend(inputRef.current);
-        }}
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginLeft: 8,
-        }}>
+      <View
+        style={[
+          styles.messageContainer,
+          isCustomer ? styles.messageRight : styles.messageLeft,
+        ]}
+      >
         <View
-          style={{
-            justifyContent: 'center',
-            padding: 20,
-            paddingVertical: 15,
-            borderRadius: 10,
-            borderWidth: 0,
-            backgroundColor: Colors.Orange,
-          }}>
-          <Icons.Send />
+          style={[
+            styles.bubble,
+            isCustomer ? styles.customerBubble : styles.restaurantBubble,
+          ]}
+        >
+          {/* Render the text message */}
+        
+          {/* Render the image professionally */}
+          {item?.image_url ? (
+            <Image
+              source={{ uri: item?.image_url }}
+              style={styles.chatImage}
+            />
+          ): item?.imageUrl ? (
+            <Image
+              source={{ uri: item?.imageUrl }}
+              style={styles.chatImage}
+            />
+          ): null }
+            {item.message && (
+            <Text
+              style={[
+                styles.messageText,
+                isCustomer ? { color: Colors.White } : { color: Colors.Black },
+              ]}
+            >
+              {item.message}
+            </Text>
+          )}
+
         </View>
-      </TouchableOpacity>
+
+        {/* Timestamp */}
+        <Text style={styles.timestamp}>
+          {new Date(item.created_at).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </Text>
+      </View>
     );
   };
-
-  const onChangeText = item => {
-    ref.current = item;
-    inputRef.current = item;
-  };
-
-  const RenderComposer = props => {
-    return (
-      <TextInput
-        {...props}
-        ref={ref}
-        style={{
-          flex: 1,
-          fontSize: 16,
-          paddingHorizontal: 15,
-          borderRadius: 10,
-          backgroundColor: '#F5F5F5',
-        }}
-        placeholder="Write message..."
-        multiline={true}
-        // value={newMessage}
-        // value={typeof ref.current == 'string' ? ref.current : ''}
-        // onChangeText={text => setNewMessage(text)}
-        onChangeText={onChangeText}
-      />
-    );
-  };
-
   return (
-    <View style={{flex: 1, backgroundColor: 'white'}}>
+    <View style={{ flex: 1, backgroundColor: 'white' }}>
       <ChatHeader
         profile={route?.params?.image ? route?.params?.image : null}
         title={route?.params?.name ? route?.params?.name : ''}
       />
 
       <Loader loading={loading} />
-      <View style={{flex: 1}}>
-        <GiftedChat
-          messagesContainerStyle={{paddingBottom: 30}}
-          messages={messages}
-          onSend={messages => onSend(messages)}
-          user={{
-            // _id: user_id,
-            _id: userId,
-          }}
-          renderInputToolbar={props => {
-            return <CustomInputToolbar {...props} />;
-          }}
-          // renderAvatar={props => {
-          //   return null;
-          // }}
-          renderAvatar={null}
-          renderBubble={props => {
-            return <CustomBubble {...props} />;
-          }}
-          renderTicks={props => {
-            return <CustomTicks {...props} />;
-          }}
-          alwaysShowSend
-          onInputTextChanged={text => {
-            console.log('text : ', text);
-          }}
-          // renderChatEmpty={() => (
-          //   <View
-          //     style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-          //     {loading ? null : (
-          //       <Text
-          //         style={{
-          //           color: 'gray',
-          //           fontSize: 14,
-          //           transform: [{scaleY: -1}],
-          //         }}>
-          //         No Record Found
-          //       </Text>
-          //     )}
-          //   </View>
-          // )}
-          disableComposer={true}
+
+      <FlatList
+        data={messages}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={renderItem}
+        contentContainerStyle={styles.chatContainer}
+        inverted
+      />
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Write message..."
+          value={message}
+          onChangeText={(text) => setMessage(text)}
+          placeholderTextColor={Colors.grayText}
         />
+    
+    <TouchableOpacity style={{marginHorizontal: wp('2%'),}} onPress={()=> cameraBtmSheetRef?.current?.open()} >
+        <Ionicons name="camera" size={wp('9')} color={Colors.Orange} />
+
+        </TouchableOpacity>
+        <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
+          <Text style={styles.sendText}>➤</Text>
+        </TouchableOpacity>
       </View>
+
+      <CameraBottomSheet refRBSheet={cameraBtmSheetRef} onImagePick={setImage} obj={{
+          roomId,
+          sender_type: 'customer',
+          senderId: customer_id,
+          receiver_type: contact.rider_id ? 'rider' : 'restaurant',
+          receiverId: contact.rider_id || contact.restaurant_id,
+          socket : socket
+          
+        }} />
     </View>
   );
 };
 
 export default Conversation;
+
+const styles = StyleSheet.create({
+  chatContainer: {
+    paddingHorizontal: wp('4%'),
+    paddingBottom: hp('2%'),
+  },
+  messageContainer: {
+    marginVertical: hp('1%'),
+    flexDirection: 'column',
+  },
+  messageRight: {
+    alignItems: 'flex-end',
+  },
+  messageLeft: {
+    alignItems: 'flex-start',
+  },
+  bubble: {
+    maxWidth: wp('70%'),
+    borderRadius: wp('3%'),
+    padding: wp('1%'),
+    overflow:'hidden'
+  },
+  customerBubble: {
+    backgroundColor: Colors.Orange,
+    borderTopRightRadius: 0,
+    width: wp(62)
+    // borderColor: Colors.Orange,
+    // borderWidth: wp(1)
+  },
+  restaurantBubble: {
+    backgroundColor: '#EDEDED',
+    borderTopLeftRadius: 0,
+  },
+  messageText: {
+    fontSize: wp('4%'),
+    color: '#333333',
+    marginBottom: hp('0.5%'),
+    marginTop: hp('0.5%'),
+    // width: wp(80)
+  },
+  timestamp: {
+    fontSize: wp('3.2%'),
+    color: '#888888',
+    marginTop: hp('0.5%'),
+  },
+  // Image Styling
+  chatImage: {
+    height: hp(30), // Set proportional height for better responsiveness
+    width: wp(60),  // Adjust width to fit bubble size
+    borderRadius: wp(2), // Add rounded corners
+    // marginTop: hp(1), // Add spacing from text
+    alignSelf: 'center', // Center the image
+    resizeMode: 'stretch', // Ensure the image covers the area proportionally
+    shadowColor: '#000', // Add shadow for depth
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.3, 
+    shadowRadius: 4,
+    // elevation: 3, // Shadow support for Android
+    borderWidth: 1, // Optional: Add border for a sleek look
+    borderColor: '#ddd', // Border color
+    overflow: 'hidden',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: hp('1%'),
+    paddingHorizontal: wp('4%'),
+    borderTopWidth: 1,
+    borderTopColor: '#EDEDED',
+  },
+  textInput: {
+    flex: 1,
+    height: hp('5%'),
+    borderWidth: 1,
+    borderColor: '#EDEDED',
+    borderRadius: wp('5%'),
+    paddingHorizontal: wp('4%'),
+    backgroundColor: '#F9F9F9',
+    fontSize: wp('4%'),
+    color: Colors.Black,
+  },
+  sendButton: {
+    marginLeft: wp('2%'),
+    backgroundColor: Colors.Orange,
+    borderRadius: wp('5%'),
+    padding: wp('3%'),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendText: {
+    color: '#FFFFFF',
+    fontSize: wp('5%'),
+    fontWeight: 'bold',
+  },
+});

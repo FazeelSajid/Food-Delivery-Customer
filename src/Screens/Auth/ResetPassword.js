@@ -6,10 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-import React, {useState, useEffect, useRef} from 'react';
-import {Colors, Fonts, Icons, Images} from '../../constants';
+import React, { useState, useEffect, useRef } from 'react';
+import { Colors, Fonts, Icons, Images } from '../../constants';
 import StackHeader from '../../components/Header/StackHeader';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -23,17 +23,20 @@ import CInput from '../../components/TextInput/CInput';
 import CRBSheetComponent from '../../components/BottomSheet/CRBSheetComponent';
 import Lottie from 'lottie-react-native';
 import RBSheetSuccess from '../../components/BottomSheet/RBSheetSuccess';
-import {useKeyboard} from '../../utils/UseKeyboardHook';
-import {showAlert} from '../../utils/helpers';
+import { useKeyboard } from '../../utils/UseKeyboardHook';
+import { handlePopup } from '../../utils/helpers';
 import api from '../../constants/api';
 import OrangeSuccessCheck from '../../Assets/svg/orangeSuccessCheck.svg';
+import { useDispatch, useSelector } from 'react-redux';
+import PopUp from '../../components/Popup/PopUp';
 
 
-const ResetPassword = ({navigation, route}) => {
+const ResetPassword = ({ navigation, route }) => {
   const keyboardHeight = useKeyboard();
   const scrollViewRef = useRef();
+  const {showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store);
   const email = route?.params?.email
-
+  const dispatch = useDispatch()
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd();
   }, [keyboardHeight]);
@@ -57,21 +60,21 @@ const ResetPassword = ({navigation, route}) => {
 
   const validate = () => {
     if (!validatePassword(password)) {
-      showAlert(
+      handlePopup(
+        dispatch,
         'Your password must be at least 8 characters long and contain a combination of letters, numbers, and special characters',
-        'red',
-        3,
+        'red'
       );
       return false;
     } else if (!validatePassword(confirmPassword)) {
-      showAlert(
+      handlePopup(
+        dispatch,
         'Your confirm password must be at least 8 characters long and contain a combination of letters, numbers, and special characters',
         'red',
-        3,
       );
       return false;
     } else if (password != confirmPassword) {
-      showAlert('Password and confirm password not matched');
+      handlePopup(dispatch, 'Password and confirm password not matched', 'red');
       return false;
     } else {
       return true;
@@ -80,12 +83,12 @@ const ResetPassword = ({navigation, route}) => {
 
   const handleUpdatePassword = () => {
     if (validate()) {
-      const data  = {
-        email:email,
+      const data = {
+        email: email,
         newPassword: password,
-    }
-    console.log(data);
-    
+      }
+      console.log(data);
+
       setLoading(true);
       fetch(api.update_password, {
         method: 'PUT',
@@ -98,14 +101,14 @@ const ResetPassword = ({navigation, route}) => {
         .then(async response => {
           console.log('response  :  ', response);
           if (response?.status == false) {
-            showAlert(response?.message);
+            handlePopup(dispatch, response?.message, 'red');
           } else {
             ref_RBSheet?.current?.open();
           }
         })
         .catch(err => {
           console.log('Error in Login :  ', err);
-          showAlert('Something went wrong');
+          handlePopup(dispatch,'Something went wrong', 'red');
         })
         .finally(() => {
           setLoading(false);
@@ -114,12 +117,14 @@ const ResetPassword = ({navigation, route}) => {
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{ flex: 1, backgroundColor: Colors.White }}>
       <ScrollView
         ref={scrollViewRef}
-        contentContainerStyle={{flexGrow: 1}}
+        contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled">
         <StackHeader title={''} backIconColor={'#1D1D20'} />
+        {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
+
         <View
           style={{
             flex: 1,
@@ -181,11 +186,11 @@ const ResetPassword = ({navigation, route}) => {
               onPress={() => handleUpdatePassword()}
             />
           </View>
-          <View style={{height: hp(3)}} />
+          <View style={{ height: hp(3) }} />
         </View>
       </ScrollView>
-
-      {/* <CRBSheetComponent
+{/* 
+     <CRBSheetComponent
           refRBSheet={ref_RBSheet}
           content={
             <View style={{width: wp(87), alignItems: 'center'}}>
@@ -223,13 +228,13 @@ const ResetPassword = ({navigation, route}) => {
               />
             </View>
           }
-        /> */}
+        />  */}
       <View>
         <RBSheetSuccess
           refRBSheet={ref_RBSheet}
           title={'Password Reset Successfully'}
           btnText={'GO TO SIGN IN'}
-          svg={<OrangeSuccessCheck/>}
+          svg={<OrangeSuccessCheck />}
           onPress={() => {
             ref_RBSheet?.current?.close();
             navigation?.popToTop();

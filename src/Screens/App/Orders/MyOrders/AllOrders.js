@@ -17,6 +17,8 @@ import {
 } from 'react-native-responsive-screen';
 import { RefreshControl } from 'react-native-gesture-handler';
 import { setAllOrders } from '../../../../redux/OrderSlice';
+import { RFPercentage } from 'react-native-responsive-fontsize';
+import { getUserFcmToken } from '../../../../utils/helpers';
 const AllOrders = ({data}) => {
   const orders = useSelector(store => store.order.all_orders);
   const [UpcomingOrders, setUpcomingOrders] = useState()
@@ -37,11 +39,18 @@ const AllOrders = ({data}) => {
         // console.log(list, 'list');
         
         // const filter = list?.filter(item => item?.cart_items_Data?.length > 0);
-        const filter = list
+        // const filter = list
         // setData([...data, ...list]);
         // console.log(filter, 'filter');
         
-        dispatch(setAllOrders(filter?.reverse()));
+        dispatch(setAllOrders(list?.reverse()));
+
+        const filteredItems = list?.filter(
+          item => item.order_status !== "cancelled" && item.order_status !== "delivered"
+          
+      );
+      setUpcomingOrders(filteredItems);
+
       })
       .catch(err => console.log('error : ', err))
       .finally(() => {
@@ -49,15 +58,23 @@ const AllOrders = ({data}) => {
         setRefreshing(false);
       });
   };
-  
 
+const func = async () => {
+  let fcm_token = await getUserFcmToken();
+  console.log({fcm_token});
+}
+  
+  
+ 
   useFocusEffect(
     React.useCallback(() => {
       getData();
-      const filteredItems = orders.filter(
-        item => item.order_status !== "cancelled" && item.order_status !== "delivered"
-    );
-    setUpcomingOrders(filteredItems);
+    //   const filteredItems = orders.filter(
+    //     item => item.order_status !== "cancelled" && item.order_status !== "delivered"
+    // );
+    // setUpcomingOrders(filteredItems);
+    // console.log({filteredItems});
+    
 
     }, []),
   );
@@ -169,7 +186,7 @@ const AllOrders = ({data}) => {
       });
     } else {
       navigation.navigate('OrderDetails', {
-        type: 'completed',
+        type: 'all',
         id: item?.order_id,
         item: item,
       });
@@ -178,7 +195,11 @@ const AllOrders = ({data}) => {
   const onRefresh = () => {
     setRefreshing(true);
     getData();
+    // func()
   };
+
+  // console.log({UpcomingOrders});
+  
   
 
   return (
@@ -200,8 +221,10 @@ const AllOrders = ({data}) => {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={() => <View style={{height: 10}} />}
         ListFooterComponent={() => <View style={{height: 10}} />}
-        ListEmptyComponent={() => <NoDataFound />}
+        ListEmptyComponent={() => <NoDataFound  loading={refreshing} text={"No Upcoming Orders"} textStyle={{fontSize: RFPercentage(3)}} />}
         renderItem={({item}) => {
+          // console.log(item.order_status);
+          
           let cart_item =
             item?.cart_items_Data?.length > 0 ? item?.cart_items_Data[0] : null;
           return (

@@ -1,8 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../constants/api';
+import { handlePopup } from '../helpers';
 
-export const getCustomerCart = id => {
+export const getCustomerCart = (id, dispatch) => {
   return new Promise((resolve, reject) => {
+    // console.log(api.get_customer_cart + id);
+
+    // console.log(typeof(id));
+    // console.log(id);
+    
+    
+    
     try {
       fetch(api.get_customer_cart + id)
         .then(response => response.json())
@@ -12,7 +20,7 @@ export const getCustomerCart = id => {
           resolve(response?.customer);
         })
         .catch(err => {
-          console.log('error : ', err);
+          handlePopup(dispatch, 'Something is went wrong', 'red')
           resolve('');
         });
     } catch (error) {
@@ -21,7 +29,7 @@ export const getCustomerCart = id => {
   });
 };
 
-export const addItemToCart = data => {
+export const addItemToCart = (data, dispatch) => {
   return new Promise((resolve, reject) => {
     try {
       fetch(api.add_item_to_cart, {
@@ -41,12 +49,14 @@ export const addItemToCart = data => {
         });
     } catch (error) {
       reject(error);
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+
     }
   });
 };
 
-export const removeItemFromCart = (cart_id, item_id) => {
-  console.log({cart_id, item_id});
+export const removeItemFromCart = (cart_id, item_id, dispatch) => {
+  // console.log({cart_id, item_id});
   return new Promise((resolve, reject) => {
     try {
       fetch(
@@ -69,11 +79,13 @@ export const removeItemFromCart = (cart_id, item_id) => {
         });
     } catch (error) {
       reject(error);
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+
     }
   });
 };
 
-export const updateCartItemQuantity = data => {
+export const updateCartItemQuantity = (data, dispatch) => {
   return new Promise((resolve, reject) => {
     try {
       fetch(api.update_cart_item_quantity, {
@@ -90,21 +102,57 @@ export const updateCartItemQuantity = data => {
           
         })
         .catch(err => {
-          console.log('Error in Login :  ', err);
+          console.log('Error in updateCartItemQuantiy :  ', err);
           reject(err);
         });
     } catch (error) {
       reject(error);
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+
+    }
+  });
+};
+export const removeCartItemQuantity = (data, dispatch) => {
+
+  // console.log({data}, api.remove_item_from_cart + `?cart_id=${data.cart_id}&cart_item_id=${data.item_id}`);
+  
+
+  return new Promise((resolve, reject) => {
+    try {
+      fetch( api.remove_item_from_cart + `?cart_id=${data.cart_id}&cart_item_id=${data.item_id}`,
+        {
+          method: 'DELETE',
+          // body: JSON.stringify(data),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        },)
+        .then(response => response.json())
+        .then(async response => {
+          resolve(response);
+          console.log(response);
+          
+        })
+        .catch(err => {
+          console.log('Error in updateCartItemQuantiy :  ', err);
+          reject(err);
+        });
+    } catch (error) {
+      reject(error);
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+
     }
   });
 };
 
-export const getCartItems = cart_id => {
+export const getCartItems = (cart_id, dispatch) => {
   return new Promise((resolve, reject) => {
     try {
       fetch(api.get_cart_items + cart_id)
         .then(response => response.json())
         .then(response => {
+          // console.log({response});
+          
           if (response?.status == false) {
             resolve([]);
           } else {
@@ -117,6 +165,8 @@ export const getCartItems = cart_id => {
         });
     } catch (error) {
       resolve([]);
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+
     }
   });
 };
@@ -147,6 +197,8 @@ export const clearCartItems = () => {
         });
     } catch (error) {
       resolve(false);
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+
     }
   });
 };
@@ -170,6 +222,8 @@ export const getEstimatedTime = () => {
         });
     } catch (error) {
       resolve([]);
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+
     }
   });
 };

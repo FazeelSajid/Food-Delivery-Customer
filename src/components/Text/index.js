@@ -12,7 +12,7 @@ const PriceText = ({text, fontSize, color, currencyColor, textColor}) => {
           color: color ? color : currencyColor ? currencyColor : Colors.Orange,
           fontSize: RFPercentage(1.8),
           position: 'absolute',
-          bottom: 4,
+          // bottom: 4,
         }}>
         $
       </Text>

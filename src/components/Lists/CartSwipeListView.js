@@ -17,41 +17,73 @@ import {
 } from 'react-native-responsive-screen';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import PriceText from '../Text';
+import { BASE_URL_IMAGE } from '../../utils/globalVariables';
+import ItemLoading from '../Loader/ItemLoading';
 
-const CartSwipeListView = ({data, onDecrement, onIncrement, onDelete}) => {
+const CartSwipeListView = ({data, onDecrement, onIncrement, onDelete, ListFooterComponent, selectedItem, itemLoading }) => {
+  const [dataa, setData] = useState([]);
+  useEffect(() => {
+    setTimeout(() => {
+      setData(data); // Re-render the list to initiate preview
+    }, 500); // Adjust delay as needed
+  }, []);
+
+
+  // console.log( selectedItem,'fdasda');
+  
   return (
     <SwipeListView
+    // style={{backgroundColor: 'green'}}
       scrollEnabled={false}
+      previewRowKey={'1'} 
+      previewOpenValue={-40} 
+      previewOpenDelay={3000}
+      previewDuration={3000}
+      previewRepeat={true}
+      previewFirstRow={true}
+      previewRowIndex={0}
+      keyExtractor={(item)=> item.cart_item_id.toString()}
       data={data}
-      //   extraData={extraData}
+      extraData={data}
       contentContainerStyle={{
         alignSelf: 'center',
         width: wp(100),
         paddingHorizontal: 20,
+        // backgroundColor: 'red'
       }}
       disableRightSwipe={true}
       rightOpenValue={-wp(18)}
-      renderItem={({item, rowMap}) => (
-        <View style={styles.itemView}>
+      renderItem={({item, rowMap}) => {
+        // console.log(item)  
+        
+        return(
+        <View key={item.cart_item_id} style={styles.itemView}>
           <ImageBackground
-            source={item.image}
+          source={{
+            uri: BASE_URL_IMAGE + item?.itemData?.images[0],
+          }}
             blurRadius={40}
             style={styles.imageContainer}>
-            <Image source={item.image} style={styles.image} />
+            <Image source={{
+                            uri: BASE_URL_IMAGE + item?.itemData?.images[0],
+                          }}style={styles.image} />
           </ImageBackground>
           <View style={styles.textContainer}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.nameText}>{item.description}</Text>
+            <Text style={styles.title}>{item?.item_type == 'item'
+                          ? item?.itemData?.item_name
+                          : item?.itemData?.name}</Text>
+            <Text style={styles.nameText} ellipsizeMode='tail' numberOfLines={1} >{item?.itemData?.description }</Text>
+            {item?.itemData?.variationData?.variation_name && <Text style={styles.variation_name}>{item?.itemData?.variationData?.variation_name}</Text>}
             <View style={styles.rowViewSB}>
               {/* <Text style={{...styles.title, color: Colors.Orange}}>
                 ${item.price}
               </Text> */}
-              <PriceText text={item?.price} />
+              <PriceText text={item?.itemData?.variationData ? item?.itemData?.variationData.price * item?.quantity : item?.itemData?.price ? item?.itemData?.price * item?.quantity: item?.sub_total * item?.quantity } />
               <View style={styles.rowView}>
                 <TouchableOpacity onPress={() => onDecrement(item)}>
                   <Icons.Remove />
                 </TouchableOpacity>
-                <Text style={styles.countText}>{item.count}</Text>
+                <Text style={styles.countText}>{item?.quantity}</Text>
                 <TouchableOpacity onPress={() => onIncrement(item)}>
                   <Icons.AddFilled />
                 </TouchableOpacity>
@@ -59,17 +91,24 @@ const CartSwipeListView = ({data, onDecrement, onIncrement, onDelete}) => {
             </View>
           </View>
         </View>
-      )}
-      renderHiddenItem={(item, rowMap) => (
-        <View style={styles.rowBack}>
-          <TouchableOpacity
+      )}}
+      renderHiddenItem={({item, rowMap}) => {
+        // console.log(selectedItem , item.cart_item_id, itemLoading)
+        return(
+
+        <View style={styles.rowBack} key={item.cart_item_id} >
+              <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => onDelete(item.item)}
+            onPress={() => onDelete(item)}
             style={[styles.backRightBtn, styles.backRightBtnRight]}>
             <Icons.Delete />
           </TouchableOpacity>
+
+        
+        
         </View>
-      )}
+      )}}
+      ListFooterComponent={ListFooterComponent}
     />
   );
 };
@@ -160,4 +199,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.5),
     lineHeight: 15.5,
   },
+  variation_name: {
+    fontSize: RFPercentage(1.8), color: Colors.Orange, fontFamily: Fonts.PlusJakartaSans_SemiBold 
+  }
 });

@@ -19,9 +19,10 @@ import CInput from '../../../components/TextInput/CInput';
 import CButton from '../../../components/Buttons/CButton';
 import { useSelector } from 'react-redux';
 import api from '../../../constants/api';
-import { showAlert } from '../../../utils/helpers';
+import { handlePopup, showAlert } from '../../../utils/helpers';
 import { setLocation } from '../../../redux/AuthSlice';
 import { useDispatch } from 'react-redux';
+import PopUp from '../../../components/Popup/PopUp';
 navigator.geolocation = require('@react-native-community/geolocation');
 const Map = ({navigation}) => {
     const dispatch = useDispatch();
@@ -40,7 +41,7 @@ const Map = ({navigation}) => {
     const [label, setLabel] = useState()
     const [formErrors, setFormErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false)
-    const customer_id = useSelector(store => store.store.customer_id)
+    const {customer_id, showPopUp, popUpColor, PopUpMesage,} = useSelector(store => store.store)
 
     // console.log(customer_id, 'id');
     
@@ -233,17 +234,17 @@ useEffect(()=>{
     };
 
     const handleSubmit = async() => {
-       const distance = await getDistanceAndDuration(selectedLocation?.latitude ,selectedLocation?.longitude, 33.651552140687556, 73.0760657787323,)
-        .then(result => {
-          if (result) {
-            console.log(result.distance, 'location result');
+    //    const distance = await getDistanceAndDuration(selectedLocation?.latitude ,selectedLocation?.longitude, 33.651552140687556, 73.0760657787323,)
+    //     .then(result => {
+    //       if (result) {
+    //         console.log(result.distance, 'location result');
             
-            return result
-        } else { 
-            console.log('Failed to retrieve distance and duration');
-          }
-        });
-        if (validate() && distance) {
+    //         return result
+    //     } else { 
+    //         console.log('Failed to retrieve distance and duration');
+    //       }
+    //     });
+        if (validate()) {
             setIsLoading(true)
             const data = {
                 house_number: '',
@@ -256,7 +257,7 @@ useEffect(()=>{
                 address: selectedLocation?.address,
                 longitude: selectedLocation?.longitude,
                 latitude: selectedLocation?.latitude,
-                distance: distance.distance
+                // distance: distance.distance
             }
             console.log(data, 'data');
 
@@ -272,11 +273,11 @@ useEffect(()=>{
                     console.log(response);
 
                     if (response.status === false) {
-                        showAlert(response.message)
+                        handlePopup(dispatch, response.message, 'red')
                         return;
 
                     } else {
-                        showAlert('Address added successfully', 'green');
+                        handlePopup(dispatch, 'Address added successfully', 'green');
                         clearFields()
                         navigation.navigate('ManageAddress')
                         closeBtmSheet()
@@ -296,7 +297,7 @@ useEffect(()=>{
                 })
                 .catch(err => {
                     console.log('Error in Login :  ', err);
-                    showAlert('Something went wrong!');
+                    handlePopup(dispatch, 'Something went wrong!', 'red');
                 })
                 .finally(() => {
                     setIsLoading(false);
@@ -307,6 +308,7 @@ useEffect(()=>{
     return (
         <View style={{ flex: 1 }}>
             <Text style={styles.title}>Map with Address Selection</Text>
+            {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
 
             {/* Google Places Search Input */}
             <GooglePlacesAutocomplete

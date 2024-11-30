@@ -12,14 +12,21 @@ import {Avatar, Badge} from 'react-native-paper';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import CBadge from '../CBadge';
 import {useNavigation} from '@react-navigation/native';
+import { widthPercentageToDP } from 'react-native-responsive-screen';
 
-const ChatCard = ({profile, user_name, message, created_at, unread_count}) => {
+const ChatCard = ({profile, user_name, message, created_at, unread_count, onpress}) => {
   const navigation = useNavigation();
+
+  const name = user_name;
+  const avatarLetter = name ? name.charAt(0).toUpperCase() : '';
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate('Conversation')}
+      onPress={onpress}
       style={styles.card}>
-      <Avatar.Image source={profile} size={40} />
+      
+      {
+        profile ? <Avatar.Image source={profile} size={40} /> : <View style={{backgroundColor: Colors.Orange, paddingHorizontal: widthPercentageToDP(4),paddingVertical: widthPercentageToDP(2.2), borderRadius: widthPercentageToDP(10), }} ><Text style={{color: Colors.White, fontSize: RFPercentage(2.4), padding: 0}} >{avatarLetter}</Text></View>
+      }
       <View style={{marginLeft: 10, flex: 1}}>
         <View style={styles.rowViewSB}>
           <Text style={styles.title}>{user_name}</Text>

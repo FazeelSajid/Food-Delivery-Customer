@@ -6,7 +6,7 @@ export const CartSlice = createSlice({
     cart: [],
     cart_restaurant_id: null,
     comment: '',
-    selected_payment_type: '', // cash or card
+    selected_payment_type: 'cash', // cash or card
     selected_payment_string: '', // cash on delivery/card payment
 
     my_cart: [], // store all items in this cart

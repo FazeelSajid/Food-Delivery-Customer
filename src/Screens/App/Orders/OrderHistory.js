@@ -42,6 +42,7 @@ import {
   getCustomerCart,
   updateCartItemQuantity,
 } from '../../../utils/helpers/cartapis';
+import PopUp from '../../../components/Popup/PopUp';
 
 const OrderHistory = ({navigation, route}) => {
   const dispatch = useDispatch();
@@ -51,7 +52,7 @@ const OrderHistory = ({navigation, route}) => {
   const ref_RBSheetResClosed = useRef();
 
   const ref_RBSheetSuccess = useRef();
-
+  const {customer_id, showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store)
   const [isSearch, setIsSearch] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,7 +62,7 @@ const OrderHistory = ({navigation, route}) => {
 
   const [restaurant_timings, setRestaurant_timings] = useState('');
   // const customer_id = useSelector(store => store.store.customer_id)
-  const customer_id = 201730
+  // const customer_id = 201730
 
 
   const [data, setData] = useState([]); 
@@ -117,7 +118,7 @@ const OrderHistory = ({navigation, route}) => {
   ) => {
     setLoading(true);
     // let customer_id = await AsyncStorage.getItem('customer_id');
-    let cart = await getCustomerCart(customer_id);
+    let cart = await getCustomerCart(customer_id,dispatch);
 
     if (count == 0) {
       showAlert('Please select quantity');
@@ -133,7 +134,7 @@ const OrderHistory = ({navigation, route}) => {
 
       console.log('data   :  ', data);
 
-      await addItemToCart(data)
+      await addItemToCart(data, dispatch)
         .then(response => {
           console.log('response  addItemToCart ', response);
           if (response?.status == true) {
@@ -220,7 +221,7 @@ const OrderHistory = ({navigation, route}) => {
     } else {
       setLoading(true);
       // console.log('order detail   : ', item?.cart_items_Data);
-      await clearCartItems();
+      // await clearCartItems();
       dispatch(setCartRestaurantId(null));
 
       //my_cart
@@ -328,6 +329,7 @@ const OrderHistory = ({navigation, route}) => {
   return (
     <View style={{flex: 1, backgroundColor: Colors.White}}>
       <Loader loading={loading} />
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView refreshControl={ 
          <RefreshControl
             colors={[Colors.Orange, Colors.OrangeLight]}

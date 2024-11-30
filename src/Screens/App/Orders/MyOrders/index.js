@@ -24,6 +24,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {setAllOrders} from '../../../../redux/OrderSlice';
 import Loader from '../../../../components/Loader';
 import {useFocusEffect} from '@react-navigation/native';
+import PopUp from '../../../../components/Popup/PopUp';
 
 const MyOrders = () => {
   const dispatch = useDispatch();
@@ -32,7 +33,7 @@ const MyOrders = () => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const customer_id = useSelector(store => store.store.customer_id)
+  const { showPopUp, popUpColor, PopUpMesage } = useSelector(store => store.store)
 
   // console.log(customer_id);
   
@@ -90,7 +91,8 @@ const MyOrders = () => {
 
   return (
     <View style={{flex: 1, backgroundColor: Colors.White}}>
-      <Loader loading={loading} />
+      {/* <Loader loading={loading} /> */}
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <MenuHeader title={'My Orders'} />
       {/* <ScrollView
         refreshControl={

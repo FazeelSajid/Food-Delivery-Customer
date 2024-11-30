@@ -1,16 +1,30 @@
 // helpers.js
 
 import messaging from '@react-native-firebase/messaging';
-import {Alert, View} from 'react-native';
+import { Alert, View } from 'react-native';
 
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 import Snackbar from 'react-native-snackbar';
 import api from '../constants/api';
 import moment from 'moment';
 import { BASE_URL } from './globalVariables';
 import { Fonts } from '../constants';
+import { setPopUpColor, setPopUpMesage, setShowPopUp } from '../redux/AuthSlice';
 
+
+
+
+export const handlePopup = (dispatch, message, color) => {
+  dispatch(setShowPopUp(true));
+  dispatch(setPopUpColor(color));
+  dispatch(setPopUpMesage(message));
+  setTimeout(() => {
+    dispatch(setShowPopUp(false));
+    dispatch(setPopUpColor(''));
+    dispatch(setPopUpMesage(''));
+  }, 1000);
+};
 export const chooseImageFromCamera = async () => {
   return new Promise(async (resolve, reject) => {
     var options = {
@@ -50,7 +64,45 @@ export const chooseImageFromCamera = async () => {
       });
   });
 };
+export const chooseImageFromGallery = async () => {
+  return new Promise(async (resolve, reject) => {
+    var options = {
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+      maxWidth: 500,
+      maxHeight: 500,
+      quality: 0.5,
+    };
 
+    await launchImageLibrary(options)
+      .then(async res => {
+        console.log('response :  ', res);
+
+        if (res.didCancel) {
+          console.log('User cancelled image picker');
+          resolve(false);
+        } else if (res.error) {
+          console.log('ImagePicker Error: ', res.error);
+          resolve(false);
+        } else if (res.customButton) {
+          console.log('User tapped custom button: ', res.customButton);
+          resolve(false);
+        } else {
+          let image = {
+            path: res.assets[0].uri,
+            mime: res.assets[0].type,
+            name: res.assets[0].fileName,
+          };
+          resolve(image);
+        }
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+};
 //
 export const chooseVideoFromCamera = async () => {
   return new Promise(async (resolve, reject) => {
@@ -100,7 +152,7 @@ export const getUserFcmToken = async () => {
   return new Promise(async (resolve, reject) => {
     try {
       const authStatus = await messaging().requestPermission();
-      console.log(authStatus, 'authStatus');
+      // console.log(authStatus, 'authStatus');
 
       const enabled =
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -132,7 +184,7 @@ export const getUserFcmToken = async () => {
 ///
 export const showAlert = (message, bgColor, numberOfLines) => {
 
- 
+
   Snackbar.show({
     text: message,
     duration: Snackbar.LENGTH_SHORT,
@@ -140,7 +192,7 @@ export const showAlert = (message, bgColor, numberOfLines) => {
     numberOfLines: numberOfLines ? numberOfLines : 2,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     top: 0,
-    marginBottom:20,
+    marginBottom: 20,
   });
 };
 
@@ -167,7 +219,7 @@ export const uploadImage = image => {
     //   name: imageName,
     //   type: imageType,
     // };
-    formData.append('file_type', 'image');
+    // formData.append('file_type', 'image');
     formData.append('image', image);
     await fetch(api.upload_image, {
       method: 'POST',
@@ -191,24 +243,26 @@ export const uploadImage = image => {
 
 export const getRestaurantDetail = id => {
   // return new Promise((resolve, reject) => {
-    console.log(api.get_restaurant_detail + id);
-    
-    try {
-      fetch(api.get_restaurant_detail + id)
-        .then(response => response.json())
-        .then(response => {
-          // resolve(response?.result);
-          return response?.result
-        })
-        .catch(err => {
-          console.log('error : ', err);
-          return ''
-        });
-    } catch (error) {
-      // resolve('');
-    }
+  // console.log(api.get_restaurant_detail + id);
+
+  try {
+    fetch(api.get_restaurant_detail + id)
+      .then(response => response.json())
+      .then(response => {
+        // resolve(response?.result);
+        return response?.result
+      })
+      .catch(err => {
+        console.log('error : ', err);
+        return ''
+      });
+  } catch (error) {
+    // resolve('');
+  }
   // });
 };
+
+
 
 export const getCustomerDetail = id => {
   return new Promise((resolve, reject) => {
@@ -218,7 +272,7 @@ export const getCustomerDetail = id => {
         .then(response => {
           resolve(response?.result);
           // console.log(response, 'customer');
-          
+
         })
         .catch(err => {
           console.log('error : ', err);
@@ -311,12 +365,12 @@ export const checkRestaurantTimings = id => {
             const restaurantOpenTime = new Date(open).getTime();
             const restaurantCloseTime = new Date(close).getTime();
 
-            console.log({currentTime, restaurantOpenTime, restaurantCloseTime});
+            console.log({ currentTime, restaurantOpenTime, restaurantCloseTime });
 
             let status =
               currentTime >= restaurantOpenTime &&
               currentTime <= restaurantCloseTime;
-            console.log({status});
+            console.log({ status });
             let obj = {
               isClosed: !status,
               closed_till: moment(close).format('h:mm a'),
@@ -391,32 +445,23 @@ export const getLocationById = id => {
 
 
 
-export const fetchApis = async (endPoint,method,setLoading, header, payload  ) => {
-  // const request = `${BASE_URL}${endPoint}`;
+export const fetchApis = async (endPoint, method, setLoading, header, payload, dispatch) => {
+
   setLoading(true)
-
-
-
-
-  // console.log('Fetching apis...', endPoint, method);
-  
-
-
-
-
   try {
     const response = await fetch(endPoint, {
       method: method,
       headers: header,
-      body: payload  // Convert payload to JSON string
+      body: JSON.stringify(payload)  // Convert payload to JSON string
     });
-    // console.log('Fetched apis...', response);
+    // console.log('Fetched apis...',  response.json());
     // Check if the response is OK (status code 200 or 201)
     if (response.status === 200) {
-      
+
       // Successfully processed request
       const jsonResponse = await response.json();
-      setLoading(false)
+      setLoading(false);
+      console.log('Fetched APIs:', jsonResponse); // Correctly log the response
 
       // console.log(jsonResponse.Response.apiResponse, 'jsonResponse');
 
@@ -425,50 +470,56 @@ export const fetchApis = async (endPoint,method,setLoading, header, payload  ) =
       const errorData = await response.json();
       setLoading(false)
       showAlert(`Bad Request: ${errorData.message || 'Invalid data sent.'}`);
-      console.log( errorData.message);
-      
-      
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+      console.log(errorData.message);
+
+
     } else if (response.status === 401) {
       // Unauthorized - invalid or missing token
       setLoading(false)
-      showAlert( 'Unauthorized: Invalid or missing token.');
-      console.log('fetchapi func, Unauthorized: Invalid or missing token');
-      
+      // showAlert( 'Unauthorized: Invalid or missing token.');s
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+      // console.log('fetchapi func, Unauthorized: Invalid or missing token');
+
       throw new Error('Unauthorized: Invalid or missing token.');
     } else if (response.status === 403) {
-      showAlert('Forbidden: You do not have permission to perform this action.');
-      console.log('fetchapi func, Forbidden: You do not have permission to perform this action.' )
+      // showAlert('Forbidden: You do not have permission to perform this action.');
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+      // console.log('fetchapi func, Forbidden: You do not have permission to perform this action.' )
       setLoading(false)
-      
+
       // Forbidden - you do not have permission
-      // throw new Error('Forbidden: You do not have permission to perform this action.');
+      // throw new Error('Forbidden: You do not have permission to perform this actio n.');
     } else if (response.status === 404) {
-      console.log(endPoint);
-      
-      showAlert( 'Not Found: The requested resource was not found.');
+      // console.log(endPoint);
+
+      // showAlert( 'Not Found: The requested resource was not found.');
       setLoading(false)
-      console.log('fetchapi func, Not Found: The requested resource was not found.');
-      console.log(response.payload);
-      
-      
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+
+      // console.log('fetchapi func, Not Found: The requested resource was not found.');
+      // console.log(response.payload);
+
+
       // Not Found - invalid URL
       // throw new Error('Not Found: The requested resource was not found.');
     } else if (response.status === 500) {
-      showAlert( 'Server Error: An error occurred on the server.');
+      // showAlert( 'Server Error: An error occurred on the server.');
       setLoading(false)
-      console.log('Server Error: An error occurred on the server.');
-      
+      // console.log('Server Error: An error occurred on the server.');
+      handlePopup(dispatch, 'Something is went wrong', 'red')
       // Internal Server Error - server-side error
       // throw new Error('Server Error: An error occurred on the server.');
     } else {
-      showAlert( `Unexpected error: ${response.statusText}`);
+      // showAlert( `Unexpected error: ${response.statusText}`);
+      handlePopup(dispatch, 'Something is went wrong', 'red')
       setLoading(false)
       // Handle other status codes
       // throw new Error(`Unexpected error: ${response.statusText}`);
       console.log(`Unexpected error: ${response.statusText}`);
-      
+
     }
-    setLoading(false)
+    // setLoading(false)
 
 
     // setTimeout(() => {
@@ -480,25 +531,128 @@ export const fetchApis = async (endPoint,method,setLoading, header, payload  ) =
     // }, 1000);z
 
   } catch (error) {
-    console.log(error instanceof TypeError);
+    // console.log(error instanceof TypeError);
+    handlePopup(dispatch, 'Something is went wrong', 'red')
+    setLoading(false)
 
-    if (error instanceof TypeError  && error.TypeError === 'Network request failed') {
-    console.log(error, 'error');
 
-      showAlert( `Please check your internet connection.`);
+    if (error instanceof TypeError && error.TypeError === 'Network request failed') {
+      console.log(error, 'error');
+
+      showAlert(`Please check your internet connection.`);
       setLoading(false)
 
-      // setTimeout(() => {
-      //   showAlert({
-      //     isLoading: false,
-      //     errorPop: false,
-      //     errorPopMsg: ``
-      //   });
-      // }, 1000);
+
       return
     }
 
 
+  }
+  // finally{
+  //   setLoading(false)
+  // }
+
+};
+export const fetchApisGet = async (endPoint, setLoading, dispatch) => {
+
+  setLoading(true)
+  try {
+    const response = await fetch(endPoint, {
+      method: "GET",
+    });
+    // console.log('Fetched apis...', response);
+    // Check if the response is OK (status code 200 or 201)
+    if (response.status === 200) {
+
+      // Successfully processed request
+      const jsonResponse = await response.json();
+      setLoading(false)
+
+      // console.log(jsonResponse.Response.apiResponse, 'jsonResponse');
+
+      return jsonResponse;
+    } else if (response.status === 400) {
+      const errorData = await response.json();
+      setLoading(false)
+      showAlert(`Bad Request: ${errorData.message || 'Invalid data sent.'}`);
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+      console.log(errorData.message);
+
+
+    } else if (response.status === 401) {
+      // Unauthorized - invalid or missing token
+      setLoading(false)
+      // showAlert( 'Unauthorized: Invalid or missing token.');s
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+      // console.log('fetchapi func, Unauthorized: Invalid or missing token');
+
+      throw new Error('Unauthorized: Invalid or missing token.');
+    } else if (response.status === 403) {
+      // showAlert('Forbidden: You do not have permission to perform this action.');
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+      // console.log('fetchapi func, Forbidden: You do not have permission to perform this action.' )
+      setLoading(false)
+
+      // Forbidden - you do not have permission
+      // throw new Error('Forbidden: You do not have permission to perform this actio n.');
+    } else if (response.status === 404) {
+      // console.log(endPoint);
+
+      // showAlert( 'Not Found: The requested resource was not found.');
+      setLoading(false)
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+
+      // console.log('fetchapi func, Not Found: The requested resource was not found.');
+      // console.log(response.payload);
+
+
+      // Not Found - invalid URL
+      // throw new Error('Not Found: The requested resource was not found.');
+    } else if (response.status === 500) {
+      // showAlert( 'Server Error: An error occurred on the server.');
+      setLoading(false)
+      // console.log('Server Error: An error occurred on the server.');
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+      // Internal Server Error - server-side error
+      // throw new Error('Server Error: An error occurred on the server.');
+    } else {
+      // showAlert( `Unexpected error: ${response.statusText}`);
+      handlePopup(dispatch, 'Something is went wrong', 'red')
+      setLoading(false)
+      // Handle other status codes
+      // throw new Error(`Unexpected error: ${response.statusText}`);
+      console.log(`Unexpected error: ${response.statusText}`);
+
+    }
+    // setLoading(false)
+
+
+    // setTimeout(() => {
+    //   showAlert({
+    //     isLoading: false,
+    //     errorPop: false,
+    //     errorPopMsg: ``
+    //   });
+    // }, 1000);z
+
+  } catch (error) {
+    // console.log(error instanceof TypeError);
+    handlePopup(dispatch, 'Something is went wrong', 'red')
+
+    if (error instanceof TypeError && error.TypeError === 'Network request failed') {
+      console.log(error, 'error');
+
+      showAlert(`Please check your internet connection.`);
+      setLoading(false)
+
+
+      return
+    }
+
+
+  }
+  finally{
+    setLoading(false)
   }
 
 };

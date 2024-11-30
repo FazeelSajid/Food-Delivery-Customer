@@ -31,16 +31,15 @@ import LogoutIcon from '../Assets/svg/logout.svg';
 //drawer svgs
 import WalletIcon from '../Assets/svg/wallet.svg';
 // import ChatIcon from '../Assets/svg/chat.svg';
-import Heart from '../Assets/svg/heart.svg';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import ScanBarCode from '../Assets/svg/scanbarcode.svg';
-
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
   DrawerItem,
   getDrawerStatusFromState,
 } from '@react-navigation/drawer';
-import { Colors, Images } from '../constants';
+import { Colors, Icons, Images } from '../constants';
 import { useNavigation } from '@react-navigation/native';
 import Favorites from '../Screens/App/Favorites';
 import Chat from '../Screens/App/Chat';
@@ -97,6 +96,10 @@ import { resetState } from '../redux/AuthSlice';
 import ManageAddress from '../Screens/App/ManageAddress/ManageAddress';
 import UpdatePassord from '../Screens/App/UpdatePassword/UpdatePassord';
 import Invite from '../Screens/App/Invite/Invite';
+import SeeAllItems from '../Screens/App/SeeAllItems/SeeAlItems';
+import Messages from '../Screens/App/Chat/Messages';
+import ImageUpload from '../Screens/App/Chat/ImageUpload';
+import TrackOrder from '../Screens/App/Orders/TrackOrder';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -230,12 +233,13 @@ const CustomDrawerContent = props => {
               }}
               icon={focused => <WalletIcon />}
             />
-            {/* <DrawerItem
+            <DrawerItem
               label="Chats"
               // labelStyle={{ color: 'red'}}
               onPress={() => navigation.navigate('Chat')}
-              icon={focused => <ChatIcon />}
-            /> */}
+              icon={focused => <Icons.Chat />}
+              
+            />
 
             <DrawerItem
               label="My Favorites"
@@ -247,7 +251,7 @@ const CustomDrawerContent = props => {
                   navigation.navigate('Favorites');
                 }
               }}
-              icon={focused => <Heart />}
+              icon={focused =>  <AntDesign name="hearto" size={24} color={Colors.darkTextColor} />}
             />
             {/* <DrawerItem
               label="Order History"
@@ -387,6 +391,7 @@ function Router() {
       <Stack.Screen name="NearByDealsDetails" component={NearByDealsDetails} />
       <Stack.Screen name="NearByRestaurants" component={NearByRestaurants} />
       <Stack.Screen name="RestaurantDetails" component={RestaurantDetails} />
+      <Stack.Screen name="ImageUpload" component={ImageUpload} />
 
       <Stack.Screen
         name="RestaurantAllDetails"
@@ -414,6 +419,7 @@ function Router() {
       <Stack.Screen name="Languages" component={Languages} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
       <Stack.Screen name="TermsAndCondition" component={TermsAndCondition} />
+
       <Stack.Screen
         name="SelectPaymentMethod"
         component={SelectPaymentMethod}
@@ -426,7 +432,8 @@ function Router() {
 
       {/* Drawer screens */}
       <Stack.Screen name="Wallet" component={Wallet} />
-      <Stack.Screen name="Chat" component={Chat} />
+      <Stack.Screen name="SeeAllitems" component={SeeAllItems} />
+      <Stack.Screen name="Chat" component={Messages} />
       <Stack.Screen name="Favorites" component={Favorites} />
       <Stack.Screen name="OrderHistory" component={OrderHistory} />
       <Stack.Screen name="PromoCodes" component={PromoCodes} />
@@ -434,6 +441,7 @@ function Router() {
       <Stack.Screen name="Drawer" component={DrawerNavigation} />
       <Stack.Screen name="Map" component={Map} />
       <Stack.Screen name='Invite' component={Invite} />
+      <Stack.Screen name='TrackOrder' component={TrackOrder} />
 
       <Stack.Screen name="AddComplaint" component={AddComplaint} />
       <Stack.Screen name="SetupCard" component={SetupCard} />

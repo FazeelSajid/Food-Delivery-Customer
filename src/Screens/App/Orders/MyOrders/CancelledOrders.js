@@ -12,6 +12,7 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 
 const CancelledOrders = () => {
   const orders = useSelector(store => store.order.all_orders);
@@ -33,10 +34,10 @@ const CancelledOrders = () => {
         contentContainerStyle={{flexGrow: 1,  width: '90%', alignSelf: 'center', paddingVertical: wp(2) }}
         ListHeaderComponent={() => <View style={{height: 10}} />}
         ListFooterComponent={() => <View style={{height: 10}} />}
-        ListEmptyComponent={() => <NoDataFound />}
+        ListEmptyComponent={() => <NoDataFound   text={"No Order cancelled"} textStyle={{fontSize: RFPercentage(3)}} />}
         renderItem={({item}) => {
-          let cart_item =
-            item?.cart_items_Data?.length > 0 ? item?.cart_items_Data[0] : null;
+          // let cart_item =
+          //   item?.cart_items_Data?.length > 0 ? item?.cart_items_Data[0] : null;
           return (
 
             <OrderCard item={item}  onPress={() =>

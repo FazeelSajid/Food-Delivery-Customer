@@ -29,7 +29,7 @@ const DealCard = ({isFavorite,  description, price, title, onPress, image, heart
       <View style={{paddingHorizontal: wp(3)}} >
 
       <Text style={[styles.productTitle, nameStyle]}>{title}</Text>
-      <Text style={[styles.productSubtitle, descriptionStyle]}>{description}</Text>
+      <Text style={[styles.productSubtitle, descriptionStyle]} ellipsizeMode='tail' numberOfLines={1} >{description}</Text>
 
       {/* Price and Heart Icon */}
       <View style={styles.footer}>
@@ -61,7 +61,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: hp('0.5%') },
     elevation: 2,
     // flex: 1
-    margin: wp(2)
+    margin: wp(2),
+    width: wp(60 ),
+    overflow: 'hidden'
   },
   imageContainer: {
     position: 'relative',

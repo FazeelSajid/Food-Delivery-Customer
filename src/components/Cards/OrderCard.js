@@ -10,20 +10,33 @@ import { RFPercentage } from 'react-native-responsive-fontsize';
 import { BASE_URL } from '../../utils/globalVariables';
 import moment from 'moment';
 const OrderCard = ({item, onPress }) => {
+
+    const statusStyles = {
+        out_for_delivery: { color: '#09275E', backgroundColor: '#B9D7FF', label: 'Out For Delivery',  width: wp(30), },
+        delivered: { color: '#384308', backgroundColor: '#F2FFB9', label: 'Delivered' ,  width: wp(22),},
+        cancelled: { color: '#88260D', backgroundColor: '#FEB6B6', label: 'Cancelled',  width: wp(22), },
+        placed: { color: '#5E3A09', backgroundColor: '#FFD7B0', label: 'Preparing',  width: wp(20), },
+        pending: { color: '#5E3A09', backgroundColor: '#FFD7B0', label: 'Pending', width: wp(18), },
+        ready_to_deliver: { color: '#09275E', backgroundColor: '#B9D7FF', label: 'Ready To Deliver',  width: wp(30), }
+    };
+
+
+    const currentStatus = statusStyles[item?.order_status] || { color: '#5E3A09', backgroundColor: '#FFD7B0', label: '',  width: wp(20), };
+
+// console.log(item);
+
+    // console.log(item.cart_items_Data[0].itemData.images[0]);
     
     return (
         <TouchableOpacity onPress={onPress} style={styles.container} >
-         <Text 
-            style={[
-                styles.statusTxt,
-            item?.order_status === 'out_for_delivery'? {color: '#09275E', backgroundColor: '#B9D7FF'} : item?.order_status === 'delivered'? {color: '#384308', backgroundColor: '#F2FFB9'} :item?.order_status === 'cancelled'? {color: '#88260D', backgroundColor: '#FEB6B6' } : {color: '#5E3A09', backgroundColor: '#FFD7B0'}
-            ]}
-            >
-                         {item?.order_status === 'out_for_delivery'? 'Out For Delivery' : item?.order_status === 'placed' ? 'Preparing': item?.order_status === 'delivered'? "Delivered" : item?.order_status === 'cancelled'? 'Cancelled' : item?.order_status === 'pending'? 'Pending': ''}
+       <Text 
+    style={[styles.statusTxt, { color: currentStatus.color, backgroundColor: currentStatus.backgroundColor, width: currentStatus.width  }]}
+>
+    {currentStatus.label}
 </Text>
             <ItemSeparator width={'100%'} style={styles.ItemSeparator} />
             <View style={styles.contentContainer} >
-                <Image source={{ uri: BASE_URL + 'images/1729754235671--Greek-Salad.webp' }} style={{
+                <Image source={{ uri: BASE_URL + item.cart_items_Data[0]?.itemData?.images[0] }} style={{
                     height: 50,
                     width: 50,
                     borderRadius: wp(3),

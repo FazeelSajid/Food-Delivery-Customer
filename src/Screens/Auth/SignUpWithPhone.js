@@ -25,8 +25,9 @@ import {
   setJoinAsGuest,
   setSignUpWith
 } from '../../redux/AuthSlice';
-import {getUserFcmToken, showAlert} from '../../utils/helpers';
 import api from '../../constants/api';
+import {getUserFcmToken, handlePopup, showAlert} from '../../utils/helpers';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CInputWithCountryCode from '../../components/TextInput/CInputWithCountryCode';
 import {
@@ -36,10 +37,11 @@ import {
 } from '@react-native-google-signin/google-signin';
 import { useDispatch, useSelector } from 'react-redux';
 import Google from '../../Assets/svg/Googlee.svg';
+import PopUp from '../../components/Popup/PopUp';
 
 const SignUpWithPhone = ({navigation, route}) => {
   const dispatch = useDispatch();
-
+  const {showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store);
   const keyboardHeight = useKeyboard();
   const scrollViewRef = useRef();
   const { signUpWith } = useSelector(store => store.store)
@@ -51,10 +53,10 @@ const SignUpWithPhone = ({navigation, route}) => {
   
 
 
-  useEffect(() => {
-    // scrollViewRef.current?.scrollToEnd();
-    scrollViewRef.current?.scrollTo({y: 180});
-  }, [keyboardHeight]);
+  // useEffect(() => {
+  //   // scrollViewRef.current?.scrollToEnd();
+  //   scrollViewRef.current?.scrollTo({y: 180});
+  // }, [keyboardHeight]);
 
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -89,59 +91,60 @@ const SignUpWithPhone = ({navigation, route}) => {
     setUserEmail('');
     setPhone_no('');
     setPassword('');
+    setUserName('');
   };
 
   const validate = () => {
     // Email Validation
     if (userEmail || userEmail.length > 0) {
       if (!/\S+@\S+\.\S+/.test(userEmail)) {
-        showAlert('Please Enter a valid email address');
+        handlePopup(dispatch, 'Please Enter a valid email address','red')
         return false;
       }
     }
   
     // Country Code Validation
     if (!countryCode || countryCode.length === 0) {
-      showAlert('Please Enter Country');
+      handlePopup(dispatch,'Please Enter Country','red');
       return false;
     }
   
     // Password Validation
     if (!password || password.length === 0) {
-      showAlert('Please Enter Password');
+      handlePopup(dispatch,'Please Enter Password', 'red')
       return false;
     } else if (password.length < 8) {
-      showAlert('Password must be at least 8 characters long');
+      handlePopup(dispatch, 'Password must be at least 8 characters long', 'red')
       return false;
     } else if (!/[A-Z]/.test(password)) {
-      showAlert('Password must include at least one uppercase letter');
+      handlePopup(dispatch,'Password must include at least one uppercase letter','red')
       return false;
     } else if (!/[a-z]/.test(password)) {
-      showAlert('Password must include at least one lowercase letter');
+      handlePopup(dispatch, 'Password must include at least one lowercase letter', 'red')
       return false;
     } else if (!/\d/.test(password)) {
-      showAlert('Password must include at least one number');
+      handlePopup(dispatch, 'Password must include at least one number', 'red')
       return false;
     } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      showAlert('Password must include at least one special character');
+      handlePopup(dispatch, 'Password must include at least one special character', 'red')
       return false;
     }
   
     // Username Validation
     if (!userName || userName.length === 0) {
-      showAlert('Please Enter username');
+      handlePopup(dispatch, 'Please Enter username', 'red')
       return false;
     } else if (userName.length < 3) {
-      showAlert('Username must be at least 3 characters long');
+      handlePopup(dispatch, 'Username must be at least 3 characters long','red')
       return false;
     }
   
     // Phone Validation
     if (!phone_no || phone_no.length === 0) {
-      showAlert('Please Enter phone number');
+      handlePopup(dispatch, 'Please Enter phone number', 'red')
       return false;
     } else if (!/^\d{10,15}$/.test(phone_no)) {
-      showAlert('Please Enter a valid phone number (10-15 digits)');
+      handlePopup(dispatch, 'Please Enter a valid phone number (10-15 digits)', 'red')
       return false;
     }
   
@@ -155,10 +158,6 @@ const SignUpWithPhone = ({navigation, route}) => {
   const handleSignUp = async () => {
     // navigation?.navigate('Verification')
         // console.log({userEmail, phone_no, password, fcm_token, userName});
-  
-      
-      
-
       if (validate()) {
         setLoading(true);
         let fcm_token = await getUserFcmToken();
@@ -170,6 +169,7 @@ const SignUpWithPhone = ({navigation, route}) => {
           signup_type: "phone_no",
           phone_no: countryCode + phone_no,
           fcm_token: fcm_token,
+          rest_ID: "res_4074614",
         };
         console.log('data  :  ', data);
 
@@ -184,10 +184,9 @@ const SignUpWithPhone = ({navigation, route}) => {
           .then(async response => {
             console.log('response  :  ', response);
             if (response?.status == false) {
-              showAlert(response?.message);
-              // showAlert('Invalid Credentials');
+              handlePopup(dispatch, response?.message, 'red')
             } else {
-              showAlert(response.message, 'green');
+              handlePopup(dispatch, response?.message, 'green')
               let wallet = await createCustomerWallet(
                 response?.result?.customer_id,
               );
@@ -203,7 +202,7 @@ const SignUpWithPhone = ({navigation, route}) => {
           })
           .catch(err => {
             console.log('Error in Login :  ', err);
-            showAlert('Something went wrong!');
+            handlePopup(dispatch,'Something went wrong!', 'red')
           })
           .finally(() => {
             setLoading(false);
@@ -288,10 +287,8 @@ const SignUpWithPhone = ({navigation, route}) => {
           .then(async response => {
             console.log('response  :  ', response);
             if (response?.status == false) {
-              showAlert(response?.message);
-              // showAlert('Invalid Credentials');
+              handlePopup(dispatch,response?.message, 'red')
             } else {
-              // showAlert(response.message, 'green');
               let wallet = await createCustomerWallet(
                 response?.result?.customer_id,
               );
@@ -332,7 +329,7 @@ const SignUpWithPhone = ({navigation, route}) => {
           })
           .catch(err => {
             console.log('Error in Login :  ', err);
-            showAlert('Something went wrong!');
+            handlePopup(dispatch,'Something went wrong!', 'red')
           })
           .finally(() => {
             setLoading(false);
@@ -347,7 +344,8 @@ const SignUpWithPhone = ({navigation, route}) => {
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         //alert('Play Services Not Available or Outdated');
       } else {
-        showAlert('Something went wrong!');
+        handlePopup(dispatch,'Something went wrong!', 'red')
+
       }
     }
   };
@@ -355,6 +353,7 @@ const SignUpWithPhone = ({navigation, route}) => {
   return (
     <View style={STYLE.container}>
       <StatusBar translucent={true} backgroundColor={'transparent'} />
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={{flexGrow: 1}}

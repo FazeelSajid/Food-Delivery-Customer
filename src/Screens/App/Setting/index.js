@@ -18,15 +18,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Loader from '../../../components/Loader';
 import api from '../../../constants/api';
-import { getCustomerDetail, showAlert } from '../../../utils/helpers';
+import { getCustomerDetail, handlePopup, showAlert } from '../../../utils/helpers';
 import RBSheetGuestUser from '../../../components/BottomSheet/RBSheetGuestUser';
 import { useFocusEffect } from '@react-navigation/native';
 import LogoutModalSvg from '../../../Assets/svg/logoutModalSvg.svg';
 import DeleteModalSvg from '../../../Assets/svg/DeleteModalSvg.svg';
 import { resetState } from '../../../redux/AuthSlice';
+import PopUp from '../../../components/Popup/PopUp';
 
 const Setting = ({ navigation, route }) => {
-  const { join_as_guest, customer_id } = useSelector(store => store.store);
+  const { join_as_guest, customer_id, showPopUp, popUpColor, PopUpMesage } = useSelector(store => store.store);
   const ref_RBSheetGuestUser = useRef(null);
   const dispatch = useDispatch();
 
@@ -97,13 +98,14 @@ const Setting = ({ navigation, route }) => {
         console.log('response  :  ', response);
         if (response?.status == true) {
           setIsNotificationEnable(status);
+          // handlePopup(dispatch,response?.message, 'red');
         } else {
-          showAlert(response?.message);
+          handlePopup(dispatch,response?.message, 'red');
         }
       })
       .catch(err => {
         console.log('Error in accept/reject order :  ', err);
-        showAlert('Something went wrong');
+        handlePopup(dispatch,'Something went wrong', 'red');
       })
       .finally(() => {
         setLoading(false);
@@ -125,7 +127,7 @@ const Setting = ({ navigation, route }) => {
         ref_RBSheetDELETE?.current?.close();
         
       }else{
-        showAlert(response?.message);
+        handlePopup(dispatch,response?.message,'red');
       }
     } )
   }
@@ -154,12 +156,12 @@ const Setting = ({ navigation, route }) => {
         if (response?.status == true) {
           setIsEmailEnable(status);
         } else {
-          showAlert(response?.message);
+          handlePopup(dispatch,response?.message,'red');
         }
       })
       .catch(err => {
         console.log('Error in handleOfferByEmailStatusChange :  ', err);
-        showAlert('Something went wrong');
+        handlePopup(dispatch,'Something went wrong', 'red');
       })
       .finally(() => {
         setLoading(false);
@@ -221,6 +223,7 @@ const Setting = ({ navigation, route }) => {
       ) : (
         <>
           <Loader loading={loading} />
+          {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
           <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
             <MenuHeader
               title={'Settings'}

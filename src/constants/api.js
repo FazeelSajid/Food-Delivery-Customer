@@ -2,7 +2,7 @@ import {BASE_URL} from '../utils/globalVariables';
 
 const api = {
   //universal apis
-  upload_image: BASE_URL + 'fileUpload/upload',
+  upload_image: BASE_URL + 'uploadImage',
   send_email: BASE_URL + 'emailVerification/sendEmail',
   verify_otp: BASE_URL + 'emailVerification/verifyOTP',
 
@@ -81,6 +81,7 @@ const api = {
 
   //promocodes
   get_all_promocodes: BASE_URL + 'promoCode/getAllPromoCodes?page=1&limit=10',
+  // get_all_promocodes: BASE_URL + 'promoCode/getAllPromoCodes?page=1&limit=10&restaurant_id=res_7487041',
   get_all_promocodes_of_restaurant:
     BASE_URL + 'promoCode/AllPromoCodesOfRestaurant?restaurant_id=',
   accept_promocode: BASE_URL + 'promoCode/approveRequest',
@@ -136,6 +137,7 @@ const api = {
     BASE_URL + 'wallet/addPayment_customer_wallet',
 
   make_order_payment_for_customer: BASE_URL + 'wallet/makeCustomerOrderPayment',
+  getCustomerTransactionHistory: BASE_URL + 'wallet/getCustomerTransactions?customer_id=',
 
   // refunded orders
   get_refunded_orders_of_customer:

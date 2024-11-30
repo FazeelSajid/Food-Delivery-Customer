@@ -223,7 +223,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
       let customer_id = await AsyncStorage.getItem('customer_id');
       let cart = await getCustomerCart(customer_id);
 
-      removeItemFromCart(cart?.cart_id, item?.item_id)
+      removeItemFromCart(cart?.cart_id, item?.item_id, dispatch)
         .then(response => {
           if (response?.status == true) {
             const newData = itemsList?.map(e => {
@@ -294,7 +294,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
         quantity: newQuantity,
       };
       console.log({newQuantity});
-      await updateCartItemQuantity(obj);
+      await updateCartItemQuantity(obj, dispatch);
       // also update quantity in redux
       const newData1 = my_cart?.map(e => {
         if (e?.item_id == item?.item_id) {
@@ -343,7 +343,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
         cart_item_id: filter[0]?.cart_item_id,
         quantity: filter[0]?.quantity - 1,
       };
-      await updateCartItemQuantity(obj);
+      await updateCartItemQuantity(obj, dispatch);
       // also update quantity in redux
       const newData1 = my_cart?.map(item => {
         if (item?.item_id == route?.params?.id) {
@@ -375,7 +375,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
       quantity: 1,
     };
 
-    await addItemToCart(data)
+    await addItemToCart(data, dispatch)
       .then(response => {
         if (response?.status == true) {
           // navigation?.navigate('MyCart');
