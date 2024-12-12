@@ -639,14 +639,14 @@ console.log(my_cart);
 
   return (
     <View style={styles.container}>
-      <Loader loading={fetching } bgColor={Colors.White} />
+      <Loader loading={fetching } bgColor={Colors.secondary_color} />
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
      <ScrollView
         contentContainerStyle={{ flexGrow: 1, }}>
            {
         itemDetail ?    
-          <View style={{flexGrow: 1, backgroundColor: Colors.Orange}} > 
-          <StatusBar backgroundColor={loading ? Colors.White :Colors.Orange} barStyle={'light-content'} />
+          <View style={{flexGrow: 1, backgroundColor: Colors.primary_color}} > 
+          <StatusBar backgroundColor={loading ? Colors.secondary_color :Colors.primary_color} barStyle={'light-content'} />
         <StackHeader
           enableStatusBar={false}
           titleColor={'white'}
@@ -762,7 +762,7 @@ console.log(my_cart);
                   <View style={styles.variationContainer} >
                     <TouchableOpacity onPress={showBtmSheet}  style={[styles.rowViewSB, {alignItems: 'center'}]} >
                       <Text style={styles.sizeText} >Variations</Text>
-                      <Ionicons name={'chevron-down'} size={19} color={Colors.Orange} />
+                      <Ionicons name={'chevron-down'} size={19} color={Colors.primary_color} />
                     </TouchableOpacity>
                     <Text style={styles.variationName} >{selectedVariation?.variation_name}</Text>
                   </View>
@@ -851,8 +851,8 @@ console.log(my_cart);
         : <View style={{alignItems: 'center', justifyContent: 'center', flex:1}} >  
         <StackHeader
         enableStatusBar={false}
-        titleColor={Colors.Orange}
-        backIconColor={Colors.Orange}
+        titleColor={Colors.primary_color}
+        backIconColor={Colors.primary_color}
         title={'Details'}
       /><NoDataFound text={'Oops Something went wrong'} svgHeight={hp(20)} /></View>
      }
@@ -961,8 +961,8 @@ console.log(my_cart);
               <View key={i} style={[styles.rowViewSB, {borderBottomColor: Colors.borderGray, borderBottomWidth: wp(0.3), paddingBottom: wp(1)}]}>
                 <View style={styles.rowView } > 
                 <RadioButton
-                  color={Colors.Orange} // Custom color for selected button
-                  uncheckedColor={Colors.Orange} // Color for unselected buttons
+                  color={Colors.primary_color} // Custom color for selected button
+                  uncheckedColor={Colors.primary_color} // Color for unselected buttons
                   status={selectedVariation?.variation_id === variation?.variation_id ? 'checked' : 'unchecked'}
                   onPress={() => {
                     setSelectedVariation({
@@ -995,7 +995,7 @@ export default ItemDetails;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.secondary_color,
     alignItems: 'center',
     // paddingHorizontal: 20,
   },
@@ -1007,12 +1007,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   restaurantName: {
-    color: Colors.White,
+    color: Colors.secondary_color ,
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(1.5),
   },
   itemName: {
-    color: Colors.White,
+    color: Colors.secondary_color ,
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(2.8),
     marginVertical: 5,
@@ -1065,7 +1065,7 @@ const styles = StyleSheet.create({
     width: wp(2.5),
     height: wp(2.5),
     borderRadius: wp(2.5) / 2,
-    backgroundColor: Colors.Orange,
+    backgroundColor: Colors.primary_color,
     margin: 0,
     marginHorizontal: 2,
   },
@@ -1073,9 +1073,9 @@ const styles = StyleSheet.create({
     width: wp(2.5),
     height: wp(2.5),
     borderRadius: wp(2.5) / 2,
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.secondary_color ,
     borderWidth: 1,
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
     opacity: 0.7,
     marginHorizontal: 2,
   },
@@ -1099,7 +1099,7 @@ const styles = StyleSheet.create({
   },
   priceTxt: {
 
-    color: Colors.Black,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_ExtraBold,
     fontSize: RFPercentage(2.2),
     lineHeight: 20,
@@ -1126,7 +1126,7 @@ const styles = StyleSheet.create({
 
   },
   variationContainer:{
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: wp(2),
@@ -1149,7 +1149,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.PlusJakartaSans_Medium,
   },
   sizeText:{
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.2),
     marginRight: wp(4)

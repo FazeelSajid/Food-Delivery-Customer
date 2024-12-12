@@ -22,7 +22,7 @@ const CDropDown = ({
       {heading && (
         <Text
           style={{
-            color: '#292323',
+            color: Colors.primary_text,
             fontFamily: Fonts.PlusJakartaSans_Bold,
             fontSize: RFPercentage(1.5),
             marginHorizontal: 25,
@@ -35,9 +35,7 @@ const CDropDown = ({
       <Dropdown
         style={[
           {
-            // borderWidth: 1,
-            // borderColor: '#DADADA',
-            backgroundColor: '#F5F6FA',
+            backgroundColor: Colors.secondary_color,
             borderRadius: 25,
             width: wp(90),
             alignSelf: 'center',
@@ -64,7 +62,7 @@ const CDropDown = ({
           width: wp(90),
           marginTop: 2,
           borderRadius: 25,
-          backgroundColor: '#F5F6FA',
+          backgroundColor: Colors.secondary_color,
           alignSelf: 'center',
           overFlow: 'hidden',
           padding: 10,
@@ -72,7 +70,7 @@ const CDropDown = ({
         // dropdownPosition="top"
         // mode="modal"
         placeholderStyle={{
-          color: '#979797',
+          color: Colors.secondary_text,
           //   fontWeight: '400',
           fontSize: RFPercentage(2.1),
         }}

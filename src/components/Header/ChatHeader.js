@@ -37,7 +37,7 @@ const ChatHeader = ({title, profile, rightIcon}) => {
   return (
     <View style={styles.header}>
       <StatusBar
-        backgroundColor={'#FFFFFF'}
+        backgroundColor={Colors.secondary_color}
         barStyle={'dark-content'}
         translucent={false}
       />
@@ -45,14 +45,14 @@ const ChatHeader = ({title, profile, rightIcon}) => {
         <TouchableOpacity
           onPress={() => navigation?.goBack()}
           style={styles.iconContainer}>
-          <Ionicons name={'chevron-back'} size={hp(3)} color={Colors.Orange} />
+          <Ionicons name={'chevron-back'} size={hp(3)} color={Colors.icon} />
         </TouchableOpacity>
-        <View style={{backgroundColor: Colors.Orange, paddingHorizontal: wp(4),paddingVertical: wp(2.2), borderRadius: wp(10),marginRight: wp(2) }} ><Text style={{color: Colors.White, fontSize: RFPercentage(2.4), padding: 0, fontFamily: Fonts.PlusJakartaSans_Regular}} >{getInitials(title)}</Text></View>
+        <View style={{backgroundColor: Colors.button.primary_button, paddingHorizontal: wp(4),paddingVertical: wp(2.2), borderRadius: wp(10),marginRight: wp(2) }} ><Text style={{color: Colors.button.primary_button_text, fontSize: RFPercentage(2.4), padding: 0, fontFamily: Fonts.PlusJakartaSans_Regular}} >{getInitials(title)}</Text></View>
         {/* <Avatar.Image
           // source={profile}
           source={{uri: profile}}
           size={40}
-          style={{marginHorizontal: 12, backgroundColor: Colors.Orange}}
+          style={{marginHorizontal: 12, backgroundColor: Colors.primary_color}}
         /> */}
         <View style={styles.headerTextContainer}>
           <Text style={styles.mainText}>{title}</Text>
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mainText: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.2),
   },

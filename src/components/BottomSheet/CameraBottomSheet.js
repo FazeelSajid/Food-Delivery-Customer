@@ -13,6 +13,7 @@ import { uploadImage } from '../../utils/helpers';
 
 const CameraBottomSheet = ({refRBSheet, onImagePick, obj}) => {
   const navigation = useNavigation();
+  // const Colors
 
 
   // const handleUploadProfileImage = (img) => {
@@ -148,13 +149,13 @@ const CameraBottomSheet = ({refRBSheet, onImagePick, obj}) => {
           backgroundColor: 'rgba(52, 52, 52, 0.5)',
         },
         draggableIcon: {
-          backgroundColor: Colors.White,
+          backgroundColor: Colors.secondary_color,
         },
         container: {
           borderTopLeftRadius: wp(8),
           borderTopRightRadius: wp(8),
           height: hp(25),
-          backgroundColor: Colors.White,
+          backgroundColor: Colors.secondary_color,
         },
       }}>
       <View
@@ -169,7 +170,7 @@ const CameraBottomSheet = ({refRBSheet, onImagePick, obj}) => {
           <Ionicons
             name="close"
             size={22}
-            color={'#000'}
+            color={Colors.icon}
             onPress={() => refRBSheet.current.close()}
           />
         </TouchableOpacity>
@@ -179,7 +180,7 @@ const CameraBottomSheet = ({refRBSheet, onImagePick, obj}) => {
         style={{
           justifyContent: 'center',
           marginTop: hp(3),
-          backgroundColor: Colors.White,
+          backgroundColor: Colors.secondary_color,
         }}>
         <TouchableOpacity
           onPress={() => {
@@ -187,7 +188,7 @@ const CameraBottomSheet = ({refRBSheet, onImagePick, obj}) => {
             refRBSheet.current.close();
           }}
           style={styles.modaltextview}>
-          <Ionicons name="camera" size={25} color={'#000'} />
+          <Ionicons name="camera" size={25} color={Colors.icon}/>
           <Text style={styles.optiontext}>Upload from Camera</Text>
         </TouchableOpacity>
         <View
@@ -205,7 +206,7 @@ const CameraBottomSheet = ({refRBSheet, onImagePick, obj}) => {
             choosePhotoFromLibrary();
           }}
           style={styles.modaltextview}>
-          <Ionicons name="image" size={25} color={'#000'} />
+          <Ionicons name="image" size={25} color={Colors.icon} />
           <Text style={styles.optiontext}>Upload from Gallery</Text>
         </TouchableOpacity>
       </View>
@@ -217,20 +218,20 @@ export default CameraBottomSheet;
 
 const styles = StyleSheet.create({
   bottomtext: {
-    color: 'black',
+    color: Colors.primary_text,
     textAlign: 'center',
     fontFamily: Fonts.Inter_Bold,
     fontSize: hp(3),
   },
   optiontext: {
     fontSize: hp(1.7),
-    color: '#000',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     marginLeft: wp(4),
   },
   maintext: {
     fontSize: hp(2),
-    color: '#000',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
   },
   modaltextview: {

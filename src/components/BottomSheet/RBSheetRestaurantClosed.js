@@ -14,7 +14,7 @@ import {
 } from 'react-native-responsive-screen';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
-import {Fonts, Images} from '../../constants';
+import {Fonts, Images, Colors} from '../../constants';
 import Lottie from 'lottie-react-native';
 import CButton from '../Buttons/CButton';
 
@@ -78,7 +78,7 @@ const RBSheetRestaurantClosed = ({
             {/* {description && ( */}
             <Text
               style={{
-                color: '#595959',
+                color: Colors.secondary_text,
                 fontSize: RFPercentage(2),
                 fontFamily: Fonts.PlusJakartaSans_Regular,
                 textAlign: 'center',

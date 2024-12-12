@@ -42,19 +42,19 @@ const OrdersCard = ({
       <View style={styles.textContainer}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.nameText}>{description}</Text>
-        {/* <Text style={{...styles.title, color: Colors.Orange}}>${price}</Text> */}
+        {/* <Text style={{...styles.title, color: Colors.primary_color}}>${price}</Text> */}
         {/* <View style={styles.rowView}>
           <Text
             style={{
               ...styles.title,
-              color: Colors.Orange,
+              color: Colors.primary_color,
               marginBottom: 7,
               marginRight: 3,
               fontSize: RFPercentage(1.8),
             }}>
             $
           </Text>
-          <Text style={{...styles.title, color: Colors.Orange}}>{price}</Text>
+          <Text style={{...styles.title, color: Colors.primary_color}}>{price}</Text>
         </View> */}
 
         <PriceText text={price} />
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F6F6F6',
+    backgroundColor: Colors.secondary_color,
     padding: 5,
     paddingHorizontal: 10,
     borderRadius: 10,
@@ -98,20 +98,20 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.Inter_SemiBold,
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontSize: RFPercentage(1.7),
     lineHeight: 25,
   },
   nameText: {
     fontFamily: Fonts.Inter_Regular,
-    color: '#292323',
+    color: Colors.primary_text,
     opacity: 0.6,
     fontSize: RFPercentage(1.5),
     lineHeight: 16,
   },
   ratingText: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontSize: RFPercentage(2),
     lineHeight: 25,
     marginLeft: 5,
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: Colors.Orange,
+    backgroundColor: Colors.primary_color,
     padding: 4,
     paddingHorizontal: 5,
     minWidth: 80,
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   labelText: {
-    color: Colors.White,
+    color: Colors.button.primary_button_text,
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.PlusJakartaSans_Regular,
   },

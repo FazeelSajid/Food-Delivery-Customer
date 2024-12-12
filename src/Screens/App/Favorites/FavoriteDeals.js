@@ -1,7 +1,6 @@
 import {StyleSheet, View, FlatList} from 'react-native';
 import React, {memo, useState, useEffect} from 'react';
 import {Colors, Images} from '../../../constants';
-import FavoriteItemCard from '../../../components/Cards/FavoriteItemCard';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../../constants/api';
@@ -276,7 +275,7 @@ const FavoriteDeals = ({}) => {
 
             image={
                   item?.deal?.images?.length > 0
-                    ? BASE_URL_IMAGE + item?.deal?.images[0]
+                    ? item?.deal?.images[0]
                     : ''
                 }
             description={shortenString(item?.deal?.description)}
@@ -295,33 +294,11 @@ const FavoriteDeals = ({}) => {
               height: hp('16.5%')}}
             nameStyle={{fontSize: RFPercentage(1.8)}}
             descriptionStyle={{fontSize: RFPercentage(1.5)}}
-            priceStyle={{fontSize: RFPercentage(2.2), color: Colors.Orange}}
+            priceStyle={{fontSize: RFPercentage(2.2), color: Colors.primary_color}}
             iconSize={19}
           />
 
-          // <FavoriteItemCard
-          //   disabled={false}
-          //   onPress={() => {
-          //     navigation.navigate('NearByDealsDetails', {
-          //       id: item?.deal?.deal_id,
-          //       type: 'favorite',
-          //     });
-          //   }}
-          //   onHeartPress={() => removeFavoriteDeal( item?.deal?.deal_id,customer_id, favoriteDeals, dispatch, showAlert)}
-          //   title={item?.deal?.name}
-          //   // image={item?.image}
-          //   image={
-          //     item?.deal?.images?.length > 0
-          //       ? BASE_URL_IMAGE + item?.deal?.images[0]
-          //       : ''
-          //   }
-          //   price={item?.deal?.price}
-          //   // rating={item?.rating}
-          //   showRating={false}
-          //   imageContainerStyle={{
-          //     flex: 0.4,
-          //   }}
-          // />
+         
         )}}
       />
     </View>

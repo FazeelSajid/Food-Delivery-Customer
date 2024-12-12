@@ -66,6 +66,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
   const { join_as_guest,  showPopUp, popUpColor, PopUpMesage, customer_id } = useSelector(store => store.store);
   const { cart, cart_restaurant_id, my_cart } = useSelector(store => store.cart);
   const { favoriteDeals, favoriteItems } = useSelector(store => store.favorite);
+
   
 
   const isDealFavorite = (id) => {
@@ -397,52 +398,18 @@ const NearByDealsDetails = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <Loader loading={loading} />
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, }}>
-        {/* <StackHeader
-          backgroundColor={Colors.Orange}
-          barStyle={'light-content'}
-          enableStatusBar={true}
-          titleColor={'white'}
-          backIconColor={'white'}
-          showTitle={false}
-          title={'Details'}
-        /> */}
-              {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
-
-        <StatusBar backgroundColor={Colors.White} barStyle={'light-content'} />
-        <View style={{ flex: 1 }}>
-          {/* <View style={{paddingHorizontal: 25}}>
-            <View style={styles.rowViewSB}>
-              <Text style={{...styles.restaurantName, flex: 1}}>
-                {restaurantDetails?.user_name}
-              </Text>
-             
-            </View>
-            <View style={styles.rowViewSB}>
-              <Text style={{...styles.itemName, flex: 1}}>
-                {itemDetail?.name}
-              </Text>
-              
-            </View>
-          </View> */}
-          {/* <View
-            style={{
-              flex: 1,
-              backgroundColor: 'white',
-              borderTopLeftRadius: 30,
-              borderTopRightRadius: 30,
-              // marginTop: 5,
-            }}> */}
-
-
-          {/* <ImageSlider data={data} marginBottom={1} />
+        
             
-            {/* <ImageSliderCircle data={data} marginBottom={1} /> */}
+
+        <StatusBar backgroundColor={`${Colors.primary_color}`} barStyle={'light-content'} />
+        <View style={{ flex: 1 }}>
           <View style={styles.sliderContainer}>
             <SwiperFlatList
               autoplay
-              autoplayDelay={2}
+              autoplayDelay={7}
               autoplayLoop
               // index={2}
               showPagination
@@ -450,7 +417,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
               renderItem={({ item }) => (
                 <View style={styles.imageCard}>
                   <ImageBackground
-                    source={{ uri: BASE_URL_IMAGE + item?.image }}
+                    source={{ uri: item?.image }}
                     style={{
                       width: '100%',
                       height: '100%',
@@ -464,7 +431,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
                         <Ionicons
                           name={'chevron-back'}
                           size={hp(3.5)}
-                          color={Colors.Orange}
+                          color={Colors.button.secondary_button_text}
                         />
                       </TouchableOpacity>
 
@@ -488,9 +455,9 @@ const NearByDealsDetails = ({ navigation, route }) => {
                           zIndex: 999,
                         }}>
                         {isFavorite ? (
-                          <AntDesign name="heart" size={24} color={Colors.Orange} />
+                          <AntDesign name="heart" size={24} color={Colors.button.primary_button} />
                         ) : (
-                          <AntDesign name="hearto" size={24} color={Colors.Orange} />
+                          <AntDesign name="hearto" size={24} color={Colors.button.primary_button} />
                         )}
                       </TouchableOpacity>
                     </View>
@@ -545,7 +512,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
                       image={
                         // item.image
                         item?.images?.length > 0
-                          ? BASE_URL_IMAGE + item?.images[0]
+                          ? item?.images[0]
                           : ''
                       }
                       // price={item?.variations[0]?.price}
@@ -608,7 +575,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
             <View
               style={{
                 ...styles.rowView,
-                backgroundColor: '#FF57224F',
+                backgroundColor: `${Colors.primary_color}30`,
                 borderRadius: 25,
                 paddingVertical: 8,
                 paddingHorizontal: 4,
@@ -616,11 +583,11 @@ const NearByDealsDetails = ({ navigation, route }) => {
               <TouchableOpacity
                 onPress={() => onDecrement()}
                 style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
-                <AntDesign name="minus" color={Colors.Orange} size={16} />
+                <AntDesign name="minus" color={Colors.button.secondary_button_text} size={16} />
               </TouchableOpacity>
               <Text
                 style={{
-                  color: Colors.Orange,
+                  color: Colors.button.secondary_button_text,
                   fontFamily: Fonts.PlusJakartaSans_Bold,
                   fontSize: RFPercentage(2),
                   marginTop: -2,
@@ -630,7 +597,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
               <TouchableOpacity
                 onPress={() => onIncrement()}
                 style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
-                <AntDesign name="plus" color={Colors.Orange} size={16} />
+                <AntDesign name="plus" color={Colors.button.secondary_button_text} size={16} />
               </TouchableOpacity>
             </View>
           </View>
@@ -738,57 +705,42 @@ export default NearByDealsDetails;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.secondary_color,
     alignItems: 'center',
     // paddingHorizontal: 20,
   },
-  heading: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#191A26',
-    fontSize: RFPercentage(3),
-    textAlign: 'center',
-    paddingHorizontal: 10,
-  },
-  restaurantName: {
-    color: Colors.White,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(1.5),
-  },
+ 
   itemName: {
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2),
     letterSpacing: 1,
     marginVertical: 5,
     marginBottom: 15,
   },
-  subText: {
-    color: '#8D93A1',
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(2),
-  },
-  timeCard: {
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#EAEDF3',
-    paddingHorizontal: 18,
-    paddingVertical: 5.5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  iconContainer: { backgroundColor: Colors.White, marginTop: hp(0.5), marginLeft: wp(2), borderRadius: wp(100), paddingHorizontal: 2 },
-  timeText: {
-    color: '#191A26',
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    marginLeft: 5,
-  },
-  title: {
-    color: '#191A26',
-    fontSize: RFPercentage(2.2),
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-  },
+
+  // timeCard: {
+  //   borderRadius: 20,
+  //   borderWidth: 1,
+  //   borderColor: '#EAEDF3',
+  //   paddingHorizontal: 18,
+  //   paddingVertical: 5.5,
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   marginVertical: 10,
+  // },
+  iconContainer: { backgroundColor: Colors.button.secondary_button, marginTop: hp(0.5), marginLeft: wp(2), borderRadius: wp(100), paddingHorizontal: 2 },
+  // timeText: {
+  //   color: '#191A26',
+  //   fontFamily: Fonts.PlusJakartaSans_Medium,
+  //   marginLeft: 5,
+  // },
+  // title: {
+  //   color: Colors.primary_color,
+  //   fontSize: RFPercentage(2.2),
+  //   fontFamily: Fonts.PlusJakartaSans_Bold,
+  // },
   rowView: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -806,7 +758,7 @@ const styles = StyleSheet.create({
     width: wp(8),
     height: wp(2.5),
     borderRadius: wp(2.5) / 2,
-    backgroundColor: Colors.Orange,
+    backgroundColor: Colors.primary_color,
     margin: 0,
     marginHorizontal: 2,
   },
@@ -814,9 +766,9 @@ const styles = StyleSheet.create({
     width: wp(2.5),
     height: wp(2.5),
     borderRadius: wp(2.5) / 2,
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.secondary_color,
     borderWidth: 1,
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
     opacity: 0.7,
     marginHorizontal: 2,
   },
@@ -842,7 +794,7 @@ const styles = StyleSheet.create({
     width: wp(2.5),
     height: wp(2.5),
     borderRadius: wp(2.5) / 2,
-    backgroundColor: Colors.Orange,
+    backgroundColor: Colors.primary_color,
     margin: 0,
     marginHorizontal: 2,
   },
@@ -850,22 +802,22 @@ const styles = StyleSheet.create({
     width: wp(2.5),
     height: wp(2.5),
     borderRadius: wp(2.5) / 2,
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.secondary_color,
     borderWidth: 1,
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
     opacity: 0.7,
     marginHorizontal: 2,
   },
   description: {
     paddingVertical: hp(0.5),
-    color: '#00000099',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(1.6),
     lineHeight: 20,
 
   },
   descriptionContainer: {
-    backgroundColor: '#FFF6F3',
+    backgroundColor:  `${Colors.primary_color}10` ,
     paddingHorizontal: wp(6),
     paddingVertical: hp(1.5),
     borderRadius: 15,
@@ -875,209 +827,3 @@ const styles = StyleSheet.create({
   },
 });
 
-// import {
-//   StyleSheet,
-//   Text,
-//   View,
-//   Image,
-//   TouchableOpacity,
-//   ScrollView,
-// } from 'react-native';
-// import React, {useState, useEffect} from 'react';
-// import {Colors, Fonts, Icons, Images} from '../../../constants';
-// import StackHeader from '../../../components/Header/StackHeader';
-// import {RFPercentage} from 'react-native-responsive-fontsize';
-// import {
-//   widthPercentageToDP as wp,
-//   heightPercentageToDP as hp,
-// } from 'react-native-responsive-screen';
-// import {SwiperFlatList} from 'react-native-swiper-flatlist';
-// import PriceText from '../../../components/Text';
-// import ImageSlider from '../../../components/Slider/ImageSlider';
-// import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
-
-// const NearByDealsDetails = ({navigation, route}) => {
-//   const [visible, setVisible] = useState(false);
-//   const [data, setData] = useState([
-//     {
-//       id: 0,
-//       image: Images.food8,
-//     },
-//     {
-//       id: 1,
-//       image: Images.food8,
-//     },
-//     {
-//       id: 2,
-//       image: Images.food8,
-//     },
-//   ]);
-
-//   return (
-//     <View style={styles.container}>
-//       <ScrollView contentContainerStyle={{flexGrow: 1}}>
-//         <StackHeader rightIcon={<Icons.HeartActive />} />
-//         <View style={{flex: 1}}>
-//           <View style={{alignItems: 'center', paddingHorizontal: 40}}>
-//             <Text style={styles.heading}>
-//               Shrimp Pad Thai Sauce ABC Barbeque
-//             </Text>
-//             <Text style={styles.subText}>By Resto Parmato Bapo</Text>
-//             <View style={styles.timeCard}>
-//               <Icons.Bike />
-//               <Text style={styles.timeText}>20 min</Text>
-//             </View>
-//           </View>
-//           <ImageSlider data={data} marginBottom={1} />
-//           <View style={{paddingHorizontal: 20, flex: 1}}>
-//             <View style={styles.rowViewSB}>
-//               <Text style={styles.title}>Description</Text>
-//               {/* <Text style={styles.title}>
-//                 <Text style={{color: Colors.Orange}}>$</Text> 9.67
-//               </Text> */}
-//               <PriceText
-//                 text={9.67}
-//                 fontSize={RFPercentage(2.5)}
-//                 textColor={Colors.Black}
-//               />
-//             </View>
-//             <Text
-//               style={{
-//                 marginVertical: 10,
-//                 color: '#808D9E',
-//                 fontFamily: Fonts.PlusJakartaSans_Regular,
-//               }}>
-//               Amet minim mollit non deserunt ullamco est sit aliqua dolor do
-//               amet sint. Velit officia consat du veniam consequat coseqtures
-//               adipsing contentet minim mollit non deserunt ullamco est sit
-//               aliqua dolor do amet sint. Velit officia consat du veniam
-//               consequat coseqtures adipsing
-//             </Text>
-//             <View
-//               style={{
-//                 marginVertical: 20,
-//                 flexDirection: 'row',
-//                 alignItems: 'flex-end',
-//                 flex: 1,
-//               }}>
-//               <TouchableOpacity
-//                 onPress={() => {
-//                   if (route?.params?.nav_type == 'add_item') {
-//                     navigation?.goBack();
-//                   } else {
-//                     navigation.navigate('ShippingAddress');
-//                   }
-//                 }}
-//                 // onPress={() => setVisible(true)}
-//                 style={{
-//                   backgroundColor: Colors.Orange,
-//                   height: 45,
-//                   borderRadius: 25,
-//                   alignItems: 'center',
-//                   justifyContent: 'center',
-//                   flex: 1,
-//                   marginRight: 15,
-//                 }}>
-//                 <Text
-//                   style={{
-//                     color: 'white',
-//                     fontFamily: Fonts.PlusJakartaSans_Regular,
-//                   }}>
-//                   Add to Cart
-//                 </Text>
-//               </TouchableOpacity>
-//               <TouchableOpacity onPress={() => navigation.navigate('Checkout')}>
-//                 <Icons.Checkout />
-//               </TouchableOpacity>
-//             </View>
-//           </View>
-//         </View>
-//       </ScrollView>
-//       <ConfirmationModal
-//         visible={visible}
-//         setVisible={setVisible}
-//         onOK={() => navigation.replace('Sign In')}
-//         onCancel={() => setVisible(false)}
-//       />
-//     </View>
-//   );
-// };
-
-// export default NearByDealsDetails;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: Colors.White,
-//     alignItems: 'center',
-//     // paddingHorizontal: 20,
-//   },
-//   heading: {
-//     fontFamily: Fonts.PlusJakartaSans_Bold,
-//     color: '#191A26',
-//     fontSize: RFPercentage(3),
-//     textAlign: 'center',
-//     paddingHorizontal: 10,
-//   },
-//   subText: {
-//     color: '#8D93A1',
-//     fontFamily: Fonts.PlusJakartaSans_Medium,
-//     fontSize: RFPercentage(2),
-//   },
-//   timeCard: {
-//     borderRadius: 20,
-//     borderWidth: 1,
-//     borderColor: '#EAEDF3',
-//     paddingHorizontal: 18,
-//     paddingVertical: 5.5,
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     marginVertical: 10,
-//   },
-//   timeText: {
-//     color: '#191A26',
-//     fontFamily: Fonts.PlusJakartaSans_Medium,
-//     marginLeft: 5,
-//   },
-//   title: {
-//     color: '#191A26',
-//     fontSize: RFPercentage(2.2),
-//     fontFamily: Fonts.PlusJakartaSans_Bold,
-//   },
-//   rowViewSB: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     justifyContent: 'space-between',
-//   },
-//   imageCard: {
-//     width: wp(90),
-//     height: hp(25),
-//     // backgroundColor: '#ccc',
-//     marginHorizontal: wp(4.5),
-//     borderRadius: 10,
-//     overflow: 'hidden',
-//   },
-//   sliderContainer: {marginVertical: 20, paddingHorizontal: 0, height: hp(30)},
-//   paginationStyle: {
-//     // marginBottom: hp(1),
-//   },
-//   paginationStyleItemActive: {
-//     width: wp(2.5),
-//     height: wp(2.5),
-//     borderRadius: wp(2.5) / 2,
-//     backgroundColor: Colors.Orange,
-//     margin: 0,
-//     marginHorizontal: 2,
-//   },
-//   paginationStyleItemInactive: {
-//     width: wp(2.5),
-//     height: wp(2.5),
-//     borderRadius: wp(2.5) / 2,
-//     backgroundColor: Colors.White,
-//     borderWidth: 1,
-//     borderColor: Colors.Orange,
-//     opacity: 0.7,
-//     marginHorizontal: 2,
-//   },
-// });

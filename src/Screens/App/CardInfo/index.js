@@ -35,7 +35,7 @@ const CardInfo = ({navigation, route}) => {
   const [visible, setVisible] = React.useState(false);
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       <StackHeader title={'Card Information'} />
       <ScrollView
         ref={scrollViewRef}

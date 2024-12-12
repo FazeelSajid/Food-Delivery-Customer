@@ -21,8 +21,12 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
+import { useSelector } from 'react-redux';
+import PopUp from '../../../components/Popup/PopUp';
 
 const Favorites = () => {
+  const { showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store)
+
   const renderScene = SceneMap({
     first: FavoriteItems,
     second: FavoriteDeals,
@@ -42,24 +46,25 @@ const Favorites = () => {
   const totalWidth = Dimensions.get('screen').width;
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       <StackHeader title={'Favorites'} />
+      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <TabView
         navigationState={{index, routes}}
         renderScene={renderScene}
         onIndexChange={setIndex}
         initialLayout={{width: layout.width}}
-        sceneContainerStyle={{backgroundColor: Colors.White}}
+        sceneContainerStyle={{backgroundColor: Colors.secondary_color}}
         // pagerStyle={{backgroundColor: 'red'}}
         swipeEnabled={true}
-        pressColor={Colors.White}
+        pressColor={Colors.secondary_color}
         pressOpacity={1}
         // tabBaroption={{pressColor: 'transparent'}}
         renderTabBar={props => (
           <TabBar
             {...props}
             style={{
-              backgroundColor: Colors.White,
+              backgroundColor: Colors.secondary_color,
               marginTop: -15,
               // paddingHorizontal: 20,
               elevation: 4,
@@ -71,7 +76,7 @@ const Favorites = () => {
             renderLabel={({route, focused, color}) => (
               <Text
                 style={{
-                  color: focused ? Colors.Orange : '#7E8CA0',
+                  color: focused ? Colors.primary_color : '#7E8CA0',
                   fontSize: hp(1.8),
                   fontFamily: focused
                     ? Fonts.PlusJakartaSans_Bold
@@ -90,7 +95,7 @@ const Favorites = () => {
             indicatorStyle={{
               padding: 1.5,
               // marginBottom: -2,
-              backgroundColor: Colors.Orange,
+              backgroundColor: Colors.primary_color,
               // width: '50%',
               alignSelf: 'center',
               // width: totalWidth / 4,

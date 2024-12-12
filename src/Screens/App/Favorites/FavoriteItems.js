@@ -1,7 +1,6 @@
 import {StyleSheet, View, FlatList, Text, TouchableOpacity} from 'react-native';
 import React, {useState, memo, useEffect, useRef} from 'react';
 import {Colors, Fonts, Images} from '../../../constants';
-import FavoriteItemCard from '../../../components/Cards/FavoriteItemCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import api from '../../../constants/api';
@@ -28,7 +27,7 @@ import PopUp from '../../../components/Popup/PopUp';
 const FavoriteItems = ({}) => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
-  const {customer_id, showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store)
+  const {customer_id} = useSelector(store => store.store)
   const { favoriteItems} = useSelector(store => store.favorite);
   const dispatch = useDispatch()
   const btmSheetRef = useRef()
@@ -234,7 +233,7 @@ const FavoriteItems = ({}) => {
   return (
     <View style={{flex: 1}}>
       <Loader loading={loading} />
-      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
+      
       <FlatList
         data={favoriteItems}
         key={numColumns}
@@ -253,7 +252,7 @@ const FavoriteItems = ({}) => {
 
             <FoodCards
             isFavorite={true}
-            image={ BASE_URL_IMAGE + item?.item?.images[0]}
+            image={ item?.item?.images[0]}
             description={item?.item?.description}
             price={item?.item?.item_prices ? item?.item?.item_prices[0]?.price : item?.item?.item_variations[0]?.price}
             heartPress={() => removeFavoriteitem( item?.item?.item_id,customer_id, favoriteItems, dispatch, showAlert)}
@@ -269,30 +268,7 @@ const FavoriteItems = ({}) => {
             addToCart={() => showBtmSheet(item?.item)}
 
           />
-          // <FavoriteItemCard
-          //   disabled={false}
-          //   onPress={() => {
-          //     navigation.navigate('ItemDetails', {
-          //       id: item?.item?.item_id, //item id
-          //       type: 'favorite',
-          //     });
-          //   }}
-          //   tag={item?.item?.cuisine?.cuisine_name}
-          //   onHeartPress={() => removeFavoriteitem( item?.item?.item_id,customer_id, favoriteItems, dispatch, showAlert)}
-          //   title={item?.item?.item_name}
-          //   // image={item?.image}
-          //   image={
-          //     item?.item?.images?.length > 0
-          //       ? BASE_URL_IMAGE + item?.item?.images[0]
-          //       : ''
-          //   }
-          //   rating={item?.rating}
-          //   price={item?.item?.price}
-          //   imageContainerStyle={{
-          //     flex: 0.4,
-          //   }}
-          //   showRating={false}
-          // />
+          
         )}}
       />
 
@@ -312,8 +288,8 @@ const FavoriteItems = ({}) => {
               <View key={i} style={[styles.rowViewSB, { borderBottomColor: Colors.borderGray, borderBottomWidth: wp(0.3), paddingBottom: wp(1) }]}>
                 <View style={styles.rowView} >
                   <RadioButton
-                    color={Colors.Orange} // Custom color for selected button
-                    uncheckedColor={Colors.Orange} // Color for unselected buttons
+                    color={Colors.primary_color} // Custom color for selected button
+                    uncheckedColor={Colors.primary_color} // Color for unselected buttons
                     status={selectedVariation === variation.variation_id ? 'checked' : 'unchecked'}
                     onPress={() => handleAddToCart(variation.variation_id, itemObj.id)}
                   />
@@ -335,7 +311,7 @@ const FavoriteItems = ({}) => {
 const styles = StyleSheet.create({
   variationText: {
     fontSize: RFPercentage(1.6),
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
   },
   rowViewSB: {
@@ -346,7 +322,7 @@ const styles = StyleSheet.create({
 
   },
   variationTxt: {
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(1.7),
     marginBottom: hp(1)

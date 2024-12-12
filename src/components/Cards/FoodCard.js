@@ -62,7 +62,7 @@ export default FoodCard;
 const styles = StyleSheet.create({
   card1: {
     borderWidth: 1,
-    borderColor: '#E6E7EB',
+    borderColor: Colors.secondary_color,
     // height: hp(23),
     paddingVertical: 7,
     flex: 0.47,
@@ -88,18 +88,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#0A212B',
+    color: Colors.primary_text,
     fontSize: RFPercentage(1.5),
     lineHeight: 30,
   },
   description: {
     fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontSize: RFPercentage(1.5),
   },
   price: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#0A212B',
+    color: Colors.primary_text,
     fontSize: RFPercentage(2.5),
   },
 });

@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   text: {
-    color: '#595959',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     fontSize: RFPercentage(2),
     lineHeight: 25,
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
 //               value="cash"
 //               status={checked === 'cash' ? 'checked' : 'unchecked'}
 //               uncheckedColor={'#757575'}
-//               color={Colors.Orange}
+//               color={Colors.primary_color}
 //               onPress={() => setChecked('cash')}
 //             />
 //           </View>
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
 //               value="credit"
 //               status={checked === 'credit' ? 'checked' : 'unchecked'}
 //               uncheckedColor={'#757575'}
-//               color={Colors.Orange}
+//               color={Colors.primary_color}
 //               onPress={() => setChecked('credit')}
 //             />
 //           </View>

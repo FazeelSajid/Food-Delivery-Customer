@@ -459,7 +459,7 @@ const MyCart = ({ navigation, route }) => {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.White }}>
+    <View style={{ flex: 1, backgroundColor: Colors.secondary_color }}>
       <Loader loading={loading} />
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView
@@ -477,7 +477,7 @@ const MyCart = ({ navigation, route }) => {
               <Text
                 style={{
                   ...styles.title,
-                  color: Colors.Orange,
+                  color: Colors.primary_color,
                   fontFamily: Fonts.Inter_SemiBold,
                   fontSize: RFPercentage(2.2),
                 }}>
@@ -492,7 +492,7 @@ const MyCart = ({ navigation, route }) => {
           style={{
             height: hp(0.1),
             marginVertical: 10,
-            backgroundColor: '#00000026',
+            backgroundColor: Colors.borderGray,
           }}
         />
         <View>
@@ -557,10 +557,10 @@ const MyCart = ({ navigation, route }) => {
                     paddingHorizontal: 27,
                     marginVertical: 10,
                   }}>
-                  <Feather name="plus" color={Colors.Orange} size={16} />
+                  <Feather name="plus" color={Colors.primary_color} size={16} />
                   <Text
                     style={{
-                      color: Colors.Orange,
+                      color: Colors.primary_color,
                       fontFamily: Fonts.Inter_Medium,
                       fontSize: RFPercentage(1.7),
                     }}>
@@ -586,10 +586,10 @@ const MyCart = ({ navigation, route }) => {
               marginVertical: 10,
               justifyContent: 'flex-start'
             }}>
-            <Feather name="plus" color={Colors.Orange} size={16} />
+            <Feather name="plus" color={Colors.icon} size={16} />
             <Text
               style={{
-                color: Colors.Orange,
+                color: Colors.primary_color,
                 fontFamily: Fonts.Inter_Medium,
                 fontSize: RFPercentage(2.1),
               }}>
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F6F6F6',
+    backgroundColor: `${Colors.secondary_text}20`,
     padding: 10,
     paddingHorizontal: 10,
     borderRadius: 10,
@@ -700,7 +700,7 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#FF572233',
+    backgroundColor: `${Colors.primary_color}30`,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#FF572233',
+    backgroundColor: `${Colors.primary_color}30`,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -722,13 +722,13 @@ const styles = StyleSheet.create({
     width: '100%',
     resizeMode: 'cover',
   },
-  subText: {
-    color: '#8D93A1',
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(2),
-  },
+  // subText: {
+  //   color: '#8D93A1',
+  //   fontFamily: Fonts.PlusJakartaSans_Medium,
+  //   fontSize: RFPercentage(2),
+  // },
   title: {
-    color: '#191A26',
+    color: Colors.primary_text,
     fontSize: RFPercentage(2),
     fontFamily: Fonts.Inter_SemiBold,
     lineHeight: 25,
@@ -752,18 +752,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   rbSheetHeading: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(1.9),
   },
   btmsheettext: {
-    color: '#56585B',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     marginLeft: wp(5),
     fontSize: RFPercentage(1.9),
   },
   countText: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     marginHorizontal: 8,
     fontFamily: Fonts.PlusJakartaSans_Bold,
   },
@@ -895,7 +895,7 @@ const styles = StyleSheet.create({
 //               <Text
 //                 style={{
 //                   ...styles.title,
-//                   color: Colors.Orange,
+//                   color: Colors.primary_color,
 //                   fontFamily: Fonts.Inter_SemiBold,
 //                   fontSize: RFPercentage(2.2),
 //                 }}>
@@ -934,7 +934,7 @@ const styles = StyleSheet.create({
 //                 <Text style={styles.title}>{item.title}</Text>
 //                 <Text style={styles.nameText}>{item.description}</Text>
 //                 <View style={styles.rowViewSB}>
-//                   <Text style={{...styles.title, color: Colors.Orange}}>
+//                   <Text style={{...styles.title, color: Colors.primary_color}}>
 //                     ${item.price}
 //                   </Text>
 //                   <View style={styles.rowView}>

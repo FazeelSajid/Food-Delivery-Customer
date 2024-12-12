@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
         fontSize: wp(4),
     },
     continueButtonContainer: {
-        backgroundColor: Colors.Orange,
+        backgroundColor: Colors.primary_color,
         paddingVertical: wp(3),
         borderRadius: wp(6),
         marginHorizontal: wp(10),

@@ -191,7 +191,7 @@ const Verification_Phone = ({navigation, route}) => {
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       <StackHeader title={''} backIconColor={'#1D1D20'} />
       <Loader loading={loader} />
       <ScrollView
@@ -286,7 +286,7 @@ export default Verification_Phone;
 const styles = StyleSheet.create({
   inputContainer: {
     borderWidth: 1,
-    borderColor: '#DDDDDD',
+    borderColor: Colors.borderGray,
     borderRadius: 35,
     width: wp(90),
     marginTop: 50,
@@ -307,12 +307,12 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 0,
     // borderBottomWidth: 1,
-    borderColor: '#DDDDDD',
+    borderColor: Colors.borderGray,
     // marginHorizontal: 2,
     backgroundColor: '#F5F6FA',
   },
   underlineStyleHighLighted: {
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
     borderRadius: 30,
     borderWidth: 1,
   },

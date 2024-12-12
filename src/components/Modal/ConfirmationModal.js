@@ -26,7 +26,7 @@ const ConfirmationModal = ({visible, setVisible, onOK, onCancel}) => {
       <Text
         style={{
           fontFamily: Fonts.PlusJakartaSans_Bold,
-          color: Colors.Orange,
+          color: Colors.primary_color,
           fontSize: RFPercentage(2.5),
           lineHeight: 30,
         }}>
@@ -34,7 +34,7 @@ const ConfirmationModal = ({visible, setVisible, onOK, onCancel}) => {
       </Text>
       <Text
         style={{
-          color: '#68686E',
+          color: Colors.secondary_text,
           fontFamily: Fonts.PlusJakartaSans_Medium,
           fontSize: RFPercentage(1.7),
           lineHeight: 20,

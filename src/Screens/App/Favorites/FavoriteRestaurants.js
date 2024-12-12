@@ -165,7 +165,7 @@ const FavoriteRestaurants = ({}) => {
               // image={item?.image}
               image={
                 restaurant && restaurant?.images?.length > 0
-                  ? BASE_URL_IMAGE + restaurant.images[0]
+                  ? restaurant.images[0]
                   : ''
               }
               description={'item?.description'}

@@ -251,7 +251,7 @@ export default UpdatePassord
 
 const styles = StyleSheet.create({
     container: {
-        flexGrow: 1, backgroundColor: Colors.White
+        flexGrow: 1, backgroundColor: Colors.secondary_color
     },
     errorText: {
         color: 'red',

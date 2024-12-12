@@ -31,9 +31,7 @@ const HeaderImageSlider = ({
     imageCard: {
       width: wp(100),
       height: hp(38),
-      // backgroundColor: '#ccc',
-      //   marginHorizontal: wp(4.5),
-      //   borderRadius: 10,
+      
       overflow: 'hidden',
     },
     sliderContainer: {
@@ -50,7 +48,7 @@ const HeaderImageSlider = ({
       width: dotSize,
       height: dotSize,
       borderRadius: dotSize / 2,
-      backgroundColor: Colors.Orange,
+      backgroundColor: Colors.primary_color,
       margin: 0,
       marginHorizontal: 3,
     },
@@ -58,9 +56,9 @@ const HeaderImageSlider = ({
       width: dotSize,
       height: dotSize,
       borderRadius: dotSize,
-      backgroundColor: Colors.White,
+      backgroundColor: Colors.secondary_color,
       borderWidth: 1,
-      borderColor: Colors.Orange,
+      borderColor: Colors.primary_color,
       opacity: 0.7,
       marginHorizontal: 3,
     },
@@ -86,7 +84,7 @@ const HeaderImageSlider = ({
             <View style={styles.imageCard}>
               <Image
                 // source={item.image}
-                source={{uri: BASE_URL_IMAGE + item}}
+                source={{uri: item}}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -113,7 +111,7 @@ const HeaderImageSlider = ({
           position: 'absolute',
           top: StatusBar.currentHeight + hp(2.5),
           marginLeft: wp(8),
-          backgroundColor: Colors.White,
+          backgroundColor: Colors.button.secondary_button,
           borderRadius: wp(5),
           padding: wp(1),
           paddingHorizontal: wp(1.3)
@@ -121,7 +119,7 @@ const HeaderImageSlider = ({
         <Ionicons
           name={'chevron-back'}
           size={hp(3)}
-          color={backIconColor ? backIconColor : '#747272'}
+          color={backIconColor ? backIconColor : Colors.button.secondary_button_text}
         />
       </TouchableOpacity>
     </View>

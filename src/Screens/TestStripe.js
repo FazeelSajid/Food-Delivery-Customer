@@ -71,14 +71,14 @@ const TestStripe = () => {
           },
         },
         colors: {
-          primary: Colors.Orange,
+          primary: Colors.primary_color,
           background: '#FFFFFF',
           componentBackground: '#FFFFFF',
           componentBorder: '#000000',
           componentDivider: '#000000',
-          primaryText: Colors.Orange,
-          secondaryText: Colors.Orange,
-          componentText: Colors.Orange,
+          primaryText: Colors.primary_color,
+          secondaryText: Colors.primary_color,
+          componentText: Colors.primary_color,
           placeholderText: '#000000',
         },
       },
@@ -208,27 +208,7 @@ const TestStripe = () => {
     <View style={{flex: 1, backgroundColor: 'white'}}>
       <Loader loading={loading} />
 
-      {/* <CardField
-        postalCodeEnabled={true}
-        placeholders={{
-          number: '4242 4242 4242 4242',
-        }}
-        cardStyle={{
-          backgroundColor: '#FFFF00',
-          textColor: '#000000',
-        }}
-        style={{
-          width: '90%',
-          height: 50,
-          marginVertical: 30,
-        }}
-        onCardChange={cardDetails => {
-          console.log('cardDetails', cardDetails);
-        }}
-        onFocus={focusedField => {
-          console.log('focusField', focusedField);
-        }}
-      /> */}
+      
 
       {/* <CardForm style={{height: 170, width: '90%'}} /> */}
       <CButton title="Pay Now" onPress={() => handlePay()} />

@@ -7,26 +7,8 @@ export const bottombarHeight =
       StatusBar.currentHeight
     : StatusBar.currentHeight;
 
-export const Colors = {
-  //UI Neutrals
+export const Colors = MYStore.getState().store.Colors;
 
-  // background
-  Orange: '#FF5722',
-  OrangeLight: '#F99145',
-  OrangeExtraLight: '#FFF6F3',
-  White: '#FFFFFF',
-  Black: '#000000',
-  Text: '#0A212B',
-  grayText: '#999999',
-  borderGray: '#EAE9E9',
-  favoriteHeart: '#B00020',
-  darkTextColor: '#545151',
-  pending: '#C08C22',
-  preparing: '#22A3C0',
-  outForDelivery : '#225AC0',
-  completed:'#19BA46',
-  cancelled: 'red'
-};
 export const Fonts = {
   PlusJakartaSans_Bold: 'PlusJakartaSans-Bold',
   PlusJakartaSans_BoldItalic: 'PlusJakartaSans-BoldItalic',
@@ -256,6 +238,7 @@ import Video from '../Assets/svg/video.svg';
 import AddSimple from '../Assets/svg/addSimple.svg';
 import LocationLogo from '../Assets/svg/LocationLogo.svg';
 import Chat from '../Assets/svg/chat.svg';
+import { MYStore } from '../redux/MyStore';
 
 export const Icons = {
   AddSimple,

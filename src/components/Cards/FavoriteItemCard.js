@@ -93,13 +93,13 @@ const FavoriteItemCard = ({
                   paddingVertical: 4,
                   paddingHorizontal: 10,
                   borderRadius: 15,
-                  borderColor: Colors.Orange,
+                  borderColor: Colors.primary_color,
                   borderWidth: 1,
                   alignItems: 'center'
                 }}>
                 <Text
                   style={{
-                    color: Colors.Orange,
+                    color: Colors.primary_color,
                     fontFamily: Fonts.PlusJakartaSans_Medium,
                     fontSize: RFPercentage(1.4),
                     marginTop: -2,
@@ -109,7 +109,7 @@ const FavoriteItemCard = ({
               </View>
 
               <TouchableOpacity onPress={onHeartPress}>
-                <AntDesign name="heart" color={Colors.Orange} size={20} />
+                <AntDesign name="heart" color={Colors.primary_color} size={20} />
               </TouchableOpacity>
             </View>
             <Text style={styles.name}>{title ? title : ''}</Text>
@@ -118,7 +118,7 @@ const FavoriteItemCard = ({
           <View style={styles.rowViewSB1}>
             <Text style={styles.name}>{title ? title : ''}</Text>
             <TouchableOpacity onPress={onHeartPress}>
-              <AntDesign name="heart" color={Colors.Orange} size={20} />
+              <AntDesign name="heart" color={Colors.primary_color} size={20} />
             </TouchableOpacity>
           </View>
         )}
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   priceText: {
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.5),
     marginTop: -5,
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontSize: RFPercentage(1.5),
   },
   price: {
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: Colors.Orange,
+    backgroundColor: Colors.primary_color,
     padding: 4,
     paddingHorizontal: 5,
     minWidth: 80,
@@ -283,10 +283,10 @@ const styles = StyleSheet.create({
 //       <View style={styles.textContainer}>
 //         <View style={styles.rowViewSB}>
 //           <Text style={styles.title}>{title}</Text>
-//           <AntDesign name="heart" color={Colors.Orange} size={20} />
+//           <AntDesign name="heart" color={Colors.primary_color} size={20} />
 //         </View>
 //         <Text style={styles.nameText}>{description}</Text>
-//         {/* <Text style={{...styles.title, color: Colors.Orange}}>$ {price}</Text>
+//         {/* <Text style={{...styles.title, color: Colors.primary_color}}>$ {price}</Text>
 //          */}
 //         <PriceText text={price} />
 //       </View>

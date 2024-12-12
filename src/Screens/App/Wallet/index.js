@@ -23,9 +23,9 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import { RFPercentage } from 'react-native-responsive-fontsize';
-import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
-import AllOrders from './AllOrders';
-import RefundedOrders from './RefundedOrders';
+// import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
+// import AllOrders from './AllOrders';
+// import RefundedOrders from './RefundedOrders';
 import CButton from '../../../components/Buttons/CButton';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../../constants/api';
@@ -36,12 +36,12 @@ import {
   GetWalletAmount,
 } from '../../../utils/helpers/walletApis';
 import { useDispatch, useSelector } from 'react-redux';
-import { setAllOrders } from '../../../redux/OrderSlice';
+// import { setAllOrders } from '../../../redux/OrderSlice';
 import { useFocusEffect } from '@react-navigation/native';
-import PaymentCard from '../../../components/Cards/PaymentCard';
+// import PaymentCard from '../ ../../components/Cards/PaymentCard';
 import { BASE_URL, BASE_URL_IMAGE, STRIPE_PUBLISH_KEY } from '../../../utils/globalVariables';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
-import FoodCardWithRating from '../../../components/Cards/FoodCardWithRating';
+// import FoodCardWithRating from '../../../components/Cards/FoodCardWithRating';
 import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
 import CInput from '../../../components/TextInput/CInput';
 import {
@@ -331,15 +331,15 @@ const Wallet = ({ navigation, route }) => {
         //   },
         // },
         colors: {
-          // primary: Colors.Orange,
+          // primary: Colors.primary_color,
           // background: '#FFFFFF',
           // componentBackground: '#FFFFFF',
           // componentBorder: '#000000',
           // componentDivider: '#000000',
-          // primaryText: Colors.Orange,
-          // secondaryText: Colors.Orange,
-          // componentText: Colors.Orange,
-          placeholderText: Colors.White,
+          // primaryText: Colors.primary_color,
+          // secondaryText: Colors.primary_color,
+          // componentText: Colors.primary_color,
+          placeholderText: Colors.secondary_color,
         },
       },
 
@@ -620,11 +620,12 @@ const Wallet = ({ navigation, route }) => {
   // console.log('somethisn');
 
 
-
+// const Colors:
   
   return (
-    <View  style={{ flex: 1, backgroundColor: Colors.White }}>
+    <View  style={{ flex: 1, backgroundColor: Colors.secondary_color }}>
       <Loader loading={loading} bgColor={'rgba(0, 0, 0, 0.5)'} />
+    
       {
         accountLinkUrl ? <WebView
         source={{ uri: accountLinkUrl }}
@@ -639,7 +640,7 @@ const Wallet = ({ navigation, route }) => {
         }}
         style={{ flex: 1 }}
       /> : <View style={{flex: 1}}>
-         <ScrollView refreshControl={<RefreshControl  onRefresh={()=> getData()} colors={[Colors.Orange]} />} contentContainerStyle={{flexGrow: 1}} >
+         <ScrollView refreshControl={<RefreshControl  onRefresh={()=> getData()} colors={[Colors.primary_color]} />} contentContainerStyle={{flexGrow: 1}} >
           <View style={styles.headerContainer}>
 
          
@@ -666,7 +667,7 @@ const Wallet = ({ navigation, route }) => {
             <Text
               style={{
                 fontFamily: Fonts.Inter_SemiBold,
-                color: Colors.White,
+                color: Colors.secondary_color,
                 fontSize: RFPercentage(4),
                 lineHeight: 45,
               }}>
@@ -675,7 +676,7 @@ const Wallet = ({ navigation, route }) => {
             <Text
               style={{
                 fontFamily: Fonts.PlusJakartaSans_Medium,
-                color: Colors.White,
+                color: Colors.secondary_color,
                 fontSize: RFPercentage(1.5),
                 opacity: 0.95,
               }}>
@@ -689,8 +690,8 @@ const Wallet = ({ navigation, route }) => {
             width={90}
             height={35}
             marginTop={-1}
-            textStyle={{ color: Colors.Orange, textTransform: 'none' }}
-            // style={{backgroundColor: Colors.Orange, borderColor: Colors.White, borderWidth: 2}}
+            textStyle={{ color: Colors.primary_color, textTransform: 'none' }}
+            // style={{backgroundColor: Colors.primary_color, borderColor: Colors.White, borderWidth: 2}}
             onPress={() => ref_RBWithdrawSheet?.current?.open()}
           /> */}
           <CButton
@@ -699,7 +700,7 @@ const Wallet = ({ navigation, route }) => {
             width={90}
             height={35} 
             marginTop={6}
-            textStyle={{ color: Colors.Orange, textTransform: 'none' }}
+            textStyle={{ color: Colors.button.secondary_button_text, textTransform: 'none' }}
             onPress={() => ref_RBTopUpSheet?.current?.open()}
           />
           
@@ -737,32 +738,7 @@ const Wallet = ({ navigation, route }) => {
                   </View>
                   <Text style={[styles.transactionsAmount, item.transaction_type === 'deposit' && {color:'#19BA46' }]} >{item.transaction_type === 'deposit' ? '+' : '-'} ${item.amount}</Text>
                 </View>
-                // <FoodCardWithRating
-                //   disabled={true}
-                //   image={
-                //     cart_item && cart_item?.itemData?.images?.length > 0
-                //       ? BASE_URL_IMAGE + cart_item?.itemData?.images[0]
-                //       : ''
-                //   }
-                //   title={
-                //     cart_item
-                //       ? cart_item?.item_type == 'deal'
-                //         ? cart_item?.itemData?.name
-                //         : cart_item?.itemData?.item_name
-                //       : ''
-                //   }
-                //   // price={cart_item ? cart_item?.itemData?.price : ''}
-                //   price={item?.total_amount}
-                //   // showRatingOnBottom={true}
-                //   showRating={false}
-                //   showNextButton={false}
-                //   cardStyle={{marginTop: 15}}
-                //   imageContainerStyle={{
-                //     height: 55,
-                //     marginVertical: 1.5,
-                //     flex: 0.3,
-                //   }}
-                // />
+                
               );
             }}
           />
@@ -779,7 +755,7 @@ const Wallet = ({ navigation, route }) => {
               <View style={{ ...styles.rowViewSB, marginBottom: 20 }}>
                 <Text
                   style={{
-                    color: '#0A212B',
+                    color: Colors.primary_text,
                     fontFamily: Fonts.PlusJakartaSans_Bold,
                     fontSize: RFPercentage(2.5),
                   }}>
@@ -789,7 +765,7 @@ const Wallet = ({ navigation, route }) => {
               <View style={{ paddingHorizontal: 10 }}>
                 <Text
                   style={{
-                    color: Colors.Orange,
+                    color: Colors.primary_color,
                     fontFamily: Fonts.PlusJakartaSans_Bold,
                     fontSize: RFPercentage(2.2),
                     marginBottom: 14,
@@ -805,7 +781,7 @@ const Wallet = ({ navigation, route }) => {
                 />
                 <Text
                   style={{
-                    color: '#A2A2A2',
+                    color: Colors.secondary_text,
                     marginTop: -15,
                     fontSize: RFPercentage(1.5),
                     marginLeft: 14,
@@ -861,7 +837,7 @@ const Wallet = ({ navigation, route }) => {
                   <View style={{...styles.rowViewSB, marginBottom: 20}}>
                     <Text
                       style={{
-                        color: '#0A212B',
+                        color: Colors.primary_text,
                         fontFamily: Fonts.PlusJakartaSans_Bold,
                         fontSize: RFPercentage(2.5),
                       }}>
@@ -917,15 +893,15 @@ const Wallet = ({ navigation, route }) => {
               <Text style={styles.rbSheetHeading}>Select an option</Text>
               <TouchableOpacity
                 onPress={() => closeBtmSheet()}>
-                <Ionicons name={'close'} size={22} color={'#1E2022'} />
+                <Ionicons name={'close'} size={22} color={Colors.icon} />
               </TouchableOpacity>
             </View>
 
             <TouchableOpacity style={styles.rowView} onPress={() => toggleSelection('stripe')} >
-              <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={selectedPaymentMethod === 'stripe' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('stripe')} />
+              <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={selectedPaymentMethod === 'stripe' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('stripe')} />
               <Text
                 style={{
-                  color: '#56585B',
+                  color: Colors.secondary_text,
                   fontFamily: Fonts.PlusJakartaSans_Regular,
                   fontSize: RFPercentage(2),
                   marginLeft: wp(4)
@@ -936,10 +912,10 @@ const Wallet = ({ navigation, route }) => {
             </TouchableOpacity  >
             <ItemSeparator />
             <TouchableOpacity style={styles.rowView} onPress={() => toggleSelection('paypal')}>
-              <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={selectedPaymentMethod === 'paypal' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('paypal')} />
+              <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={selectedPaymentMethod === 'paypal' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('paypal')} />
               <Text
                 style={{
-                  color: '#56585B',
+                  color: Colors.secondary_text,
                   fontFamily: Fonts.PlusJakartaSans_Regular,
                   fontSize: RFPercentage(2),
                   marginLeft: wp(4)
@@ -963,32 +939,32 @@ export default Wallet;
 
 const styles = StyleSheet.create({
   heading: {
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.3),
     marginHorizontal: 20,
     marginVertical : hp(2)
     // backgroundColor: 'green'
   },
-  itemView: {
-    marginVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F6F6F6',
-    padding: 10,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  imageContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 10,
-    overflow: 'hidden',
-    backgroundColor: '#FF572233',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  // itemView: {
+  //   marginVertical: 10,
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   backgroundColor: Colors.Black,
+  //   padding: 10,
+  //   paddingHorizontal: 10,
+  //   borderRadius: 10,
+  //   overflow: 'hidden',
+  // },
+  // imageContainer: {
+  //   width: 50,
+  //   height: 50,
+  //   borderRadius: 10,
+  //   overflow: 'hidden',
+  //   backgroundColor: `${Colors.primary_color}30`,
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  // },
   textContainer: {
     marginLeft: 15,
     flex: 1,
@@ -999,7 +975,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   priceText: {
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontFamily: Fonts.Inter_SemiBold,
     fontSize: RFPercentage(2.5),
   },
@@ -1008,13 +984,13 @@ const styles = StyleSheet.create({
   //   fontFamily: Fonts.Inter_Medium,
   //   fontSize: RFPercentage(2),
   // },
-  subText: {
-    color: '#8D93A1',
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(2),
-  },
+  // subText: {
+  //   color: '#8D93A1',
+  //   fontFamily: Fonts.PlusJakartaSans_Medium,
+  //   fontSize: RFPercentage(2),
+  // },
   rbSheetHeading: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2),
   },
@@ -1041,13 +1017,13 @@ const styles = StyleSheet.create({
 
   },
   transactionId:{
-    color: Colors.Black,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_SemiBold,
     fontSize: RFPercentage(1.7),
     marginLeft: 10,
   },
   transactionType:{
-    color: Colors.darkTextColor,
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(1.7),
     marginLeft: 10,
@@ -1058,7 +1034,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2),
     marginRight: 10,
   },
-  headerContainer: { backgroundColor: Colors.Orange, height: hp(30) },
+  headerContainer: { backgroundColor: Colors.primary_color, height: hp(30) },
 
 });
 
@@ -1150,7 +1126,7 @@ const styles = StyleSheet.create({
 //   return (
 //     <View style={{flex: 1, backgroundColor: Colors.White}}>
 //       <Loader loading={loading} />
-//       <View style={{backgroundColor: Colors.Orange, height: hp(27)}}>
+//       <View style={{backgroundColor: Colors.primary_color, height: hp(27)}}>
 //         <StackHeader
 //           title={'My Wallet'}
 //           titleColor={'white'}
@@ -1215,7 +1191,7 @@ const styles = StyleSheet.create({
 //               renderLabel={({route, focused, color}) => (
 //                 <Text
 //                   style={{
-//                     color: focused ? Colors.Orange : '#4D4D5680',
+//                     color: focused ? Colors.primary_color : '#4D4D5680',
 //                     fontSize: hp(1.8),
 //                     fontFamily: focused
 //                       ? Fonts.PlusJakartaSans_Bold
@@ -1229,11 +1205,11 @@ const styles = StyleSheet.create({
 //               activeColor={'#fff'}
 //               // indicatorStyle={{
 //               //   padding: 1.5,
-//               //   backgroundColor: Colors.Orange,
+//               //   backgroundColor: Colors.primary_color,
 //               // }}
 //               indicatorStyle={{
 //                 padding: 1.5,
-//                 backgroundColor: Colors.Orange,
+//                 backgroundColor: Colors.primary_color,
 //                 width: totalWidth / 2.7,
 //                 left: totalWidth / 15.5,
 //               }}
@@ -1277,7 +1253,7 @@ const styles = StyleSheet.create({
 //     resizeMode: 'contain',
 //   },
 //   priceText: {
-//     color: Colors.Orange,
+//     color: Colors.primary_color,
 //     fontFamily: Fonts.Inter_SemiBold,
 //     fontSize: RFPercentage(2.5),
 //   },

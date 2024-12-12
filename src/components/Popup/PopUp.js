@@ -7,13 +7,13 @@ import {
   } from 'react-native-responsive-screen';
 import { Fonts } from '../../constants';
 
-const PopUp = ({heading, message, color}) => {
+const PopUp = ({heading, message, color, txtColor}) => {
   return (
-    <View style={[styles.popUp, {backgroundColor: color}]}>
-    <View style={[styles.color, {backgroundColor: color}]} />
+    <View style={[styles.popUp, {backgroundColor: color||'red'}]}>
+    <View style={[styles.color, {backgroundColor: color||'red'}]} />
     <View style={[styles.innerContainer]} >
-      {heading && <Text style={[styles.heading, {  color: color,}]} >{heading}</Text>}
-      <Text style={[styles.text, {}]} >{message}</Text>
+      {heading && <Text style={[styles.heading, {  color: color|| 'red'}]} >{heading}</Text>}
+      <Text style={[styles.text]} >{message}</Text>
     </View>
   </View>
   )
@@ -27,12 +27,8 @@ const styles = StyleSheet.create({
       top: hp('3.3%'),
       left: wp('5%'),
       right: wp('5%'),
-      // backgroundColor: '#d4edda',
-      // borderRadius: wp('2%'),
-      // alignItems: 'center',
-      
       zIndex: 1,
-        backgroundColor: Colors.White,
+        backgroundColor: Colors.primary_color,
         flexDirection: 'row',
         // flex:1,
         borderRadius: wp('2.5%'),
@@ -44,14 +40,12 @@ const styles = StyleSheet.create({
         // height: hp('7.3%'),
         width: wp('2.2%'),
         // flexGrow:1
+        backgroundColor: Colors.primary_color,
       },
       innerContainer:{
         paddingHorizontal: wp('3%'),
         justifyContent: 'center',
         paddingVertical: wp(1)
-
-        
-        // paddingVertical: hp('4%'),
       },
       heading: {
         fontFamily: Fonts.PlusJakartaSans_Regular,
@@ -62,6 +56,6 @@ const styles = StyleSheet.create({
       text:{
         fontFamily: Fonts.PlusJakartaSans_SemiBold,
         fontSize: wp('3.5%'),
-        color: Colors.White,
+        color: Colors.secondary_color,
       }
 })

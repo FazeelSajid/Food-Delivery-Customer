@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import StackHeader from '../../../components/Header/StackHeader'
 import {
@@ -11,7 +11,7 @@ import { Colors, Fonts } from '../../../constants';
 import { RadioButton } from 'react-native-paper';
 import api from '../../../constants/api';
 import { useDispatch, useSelector } from 'react-redux';
-import { handlePopup, showAlert } from '../../../utils/helpers';
+import { fetchApisGet, handlePopup, showAlert } from '../../../utils/helpers';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import Ionicons from 'react-native-vector-icons/Ionicons';  // For delete icon (optional)
 import { setLocation, setSetAllLocation, setUpdateLocation } from '../../../redux/AuthSlice';
@@ -20,12 +20,13 @@ import { ScrollView } from 'react-native-gesture-handler';
 import CButton from '../../../components/Buttons/CButton';
 import Loader from '../../../components/Loader';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
+import PopUp from '../../../components/Popup/PopUp';
 
 
 
 const ManageAddress = ({navigation}) => {
 
-    const { customer_id, location } = useSelector(store => store.store)
+    const { customer_id, location,  showPopUp, popUpColor, PopUpMesage } = useSelector(store => store.store)
     const [isLoading, setIsLoading] = useState()
 
     const [locations, setLocations] = useState([])
@@ -68,48 +69,76 @@ const ManageAddress = ({navigation}) => {
 
     // console.log(location );
 
-    const getLocation = () => {
-        fetch(api.get_customer_location + customer_id, {
-            method: 'GET',
-            headers: {
-                // 'Content-Type': 'application/json'
-            }
-        })
-            .then(response => response.json())
-            .then(response => {
+    const getLocation = async () => {
+        setIsLoading(true)
+        const response = await fetchApisGet(api.get_customer_location + customer_id, setIsLoading, dispatch)
+        console.log({response});
 
-                if (response.status === false) {
-                    handlePopup(dispatch,response?.message, 'red')
-                    setIsLoading(false)
-                }
-                else {
-                    setLocations(response?.customerData?.locations)
-                    // console.log(api.get_customer_location + customer_id);
 
-                    setIsLoading(false)
-                    // console.log(response.customerData.locations[0]);
-                    dispatch(setLocation({
-                        latitude: response?.customerData?.locations[0]?.latitude,
-                        longitude: response?.customerData?.locations[0]?.longitude,
-                        address: response?.customerData?.locations[0]?.address,
-                        id: response?.customerData?.locations[0]?.location_id
-                    }))
-                    dispatch(setSetAllLocation(response?.customerData?.locations))
+        if (response.status === false) {
+            handlePopup(dispatch,response?.message, 'red')
+            setIsLoading(false)
+        }
+        else {
+            setLocations(response?.customerData?.locations)
+            // console.log(api.get_customer_location + customer_id);
 
-                    dispatch(setSelectedPaymentType(''));
-                    // dispatch(setSelectedPaymentString(''));
+            setIsLoading(false)
+            // console.log(response.customerData.locations[0]);
+            dispatch(setLocation({
+                latitude: response?.customerData?.locations[0]?.latitude,
+                longitude: response?.customerData?.locations[0]?.longitude,
+                address: response?.customerData?.locations[0]?.address,
+                id: response?.customerData?.locations[0]?.location_id
+            }))
+            dispatch(setSetAllLocation(response?.customerData?.locations))
 
-                }
+            dispatch(setSelectedPaymentType(''));
+            // dispatch(setSelectedPaymentString(''));
 
-                // update state with fetched data
-            })
-            .catch(err => {
-                console.log('Error in Login :  ', err);
-                handlePopup(dispatch,'Something went wrong!', 'red');
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        }
+
+        // fetch(api.get_customer_location + customer_id, {
+        //     method: 'GET',
+        //     headers: {
+        //         // 'Content-Type': 'application/json'
+        //     }
+        // })
+        //     .then(response => response.json())
+        //     .then(response => {
+
+        //         if (response.status === false) {
+        //             handlePopup(dispatch,response?.message, 'red')
+        //             setIsLoading(false)
+        //         }
+        //         else {
+        //             setLocations(response?.customerData?.locations)
+        //             // console.log(api.get_customer_location + customer_id);
+
+        //             setIsLoading(false)
+        //             // console.log(response.customerData.locations[0]);
+        //             dispatch(setLocation({
+        //                 latitude: response?.customerData?.locations[0]?.latitude,
+        //                 longitude: response?.customerData?.locations[0]?.longitude,
+        //                 address: response?.customerData?.locations[0]?.address,
+        //                 id: response?.customerData?.locations[0]?.location_id
+        //             }))
+        //             dispatch(setSetAllLocation(response?.customerData?.locations))
+
+        //             dispatch(setSelectedPaymentType(''));
+        //             // dispatch(setSelectedPaymentString(''));
+
+        //         }
+
+        //         // update state with fetched data
+        //     })
+        //     .catch(err => {
+        //         console.log('Error in Login :  ', err);
+        //         handlePopup(dispatch,'Something went wrong!', 'red');
+        //     })
+        //     .finally(() => {
+        //         setIsLoading(false);
+        //     });
     }
     const truncateString = (text, maxLength = 30) => {
         if (text.length > maxLength) {
@@ -131,14 +160,18 @@ const ManageAddress = ({navigation}) => {
 
     return (
         <View style={styles.container}>
+
             <StackHeader title={'Manage Addresses'} headerStyle={{ marginBottom: hp(2) }} iconContainerStyle={{ marginTop: hp(1) }} />
+            {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
             <Loader loading={isLoading} />
             {/* <View style={{alignItems: 'center'}}  > */}
 
             <FlatList
                 data={locations}
-                contentContainerStyle={{ alignItems: 'center' }}
-                ListEmptyComponent={() => !isLoading && <NoDataFound text={'No Location Found Kindly Add Locations'} />}
+                style={{flex:1}}
+                contentContainerStyle={{ alignItems: 'center',flexGrow: 1 }}
+                refreshControl={<RefreshControl onRefresh={getLocation} colors={[Colors.primary_color]} refreshing={false} />}
+                ListEmptyComponent={() => !isLoading && <NoDataFound text={'No Addresses were added'} />}
                 keyExtractor={(item) => item.location_id.toString()} // Ensure each item has a unique id
                 renderItem={({ item }) => {
                     return (
@@ -181,8 +214,8 @@ const ManageAddress = ({navigation}) => {
                                 </View>
                                 <View style={{ flex: 0.2, alignItems: 'flex-end', justifyContent: 'center' }}>
                                     <RadioButton
-                                        color={Colors.Orange}
-                                        uncheckedColor={Colors.Orange}
+                                        color={Colors.button.primary_button}
+                                        uncheckedColor={Colors.button.primary_button}
                                         status={location.id === item.location_id ? 'checked' : 'unchecked'}
                                         onPress={() => {
                                             dispatch(setLocation({
@@ -221,7 +254,7 @@ const ManageAddress = ({navigation}) => {
                         <Text style={styles.address}>{'45 Maple Road, Bristol, Avon, B...'.length}</Text>
                     </View>
                     <View style={{flex: 0.2, alignItems: 'flex-end', justifyContent: 'center'}}>
-                    <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={ 'checked'}  />
+                    <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={ 'checked'}  />
                     </View>
                 </View> */}
             {/* <View style={styles.listContainer} >
@@ -233,7 +266,7 @@ const ManageAddress = ({navigation}) => {
                         <Text style={styles.address}>45 Maple Road, Bristol, Avon, B...</Text>
                     </View>
                     <View style={{flex: 0.2, alignItems: 'flex-end', justifyContent: 'center'}}>
-                    <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={ 'checked'}  />
+                    <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={ 'checked'}  />
                     </View>
                 </View> */}
 
@@ -269,11 +302,11 @@ export default ManageAddress
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.White,
+        backgroundColor: Colors.secondary_color,
         // paddingHorizontal: wp(2),
     },
     listContainer: {
-        backgroundColor: '#F5F6FA',
+        backgroundColor: `${Colors.secondary_text}12`,
         flexDirection: 'row',
         width: wp(90),
         overflow: 'hidden',
@@ -283,12 +316,12 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     label: {
-        color: Colors.Black,
+        color: Colors.primary_text,
         fontFamily: Fonts.PlusJakartaSans_Bold,
         fontSize: RFPercentage(2),
     },
     address: {
-        color: '#535151',
+        color: Colors.secondary_text,
         fontFamily: Fonts.PlusJakartaSans_Regular,
         fontSize: RFPercentage(1.5),
     },

@@ -27,7 +27,7 @@ const Chat = () => {
   //   {key: 'second', title: 'Restaurants'},
   // ]);
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       {/* <StackHeader title={'My Chats'} /> */}
       {/* <TabView
         navigationState={{index, routes}}
@@ -50,7 +50,7 @@ const Chat = () => {
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Text
                   style={{
-                    color: focused ? Colors.Orange : '#7E8CA0',
+                    color: focused ? Colors.primary_color : '#7E8CA0',
                     fontSize: hp(1.8),
                     fontFamily: Fonts.PlusJakartaSans_Bold,
                   }}>
@@ -78,7 +78,7 @@ const Chat = () => {
             indicatorStyle={{
               padding: 1.5,
               // marginBottom: -2,
-              backgroundColor: Colors.Orange,
+              backgroundColor: Colors.primary_color,
               // width: '50%',
               // alignSelf: 'center',
             }}

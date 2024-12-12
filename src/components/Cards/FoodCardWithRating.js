@@ -116,17 +116,17 @@ const FoodCardWithRating = ({
                     return(
                     <TouchableOpacity
                       style={{
-                        backgroundColor: Colors.White,
+                        backgroundColor: Colors.secondary_color,
                         paddingVertical: 2,
                         paddingHorizontal: 10,
                         borderRadius: 15,
                         marginRight: 4,
-                        borderColor: Colors.Orange,
+                        borderColor: Colors.primary_color,
                         borderWidth: 1,
                       }}>
                       <Text
                         style={{
-                          color: Colors.Orange,
+                          color: Colors.primary_color,
                           fontFamily: Fonts.PlusJakartaSans_Medium,
                           fontSize: RFPercentage(1.5),
                           marginTop: -2,
@@ -136,43 +136,21 @@ const FoodCardWithRating = ({
                     </TouchableOpacity>
                   )}}
                 />
-                {/* {tag?.map((element, key) => {
-                  return (
-                    <View
-                      key={key}
-                      style={{
-                        backgroundColor: '#FF572230',
-                        paddingVertical: 4,
-                        paddingHorizontal: 10,
-                        borderRadius: 15,
-                        marginRight: 4,
-                      }}>
-                      <Text
-                        style={{
-                          color: Colors.Orange,
-                          fontFamily: Fonts.PlusJakartaSans_Medium,
-                          fontSize: RFPercentage(1.5),
-                          marginTop: -2,
-                        }}>
-                        {element?.item_name}
-                      </Text>
-                    </View>
-                  );
-                })} */}
+               
               </View>
             ) : (
               <View
                 style={{
-                  backgroundColor:Colors.White,
+                  backgroundColor:Colors.secondary_color,
                   paddingVertical: 4,
                   paddingHorizontal: 10,
                   borderRadius: 15,
-                  borderColor: Colors.Orange,
+                  borderColor: Colors.primary_color,
                   borderWidth: 1,
                 }}>
                 <Text
                   style={{
-                    color: Colors.Orange,
+                    color: Colors.primary_color,
                     fontFamily: Fonts.PlusJakartaSans_Medium,
                     fontSize: RFPercentage(1.5),
                     marginTop: -2,
@@ -188,7 +166,7 @@ const FoodCardWithRating = ({
               <Text
                 style={{
                   marginLeft: 5,
-                  color: '#C7C5C5',
+                  color: Colors.secondary_text,
                   fontFamily: Fonts.PlusJakartaSans_Bold,
                   fontSize: RFPercentage(1.6),
                 }}>
@@ -207,7 +185,7 @@ const FoodCardWithRating = ({
               <Text
                 style={{
                   marginLeft: 5,
-                  color: '#C7C5C5',
+                  color: Colors.secondary_text,
                   fontFamily: Fonts.PlusJakartaSans_Bold,
                   fontSize: RFPercentage(1.6),
                 }}>
@@ -228,9 +206,9 @@ const FoodCardWithRating = ({
                 nextComponent
               ) : (
                 isFavorite ? (
-                  <AntDesign name="heart" size={24} color={Colors.Orange} />
+                  <AntDesign name="heart" size={24} color={Colors.button.primary_button} />
                 ) : (
-                  <AntDesign name="hearto" size={24} color={Colors.Orange} />
+                  <AntDesign name="hearto" size={24} color={Colors.button.primary_button} />
                 )
               )}
               {/* <Icons.AddCircle /> */}
@@ -242,7 +220,7 @@ const FoodCardWithRating = ({
               <Text
                 style={{
                   marginLeft: 5,
-                  color: '#C7C5C5',
+                  color: Colors.secondary_text,
                   fontFamily: Fonts.PlusJakartaSans_Bold,
                   fontSize: RFPercentage(1.6),
                 }}>
@@ -260,7 +238,7 @@ export default FoodCardWithRating;
 
 const styles = StyleSheet.create({
   name: {
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_SemiBold,
     fontSize: RFPercentage(2),
     marginTop: 5,
@@ -284,7 +262,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   priceText: {
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.5),
     marginTop: -5,
@@ -292,7 +270,7 @@ const styles = StyleSheet.create({
   //
   card1: {
     borderWidth: 1,
-    borderColor: '#E6E7EB',
+    borderColor: Colors.borderGray,
     paddingVertical: 15,
     flex: 1,
     marginHorizontal: 20,
@@ -322,25 +300,25 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#0A212B',
+    color: Colors.primary_text,
     fontSize: RFPercentage(1.5),
     lineHeight: 30,
   },
   description: {
     fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontSize: RFPercentage(1.5),
   },
   price: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#0A212B',
+    color: Colors.primary_text,
     fontSize: RFPercentage(2.5),
   },
   labelView: {
     position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: Colors.Orange,
+    backgroundColor: Colors.primary_color,
     padding: 4,
     paddingHorizontal: 5,
     minWidth: 80,
@@ -348,13 +326,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   labelText: {
-    color: Colors.White,
+    color: Colors.button.primary_button_text,
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.PlusJakartaSans_Regular,
     textTransform: 'capitalize',
   },
   quantity:{
-    color: '#00000099' ,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     fontSize: RFPercentage(1.5),
     

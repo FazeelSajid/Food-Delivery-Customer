@@ -27,7 +27,7 @@ import Loader from '../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 import OrangeSuccessCheck from '../../Assets/svg/orangeSuccessCheck.svg';
-import {setCustomerDetail, setCustomerId, setJoinAsGuest} from '../../redux/AuthSlice';
+import {setCustomerDetail, setCustomerId, setJoinAsGuest, setRestautantDetails} from '../../redux/AuthSlice';
 import PopUp from '../../components/Popup/PopUp';
 
 const Verification = ({navigation, route}) => {
@@ -47,20 +47,21 @@ const Verification = ({navigation, route}) => {
   const [loader, setLoader] = useState(false);
   const [confirmResult, setConfirmResult] = useState(null);
 
-  // useEffect(() => {
-  //   handleSendOTPCode();
-  //   // setTimeout(() => refOTP.current.focusField(0), 250);
-  // }, []);
+  const otp = route?.params?.otp?.toString()
+  const email = route?.params?.email,
+  customer_id =route?.params?.customer_id
 
   const validate = () => {
+    console.log(otpCode, 'route :' ,  otp, email, customer_id);
+
+    
     if (otpCode?.length == 0 || otpCode?.length < 4) {
-      Snackbar.show({
-        text: 'Please Enter 6 digit OTP code',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: 'red',
-      });
+      handlePopup(dispatch, 'Please Enter 4 digit OTP code', 'red')
       return false;
-    } else {
+    } else if (otpCode !== otp){
+      handlePopup(dispatch,'Incorrect OP code')
+    } 
+    else {
       return true;
     }
   };
@@ -140,7 +141,7 @@ const Verification = ({navigation, route}) => {
   
     let prevResponse = route?.params?.response;
     let data = {
-      customer_id: route?.params?.customer_id,
+      customer_id: customer_id,
       verified: true,
       otp: otpCode
     };
@@ -164,19 +165,12 @@ const Verification = ({navigation, route}) => {
           // showAlert(response.message, 'green');
           ref_RBSheet?.current?.open();
           dispatch(setJoinAsGuest(false));
-          // await AsyncStorage.setItem(
-          //   'customer_id',
-          //   prevResponse?.result?.customer_id?.toString(),
-          // );
-          // await AsyncStorage.setItem(
-          //   'customer_detail',
-          //   JSON.stringify(prevResponse?.result),
-          // );
-
+          
           dispatch(
-            setCustomerId(route?.params?.customer_id,),
+            setCustomerId(customer_id,),
           );
-          dispatch(setCustomerDetail(prevResponse?.result));
+          dispatch(setCustomerDetail(prevResponse?.user));
+          dispatch(setRestautantDetails(prevResponse?.restautant))
         }
       })
       .catch(err => {
@@ -313,7 +307,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F6FA',
   },
   underlineStyleHighLighted: {
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
     borderRadius: 30,
     borderWidth: 1,
   },

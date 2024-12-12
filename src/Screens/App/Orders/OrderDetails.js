@@ -30,6 +30,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import RBSheetSuccess from '../../../components/BottomSheet/RBSheetSuccess';
 import { RadioButton } from 'react-native-paper';
 import {
+  fetchApisGet,
   getUserFcmToken,
   handlePopup,
   showAlert,
@@ -96,6 +97,8 @@ const OrderDetails = ({ navigation, route }) => {
     // },
   ]);
 
+  const [typee, setTypee] = useState(route?.params?.type);
+
   // console.log(orderDetails.riderData);
   // console.log(orderDetails.restaurantData.restaurant_id);
 
@@ -139,7 +142,7 @@ const OrderDetails = ({ navigation, route }) => {
   const handleCancelOrder = () => {
     setLoading(true);
     let data = {
-      order_id: route?.params?.id,
+      order_id: orderDetails?.order_id,
       order_status: 'cancelled',
     };
     // console.log(data);
@@ -220,7 +223,7 @@ const OrderDetails = ({ navigation, route }) => {
           let title = 'Rating';
           let description = `${orderDetails?.customerData?.user_name} gives you ${rating} star rating`;
           let notification_type = 'rating';
-          let order_id = route?.params?.id;
+          let order_id = orderDetails?.order_id
 
           handleSendPushNotification(description, fcm_token); // sending push notification
           console.log(
@@ -258,7 +261,7 @@ const OrderDetails = ({ navigation, route }) => {
       rating: rating,
       customer_id: customer_id,
       comments: ratingComment,
-      order_id: route?.params?.id,
+      order_id: orderDetails?.order_id
     };
     console.log('Body in rate rider  : ', data);
 
@@ -282,7 +285,7 @@ const OrderDetails = ({ navigation, route }) => {
           let title = 'Rating';
           let description = `${orderDetails?.customerData?.user_name} gives you ${rating} star rating`;
           let notification_type = 'rating';
-          let order_id = route?.params?.id;
+          let order_id = orderDetails?.order_id
 
           handleSendPushNotification(description, fcm_token); // sending push notification
           // storing notification to db
@@ -373,48 +376,76 @@ const OrderDetails = ({ navigation, route }) => {
     }
   };
 
-  // const getDetail = id => {
-  //   console.log(api.get_order_by_id + id);
+  const getDetail = async (id) => {
+    console.log(api.get_order_by_id + id);
 
-  //   setLoading(true);
-  //   fetch(api.get_order_by_id + id)
-  //     .then(response => response.json())
-  //     .then(response => {
-  //       // console.log('response :  ', response);
-  //       if (response.error == false) {
-  //         setOrderDetails(response.result);
-  //         let cart_item =
-  //           response.result?.cart_items_Data?.length > 0
-  //             ? response.result?.cart_items_Data[0]
-  //             : null;
-  //         setItemImages(cart_item?.itemData?.images);
-  //         setFistCartItemDetail(cart_item);
-  //       } else {
-  //         setOrderDetails(null);
-  //       }
-  //     })
-  //     .catch(err => console.log('error : ', err))
-  //     .finally(() => setLoading(false));
-  // };
+   const response = await fetchApisGet(api.get_order_by_id + id, setLoading , dispatch)
+    if (response.error == false) {
+      console.log(response?.result?.order_status);
+      
+      if (response?.result?.order_status === 'cancelled' ) {
+        // console.log('cancelled');
+        
+        setTypee('cancelled')
+      }
+      else if (response?.result?.order_id === "delivered") {
+        setTypee('completed')
+      }
+      else {
+        setTypee('all')
+      }
+      setOrderDetails(response.result);
+      let cart_item =
+        response.result?.cart_items_Data?.length > 0
+          ? response.result?.cart_items_Data[0]
+          : null;
+      setItemImages(cart_item?.itemData?.images);
+      setFistCartItemDetail(cart_item);
+    } else {
+      setOrderDetails(null);
+    }
+    // fetch(api.get_order_by_id + id)
+    //   .then(response => response.json())
+    //   .then(response => {
+    //     // console.log('response :  ', response);
+    //     if (response.error == false) {
+    //       setOrderDetails(response.result);
+    //       let cart_item =
+    //         response.result?.cart_items_Data?.length > 0
+    //           ? response.result?.cart_items_Data[0]
+    //           : null;
+    //       setItemImages(cart_item?.itemData?.images);
+    //       setFistCartItemDetail(cart_item);
+    //     } else {
+    //       setOrderDetails(null);
+    //     }
+    //   })
+    //   .catch(err => console.log('error : ', err))
+    //   .finally(() => setLoading(false));
+  };
 
   // console.log(orderDetails, 'orderDetails') 
 
   useEffect(() => {
     let id = route?.params?.id;
-    let item = route?.params?.item;
-    // console.log('order details id :  ', item);
-    setOrderDetails(item)
-
-
-    let cart_item =
-      item?.cart_items_Data?.length > 0
-        ? item?.cart_items_Data[0]
-        : null;
-    setItemImages(cart_item?.itemData?.images);
-    setFistCartItemDetail(cart_item);
-    // if (id) {
-    //   getDetail(id);
-    // }
+    if (id) {
+      getDetail(id)
+    }
+    else{
+      let item = route?.params?.item;
+      // console.log('order details id :  ', item);
+      setOrderDetails(item)
+  
+  
+      let cart_item =
+        item?.cart_items_Data?.length > 0
+          ? item?.cart_items_Data[0]
+          : null;
+      setItemImages(cart_item?.itemData?.images);
+      setFistCartItemDetail(cart_item);
+    }
+  
+   
   }, []);
 
   function getInitials(input) {
@@ -439,6 +470,9 @@ const OrderDetails = ({ navigation, route }) => {
         : totalAmount - service_charges;
     return subtotal;
   };
+
+  console.log(orderDetails?.cart_items_Data?.[0],'asdasd');
+  
   return (
     <View style={styles.container}>
       <Loader loading={loading} />
@@ -451,7 +485,7 @@ const OrderDetails = ({ navigation, route }) => {
         </TouchableOpacity> */}
         <HeaderImageSlider data={itemImages && itemImages} />
 
-        <View style={{ flex: 1, backgroundColor: Colors.OrangeExtraLight, width: '90%', overflow: 'hidden', alignSelf: 'center' }}>
+        <View style={{ flex: 1, backgroundColor: `${Colors.primary_color}10`, width: '90%', overflow: 'hidden', alignSelf: 'center', borderRadius: wp(3) }}>
           {/* <View
             style={{
               alignItems: 'center',
@@ -469,17 +503,17 @@ const OrderDetails = ({ navigation, route }) => {
             <View>
               <Text
                 style={{
-                  color: '#191A26',
+                  color: Colors.primary_text,
                   fontFamily: Fonts.PlusJakartaSans_Bold,
                   fontSize: RFPercentage(2),
                   lineHeight: 30,
                 }}>
                 Order #{orderDetails?.order_id}
               </Text>
-              {route?.params?.type == 'cancelled' ? (
+              {typee == 'cancelled' ? (
                 <Text
                   style={{
-                    color: '#6C6C6C',
+                    color: Colors.secondary_text,
                     fontFamily: Fonts.PlusJakartaSans_Regular,
                     fontSize: RFPercentage(1.7),
                   }}>
@@ -489,10 +523,10 @@ const OrderDetails = ({ navigation, route }) => {
                     'Do,MMM YYYY',
                   )}
                 </Text>
-              ) : route?.params?.type == 'completed' ? (
+              ) : typee == 'completed' ? (
                 <Text
                   style={{
-                    color: '#6C6C6C',
+                    color: Colors.secondary_text,
                     fontFamily: Fonts.PlusJakartaSans_Regular,
                     fontSize: RFPercentage(1.7),
                   }}>
@@ -506,14 +540,14 @@ const OrderDetails = ({ navigation, route }) => {
                 <>
                   <Text
                     style={{
-                      color: '#6C6C6C',
+                      color: Colors.secondary_text,
                       fontFamily: Fonts.PlusJakartaSans_Regular,
                       fontSize: RFPercentage(1.7),
                     }}>
                     Order Status:{' '}
                     <Text
                       style={{
-                        color: Colors.Orange,
+                        color: Colors.primary_color,
                         fontFamily: Fonts.PlusJakartaSans_SemiBold,
                         fontSize: RFPercentage(1.7),
                         textTransform: 'capitalize',
@@ -557,16 +591,16 @@ const OrderDetails = ({ navigation, route }) => {
                 // {item?.item_type == 'deal' ? item.price * item?.quantity : item?.variationData?.price * item?.quantity}
 
                 return (
-                  <View style={{ ...styles.rowView, marginBottom: 5 }}>
+                  <View key={key} style={{ ...styles.rowView, marginBottom: 5 }}>
                     <Ionicons
                       name={'close'}
                       size={15}
-                      color={Colors.Orange}
+                      color={Colors.primary_color}
                       style={{ marginBottom: -3 }}
                     />
                     <Text
                       style={{
-                        color: Colors.Orange,
+                        color: Colors.primary_color,
                         fontFamily: Fonts.PlusJakartaSans_Bold,
                         fontSize: RFPercentage(2),
                         marginLeft: 5,
@@ -576,7 +610,7 @@ const OrderDetails = ({ navigation, route }) => {
                     </Text>
                     <Text
                       style={{
-                        color: '#191A26',
+                        color: Colors.primary_text,
                         fontFamily: Fonts.PlusJakartaSans_Bold,
                         fontSize: RFPercentage(2),
                       }}>
@@ -590,11 +624,11 @@ const OrderDetails = ({ navigation, route }) => {
                       style={{
                         flex: 1,
                         textAlign: 'right',
-                        color: Colors.Orange,
+                        color: Colors.primary_color,
                         fontFamily: Fonts.PlusJakartaSans_SemiBold,
                         fontSize: RFPercentage(2),
                       }}>
-                      $ {item?.item_type == 'deal' ? item.sub_total * item?.quantity : item?.variationData?.price * item?.quantity}
+                      $ {item?.item_type == 'deal' ? item.sub_total * item?.quantity : item?.sub_total * item?.quantity}
                     </Text>
                   </View>
                 )
@@ -648,7 +682,7 @@ const OrderDetails = ({ navigation, route }) => {
               </View>
               {
                 orderDetails?.comments && <View style={{ marginTop: hp(2) }} >
-                  <Text style={[styles.total_amountText, { fontFamily: Fonts.PlusJakartaSans_Bold, marginBottom: hp(1), color: Colors.Orange }]}>Special Instructions: </Text>
+                  <Text style={[styles.total_amountText, { fontFamily: Fonts.PlusJakartaSans_Bold, marginBottom: hp(1), color: Colors.primary_color }]}>Special Instructions: </Text>
                   <Text style={[styles.subText2, { fontFamily: Fonts.PlusJakartaSans_Regular, fontSize: RFPercentage(1.6) }]}>Please drop the food at the reception desk. I’ll collect it later. </Text>
                 </View>
               }
@@ -658,41 +692,14 @@ const OrderDetails = ({ navigation, route }) => {
 
             <Text
               style={{
-                color: Colors.Orange,
+                color: Colors.primary_color,
                 fontFamily: Fonts.PlusJakartaSans_Bold,
                 fontSize: RFPercentage(2.3),
                 marginHorizontal: 20,
               }}>
               Payment Methods
             </Text>
-            {/* <View
-                style={{
-                  borderWidth: 1,
-                  borderColor: '#E6E7EB',
-                  paddingVertical: 5,
-                  flex: 1,
-                  marginHorizontal: 20,
-                  borderRadius: 10,
-                  alignItems: 'center',
-                  paddingHorizontal: 10,
-                  overflow: 'hidden',
-                  flexDirection: 'row',
-                  marginVertical: 10,
-                }}>
-                <Image
-                  source={Images.master_card}
-                  style={{height: 50, width: 50, resizeMode: 'contain'}}
-                />
-                <Text
-                  style={{
-                    color: '#02010E',
-                    fontFamily: Fonts.PlusJakartaSans_Medium,
-                    fontSize: RFPercentage(2),
-                    marginLeft: 15,
-                  }}>
-                  Master Card
-                </Text>
-              </View> */}
+           
             {orderDetails?.payment_option == 'cash' ? (
               <PaymentCard type="cash" title="Cash On Delivery" />
             ) : (
@@ -701,7 +708,7 @@ const OrderDetails = ({ navigation, route }) => {
 
 
             <View style={{ paddingHorizontal: 20 }}>
-              {route?.params?.type == 'all' && <View style={styles.itemView}>
+              {typee == 'all' && <View style={styles.itemView}>
                 <View style={styles.imageContainer}>
                   <Icons.Van />
                 </View>
@@ -712,7 +719,7 @@ const OrderDetails = ({ navigation, route }) => {
                   <Text
                     style={{
                       ...styles.title,
-                      color: Colors.Orange,
+                      color: Colors.primary_color,
                       fontFamily: Fonts.Inter_SemiBold,
                     }}>
                     {/* 40 mins */}
@@ -725,7 +732,7 @@ const OrderDetails = ({ navigation, route }) => {
 
               {orderDetails?.restaurantData?.restaurant_id && (
                 <View style={styles.itemView}>
-                  <View style={{ backgroundColor: Colors.Orange, paddingHorizontal: wp(4), paddingVertical: wp(2.2), borderRadius: wp(10), }} ><Text style={{ color: Colors.White, fontSize: RFPercentage(2.4), padding: 0 }} >{getInitials(orderDetails?.restaurantData?.user_name)}</Text></View>
+                  <View style={{ backgroundColor: Colors.button.primary_button, paddingHorizontal: wp(4), paddingVertical: wp(2.2), borderRadius: wp(10), }} ><Text style={{ color: Colors.button.primary_button_text, fontSize: RFPercentage(2.4), padding: 0 }} >{getInitials(orderDetails?.restaurantData?.user_name)}</Text></View>
                   <View style={styles.textContainer}>
                     <Text style={{ ...styles.subText, marginLeft: 5 }}>
                       {/* Rider's name here */}
@@ -742,7 +749,7 @@ const OrderDetails = ({ navigation, route }) => {
 
               {orderDetails?.riderData?.rider_id && (
                 <View style={styles.itemView}>
-                  <View style={{ backgroundColor: Colors.Orange, paddingHorizontal: wp(4), paddingVertical: wp(2.2), borderRadius: wp(10), }} ><Text style={{ color: Colors.White, fontSize: RFPercentage(2.4), padding: 0 }} >{getInitials(orderDetails?.riderData?.name)}</Text></View>
+                  <View style={{ backgroundColor: Colors.button.primary_button, paddingHorizontal: wp(4), paddingVertical: wp(2.2), borderRadius: wp(10), }} ><Text style={{ color: Colors.button.primary_button_text, fontSize: RFPercentage(2.4), padding: 0 }} >{getInitials(orderDetails?.riderData?.name)}</Text></View>
 
                   <View style={styles.textContainer}>
                     <Text style={{ ...styles.subText, marginLeft: 5 }}>
@@ -763,7 +770,7 @@ const OrderDetails = ({ navigation, route }) => {
           </>
 
 
-          {route?.params?.type == 'history' && (
+          {typee == 'history' && (
             <View
               style={{
                 paddingHorizontal: 20,
@@ -804,7 +811,7 @@ const OrderDetails = ({ navigation, route }) => {
           </View> */}
 
           {/* <View style={{paddingHorizontal: 20}}>
-            {route?.params?.type == 'history' ? null : (
+            {typee == 'history' ? null : (
               <View style={styles.itemView}>
                 <View style={styles.imageContainer}>
                   <Icons.Van />
@@ -816,7 +823,7 @@ const OrderDetails = ({ navigation, route }) => {
                   <Text
                     style={{
                       ...styles.title,
-                      color: Colors.Orange,
+                      color: Colors.primary_color,
                       fontFamily: Fonts.Inter_SemiBold,
                     }}>
                  
@@ -844,7 +851,7 @@ const OrderDetails = ({ navigation, route }) => {
             {orderDetails?.restaurantData?.restaurant_id && (
               <View style={styles.itemView}>
                 <Avatar.Image
-                  style={{backgroundColor: Colors.Orange}}
+                  style={{backgroundColor: Colors.primary_color}}
                   size={45}
                
                   source={{
@@ -876,13 +883,13 @@ const OrderDetails = ({ navigation, route }) => {
             )}
           </View> */}
 
-          {/* {route?.params?.type == 'all' ? (
+          {/* {typee == 'all' ? (
             <View style={{paddingHorizontal: 20, flex: 1}}>
               {orderDetails?.riderData?.rider_id &&
                 orderDetails?.order_status == 'out_for_delivery' && (
                   <View style={styles.itemView}>
                     <Avatar.Image
-                      style={{backgroundColor: Colors.Orange}}
+                      style={{backgroundColor: Colors.primary_color}}
                       size={45}
                      
                       source={{
@@ -924,9 +931,9 @@ const OrderDetails = ({ navigation, route }) => {
                 />
               </View>
             </View>
-          ) : route?.params?.type == 'cancelled' ? (
+          ) : typee == 'cancelled' ? (
             <View style={{paddingHorizontal: 20, paddingBottom: 20}}></View>
-          ) : route?.params?.type == 'history' ? (
+          ) : typee == 'history' ? (
             <View
               style={{
                 paddingHorizontal: 20,
@@ -1027,14 +1034,14 @@ const OrderDetails = ({ navigation, route }) => {
                     style={styles.rowView}>
                     <RadioButton
                       value="first"
-                      uncheckedColor={Colors.Orange}
-                      color={Colors.Orange}
+                      uncheckedColor={Colors.button.primary_button}
+                      color={Colors.button.primary_button}
                       status={checked === 'rider' ? 'checked' : 'unchecked'}
                       onPress={() => onRiderSelect()}
                     />
                     <Text
                       style={{
-                        color: '#56585B',
+                        color: Colors.secondary_text ,
                         fontFamily: Fonts.PlusJakartaSans_Regular,
                         fontSize: RFPercentage(1.8),
                         marginTop: -2,
@@ -1047,7 +1054,7 @@ const OrderDetails = ({ navigation, route }) => {
                     style={{
                       marginVertical: 7,
                       height: 0.8,
-                      backgroundColor: '#00000021',
+                      backgroundColor: Colors.secondary_text,
                     }}
                   />
                   <TouchableOpacity
@@ -1055,14 +1062,14 @@ const OrderDetails = ({ navigation, route }) => {
                     style={styles.rowView}>
                     <RadioButton
                       value="first"
-                      uncheckedColor={Colors.Orange}
-                      color={Colors.Orange}
+                      uncheckedColor={Colors.button.primary_button}
+                      color={Colors.button.primary_button}
                       status={checked === 'driver' ? 'checked' : 'unchecked'}
                       onPress={() => onDriverSelect()}
                     />
                     <Text
                       style={{
-                        color: '#757575',
+                        color: Colors.secondary_text,
                         fontFamily: Fonts.PlusJakartaSans_Medium,
                       }}>
                       Rate Restaurant
@@ -1089,7 +1096,7 @@ const OrderDetails = ({ navigation, route }) => {
               <View style={{ width: wp(90) }}>
                 <Text
                   style={{
-                    color: Colors.Text,
+                    color: Colors.primary_text,
                     fontFamily: Fonts.PlusJakartaSans_Bold,
                     fontSize: RFPercentage(2.4),
                     marginBottom: 20,
@@ -1162,9 +1169,9 @@ const OrderDetails = ({ navigation, route }) => {
             }
           />
         </View>
-        <View style={route?.params?.type == 'cancelled' ? { height: hp(2) } : { height: hp(10) }} />
+        <View style={typee == 'cancelled' ? { height: hp(2) } : { height: hp(10) }} />
       </ScrollView>
-      {route?.params?.type == 'all' && (
+      {typee == 'all' && (
         orderDetails?.order_status === 'out_for_delivery' ? (
           <View
             style={{
@@ -1184,7 +1191,7 @@ const OrderDetails = ({ navigation, route }) => {
             <CButton
               title="Track Order"
               width={wp(42)}
-            onPress={() => navigation.navigate('TrackOrder')}
+            onPress={() => navigation.navigate('TrackOrder', {item: orderDetails})}
             />
           </View>
 
@@ -1194,7 +1201,7 @@ const OrderDetails = ({ navigation, route }) => {
           style={{ position: 'absolute', top: hp(95), zIndex: 999 }}
         />
       )}
-      {route?.params?.type == 'completed' && (
+      {typee == 'completed' && (
         <View
           style={{
             position: 'absolute',
@@ -1249,30 +1256,30 @@ export default OrderDetails;
 const styles = StyleSheet.create({
   heading1: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#191A26',
+    color: Colors.primary_text,
     fontSize: RFPercentage(2.2),
   },
   priceText: {
     fontFamily: Fonts.PlusJakartaSans_ExtraBold,
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontSize: RFPercentage(2.5),
   },
 
   container: {
     flex: 1,
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.secondary_color,
     alignItems: 'center',
     // paddingHorizontal: 20,
   },
   heading: {
     fontFamily: Fonts.PlusJakartaSans_SemiBold,
-    color: '#191A26',
+    color: Colors.primary_text,
     fontSize: RFPercentage(2.2),
     flex: 1,
   },
   price: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontSize: RFPercentage(2.4),
     flex: 0.6,
     textAlign: 'right',
@@ -1283,7 +1290,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     // backgroundColor: '#F6F6F6',
-    backgroundColor: '#F5F6FA',
+    backgroundColor: `${Colors.secondary_text}10`,
     padding: 10,
     paddingHorizontal: 10,
     borderRadius: 10,
@@ -1294,7 +1301,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#FF572233',
+    backgroundColor: `${Colors.primary_color}30`,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1318,35 +1325,35 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   subText: {
-    color: '#8D93A1',
+    color: Colors.secondary_text,
     fontFamily: Fonts.Inter_Regular,
     fontSize: RFPercentage(2),
   },
   subText1: {
     fontFamily: Fonts.Inter_Regular,
     fontSize: RFPercentage(1.5),
-    color: '#898A8D',
+    color: Colors.secondary_text,
     textTransform: 'capitalize',
   },
   title: {
-    color: '#191A26',
+    color: Colors.primary_text,
     fontSize: RFPercentage(2),
     fontFamily: Fonts.Inter_Medium,
   },
   title1: {
-    color: '#191A26',
+    color: Colors.primary_text,
     fontFamily: Fonts.Inter_Medium,
     fontSize: RFPercentage(1.8),
     marginLeft: 12,
   },
   title2: {
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(1.9),
     marginLeft: 12,
   },
   rbSheetHeading: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.4),
   },
@@ -1371,7 +1378,7 @@ const styles = StyleSheet.create({
     minHeight: 30,
     flex: 1,
     borderWidth: 1,
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
     borderStyle: 'dashed',
     width: 1,
     // marginLeft: 19,
@@ -1381,28 +1388,28 @@ const styles = StyleSheet.create({
     top: 33,
   },
   location_heading: {
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontFamily: Fonts.Inter_Medium,
     fontSize: RFPercentage(2),
     width: wp(70),
     marginLeft: 15,
   },
   location_description: {
-    color: '#808D9E',
+    color: Colors.secondary_text,
     fontFamily: Fonts.Inter_Regular,
     fontSize: RFPercentage(1.5),
     width: wp(70),
     marginLeft: 15,
   },
   subText2: {
-    color: '#0C0B0B',
+    color: Colors.primary_text,
     fontFamily: Fonts.Inter_Regular,
     fontSize: RFPercentage(2),
     // lineHeight: 30,
   },
   total_amountText: {
-    color: '#292323',
-    fontFamily: Fonts.Inter_Bold,
+    color: Colors.primary_text,
+    fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2),
     // lineHeight: 30,
   },
@@ -1804,7 +1811,7 @@ const styles = StyleSheet.create({
 //           </View>
 
 //           <View style={{paddingHorizontal: 20}}>
-//             {route?.params?.type == 'history' ? null : (
+//             {typee == 'history' ? null : (
 //               <View style={styles.itemView}>
 //                 <View style={styles.imageContainer}>
 //                   <Icons.Van />
@@ -1816,7 +1823,7 @@ const styles = StyleSheet.create({
 //                   <Text
 //                     style={{
 //                       ...styles.title,
-//                       color: Colors.Orange,
+//                       color: Colors.primary_color,
 //                       fontFamily: Fonts.Inter_SemiBold,
 //                     }}>
 //                     {/* 40 mins */}
@@ -1844,7 +1851,7 @@ const styles = StyleSheet.create({
 //             {orderDetails?.restaurantData?.restaurant_id && (
 //               <View style={styles.itemView}>
 //                 <Avatar.Image
-//                   style={{backgroundColor: Colors.Orange}}
+//                   style={{backgroundColor: Colors.primary_color}}
 //                   size={45}
 //                   // source={Images.user}
 //                   source={{
@@ -1876,13 +1883,13 @@ const styles = StyleSheet.create({
 //             )}
 //           </View>
 
-//           {route?.params?.type == 'all' ? (
+//           {typee == 'all' ? (
 //             <View style={{paddingHorizontal: 20, flex: 1}}>
 //               {orderDetails?.riderData?.rider_id &&
 //                 orderDetails?.order_status == 'out_for_delivery' && (
 //                   <View style={styles.itemView}>
 //                     <Avatar.Image
-//                       style={{backgroundColor: Colors.Orange}}
+//                       style={{backgroundColor: Colors.primary_color}}
 //                       size={45}
 //                       // source={Images.user}
 //                       source={{
@@ -1924,9 +1931,9 @@ const styles = StyleSheet.create({
 //                 />
 //               </View>
 //             </View>
-//           ) : route?.params?.type == 'cancelled' ? (
+//           ) : typee == 'cancelled' ? (
 //             <View style={{paddingHorizontal: 20, paddingBottom: 20}}>
-//               {/* <Text style={{...styles.heading, color: Colors.Orange}}>
+//               {/* <Text style={{...styles.heading, color: Colors.primary_color}}>
 //                 Cancelled By
 //               </Text>
 
@@ -1942,7 +1949,7 @@ const styles = StyleSheet.create({
 //                 malesuada
 //               </Text> */}
 //             </View>
-//           ) : route?.params?.type == 'history' ? (
+//           ) : typee == 'history' ? (
 //             <View
 //               style={{
 //                 paddingHorizontal: 20,
@@ -2043,8 +2050,8 @@ const styles = StyleSheet.create({
 //                     style={styles.rowView}>
 //                     <RadioButton
 //                       value="first"
-//                       uncheckedColor={Colors.Orange}
-//                       color={Colors.Orange}
+//                       uncheckedColor={Colors.primary_color}
+//                       color={Colors.primary_color}
 //                       status={checked === 'rider' ? 'checked' : 'unchecked'}
 //                       onPress={() => onRiderSelect()}
 //                     />
@@ -2063,7 +2070,7 @@ const styles = StyleSheet.create({
 //                     style={{
 //                       marginVertical: 7,
 //                       height: 0.8,
-//                       backgroundColor: '#00000021',
+//                       backgroundColor: Colors.borderGray,
 //                     }}
 //                   />
 //                   <TouchableOpacity
@@ -2071,8 +2078,8 @@ const styles = StyleSheet.create({
 //                     style={styles.rowView}>
 //                     <RadioButton
 //                       value="first"
-//                       uncheckedColor={Colors.Orange}
-//                       color={Colors.Orange}
+//                       uncheckedColor={Colors.primary_color}
+//                       color={Colors.primary_color}
 //                       status={checked === 'driver' ? 'checked' : 'unchecked'}
 //                       onPress={() => onDriverSelect()}
 //                     />
@@ -2205,12 +2212,12 @@ const styles = StyleSheet.create({
 // const styles = StyleSheet.create({
 //   heading1: {
 //     fontFamily: Fonts.PlusJakartaSans_Bold,
-//     color: '#191A26',
+//     color: Colors.primary_text,
 //     fontSize: RFPercentage(2.2),
 //   },
 //   priceText: {
 //     fontFamily: Fonts.PlusJakartaSans_ExtraBold,
-//     color: Colors.Orange,
+//     color: Colors.primary_color,
 //     fontSize: RFPercentage(2.5),
 //   },
 
@@ -2222,13 +2229,13 @@ const styles = StyleSheet.create({
 //   },
 //   heading: {
 //     fontFamily: Fonts.PlusJakartaSans_SemiBold,
-//     color: '#191A26',
+//     color: Colors.primary_text,
 //     fontSize: RFPercentage(2.2),
 //     flex: 1,
 //   },
 //   price: {
 //     fontFamily: Fonts.PlusJakartaSans_Bold,
-//     color: Colors.Orange,
+//     color: Colors.primary_color,
 //     fontSize: RFPercentage(2.4),
 //     flex: 0.6,
 //     textAlign: 'right',
@@ -2285,18 +2292,18 @@ const styles = StyleSheet.create({
 //     textTransform: 'capitalize',
 //   },
 //   title: {
-//     color: '#191A26',
+//     color: Colors.primary_text,
 //     fontSize: RFPercentage(2),
 //     fontFamily: Fonts.Inter_Medium,
 //   },
 //   title1: {
-//     color: '#191A26',
+//     color: Colors.primary_text,
 //     fontFamily: Fonts.Inter_Medium,
 //     fontSize: RFPercentage(1.8),
 //     marginLeft: 12,
 //   },
 //   title2: {
-//     color: Colors.Orange,
+//     color: Colors.primary_color,
 //     fontFamily: Fonts.PlusJakartaSans_Bold,
 //     fontSize: RFPercentage(1.9),
 //     marginLeft: 12,

@@ -8,8 +8,8 @@ const Chip = ({title, onPress, selected, icon}) => {
       onPress={onPress}
       style={{
         borderWidth: 1,
-        borderColor: '#E6E9ED',
-        backgroundColor: selected ? Colors.Orange : Colors.White,
+        borderColor: Colors.borderGray,
+        backgroundColor: selected ? Colors.button.primary_button : Colors.button.secondary_button,
         paddingHorizontal: 20,
         paddingVertical: 8,
         borderRadius: 25,
@@ -19,7 +19,7 @@ const Chip = ({title, onPress, selected, icon}) => {
         flexDirection: 'row',
       }}>
       {icon && <View style={{marginRight: 5}}>{icon}</View>}
-      <Text style={{color: selected ? Colors.White : Colors.Text}}>
+      <Text style={{color: selected ? Colors.button.primary_button_text : Colors.button.secondary_button_text}}>
         {title}
       </Text>
     </TouchableOpacity>

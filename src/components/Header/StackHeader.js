@@ -66,7 +66,7 @@ const StackHeader = ({
           <Ionicons
             name={'chevron-back'}
             size={hp(3.5)}
-            color={backIconColor ? backIconColor : Colors.Orange}
+            color={backIconColor ? backIconColor : Colors.primary_color}
           />
         </TouchableOpacity>
         {showTitle == false ? null : (
@@ -74,7 +74,7 @@ const StackHeader = ({
             <Text
               style={[headerTxtStyle,{
                 ...styles.mainText,
-                color: titleColor ? titleColor : Colors.Orange,
+                color: titleColor ? titleColor : Colors.primary_color,
                 letterSpacing: 0,
                 fontSize: titleSize? titleSize : RFPercentage(2.8),
                 
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mainText: {
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontFamily: Fonts.PlusJakartaSans_SemiBold,
     // fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(3),
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
 //           <Ionicons
 //             name={'chevron-back'}
 //             size={hp(3)}
-//             color={backIconColor ? backIconColor : Colors.Orange}
+//             color={backIconColor ? backIconColor : Colors.primary_color}
 //           />
 //         </TouchableOpacity>
 //         {showTitle == false ? null : (
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
 //             <Text
 //               style={{
 //                 ...styles.mainText,
-//                 color: titleColor ? titleColor : Colors.Orange,
+//                 color: titleColor ? titleColor : Colors.primary_color,
 //                 letterSpacing: 1.5,
 //               }}>
 //               {title}
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
 //     flex: 1,
 //   },
 //   mainText: {
-//     color: Colors.Orange,
+//     color: Colors.primary_color,
 //     fontFamily: Fonts.PlusJakartaSans_SemiBold,
 //     fontSize: RFPercentage(2.2),
 //     textAlign: 'center',

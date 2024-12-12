@@ -10,14 +10,13 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-import FoodCardWithRating from '../../components/Cards/FoodCardWithRating';
-import { Colors, Images, Fonts, Icons } from '../../constants';
+import { Colors,Images, Fonts, Icons } from '../../constants';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -53,11 +52,12 @@ import { GetWalletAmount } from '../../utils/helpers/walletApis';
 import PopUp from '../../components/Popup/PopUp';
 import RBSheetGuestUser from '../../components/BottomSheet/RBSheetGuestUser';
 import { io } from 'socket.io-client';
+import socket from '../../utils/Socket';
 
 
 const Dashboard = ({ navigation, route }) => {
   const dispatch = useDispatch();
-  const { location, customer_detail, customer_id, cuisines, items, deals, promos, currentLocation, walletTotalAmount, showPopUp, popUpColor, PopUpMesage, join_as_guest } = useSelector(store => store.store);
+  const { location, customer_detail, customer_id, cuisines, items, deals, promos, currentLocation, restautantDetails, showPopUp, popUpColor, PopUpMesage, join_as_guest } = useSelector(store => store.store);
   const { cart_restaurant_id, my_cart } = useSelector(store => store.cart);
   const { favoriteItems, favoriteDeals } = useSelector(store => store.favorite);
   const [variations, setVariations] = useState([])
@@ -69,7 +69,6 @@ const Dashboard = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const [itemLoading, setItemLoading] = useState(false);
   const [dealLoading, setDealLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [showFilteredData, setShowFilteredData] = useState(false);
   const [searchedItems, setSearchedItems] = useState([]);
@@ -92,8 +91,13 @@ const Dashboard = ({ navigation, route }) => {
   const ref_RBSheetGuestUser = useRef(null);
 
 
-const socketUrl = 'http://192.168.100.239:3017'
-  // console.log(customer_detail.rest_id);
+
+
+  // console.log({restautantDetails})
+
+
+
+  // console.log({Colors});
 
 
   const onPageSelected = (e) => {
@@ -127,6 +131,7 @@ const socketUrl = 'http://192.168.100.239:3017'
 
     handlePriceSort();
   };
+
   const renderPaginationDots = () => {
     return (
       <View
@@ -137,7 +142,7 @@ const socketUrl = 'http://192.168.100.239:3017'
             style={[
               styles.dot,
               {
-                backgroundColor: currentPage === index ? Colors.Orange : Colors.grayText,
+                backgroundColor: currentPage === index ? Colors.primary_color : Colors.secondary_text,
                 width: currentPage === index ? wp(6.5) : wp(2),
               },
             ]}
@@ -157,7 +162,7 @@ const socketUrl = 'http://192.168.100.239:3017'
       style={{
         height: hp(0.1),
         marginVertical: 10,
-        backgroundColor: '#00000026',
+        backgroundColor:Colors.borderGray,
       }}
     />
   );
@@ -192,11 +197,6 @@ const socketUrl = 'http://192.168.100.239:3017'
   }
   const add_item_to_cart = async (id, type, name, item_id) => {
     let cart = await getCustomerCart(customer_id, dispatch);
-    // console.log('______cart    :  ', cart?.cart_id);
-    // console.log({cart});
-
-
-
     let data = type === 'item' ? {
       item_id: item_id ? item_id : itemObj.id,
       cart_id: cart?.cart_id?.toString(),
@@ -433,22 +433,6 @@ const socketUrl = 'http://192.168.100.239:3017'
   //   setSearchQuery(text);
   // };
 
-  // useEffect(() => {
-  //   const delayDebounceFn = setTimeout(() => {
-  //     if (searchQuery?.length == 0) {
-  //       setLoading(false);
-  //       // handleSelect(false, false, true)
-  //       setSearchedItems([]);
-  //       setFilteredDeals([]);
-  //       setFilteredRestaurant([]);
-  //     } else {
-  //       searchApi(searchQuery);
-  //     }
-  //   }, 1000);
-  //   return () => clearTimeout(delayDebounceFn);
-  // }, [searchQuery]);
-
-
   const handleSearch = () => {
     if (searchQuery?.length === 0) {
       setLoading(false);
@@ -461,28 +445,28 @@ const socketUrl = 'http://192.168.100.239:3017'
   };
 
   useEffect(() => {
-    const newSocket = io(BASE_URL);
-    // setSocket(newSocket);
+    // const socket = io(BASE_URL);
+    // setSocket(socket);
 
     // Fetch contacts on socket connection
-    newSocket.on('connect', () => {
-        newSocket.emit('getContacts', { customer_id }); 
+    socket.on('connect', () => {
+        socket.emit('getContacts', { customer_id }); 
     });
 
     // Listen for contacts data
-    newSocket.on('contacts', (contactsData) => {
+    socket.on('contacts', (contactsData) => {
         dispatch(setContacts(contactsData));  
         
     });
 
   
-    newSocket.on('error', (error) => {
+    socket.on('error', (error) => {
         console.error('Socket Error:', error.message);
     });
 
     // Cleanup on component unmount
     return () => {
-        newSocket.disconnect();
+        socket.disconnect();
     };
 }, []);
 
@@ -540,6 +524,8 @@ const socketUrl = 'http://192.168.100.239:3017'
   const func = async () => {
     let amount = await GetWalletAmount(customer_id);
     dispatch(setWalletTotalAmount(amount))
+    await getCustomerCart(customer_id, dispatch);
+
   }
 
   const getPromo = async () => {
@@ -564,7 +550,7 @@ const socketUrl = 'http://192.168.100.239:3017'
   };
   const getDeals = async () => {
     setDealLoading(true)
-    const response = await fetchApisGet(api.get_all_deals, setDealLoading, dispatch);
+    const response = await fetchApisGet(api.get_all_deals_by_restaurant+'res_4074614', setDealLoading, dispatch);
     let list = response?.result ? response?.result : [];
     dispatch(setdeals(list))
     // console.log(list);
@@ -673,44 +659,31 @@ const socketUrl = 'http://192.168.100.239:3017'
     func()
     setRefresh(false)
   };
-  useEffect(() => {
 
+  useEffect(() => {
     setDeals(deals);
     setItems(items)
-    setPromoCodes(promos)
+    getPromo()
     setCuisine(cuisines)
     getDeals();
     handleSelect(false, false, true)
     getAllCuisines();
     get_Cart_Items()
     getCurrentLocatin()
-    // getLocation()
-    // getCustomerLocations()
-    // if (deals.length < 0) {
-    //   getDeals();
-    // } 
-    // if (items.length < 0) {
-    //   handleSelect(false, false, true)
-    // }
-    // if (promos.length < 0) {
-    //   getPromo()
-    // } 
-    // if (cuisines.length < 0) {
-    //   getAllCuisines();
-    // } 
-    // get_Cart_Items()
-    // getCurrentLocatin()
+
   }, []);
 
   useEffect(() => {
     setItems(items)
   }, [items])
 
-  useEffect(() => {
-    getFavoriteItem(customer_id, dispatch);
-    getFavoriteDeals(customer_id, dispatch);
-    func()
-  }, [customer_id]);
+  useFocusEffect(
+    useCallback(() => {
+      getFavoriteItem(customer_id, dispatch);
+      getFavoriteDeals(customer_id, dispatch);
+      func();
+    }, [customer_id, dispatch])
+  );
 
   const isItemFavorite = (id) => {
     return favoriteItems.some(item => item?.item?.item_id === id);
@@ -1000,7 +973,7 @@ const socketUrl = 'http://192.168.100.239:3017'
         keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
-            colors={[Colors.Orange, Colors.OrangeLight]}
+            colors={[Colors.primary_color]}
             refreshing={false}
             onRefresh={() => onRefresh()}
           />
@@ -1014,7 +987,8 @@ const socketUrl = 'http://192.168.100.239:3017'
         {
           !isSearch && <View style={styles.headerContainer}>
             <TouchableOpacity onPress={() => navigation?.openDrawer()}>
-              <Icons.MenuActive width={23} />
+            <Feather name="menu" size={RFPercentage(3.2)} color={Colors.primary_color} />
+            
             </TouchableOpacity>
             <Text style={styles.headerLocation} ellipsizeMode='tail' numberOfLines={1} >{currentLocation.shortAddress}</Text>
 
@@ -1022,7 +996,7 @@ const socketUrl = 'http://192.168.100.239:3017'
               <TouchableOpacity
                 style={{ marginRight: 20 }}
                 onPress={() => handleOpenSearch()}>
-                <Feather name="search" size={RFPercentage(2.8)} color={Colors.Orange} />
+                <Feather name="search" size={RFPercentage(2.8)} color={Colors.primary_color} />
 
               </TouchableOpacity>
               <TouchableOpacity
@@ -1034,7 +1008,7 @@ const socketUrl = 'http://192.168.100.239:3017'
         }
         {/* <Text
           style={{
-            color: '#02010E',
+            color: Colors.primary_text,
             fontFamily: Fonts.PlusJakartaSans_Bold,
             fontSize: RFPercentage(2.5),
             width: wp(60),
@@ -1051,7 +1025,7 @@ const socketUrl = 'http://192.168.100.239:3017'
             }>
             <Text
               style={{
-                color: '#02010E',
+                color: Colors.primary_text,
                 fontFamily: Fonts.PlusJakartaSans_Medium,
                 fontSize: RFPercentage(1.7),
                 width: wp(90),
@@ -1071,7 +1045,7 @@ const socketUrl = 'http://192.168.100.239:3017'
                   <Ionicons
                     name={'chevron-back'}
                     size={hp(3.5)}
-                    color={Colors.Orange}
+                    color={Colors.primary_color}
                   />
                 </TouchableOpacity>
 
@@ -1113,13 +1087,13 @@ const socketUrl = 'http://192.168.100.239:3017'
                   style={{
                     ...styles.topChip,
                     backgroundColor: searchBtns.all
-                      ? Colors.Orange
-                      : '#F5F6FA',
+                      ? Colors.button.primary_button
+                      : `${Colors.secondary_text}10`,
                   }}>
                   <Text
                     style={{
                       ...styles.topChipText,
-                      color: searchBtns.all ? Colors.White : '#9F9F9F',
+                      color: searchBtns.all ? Colors.button.primary_button_text : Colors.secondary_text,
                     }}>
                     All
                   </Text>
@@ -1131,13 +1105,13 @@ const socketUrl = 'http://192.168.100.239:3017'
                   style={{
                     ...styles.topChip,
                     backgroundColor: searchBtns.category
-                      ? Colors.Orange
-                      : '#F5F6FA',
+                      ?Colors.button.primary_button
+                      : `${Colors.secondary_text}10`,
                   }}>
                   <Text
                     style={{
                       ...styles.topChipText,
-                      color: searchBtns.category ? Colors.White : '#9F9F9F',
+                      color: searchBtns.category ? Colors.button.primary_button_text : Colors.secondary_text,
                     }}>
                     Category
                   </Text>
@@ -1149,13 +1123,13 @@ const socketUrl = 'http://192.168.100.239:3017'
                   style={{
                     ...styles.topChip,
                     backgroundColor: searchBtns.price
-                      ? Colors.Orange
-                      : '#F5F6FA',
+                      ? Colors.button.primary_button
+                      : `${Colors.secondary_text}10`,
                   }}>
                   <Text
                     style={{
                       ...styles.topChipText,
-                      color: searchBtns.price ? Colors.White : '#9F9F9F',
+                      color: searchBtns.price ? Colors.button.primary_button_text: Colors.secondary_text,
                     }}>
                     {!searchBtns.price ? 'Price ↑↓' : searchBtns.priceUp ? 'Price ↑' : 'Price ↓'}
                   </Text>
@@ -1163,17 +1137,14 @@ const socketUrl = 'http://192.168.100.239:3017'
 
               </View>
 
-              <View style={styles.headerTextView}>
+
+                    {
+                      searchedItems.length > 0 &&
+                      <>
+                      <View style={styles.headerTextView}>
                 <Text style={[styles.headerText]}>Items</Text>
               </View>
-              {/* 
-              {searchQuery?.length == 0 && <Text style={{
-                fontFamily: Fonts.PlusJakartaSans_Bold,
-                color: '#0A212B',
-                textAlign: 'center',
-                fontSize: RFPercentage(1.8),
-                lineHeight: 30,
-              }}>Search Your Favorite Food</Text>}  */}
+             
 
               <FlatList
                 scrollEnabled={false}
@@ -1186,7 +1157,7 @@ const socketUrl = 'http://192.168.100.239:3017'
                   return (
                     <FoodCards
                       isFavorite={fav}
-                      image={BASE_URL_IMAGE + item?.images[0]}
+                      image={item?.images[0]}
                       description={shortenString(item?.description)}
                       price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
                       heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
@@ -1203,7 +1174,15 @@ const socketUrl = 'http://192.168.100.239:3017'
                   );
                 }}
               />
-              <View style={styles.headerTextView}>
+                      </>
+                    }
+              
+              {
+                filteredDeals.length > 0 &&  
+                <>
+                
+                
+                <View style={styles.headerTextView}>
                 <Text style={[styles.headerText]}>Deals</Text>
               </View>
               <FlatList
@@ -1233,7 +1212,7 @@ const socketUrl = 'http://192.168.100.239:3017'
                   // console.log(favoriteDeals[0], 'deal as favorite');
                   return (
                     <DealCard
-                      image={item?.images?.length > 0 && BASE_URL_IMAGE + item?.images[0]}
+                      image={item?.images?.length > 0 && item?.images[0]}
                       description={shortenString(item?.description)}
                       price={item?.price}
                       title={item?.name}
@@ -1249,6 +1228,9 @@ const socketUrl = 'http://192.168.100.239:3017'
                   );
                 }}
               />
+              </>
+              }
+             
             </View>
           ) : (
             <>
@@ -1263,7 +1245,7 @@ const socketUrl = 'http://192.168.100.239:3017'
                   {promos.length > 0 ? promos.map((promo, index) => {
                     return (
                       <TouchableOpacity key={index} style={{ backgroundColor: 'white' }} activeOpacity={0.7}>
-                        <Image source={{ uri: BASE_URL_IMAGE + promo.image }} style={{ width: wp(100), height: hp(25), resizeMode: 'cover' }} />
+                        <Image source={{ uri: promo.image }} style={{ width: wp(100), height: hp(25), resizeMode: 'cover' }} />
                       </TouchableOpacity>
                     )
                   }) : <NoDataFound text={'No Promo Codes'} />}
@@ -1290,13 +1272,13 @@ const socketUrl = 'http://192.168.100.239:3017'
                         style={{
                           ...styles.topChip,
                           backgroundColor: allSelected
-                            ? Colors.Orange
-                            : '#F5F6FA',
+                            ? Colors.button.primary_button
+                            : `${Colors.secondary_text}10`,
                         }}>
                         <Text
                           style={{
                             ...styles.topChipText,
-                            color: allSelected ? Colors.White : '#9F9F9F',
+                            color: allSelected ? Colors.button.primary_button_text : Colors.secondary_text,
                           }}>
                           All
                         </Text>
@@ -1312,13 +1294,13 @@ const socketUrl = 'http://192.168.100.239:3017'
                         style={{
                           ...styles.topChip,
                           backgroundColor: item?.selected
-                            ? Colors.Orange
-                            : '#F5F6FA',
+                            ? Colors.button.primary_button
+                            : `${Colors.secondary_text}10`,
                         }}>
                         <Text
                           style={{
                             ...styles.topChipText,
-                            color: item?.selected ? Colors.White : '#9F9F9F',
+                            color: item?.selected ? Colors.button.primary_button_text : Colors.secondary_text,
                           }}>
                           {item?.cuisine_name}
                         </Text>
@@ -1343,13 +1325,13 @@ const socketUrl = 'http://192.168.100.239:3017'
                 numColumns={numColumns}
                 keyExtractor={(item) => item.item_id.toString()}
                 style={{ paddingHorizontal: 10 }}
-                ListEmptyComponent={() => !loading && <NoDataFound text={'No Items'} />}
+                ListEmptyComponent={() => !loading || !itemLoading  && <NoDataFound text={'No Items'} />}
                 renderItem={({ item, index }) => {
                   const fav = isItemFavorite(item?.item_id)
                   return (
                     <FoodCards
                       isFavorite={fav}
-                      image={item?.images?.length && BASE_URL_IMAGE + item?.images[0]}
+                      image={item?.images?.length && item?.images[0]}
                       description={shortenString(item?.description)}
                       price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
                       heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
@@ -1386,9 +1368,10 @@ const socketUrl = 'http://192.168.100.239:3017'
                     setCusineNameByItemCusineId(cuisineId)
                   );
                   const fav = isDealFavorite(item?.deal_id)
+                  
                   return (
                     <DealCard
-                      image={item?.images?.length > 0 && BASE_URL_IMAGE + item?.images[0]}
+                      image={item?.images?.length > 0 &&  item?.images[0]}
                       description={shortenString(item?.description)}
                       price={item?.price}
                       title={item?.name}
@@ -1636,8 +1619,8 @@ const socketUrl = 'http://192.168.100.239:3017'
                 position: 'absolute',
                 top: -10,
                 right: 6,
-                backgroundColor: Colors.OrangeLight,
-                color: Colors.White,
+                backgroundColor: `${Colors.secondary_color}40`,
+                color: Colors.secondary_color,
                 fontFamily: Fonts.PlusJakartaSans_Bold,
                 fontSize: RFPercentage(1.2),
 
@@ -1671,8 +1654,8 @@ const socketUrl = 'http://192.168.100.239:3017'
               <View key={i} style={[styles.rowViewSB, { borderBottomColor: Colors.borderGray, borderBottomWidth: wp(0.3), paddingBottom: wp(1) }]}>
                 <TouchableOpacity onPress={() => handleAddToCart(variation.variation_id, itemObj.id)} style={styles.rowView} >
                   <RadioButton
-                    color={Colors.Orange} // Custom color for selected button
-                    uncheckedColor={Colors.Orange} // Color for unselected buttons
+                    color={Colors.primary_color} // Custom color for selected button
+                    uncheckedColor={Colors.primary_color} // Color for unselected buttons
                     status={selectedVariation === variation.variation_id ? 'checked' : 'unchecked'}
                     onPress={() => handleAddToCart(variation.variation_id, itemObj.id)}
                   />
@@ -1721,7 +1704,7 @@ const socketUrl = 'http://192.168.100.239:3017'
 export default Dashboard;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.White, },
+  container: { flex: 1, backgroundColor: Colors.secondary_color, },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1731,31 +1714,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20
   },
   topChip: {
-    backgroundColor: '#F5F6FA',
+    backgroundColor: `${Colors.secondary_text}10`,
     borderRadius: 25,
     paddingHorizontal: 20,
     paddingVertical: 10,
     marginRight: 7,
   },
   topChipText: {
-    color: '#9F9F9F',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(1.7),
     marginTop: -2,
   },
-  welcomeText: {
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: '#02010E',
-    fontSize: RFPercentage(2),
-    letterSpacing: 0.5,
-    marginBottom: 6,
-  },
-  nameText: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#02010E',
-    fontSize: RFPercentage(2.1),
-    letterSpacing: 1,
-  },
+  // welcomeText: {
+  //   fontFamily: Fonts.PlusJakartaSans_Medium,
+  //   color: Colors.primary_text,
+  //   fontSize: RFPercentage(2),
+  //   letterSpacing: 0.5,
+  //   marginBottom: 6,
+  // },
+  // nameText: {
+  //   fontFamily: Fonts.PlusJakartaSans_Bold,
+  //   color: Colors.primary_text,
+  //   fontSize: RFPercentage(2.1),
+  //   letterSpacing: 1,
+  // },
   headerTextView: {
     height: hp(4),
     flexDirection: 'row',
@@ -1765,20 +1748,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20
   },
   headerText: {
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(1.9),
     letterSpacing: 0.45,
   },
   viewAllText: {
-    color: '#FF5722',
+    color: Colors.button.primary_button,
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.PlusJakartaSans_Medium,
     textDecorationLine: 'underline',
   },
   container2: { flex: 1, backgroundColor: 'red', alignItems: 'flex-end' },
   rbSheetHeading: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2),
   },
@@ -1797,17 +1780,16 @@ const styles = StyleSheet.create({
     marginLeft: wp(3)
   },
   btmsheettext: {
-    color: '#56585B',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     marginLeft: wp(5),
     fontSize: RFPercentage(1.9),
   },
   headerLocation: {
-    color: Colors.Black,
+    color: Colors.primary_text,
     width: wp(60),
     fontFamily: Fonts.PlusJakartaSans_Regular,
     textAlign: "center",
-    paddingTop: hp(1)
   },
   paginationContainer: {
     flexDirection: 'row',
@@ -1831,13 +1813,13 @@ const styles = StyleSheet.create({
     bottom: 40, // Adjust the distance from the bottom
     right: 20, // Adjust the distance from the right
     overflow: 'hidden',
-    backgroundColor: Colors.Orange,
+    backgroundColor: Colors.button.primary_button,
     paddingVertical: wp(3),
     paddingHorizontal: wp(2.5),
 
   },
   variationTxt: {
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(1.7),
     marginBottom: hp(1)
@@ -1848,7 +1830,7 @@ const styles = StyleSheet.create({
   },
   variationText: {
     fontSize: RFPercentage(1.6),
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
   },
   rowViewSB: {

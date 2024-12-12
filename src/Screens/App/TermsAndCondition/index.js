@@ -13,7 +13,7 @@ import CButton from '../../../components/Buttons/CButton';
 const TermsAndCondition = () => {
   return (
     <ScrollView
-      contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.White}}>
+      contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.secondary_color}}>
       <StackHeader
         title={'Terms & Condition'}
         headerStyle={{paddingBottom: 10}}
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   text: {
-    color: '#595959',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     fontSize: RFPercentage(1.5),
     lineHeight: 25,

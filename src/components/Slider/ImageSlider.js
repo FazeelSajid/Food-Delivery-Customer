@@ -31,7 +31,7 @@ const ImageSlider = ({data, marginBottom}) => {
       width: wp(2.5),
       height: wp(2.5),
       borderRadius: wp(2.5) / 2,
-      backgroundColor: Colors.Orange,
+      backgroundColor: Colors.primary_color,
       margin: 0,
       marginHorizontal: 2,
     },
@@ -41,7 +41,7 @@ const ImageSlider = ({data, marginBottom}) => {
       borderRadius: wp(2.5) / 2,
       backgroundColor: Colors.White,
       borderWidth: 1,
-      borderColor: Colors.Orange,
+      borderColor: Colors.primary_color,
       opacity: 0.7,
       marginHorizontal: 2,
     },
@@ -58,7 +58,7 @@ const ImageSlider = ({data, marginBottom}) => {
         renderItem={({item}) => (
           <View style={styles.imageCard}>
             <Image
-               source={{uri: BASE_URL_IMAGE + item?.image}}
+               source={{uri: item?.image}}
               style={{
                 width: '100%',
                 height: '100%',

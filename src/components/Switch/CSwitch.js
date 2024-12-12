@@ -10,11 +10,11 @@ const CSwitch = ({value, onValueChange}) => {
       disabled={false}
       activeText={'On'}
       inActiveText={'Off'}
-      circleBorderActiveColor={Colors.Orange}
+      circleBorderActiveColor={Colors.primary_color}
       circleBorderInactiveColor={'#BEBEBE'}
-      backgroundActive={Colors.Orange}
+      backgroundActive={Colors.primary_color}
       backgroundInactive={'#E2E2E2'}
-      circleActiveColor={Colors.White}
+      circleActiveColor={Colors.secondary_color}
       circleInActiveColor={'#BEBEBE'}
       //   renderInsideCircle={() => <CustomComponent />} // custom component to render inside the Switch circle (Text, Image, etc.)
       changeValueImmediately={true} // if rendering inside circle, change state immediately or wait for animation to complete

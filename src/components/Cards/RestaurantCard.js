@@ -100,12 +100,12 @@ const RestaurantCard = ({
                 paddingVertical: 4,
                 paddingHorizontal: 10,
                 borderRadius: 15,
-                borderColor: Colors.Orange,
+                borderColor: Colors.primary_color,
                 borderWidth: 1,
               }}>
               <Text
                 style={{
-                  color: Colors.Orange,
+                  color: Colors.primary_color,
                   fontFamily: Fonts.PlusJakartaSans_Medium,
                   fontSize: RFPercentage(1.5),
                   marginTop: -2,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   priceText: {
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.5),
     marginTop: -5,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontSize: RFPercentage(1.5),
   },
   price: {

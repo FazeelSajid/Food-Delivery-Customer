@@ -3,7 +3,7 @@ import React from 'react';
 import {Colors} from '../../constants';
 
 const ItemLoading = ({loading, size, color}) => {
-  return loading && <ActivityIndicator size={size || "small"} color={color || Colors.Orange} />
+  return loading && <ActivityIndicator size={size || "small"} color={color || Colors.primary_color} />
   
 };
 

@@ -21,7 +21,7 @@ const CInput = props => {
       {props?.heading && (
         <Text
           style={{
-            color: '#292323',
+            color: Colors.primary_text,
             fontFamily: Fonts.PlusJakartaSans_Medium,
             fontSize: RFPercentage(1.8),
             marginHorizontal: 10,
@@ -47,7 +47,7 @@ const CInput = props => {
           alignItems: 'center',
           backgroundColor: props?.backgroundColor
             ? props?.backgroundColor
-            : '#F5F6FA',
+            : `${Colors.secondary_text}15`,
           ...props?.containerStyle,
         }]}>
         <TouchableOpacity>{props?.leftContent}</TouchableOpacity>
@@ -65,10 +65,10 @@ const CInput = props => {
           placeholderTextColor={
             props?.placeholderTextColor
               ? props?.placeholderTextColor
-              : '#B0B0B0'
+              : Colors.secondary_text
           }
           style={{
-            color: Colors.Text,
+            color: Colors.primary_text,
             flex: 1,
             // backgroundColor: 'green',
             fontFamily: Fonts.PlusJakartaSans_Regular,
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({});
 //       {props?.heading && (
 //         <Text
 //           style={{
-//             color: '#292323',
+//             color: Colors.primary_text,
 //             fontFamily: Fonts.PlusJakartaSans_Medium,
 //             fontSize: RFPercentage(1.8),
 //             marginHorizontal: 10,

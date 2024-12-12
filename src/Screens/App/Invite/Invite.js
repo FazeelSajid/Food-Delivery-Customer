@@ -52,18 +52,18 @@ export default Invite
 const styles = StyleSheet.create({
     container:{
         flex: 1,
-        backgroundColor: Colors.White 
+        backgroundColor: Colors.secondary_text 
     },
     heading:{
         fontFamily: Fonts.PlusJakartaSans_SemiBold,
         fontSize: RFPercentage(2.8),
-        color: Colors.Black,
+        color: Colors.primary_text,
         marginTop: hp(7)
     },
     text:{
         fontFamily: Fonts.PlusJakartaSans_Regular,
         fontSize: RFPercentage(2),
-        color: '#666666',
+        color: Colors.secondary_text,
         textAlign: 'center',
         marginTop: hp(1.5)
     },
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     },
     code: {
         fontFamily: Fonts.PlusJakartaSans_Regular,
-        color: Colors.Black,
+        color: Colors.primary_text,
         fontSize: RFPercentage(2),
     }
 })

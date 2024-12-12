@@ -51,13 +51,13 @@ const OnBoarding = ({ navigation, route }) => {
       style={{
         height: hp(0.1),
         marginVertical: 10,
-        backgroundColor: '#00000026',
+        backgroundColor: Colors.borderGray,
       }}
     />
   );
   return (
     <View style={styles.container}  >
-      <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
+      <StatusBar backgroundColor={Colors.secondary_color} barStyle={'dark-content'} />
       <View style={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Image
           source={Images.onboardingLogo}
@@ -70,7 +70,7 @@ const OnBoarding = ({ navigation, route }) => {
         />
         <Text
           style={{
-            color: Colors.Black,
+            color: Colors.primary_text,
             fontFamily: Fonts.PlusJakartaSans_SemiBold,
             fontSize: RFPercentage(3),
             width: wp(60),
@@ -83,7 +83,7 @@ const OnBoarding = ({ navigation, route }) => {
         <Text
           style={{
             textAlign: 'center',
-            color: '#393939B2',
+            color: Colors.primary_text,
             fontFamily: Fonts.PlusJakartaSans_Medium,
             width: wp(80),
             lineHeight: 20,
@@ -151,10 +151,10 @@ const OnBoarding = ({ navigation, route }) => {
               </View>
 
               <TouchableOpacity style={styles.rowView} onPress={() =>toggleSelection('phone')} >
-                <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/>
+                <RadioButton color={Colors.button.primary_button} uncheckedColor={Colors.button.primary_button} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/>
                 <Text
                   style={{
-                    color: '#56585B',
+                    color: Colors.secondary_text,
                     fontFamily: Fonts.PlusJakartaSans_Regular,
                     marginTop: -2,
                     fontSize: RFPercentage(2),
@@ -165,10 +165,10 @@ const OnBoarding = ({ navigation, route }) => {
               </TouchableOpacity  >
               <ItemSeparator />
               <TouchableOpacity style={styles.rowView} onPress={() => toggleSelection('email')}>
-                <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} />
+                <RadioButton color={Colors.button.primary_button} uncheckedColor={Colors.button.primary_button} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} />
                 <Text
                   style={{
-                    color: '#56585B',
+                    color: Colors.primary_text,
                     fontFamily: Fonts.PlusJakartaSans_Regular,
                     marginTop: -2,
                     fontSize: RFPercentage(2),
@@ -188,7 +188,7 @@ const OnBoarding = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.secondary_color,
   },
   image: {
     flex: 1,
@@ -196,70 +196,70 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     // paddingTop:hp("20%"),
   },
-  mainBody: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
-  },
-  textsContainer: {
-    flex: 7.5,
-    width: wp(100),
-    // borderWidth:2,
-    justifyContent: 'center',
-  },
-  mainText: {
-    color: '#FFFFFF',
-    fontFamily: 'PlusJakartaSans-Regular',
-    fontSize: RFPercentage(3.5),
-    //lineHeight: 84,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: hp('2'),
-  },
-  descriptionText: {
-    color: '#FFFFFF',
-    fontSize: RFPercentage(2),
-    fontFamily: 'PlusJakartaSans-Regular',
-    textAlign: 'center',
-  },
-  buttonsContainer: {
-    flex: 3,
-    //paddingHorizontal:wp(2),
-    //borderWidth:1,
-    //  justifyContent:"center"
-  },
-  signInsignUpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    // height:hp(7),
-    marginBottom: hp(5),
-    // borderWidth:1,
-  },
-  signInsignUpButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: wp(38),
-    height: hp(7),
-    borderRadius: hp(10),
-    backgroundColor: '#FF5722',
-    //borderWidth:1,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: RFPercentage(2),
-    textAlign: 'center',
-    fontFamily: 'PlusJakartaSans-Regular',
-  },
-  joinAsGuestButton: {
-    height: hp(7),
-    justifyContent: 'center',
-    alignSelf: 'center',
-    width: wp(83),
-    borderRadius: hp(10),
-    borderColor: '#FFFFFF',
-    borderWidth: 1,
-  },
+  // mainBody: {
+  //   flex: 1,
+  //   backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  // },
+  // textsContainer: {
+  //   flex: 7.5,
+  //   width: wp(100),
+  //   // borderWidth:2,
+  //   justifyContent: 'center',
+  // },
+  // mainText: {
+  //   color: Colors.secondary_color,
+  //   fontFamily: 'PlusJakartaSans-Regular',
+  //   fontSize: RFPercentage(3.5),
+  //   //lineHeight: 84,
+  //   fontWeight: 'bold',
+  //   textAlign: 'center',
+  //   marginBottom: hp('2'),
+  // },
+  // descriptionText: {
+  //   color: Colors.secondary_color,
+  //   fontSize: RFPercentage(2),
+  //   fontFamily: 'PlusJakartaSans-Regular',
+  //   textAlign: 'center',
+  // },
+  // buttonsContainer: {
+  //   flex: 3,
+  //   //paddingHorizontal:wp(2),
+  //   //borderWidth:1,
+  //   //  justifyContent:"center"
+  // },
+  // signInsignUpContainer: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-evenly',
+  //   // height:hp(7),
+  //   marginBottom: hp(5),
+  //   // borderWidth:1,
+  // },
+  // signInsignUpButton: {
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   width: wp(38),
+  //   height: hp(7),
+  //   borderRadius: hp(10),
+  //   backgroundColor: '#FF5722',
+  //   //borderWidth:1,
+  // },
+  // buttonText: {
+  //   color: Colors.secondary_color,
+  //   fontSize: RFPercentage(2),
+  //   textAlign: 'center',
+  //   fontFamily: 'PlusJakartaSans-Regular',
+  // },
+  // joinAsGuestButton: {
+  //   height: hp(7),
+  //   justifyContent: 'center',
+  //   alignSelf: 'center',
+  //   width: wp(83),
+  //   borderRadius: hp(10),
+  //   borderColor: '#FFFFFF',
+  //   borderWidth: 1,
+  // },
   rbSheetHeading: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2),
   },

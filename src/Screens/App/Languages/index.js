@@ -98,7 +98,7 @@ const Languages = ({navigation, route}) => {
 
   return (
     <ScrollView
-      style={{flex: 1, backgroundColor: Colors.White}}
+      style={{flex: 1, backgroundColor: Colors.secondary_color}}
       keyboardShouldPersistTaps="handled">
       <StackHeader
         onBackPress={() =>
@@ -118,7 +118,7 @@ const Languages = ({navigation, route}) => {
                   <TextInput
                     style={styles.input}
                     placeholder="Search here"
-                    placeholderTextColor={Colors.Black}
+                    placeholderTextColor={Colors.primary_text}
                     value={searchQuery}
                     onChangeText={handleSearch}
                   />
@@ -155,7 +155,7 @@ const Languages = ({navigation, route}) => {
               value={item.name}
               status={checked === item.name ? 'checked' : 'unchecked'}
               uncheckedColor={'#757575'}
-              color={Colors.Orange}
+              color={Colors.primary_color}
               onPress={() => setChecked(item.name)}
             />
           </TouchableOpacity>
@@ -177,17 +177,17 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: Fonts.Inter_Medium,
     fontSize: RFPercentage(2.1),
-    color: '#292323',
+    color: Colors.primary_text,
     paddingHorizontal: 5,
   },
   input: {
     flex: 0.9,
     fontFamily: Fonts.PlusJakartaSans_Regular,
-    color: Colors.Black,
+    color: Colors.primary_text,
   },
   searchContainer: {
     flexDirection: 'row',
-    backgroundColor: '#FAFAFA',
+    backgroundColor:Colors.secondary_color,
     width: wp(75),
     // flex: 1,
     height: wp(12),

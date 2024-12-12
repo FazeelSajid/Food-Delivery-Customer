@@ -234,7 +234,7 @@ const AddComplaint = ({navigation, route}) => {
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       {/* <Loader loading={loading} /> */}
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView
@@ -263,7 +263,7 @@ const AddComplaint = ({navigation, route}) => {
             }}>
             <Text
               style={{
-                color: '#1D1D20',
+                color: Colors.primary_text,
                 fontFamily: Fonts.PlusJakartaSans_Medium,
                 fontSize: RFPercentage(2),
               }}>
@@ -271,7 +271,7 @@ const AddComplaint = ({navigation, route}) => {
             </Text>
             <Text
               style={{
-                color: '#676767',
+                color:Colors.secondary_text,
                 fontFamily: Fonts.PlusJakartaSans_Regular,
                 fontSize: RFPercentage(1.7),
               }}>
@@ -281,7 +281,7 @@ const AddComplaint = ({navigation, route}) => {
           </View>
           <Text
             style={{
-              color: '#676767',
+              color:Colors.secondary_text,
               fontFamily: Fonts.PlusJakartaSans_Regular,
               fontSize: RFPercentage(1.8),
               marginTop: 7,
@@ -336,7 +336,7 @@ const AddComplaint = ({navigation, route}) => {
             }}>
             <Text
               style={{
-                color: '#1D1D20',
+                color: Colors.primary_text,
                 fontFamily: Fonts.PlusJakartaSans_Medium,
                 fontSize: RFPercentage(2),
               }}>
@@ -344,7 +344,7 @@ const AddComplaint = ({navigation, route}) => {
             </Text>
             <Text
               style={{
-                color: '#676767',
+                color:Colors.secondary_text,
                 fontFamily: Fonts.PlusJakartaSans_Regular,
                 fontSize: RFPercentage(1.7),
               }}>
@@ -356,7 +356,7 @@ const AddComplaint = ({navigation, route}) => {
           <View style={{marginVertical: 15}}>
             <Text
               style={{
-                color: '#1D1D20',
+                color: Colors.primary_text,
                 fontFamily: Fonts.PlusJakartaSans_Medium,
                 fontSize: RFPercentage(2),
                 marginBottom: 10,
@@ -393,41 +393,7 @@ const AddComplaint = ({navigation, route}) => {
             </View>
           </View>
 
-          {/* {videoFile ? (
-            <TouchableOpacity
-              onPress={() => handleUploadVideo()}
-              style={{
-                marginVertical: 15,
-                borderWidth: 1,
-                borderColor: '#DADADA',
-                width: wp(83),
-                borderRadius: 15,
-              }}>
-              <VideoPlayer
-                video={{
-                  uri: videoFile,
-                }}
-                videoWidth={wp(70)}
-                videoHeight={120}
-                thumbnail={{uri: 'https://i.picsum.photos/id/866/1600/900.jpg'}}
-              />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              onPress={() => handleUploadVideo()}
-              style={{
-                borderWidth: 1,
-                borderColor: '#DADADA',
-                height: 140,
-                width: wp(83),
-                borderRadius: 15,
-                marginVertical: 15,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Icons.Video width={28} />
-            </TouchableOpacity>
-          )} */}
+         
 
           <CButton
             title="ADD"
@@ -461,17 +427,13 @@ const styles = StyleSheet.create({
     width: '28%',
     height: hp(9.5),
     borderWidth: 1,
-    borderColor: '#DADADA',
+    borderColor: Colors.borderGray,
     borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  description: {
-    color: '#979797',
-    fontFamily: Fonts.Inter_Regular,
-    marginVertical: 10,
-  },
+ 
 
   image: {
     width: '100%',
@@ -488,7 +450,7 @@ const styles = StyleSheet.create({
     width: '30%',
     height: hp(11),
     borderWidth: 1,
-    borderColor: '#DADADA',
+    borderColor: Colors.borderGray,
     borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
@@ -502,7 +464,7 @@ const styles = StyleSheet.create({
   },
   radioButtonText: {
     marginLeft: 10,
-    color: Colors.Black,
+    color: Colors.primary_text,
     fontSize: 14,
     fontFamily: Fonts.PlusJakartaSans_Regular,
   },

@@ -10,14 +10,14 @@ import { RFPercentage } from 'react-native-responsive-fontsize';
 export const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.secondary_color,
     // justifyContent: 'center',
     // paddingHorizontal: wp(10),
     // alignItems: 'center',
     paddingVertical: wp(5),
   },
   skipBtn: {
-    color: Colors.Black,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     fontSize: RFPercentage(2.3),
     alignSelf: 'flex-end',
@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   text: {
-    color: Colors.Black,
+    color: Colors.primary_text,
     fontSize: wp(6),
     fontFamily: Fonts.PlusJakartaSans_Bold,
     textAlign: 'center',
@@ -39,7 +39,7 @@ export const styles = StyleSheet.create({
     width: wp(100)
   },
   subHeading: {
-    color: '#333333',
+    color: Colors.primary_text,
     fontSize: wp(3.8),
     textAlign: 'center',
     marginTop: hp(3),
@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
     
   },
   continueButtonContainer: {
-    backgroundColor: Colors.Orange,
+    backgroundColor: Colors.button.primary_button,
     paddingVertical: wp(3),
     borderRadius: wp(6),
     
@@ -57,19 +57,19 @@ export const styles = StyleSheet.create({
     paddingVertical: wp(3),
     borderRadius: wp(6),
     borderWidth: 1,
-    borderColor: Colors.Orange,
+    borderColor: Colors.button.secondary_button_text,
     marginBottom: hp(2)
     
   },
   joinButtonText: {
     alignSelf: 'center',
-    color: Colors.Orange,
+    color: Colors.button.secondary_button_text,
     fontFamily: Fonts.medium,
     fontSize: wp(4),
   },
   continueButtonText: {
     alignSelf: 'center',
-    color: Colors.White,
+    color: Colors.button.primary_button_text,
     fontFamily: Fonts.medium,
     fontSize: wp(4),
   },
@@ -84,7 +84,7 @@ export const styles = StyleSheet.create({
     marginHorizontal: wp(1),
   },
   rbSheetHeading: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2),
   },

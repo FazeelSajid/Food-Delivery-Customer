@@ -18,9 +18,9 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import StackHeader from '../../../components/Header/StackHeader';
 import {Colors, Fonts, Icons, Images} from '../../../constants';
-import FastImage from 'react-native-fast-image';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import FoodCard from '../../../components/Cards/FoodCard';
+// import FastImage from 'react-native-fast-image';
+// import Ionicons from 'react-native-vector-icons/Ionicons';
+// import FoodCard from '../../../components/Cards/FoodCard';
 import CButton from '../../../components/Buttons/CButton';
 import RBSheetRating from '../../../components/BottomSheet/RBSheetRating';
 import RBSheetSuccess from '../../../components/BottomSheet/RBSheetSuccess';
@@ -817,7 +817,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
               <View style={styles.rowViewSB}>
                 <Text
                   style={{
-                    color: Colors.Orange,
+                    color: Colors.primary_color,
                     fontSize: RFPercentage(2.4),
                     fontFamily: Fonts.PlusJakartaSans_Bold,
                   }}>
@@ -851,12 +851,12 @@ const RestaurantAllDetails = ({navigation, route}) => {
                       zIndex: 999,
                     }}>
                     {isFavorite ? (
-                      <AntDesign name="heart" size={24} color={Colors.Orange} />
+                      <AntDesign name="heart" size={24} color={Colors.primary_color} />
                     ) : (
                       <AntDesign
                         name="hearto"
                         size={24}
-                        color={Colors.Orange}
+                        color={Colors.primary_color}
                       />
                     )}
                   </TouchableOpacity>
@@ -955,7 +955,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
                     style={{
                       borderBottomWidth: 3,
                       borderColor:
-                        selectedCuisine == 'all' ? Colors.Orange : '#00000017',
+                        selectedCuisine == 'all' ? Colors.primary_color : '#00000017',
                     }}>
                     <Text
                       style={{
@@ -963,7 +963,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
                         paddingVertical: 10,
                         paddingLeft: 15,
                         color:
-                          selectedCuisine == 'all' ? Colors.Orange : '#979797',
+                          selectedCuisine == 'all' ? Colors.primary_color : '#979797',
                         fontFamily:
                           selectedCuisine == 'all'
                             ? Fonts.Inter_SemiBold
@@ -981,7 +981,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
                         borderBottomWidth: 3,
                         borderColor:
                           selectedCuisine?.cuisine_id == item?.cuisine_id
-                            ? Colors.Orange
+                            ? Colors.primary_color
                             : '#00000017',
                       }}>
                       <Text
@@ -990,7 +990,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
                           paddingVertical: 10,
                           color:
                             selectedCuisine?.cuisine_id == item?.cuisine_id
-                              ? Colors.Orange
+                              ? Colors.primary_color
                               : '#979797',
                           fontFamily:
                             selectedCuisine?.cuisine_id == item?.cuisine_id
@@ -1019,7 +1019,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
                         disabled={true}
                         image={
                           item?.images?.length > 0
-                            ? BASE_URL_IMAGE + item?.images[0]
+                            ? item?.images[0]
                             : ''
                         }
                         title={item?.item_name}
@@ -1057,13 +1057,13 @@ const RestaurantAllDetails = ({navigation, route}) => {
                         //           }}>
                         //           <AntDesign
                         //             name="minus"
-                        //             color={Colors.Orange}
+                        //             color={Colors.primary_color}
                         //             size={16}
                         //           />
                         //         </TouchableOpacity>
                         //         <Text
                         //           style={{
-                        //             color: Colors.Orange,
+                        //             color: Colors.primary_color,
                         //             fontFamily: Fonts.PlusJakartaSans_Bold,
                         //             fontSize: RFPercentage(2),
                         //             marginTop: -2,
@@ -1078,7 +1078,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
                         //           }}>
                         //           <AntDesign
                         //             name="plus"
-                        //             color={Colors.Orange}
+                        //             color={Colors.primary_color}
                         //             size={16}
                         //           />
                         //         </TouchableOpacity>
@@ -1123,13 +1123,13 @@ const RestaurantAllDetails = ({navigation, route}) => {
                                   }}>
                                   <AntDesign
                                     name="minus"
-                                    color={Colors.Orange}
+                                    color={Colors.primary_color}
                                     size={16}
                                   />
                                 </TouchableOpacity>
                                 <Text
                                   style={{
-                                    color: Colors.Orange,
+                                    color: Colors.primary_color,
                                     fontFamily: Fonts.PlusJakartaSans_Bold,
                                     fontSize: RFPercentage(2),
                                     marginTop: -2,
@@ -1150,7 +1150,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
                                   }}>
                                   <AntDesign
                                     name="plus"
-                                    color={Colors.Orange}
+                                    color={Colors.primary_color}
                                     size={16}
                                   />
                                 </TouchableOpacity>
@@ -1295,7 +1295,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
                   image:
                     details?.images?.length == 0
                       ? null
-                      : BASE_URL_IMAGE + details?.images[0],
+                      : details?.images[0],
                   fcm_token: details?.fcm_token,
                 });
               }
@@ -1335,7 +1335,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontSize: RFPercentage(2.5),
     marginBottom: 10,
   },
@@ -1353,7 +1353,7 @@ const styles = StyleSheet.create({
   },
   card: {
     borderWidth: 1,
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
     minWidth: 80,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1367,7 +1367,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
 
-  cardText: {color: Colors.Orange},
+  cardText: {color: Colors.primary_color},
   rowView1: {
     flexDirection: 'row',
     alignItems: 'center',

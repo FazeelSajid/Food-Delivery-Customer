@@ -54,7 +54,7 @@ const Onboarding = ({ navigation }) => {
       style={{
         height: hp(0.1),
         marginVertical: 10,
-        backgroundColor: '#00000026',
+        backgroundColor: Colors.borderGray,
       }}
     />
   );
@@ -107,7 +107,7 @@ const Onboarding = ({ navigation }) => {
             style={[
               styles.dot,
               {
-                backgroundColor: currentPage === index ? Colors.Orange : Colors.grayText,
+                backgroundColor: currentPage === index ? Colors.primary_color : Colors.secondary_text,
                 width: currentPage === index ? wp(6.5) : wp(2),
               },
             ]}
@@ -169,7 +169,7 @@ const Onboarding = ({ navigation }) => {
           // height={hp(6)}
           // transparent={true}
          onPress={handleContinue} 
-          bgColor={Colors.Orange}
+          bgColor={Colors.button.primary_button}
           // leftIcon={<ChevronRightOrange />}
           
         />
@@ -236,10 +236,10 @@ const Onboarding = ({ navigation }) => {
               </View>
 
               <TouchableOpacity style={styles.rowView} onPress={() =>toggleSelection('phone')} >
-                {/* <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/> */}
+                {/* <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/> */}
                 <Text
                   style={{
-                    color: '#56585B',
+                    color: Colors.secondary_text,
                     fontFamily: Fonts.PlusJakartaSans_Regular,
                     fontSize: RFPercentage(2),
                     marginLeft: wp(4)
@@ -250,10 +250,10 @@ const Onboarding = ({ navigation }) => {
               </TouchableOpacity  >
               <ItemSeparator />
               <TouchableOpacity style={styles.rowView} onPress={() => toggleSelection('email')}>
-                {/* <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} /> */}
+                {/* <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} /> */}
                 <Text
                   style={{
-                    color: '#56585B',
+                    color: Colors.secondary_text,
                     fontFamily: Fonts.PlusJakartaSans_Regular,
                     fontSize: RFPercentage(2),
                     marginLeft: wp(4)

@@ -18,7 +18,7 @@ const PaymentCard = ({
       onPress={onPress}
       style={{
         borderWidth: 1,
-        borderColor: selected ? Colors.Orange : '#E6E7EB',
+        borderColor: selected ? Colors.primary_color : '#E6E7EB',
         paddingVertical: 5,
         // flex: 1,
         minHeight: 40,
@@ -59,7 +59,7 @@ export default PaymentCard;
 
 const styles = StyleSheet.create({
   title: {
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(2),
     marginLeft: 15,

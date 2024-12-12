@@ -117,7 +117,7 @@ const ResetPassword = ({ navigation, route }) => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.White }}>
+    <View style={{ flex: 1, backgroundColor: Colors.secondary_color }}>
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={{ flexGrow: 1 }}
@@ -251,7 +251,7 @@ export default ResetPassword;
 const styles = StyleSheet.create({
   inputContainer: {
     borderWidth: 1,
-    borderColor: '#DDDDDD',
+    borderColor: Colors.borderGray,
     borderRadius: 35,
     width: wp(90),
     // marginVertical: 80,
@@ -261,25 +261,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  textInput: {
-    paddingHorizontal: 20,
-  },
-  underlineStyleBase: {
-    color: Colors.Text,
-    fontSize: 24,
-    fontFamily: Fonts.Inter_Medium,
-    width: 60,
-    height: 50,
-    borderRadius: 30,
-    borderWidth: 0,
-    // borderBottomWidth: 1,
-    borderColor: '#DDDDDD',
-    marginHorizontal: 5,
-    backgroundColor: '#F5F6FA',
-  },
-  underlineStyleHighLighted: {
-    borderColor: Colors.Orange,
-    borderRadius: 30,
-    borderWidth: 1,
-  },
+  // textInput: {
+  //   paddingHorizontal: 20,
+  // },
+  // underlineStyleBase: {
+  //   color: Colors.Text,
+  //   fontSize: 24,
+  //   fontFamily: Fonts.Inter_Medium,
+  //   width: 60,
+  //   height: 50,
+  //   borderRadius: 30,
+  //   borderWidth: 0,
+  //   // borderBottomWidth: 1,
+  //   borderColor: Colors.borderGray,
+  //   marginHorizontal: 5,
+  //   backgroundColor: Colors.secondary_color,
+  // },
+  // underlineStyleHighLighted: {
+  //   borderColor: Colors.primary_color,
+  //   borderRadius: 30,
+  //   borderWidth: 1,
+  // },
 });

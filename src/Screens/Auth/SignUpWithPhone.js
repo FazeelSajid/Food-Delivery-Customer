@@ -23,6 +23,7 @@ import {
   setCustomerDetail,
   setCustomerId,
   setJoinAsGuest,
+  setRestautantDetails,
   setSignUpWith
 } from '../../redux/AuthSlice';
 import api from '../../constants/api';
@@ -211,11 +212,22 @@ const SignUpWithPhone = ({navigation, route}) => {
     // }
   };
 
-  const updateVerificationStatus = customer_id => {
+
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      androidClientId:
+        '293745886997-4i5fm6s806fpea20r9qq7383pdtedl65.apps.googleusercontent.com',
+      iosClientId: '',
+    });
+  }, []);
+
+  const updateVerificationStatus = (customer_id, otp) => {
     return new Promise((resolve, reject) => {
       let data = {
         customer_id: customer_id,
         verified: true,
+        otp:otp
       };
       console.log('data  :  ', data);
       fetch(api.update_verification_status, {
@@ -229,24 +241,30 @@ const SignUpWithPhone = ({navigation, route}) => {
         .then(async response => {
           console.log('response  :  ', response);
           if (response?.status == false) {
-            resolve(false);
+              handlePopup(dispatch, 'Something went wrong!', 'red')
           } else {
-            resolve(true);
+            handlePopup(dispatch, response.message, 'green')
+
+            let wallet = await createCustomerWallet(
+              response?.result?.customer_id,
+            );
+            console.log(wallet);
+            dispatch(
+              setCustomerId(response?.result?.customer_id?.toString()),
+            );
+            dispatch(setJoinAsGuest(false));
+            dispatch(setCustomerDetail(response?.result));
+            dispatch(setRestautantDetails(response?.restaurant))
+            // navigation?.popToTop()
+            navigation?.navigate('Drawer');
+            clearFields();
           }
         })
         .catch(err => {
-          resolve(false);
+            handlePopup(dispatch, 'Something went wrong!', 'red')
         });
     });
   };
-
-  useEffect(() => {
-    GoogleSignin.configure({
-      androidClientId:
-        '293745886997-4i5fm6s806fpea20r9qq7383pdtedl65.apps.googleusercontent.com',
-      iosClientId: '',
-    });
-  }, []);
 
   const handleGoogleSignUp = async () => {
     console.log('handleGoogleSignIn');
@@ -259,19 +277,23 @@ const SignUpWithPhone = ({navigation, route}) => {
         showPlayServicesUpdateDialog: true,
       });
       const userInfo = await GoogleSignin.signIn();
-      let email = userInfo?.user?.email;
+      let user_email = userInfo?.user?.email;
       let user_name = userInfo?.user?.name;
 
-      console.log('user email : ', email);
+      console.log('user email : ', user_email, user_name);
       let fcm_token = await getUserFcmToken();
-      if (email) {
+      if (user_email) {
         setLoading(true);
         let data = {
           // phone_no: countryCode + phone_no,
-          signup_type: 'google',
-          email: email,
+          signup_type: 'email',
+          email: user_email ,
           user_name: user_name,
           fcm_token: fcm_token,
+          signup_type: "google",
+          rest_ID: "res_4074614",
+          
+
           // password: password,
         };
         console.log('data  :  ', data);
@@ -287,49 +309,34 @@ const SignUpWithPhone = ({navigation, route}) => {
           .then(async response => {
             console.log('response  :  ', response);
             if (response?.status == false) {
-              handlePopup(dispatch,response?.message, 'red')
-            } else {
+              handlePopup(dispatch, response?.message, 'red')
+            } else if(response.result.verified === false){
+              
+              updateVerificationStatus(response?.result?.customer_id, response.verifyCode)
+              dispatch(setRestautantDetails(response?.restaurant))
+            } 
+            
+            else {
+              handlePopup(dispatch, response.message, 'green')
+
               let wallet = await createCustomerWallet(
                 response?.result?.customer_id,
               );
-
-              console.log({wallet});
-
-              // navigation?.popToTop();
-              // navigation?.navigate('EmailVerification', {
-              //   response: response,
-              //   customer_id: response?.result?.customer_id,
-              //   email: email,
-              // });
-              let isUpdateVerificationStatus = await updateVerificationStatus(
-                response?.result?.customer_id,
-              );
-              console.log({isUpdateVerificationStatus});
-              if (!isUpdateVerificationStatus) {
-                return;
-              }
-              await AsyncStorage.setItem(
-                'customer_id',
-                response?.result?.customer_id?.toString(),
-              );
-              await AsyncStorage.setItem(
-                'customer_detail',
-                JSON.stringify(response?.result),
-              );
-
+              console.log(wallet);
               dispatch(
                 setCustomerId(response?.result?.customer_id?.toString()),
               );
+              dispatch(setJoinAsGuest(false));
               dispatch(setCustomerDetail(response?.result));
-              navigation.navigate('EnableLocation', {
-                customer_id: response?.result?.customer_id,
-              });
+              // navigation?.popToTop()
+              navigation?.navigate('Drawer');
               clearFields();
             }
           })
           .catch(err => {
             console.log('Error in Login :  ', err);
-            handlePopup(dispatch,'Something went wrong!', 'red')
+            handlePopup(dispatch, 'Something went wrong!', 'red')
+
           })
           .finally(() => {
             setLoading(false);
@@ -344,7 +351,7 @@ const SignUpWithPhone = ({navigation, route}) => {
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         //alert('Play Services Not Available or Outdated');
       } else {
-        handlePopup(dispatch,'Something went wrong!', 'red')
+        handlePopup(dispatch, 'Something went wrong!', 'red')
 
       }
     }
@@ -404,7 +411,7 @@ const SignUpWithPhone = ({navigation, route}) => {
                 <Feather
                   name={!showPass ? 'eye' : 'eye-off'}
                   size={20}
-                  color={'#39393999'}
+                  color={Colors.secondary_text}
                 />
               </TouchableOpacity>
             }
@@ -442,7 +449,7 @@ const SignUpWithPhone = ({navigation, route}) => {
             width={wp(88)}
             leftIcon={<Google  />}
             borderColor={Colors.borderGray}
-            color={Colors.Black}
+            color={Colors.primary_text}
             onPress={() => handleGoogleSignUp()}
           />
           </View>

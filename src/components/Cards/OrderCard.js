@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     },
 
     orderId:{
-        color: Colors.Black,
+        color: Colors.primary_text,
         fontFamily: Fonts.PlusJakartaSans_SemiBold
     },
     orderPriceContainer:{
@@ -106,12 +106,12 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     priceText:{
-        color: Colors.Orange,
+        color: Colors.primary_color,
         fontFamily: Fonts.PlusJakartaSans_SemiBold,
         fontSize: RFPercentage(1.7),
     },
     dataTxt:{
-        color: Colors.grayText,
+        color: Colors.secondary_text,
         fontFamily: Fonts.PlusJakartaSans_SemiBold,
         fontSize: RFPercentage(1.5),
         marginLeft: wp(3),

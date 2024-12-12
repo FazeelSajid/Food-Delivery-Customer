@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   text: {
-    color: '#595959',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     fontSize: RFPercentage(2),
     lineHeight: 25,

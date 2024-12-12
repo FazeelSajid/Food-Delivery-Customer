@@ -29,7 +29,7 @@ const MenuHeader = ({title, rightIcon}) => {
         <TouchableOpacity
           onPress={() => navigation?.toggleDrawer()}
           style={styles.iconContainer}>
-          {/* <Feather name="menu" size={hp(3.5)} color={Colors.Orange} /> */}
+          {/* <Feather name="menu" size={hp(3.5)} color={Colors.primary_color} /> */}
           <Icons.MenuActive width={24} />
         </TouchableOpacity>
         <View style={styles.headerTextContainer}>
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mainText: {
-    color: Colors.Orange,
+    color: Colors.primary_color,
     // fontFamily: Fonts.PlusJakartaSans_Medium,
     fontFamily: Fonts.PlusJakartaSans_SemiBold,
     letterSpacing: 1,

@@ -11,7 +11,7 @@ const Loader = ({ color, size }) => {
     return (
         <ActivityIndicator
             size={size || "small"}
-            color={color ?? Colors.Orange}
+            color={color ?? Colors.primary_color}
             style={{alignSelf: 'center', transform: [{ scale: 1.5 }]}} // scale the size
             />
     )

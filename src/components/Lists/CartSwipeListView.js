@@ -28,7 +28,7 @@ const CartSwipeListView = ({data, onDecrement, onIncrement, onDelete, ListFooter
     }, 500); // Adjust delay as needed
   }, []);
 
-
+     
   // console.log( selectedItem,'fdasda');
   
   return (
@@ -60,12 +60,12 @@ const CartSwipeListView = ({data, onDecrement, onIncrement, onDelete, ListFooter
         <View key={item.cart_item_id} style={styles.itemView}>
           <ImageBackground
           source={{
-            uri: BASE_URL_IMAGE + item?.itemData?.images[0],
+            uri: item?.itemData?.images[0],
           }}
             blurRadius={40}
             style={styles.imageContainer}>
             <Image source={{
-                            uri: BASE_URL_IMAGE + item?.itemData?.images[0],
+                            uri: item?.itemData?.images[0],
                           }}style={styles.image} />
           </ImageBackground>
           <View style={styles.textContainer}>
@@ -75,7 +75,7 @@ const CartSwipeListView = ({data, onDecrement, onIncrement, onDelete, ListFooter
             <Text style={styles.nameText} ellipsizeMode='tail' numberOfLines={1} >{item?.itemData?.description }</Text>
             {item?.itemData?.variationData?.variation_name && <Text style={styles.variation_name}>{item?.itemData?.variationData?.variation_name}</Text>}
             <View style={styles.rowViewSB}>
-              {/* <Text style={{...styles.title, color: Colors.Orange}}>
+              {/* <Text style={{...styles.title, color: Colors.primary_color}}>
                 ${item.price}
               </Text> */}
               <PriceText text={item?.itemData?.variationData ? item?.itemData?.variationData.price * item?.quantity : item?.itemData?.price ? item?.itemData?.price * item?.quantity: item?.sub_total * item?.quantity } />
@@ -131,7 +131,6 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#FF572233',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -144,13 +143,9 @@ const styles = StyleSheet.create({
     width: '100%',
     resizeMode: 'contain',
   },
-  subText: {
-    color: '#8D93A1',
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(2),
-  },
+ 
   title: {
-    color: '#292323',
+    color: Colors.primary_text,
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.Inter_SemiBold,
   },
@@ -165,7 +160,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   countText: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     marginHorizontal: 8,
     fontFamily: Fonts.PlusJakartaSans_Bold,
   },
@@ -187,7 +182,6 @@ const styles = StyleSheet.create({
     width: wp(15),
     height: hp(6.7),
     borderRadius: wp(2),
-    // backgroundColor: '#ffbdbd',
   },
   backRightBtnRight: {
     right: 0,
@@ -195,11 +189,11 @@ const styles = StyleSheet.create({
 
   nameText: {
     fontFamily: Fonts.Inter_Regular,
-    color: '#292323',
+    color: Colors.primary_text,
     fontSize: RFPercentage(1.5),
     lineHeight: 15.5,
   },
   variation_name: {
-    fontSize: RFPercentage(1.8), color: Colors.Orange, fontFamily: Fonts.PlusJakartaSans_SemiBold 
+    fontSize: RFPercentage(1.8), color: Colors.primary_color, fontFamily: Fonts.PlusJakartaSans_SemiBold 
   }
 });

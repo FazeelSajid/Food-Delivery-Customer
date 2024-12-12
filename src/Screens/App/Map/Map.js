@@ -34,6 +34,7 @@ const Map = ({navigation}) => {
         longitudeDelta: 0.0121,
     });
 
+
   
 
     const [selectedLocation, setSelectedLocation] = useState(null); // For holding marker position
@@ -41,7 +42,7 @@ const Map = ({navigation}) => {
     const [label, setLabel] = useState()
     const [formErrors, setFormErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false)
-    const {customer_id, showPopUp, popUpColor, PopUpMesage,} = useSelector(store => store.store)
+    const {customer_id, showPopUp, popUpColor, PopUpMesage, restautantDetails} = useSelector(store => store.store)
 
     // console.log(customer_id, 'id');
     
@@ -234,16 +235,16 @@ useEffect(()=>{
     };
 
     const handleSubmit = async() => {
-    //    const distance = await getDistanceAndDuration(selectedLocation?.latitude ,selectedLocation?.longitude, 33.651552140687556, 73.0760657787323,)
-    //     .then(result => {
-    //       if (result) {
-    //         console.log(result.distance, 'location result');
+       const distance = await getDistanceAndDuration(selectedLocation?.latitude ,selectedLocation?.longitude, restautantDetails?.latitude, restautantDetails?.longitude,)
+        .then(result => {
+          if (result) {
+            console.log(result.distance, 'location result');
             
-    //         return result
-    //     } else { 
-    //         console.log('Failed to retrieve distance and duration');
-    //       }
-    //     });
+            return result
+        } else { 
+            console.log('Failed to retrieve distance and duration');
+          }
+        });
         if (validate()) {
             setIsLoading(true)
             const data = {
@@ -257,7 +258,7 @@ useEffect(()=>{
                 address: selectedLocation?.address,
                 longitude: selectedLocation?.longitude,
                 latitude: selectedLocation?.latitude,
-                // distance: distance.distance
+                distance: distance.distance
             }
             console.log(data, 'data');
 
@@ -336,7 +337,7 @@ useEffect(()=>{
                     textInput: {
                         color: 'black',
                         borderRadius: wp(10),
-                        backgroundColor: '#FFFFFFFF',
+                        backgroundColor: Colors.secondary_color,
                         paddingLeft: wp(5),
                         fontFamily: Fonts.PlusJakartaSans_Regular
                     },
@@ -362,12 +363,13 @@ useEffect(()=>{
                 placeholderTextColor={'black'}
                 debounce={200}
                 textInputProps={{
-                    placeholderTextColor: '#999999'
+                    placeholderTextColor: Colors.secondary_text
                 }}
                
             />
 
             {/* Google Map */}
+            
             <MapView
                 ref={mapRef}
                 style={styles.map}
@@ -401,7 +403,7 @@ useEffect(()=>{
                             <Text style={styles.rbSheetHeading}>Add Location</Text>
                             <TouchableOpacity
                                 onPress={() => closeBtmSheet()}>
-                                <Ionicons name={'close'} size={22} color={'#1E2022'} />
+                                <Ionicons name={'close'} size={22} color={Colors.icon} />
                             </TouchableOpacity>
                         </View>
                         <CInput
@@ -455,7 +457,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     rbSheetHeading: {
-        color: Colors.Text,
+        color: Colors.primary_text,
         fontFamily: Fonts.PlusJakartaSans_Bold,
         fontSize: RFPercentage(2),
     },
@@ -474,7 +476,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 80,
         right: 20,
-        backgroundColor: Colors.Orange,
+        backgroundColor: Colors.primary_color,
         borderRadius: 50,
         padding: 8,
     },

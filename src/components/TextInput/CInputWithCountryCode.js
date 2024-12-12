@@ -63,7 +63,7 @@ const CInputWithCountryCode = ({
           visible={CountryPickerView}
         />
           {/* <TextInput style={[styles.TextField, { width: wp(15) }]} value={"+" + countryCode} editable={false} disabled={false}></TextInput> */}
-          <Text style={{color: Colors.Text}}>{countryCode}</Text>
+          <Text style={{color: Colors.primary_text}}>{countryCode}</Text>
         </TouchableOpacity>
 
         <TextInput
@@ -72,7 +72,7 @@ const CInputWithCountryCode = ({
           value={phoneNo}
           onChangeText={text => setPhoneNo(text)}
           keyboardType={'numeric'}
-          placeholderTextColor={'#B0B0B0'}
+          placeholderTextColor={Colors.secondary_text}
           // onSubmitEditing={handleTextSubmit}
         ></TextInput>
       </View>
@@ -92,12 +92,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F6FA',
+    backgroundColor: `${Colors.secondary_text}15`
   },
   TextField: {
     // fontSize: hp(1.6),
     marginHorizontal: wp(0),
-    color: Colors.Text,
+    color: Colors.primary_text,
     flex: 1,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     // width: wp(20),

@@ -122,7 +122,7 @@ function DashboardTabs() {
                 fontSize: RFPercentage(1.4),
                 fontFamily: 'PlusJakartaSans-Regular',
                 fontWeight: '700',
-                color: '#FF5722',
+                color: Colors.primary_color,
               }}>
               {route.name}
             </Text>
@@ -193,7 +193,7 @@ const CustomDrawerContent = props => {
       <View
         style={{
           height: hp(100),
-          backgroundColor: Colors.White,
+          backgroundColor: Colors.secondary_color,
         }}>
         <View
           style={{
@@ -214,7 +214,7 @@ const CustomDrawerContent = props => {
             style={{
               width: wp(67),
               height: hp(0.1),
-              backgroundColor: '#00000021',
+              backgroundColor: Colors.borderGray,
             }}
           />
         </View>
@@ -251,7 +251,7 @@ const CustomDrawerContent = props => {
                   navigation.navigate('Favorites');
                 }
               }}
-              icon={focused =>  <AntDesign name="hearto" size={24} color={Colors.darkTextColor} />}
+              icon={focused =>  <AntDesign name="hearto" size={24} color={Colors.primary_text} />}
             />
             {/* <DrawerItem
               label="Order History"
@@ -284,7 +284,7 @@ const CustomDrawerContent = props => {
                 style={{
                   width: wp(60),
                   height: 40,
-                  backgroundColor: Colors.Orange,
+                  backgroundColor: Colors.primary_color,
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderRadius: 20,
@@ -367,7 +367,6 @@ function Router() {
       screenOptions={{
         headerShown: false,
       }}>
-      {/* <Stack.Screen name="TestStripe" component={TestStripe} /> */}
       <Stack.Screen name="Splash" component={Splash} />
       <Stack.Screen name="OnBoarding" component={Onboarding} />
       <Stack.Screen name="SignIn" component={SignIn} />
@@ -377,8 +376,6 @@ function Router() {
       <Stack.Screen name="ResetPassword" component={ResetPassword} />
       <Stack.Screen name="Verification_Phone" component={Verification_Phone} />
       <Stack.Screen name="EmailVerification" component={EmailVerification} />
-
-
       <Stack.Screen name="EnableLocation" component={EnableLocation} />
       <Stack.Screen name="AddAddress" component={AddAddress} />
       <Stack.Screen name="ManageAddress" component={ManageAddress} />
@@ -392,21 +389,10 @@ function Router() {
       <Stack.Screen name="NearByRestaurants" component={NearByRestaurants} />
       <Stack.Screen name="RestaurantDetails" component={RestaurantDetails} />
       <Stack.Screen name="ImageUpload" component={ImageUpload} />
-
-      <Stack.Screen
-        name="RestaurantAllDetails"
-        component={RestaurantAllDetails}
-      />
+      <Stack.Screen name="RestaurantAllDetails" component={RestaurantAllDetails}/>
       <Stack.Screen name="ShippingAddress" component={ShippingAddress} />
-      <Stack.Screen
-        name="UpdateShippingAddress"
-        component={UpdateShippingAddress}
-      />
-      <Stack.Screen
-        name="ShippingAddressList"
-        component={ShippingAddressList}
-      />
-
+      <Stack.Screen name="UpdateShippingAddress" component={UpdateShippingAddress}/>
+      <Stack.Screen name="ShippingAddressList" component={ShippingAddressList}/>
       <Stack.Screen name="SpecificCuisines" component={SpecificCuisines} />
       <Stack.Screen name="OrderDetails" component={OrderDetails} />
       <Stack.Screen name="Checkout" component={Checkout} />
@@ -419,18 +405,12 @@ function Router() {
       <Stack.Screen name="Languages" component={Languages} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
       <Stack.Screen name="TermsAndCondition" component={TermsAndCondition} />
-
-      <Stack.Screen
-        name="SelectPaymentMethod"
-        component={SelectPaymentMethod}
-      />
+      <Stack.Screen name="SelectPaymentMethod" component={SelectPaymentMethod}/>
       <Stack.Screen name="Verification" component={Verification} />
       <Stack.Screen name="MyCart" component={MyCart} />
       <Stack.Screen name="SearchNearByDeals" component={SearchNearByDeals} />
       <Stack.Screen name="SearchRestaurants" component={SearchRestaurants} />
       <Stack.Screen name="SearchOrder" component={SearchOrder} />
-
-      {/* Drawer screens */}
       <Stack.Screen name="Wallet" component={Wallet} />
       <Stack.Screen name="SeeAllitems" component={SeeAllItems} />
       <Stack.Screen name="Chat" component={Messages} />
@@ -442,13 +422,8 @@ function Router() {
       <Stack.Screen name="Map" component={Map} />
       <Stack.Screen name='Invite' component={Invite} />
       <Stack.Screen name='TrackOrder' component={TrackOrder} />
-
       <Stack.Screen name="AddComplaint" component={AddComplaint} />
       <Stack.Screen name="SetupCard" component={SetupCard} />
-      {/* <Stack.Screen
-        name="SelectPaymentMethod"
-        component={SelectPaymentMethod}
-      /> */}
     </Stack.Navigator>
   );
 }

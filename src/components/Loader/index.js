@@ -11,7 +11,7 @@ const Loader = ({loading, size, color, bgColor}) => {
     <Modal visible={loading} transparent={true}>
       <View
         style={[{backgroundColor: bgColor}, styles.container]}>
-        <ActivityIndicator  size={size || "large"} color={color || Colors.Orange} />
+        <ActivityIndicator  size={size || "large"} color={color || Colors.primary_color} />
       </View>
     </Modal>
   );

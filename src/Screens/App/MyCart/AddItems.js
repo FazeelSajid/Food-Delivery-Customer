@@ -19,7 +19,7 @@ import { RFPercentage } from 'react-native-responsive-fontsize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import StackHeader from '../../../components/Header/StackHeader';
 import { Colors, Fonts, Icons, Images } from '../../../constants';
-import FoodCard from '../../../components/Cards/FoodCard';
+// import FoodCard from '../../../components/Cards/FoodCard';
 import Chip from '../../../components/Chip.js';
 import FoodCardWithRating from '../../../components/Cards/FoodCardWithRating';
 import api from '../../../constants/api';
@@ -787,9 +787,9 @@ const AddItems = ({ navigation, route }) => {
 
       <View style={{}}>
         <FlatList
-          refreshControl={<RefreshControl refreshing={false} onRefresh={()=> getData()} colors={[Colors.Orange]} />}
+          refreshControl={<RefreshControl refreshing={false} onRefresh={()=> getData()} colors={[Colors.primary_color]} />}
           ListFooterComponent={() => <View style={{ height: hp(3) }} />}
-          ListHeaderComponent={() => <StackHeader title={'Explore Items'} />}
+          ListHeaderComponent={() => <StackHeader title={'Add Items'} />}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ flexGrow: 1 }}
           ListEmptyComponent={() =>!loading && <NoDataFound svgHeight={hp(15)} text={'No Items'} textStyle={{fontSize : RFPercentage(2.5)}}  /> }
@@ -809,7 +809,7 @@ const AddItems = ({ navigation, route }) => {
 
                 <FoodCards
                   isFavorite={fav}
-                  image={BASE_URL_IMAGE + item?.images[0]}
+                  image={item?.images[0]}
                   description={item.description}
                   price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
                   heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
@@ -831,7 +831,7 @@ const AddItems = ({ navigation, route }) => {
                           style={{
                             flexDirection: 'row',
                             alignItems: 'center',
-                            backgroundColor: '#FF57224F',
+                            backgroundColor: `${Colors.primary_color}30`,
                             borderRadius: 25,
                             paddingVertical: 2,
                             paddingHorizontal: 2,
@@ -852,13 +852,13 @@ const AddItems = ({ navigation, route }) => {
                             }}>
                             <AntDesign
                               name="minus"
-                              color={Colors.Orange}
+                              color={Colors.primary_color}
                               size={16}
                             />
                           </TouchableOpacity>
                           <Text
                             style={{
-                              color: Colors.Orange,
+                              color: Colors.primary_color,
                               fontFamily: Fonts.PlusJakartaSans_Bold,
                               fontSize: RFPercentage(2),
                               marginTop: -2,
@@ -879,7 +879,7 @@ const AddItems = ({ navigation, route }) => {
                             }}>
                             <AntDesign
                               name="plus"
-                              color={Colors.Orange}
+                              color={Colors.primary_color}
                               size={16}
                             />
                           </TouchableOpacity>
@@ -942,8 +942,8 @@ const AddItems = ({ navigation, route }) => {
               <View key={i} style={styles.rowViewSB}>
                 <View style={styles.rowView} >
                   <RadioButton
-                    color={Colors.Orange} // Custom color for selected button
-                    uncheckedColor={Colors.Orange} // Color for unselected buttons
+                    color={Colors.primary_color} // Custom color for selected button
+                    uncheckedColor={Colors.primary_color} // Color for unselected buttons
                     status={selectedVariation === variation.variation_id ? 'checked' : 'unchecked'}
                     onPress={() => handleAddToCart(variation.variation_id, itemObj.id)}
                   />
@@ -973,8 +973,8 @@ const AddItems = ({ navigation, route }) => {
               <View key={i} style={styles.rowViewSB}>
                 <View style={styles.rowView} >
                   <RadioButton
-                    color={Colors.Orange} // Custom color for selected button
-                    uncheckedColor={Colors.Orange} // Color for unselected buttons
+                    color={Colors.primary_color} // Custom color for selected button
+                    uncheckedColor={Colors.primary_color} // Color for unselected buttons
                     status={selectedVariation === variation.variation_id ? 'checked' : 'unchecked'}
                     onPress={() => handleAddToCartDecrement(variation?.variation_id, variation.item_id)}
                   />
@@ -1022,11 +1022,11 @@ const AddItems = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.secondary_color,
     alignItems: 'center',
   },
   heading: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.5),
     marginBottom: 10,
@@ -1052,25 +1052,25 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     flex: 1,
   },
-  title: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.Text,
-    fontSize: RFPercentage(1.7),
-    lineHeight: 25,
-  },
-  nameText: {
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: '#7E8CA0',
-    fontSize: RFPercentage(2),
-    lineHeight: 25,
-  },
-  ratingText: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.Text,
-    fontSize: RFPercentage(2),
-    lineHeight: 25,
-    marginLeft: 5,
-  },
+  // title: {
+  //   fontFamily: Fonts.PlusJakartaSans_Bold,
+  //   color: Colors.Text,
+  //   fontSize: RFPercentage(1.7),
+  //   lineHeight: 25,
+  // },
+  // nameText: {
+  //   fontFamily: Fonts.PlusJakartaSans_Medium,
+  //   color: '#7E8CA0',
+  //   fontSize: RFPercentage(2),
+  //   lineHeight: 25,
+  // },
+  // ratingText: {
+  //   fontFamily: Fonts.PlusJakartaSans_Bold,
+  //   color: Colors.primary_text,
+  //   fontSize: RFPercentage(2),
+  //   lineHeight: 25,
+  //   marginLeft: 5,
+  // },
   rowViewSB: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1087,11 +1087,11 @@ const styles = StyleSheet.create({
   },
   variationText: {
     fontSize: RFPercentage(1.6),
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
   },
   variationTxt: {
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(1.7),
     marginBottom: hp(1)

@@ -1,117 +1,118 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import {
-    heightPercentageToDP as hp,
-    widthPercentageToDP as wp,
-  } from 'react-native-responsive-screen';
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from 'react-native-responsive-screen';
 import AddButton from '../../Assets/svg/addButton.svg';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Colors, Fonts } from '../../constants';
-import { BASE_URL } from '../../utils/globalVariables';
 
-
-const DealCard = ({isFavorite,  description, price, title, onPress, image, heartPress, addToCartpress, imageStyle, nameStyle, descriptionStyle, priceStyle, iconSize}) => {
+const DealCard = ({
+  isFavorite,
+  description,
+  price,
+  title,
+  onPress,
+  image,
+  heartPress,
+  addToCartpress,
+  imageStyle,
+  nameStyle,
+  descriptionStyle,
+  priceStyle,
+  iconSize,
+}) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.cardContainer}>
       {/* Product Image */}
-      {/* <View style={styles.imageContainer}> */}
-        <Image
-          source={{ uri: image}} // Add the image source URL
-          style={[styles.productImage, imageStyle]}
-        />
-        {/* Cart Icon */}
-        <TouchableOpacity style={styles.cartIconContainer} onPress={addToCartpress} >
-        <AddButton width={wp(10)} height={hp(5)} />
-        </TouchableOpacity>
-      {/* </View> */}
+      <Image
+        source={{ uri: image }}
+        style={[styles.productImage, imageStyle]}
+      />
+      
+      {/* Cart Icon */}
+      <TouchableOpacity style={styles.cartIconContainer} onPress={addToCartpress}>
+        <AntDesign name="plus" size={iconSize ? iconSize : 12} color={Colors.button.primary_button_text} />
+      </TouchableOpacity>
 
       {/* Product Info */}
-      <View style={{paddingHorizontal: wp(3)}} >
+      <View style={styles.infoContainer}>
+        <Text style={[styles.productTitle, nameStyle]}>{title}</Text>
+        <Text style={[styles.productSubtitle, descriptionStyle]} ellipsizeMode="tail" numberOfLines={1}>
+          {description}
+        </Text>
 
-      <Text style={[styles.productTitle, nameStyle]}>{title}</Text>
-      <Text style={[styles.productSubtitle, descriptionStyle]} ellipsizeMode='tail' numberOfLines={1} >{description}</Text>
-
-      {/* Price and Heart Icon */}
-      <View style={styles.footer}>
-        <Text style={[styles.priceText, priceStyle]}>£ {price}</Text>
-        <TouchableOpacity onPress={heartPress} >
-        { isFavorite ? (
-                  <AntDesign name="heart" size={iconSize?iconSize:24} color={Colors.Orange} />
-                ) : (
-                  <AntDesign name="hearto" size={iconSize?iconSize:24} color={Colors.Orange} />
-                )}
-        </TouchableOpacity>
+        {/* Price and Heart Icon */}
+        <View style={styles.footer}>
+          <Text style={[styles.priceText, priceStyle]}>£ {price}</Text>
+          <TouchableOpacity onPress={heartPress}>
+            {isFavorite ? (
+              <AntDesign name="heart" size={iconSize ? iconSize : 24} color={Colors.button.primary_button} />
+            ) : (
+              <AntDesign name="hearto" size={iconSize ? iconSize : 24} color={Colors.button.primary_button} />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
-
-      </View>
-      
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   cardContainer: {
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.secondary_color,
     borderRadius: wp('3%'),
-    // padding: wp('4%'s),
-    // marginBottom: hp('3%'),
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: wp('5%'),
     shadowOffset: { width: 0, height: hp('0.5%') },
     elevation: 2,
-    // flex: 1
     margin: wp(2),
-    width: wp(60 ),
-    overflow: 'hidden'
-  },
-  imageContainer: {
-    position: 'relative',
+    width: wp(42), // Adjusted for a better fit
+    overflow: 'hidden',
+    paddingBottom: wp(2)
   },
   productImage: {
-    width: wp(65),
-    height: hp('23%'),
+    width: '100%',
+    height: hp('20%'),
     borderRadius: wp('3%'),
-    resizeMode: 'cover'
+    resizeMode: 'cover',
   },
   cartIconContainer: {
     position: 'absolute',
     top: hp('1.5%'),
     right: wp('2%'),
-    // borderRadius: wp('10%'),
-    // padding: wp('2%'),
-    // alignItems: 'center',
-    // backgroundColor: Colors.Orange,
-    // paddingVertical: wp(0.6),
-    // paddingHorizontal: wp(2.2),
+    backgroundColor: Colors.button.primary_button,
+    paddingHorizontal: wp(2),
+    paddingVertical: wp(2),
+    borderRadius: wp('50%'),
+  },
+  infoContainer: {
+    paddingHorizontal: wp(3),
+    marginTop: hp('1%'),
   },
   productTitle: {
-    fontSize: wp('5%'),
+    fontSize: wp('4.5%'),
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    // marginTop: hp('1%'),
-    color: Colors.Black,
+    color: Colors.primary_text,
     marginTop: hp('0.5%'),
-
   },
   productSubtitle: {
-    fontSize: wp('3.5%'),
-    color: Colors.darkTextColor,
+    fontSize: wp('3%'),
+    color: Colors.secondary_text,
     marginTop: hp('0.5%'),
   },
   footer: {
     flexDirection: 'row',
-    // justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: hp('1%'),
-    marginTop: hp('0.5%'),
-
+    marginTop: hp('1%'),
   },
   priceText: {
-    fontSize: wp('5%'),
+    fontSize: wp('4.5%'),
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.darkTextColor,
-    marginRight: wp(2)
-
+    color: Colors.primary_text,
+    marginRight: wp(2),
   },
 });
 

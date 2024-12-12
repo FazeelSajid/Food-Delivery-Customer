@@ -1,11 +1,11 @@
 import {StyleSheet, Text, View, FlatList} from 'react-native';
 import React, {useState, useEffect} from 'react';
-import {Images} from '../../../../constants';
-import OrdersCard from '../../../../components/Cards/OrdersCard';
-import FoodCardWithRating from '../../../../components/Cards/FoodCardWithRating';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+// import {Images} from '../../../../constants';
+// import OrdersCard from '../../../../components/Cards/OrdersCard';
+// import FoodCardWithRating from '../../../../components/Cards/FoodCardWithRating';
+import { useNavigation} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
-import {BASE_URL_IMAGE} from '../../../../utils/globalVariables';
+// import {BASE_URL_IMAGE} from '../../../../utils/globalVariables';
 import NoDataFound from '../../../../components/NotFound/NoDataFound';
 import OrderCard from '../../../../components/Cards/OrderCard';
 import {

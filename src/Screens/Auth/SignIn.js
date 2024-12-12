@@ -25,7 +25,8 @@ import {
   setCustomerId,
   setJoinAsGuest,
   setSignUpWith,
-  setPassword
+  setPassword,
+  setRestautantDetails
 } from '../../redux/AuthSlice';
 import {getUserFcmToken, handlePopup, showAlert} from '../../utils/helpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -74,17 +75,14 @@ const SignIn = ({navigation, route}) => {
       style={{
         height: hp(0.1),
         marginVertical: 10,
-        backgroundColor: '#00000026',
+        backgroundColor: Colors.borderGray,
       }}
     />
   );
 
   const keyboardHeight = useKeyboard();
   const scrollViewRef = useRef();
-  // useEffect(() => {
-  //   // scrollViewRef.current?.scrollToEnd();
-  //   scrollViewRef.current?.scrollTo({y: 180});
-  // }, [keyboardHeight]);
+  
 
   const [loading, setLoading] = useState(false);
   const [userValue, setUserValue] = useState(null);
@@ -159,7 +157,8 @@ const SignIn = ({navigation, route}) => {
         email: userValue.toLowerCase(),
         password: password,
        fcm_token,
-        login_type: "email"
+        login_type: "email",
+        rest_ID: "res_4074614",
     }
 
     // console.log(data, 'dataaa');
@@ -176,50 +175,31 @@ const SignIn = ({navigation, route}) => {
       .then(async response => {
        
         if (
-          response?.verified == false ||
-          response?.message == 'User is not verified'
+          response?.user?.verified == false
         ) {
-          // navigation?.navigate('Verification', {
-          //   response: response,
-          //   customer_id: response?.user?.customer_id,
-          //   phone_no: countryCode + phone_no,
-          // });
-          // console.log('login response   : ', response.result);
-          navigation?.replace('Drawer');
-          dispatch(setJoinAsGuest(false));
-          dispatch(
-            setCustomerId(response?.user?.customer_id?.toString()),
-          );
-          dispatch(setCustomerDetail(response?.user));
-
-          // dispatch(
-          //   setCustomerId(response?.result?.customer_id?.toString()),
-          // );
-          // dispatch(setCustomerDetail(response?.result));
-
+          navigation.navigate('Verification',{
+            response: response?.user,
+            customer_id: response?.user?.customer_id,
+            otp: response?.verificationCode,
+            email: response?.user?.email
+          })
+          
           clearFields();
         } else if (response?.status == false) {
-          // showAlert(response?.message);
           handlePopup(dispatch,'Invalid Credentials', 'red');
-        } else {
-          // await AsyncStorage.setItem(
-          //   'customer_id',
-          //   response?.user?.customer_id?.toString(),
-          // );
-          // await AsyncStorage.setItem(
-          //   'customer_detail',
-          //   JSON.stringify(response?.user),
-          // );
-          // console.log(response?.user?.customer_id?.toString(), 'id signin');
+        } else if (response?.user?.trash === true) {
+          handlePopup(dispatch,'Account Delete Please login with different email', 'red');
+
+        } 
+        
+        else {
+        
           
           dispatch(setJoinAsGuest(false));
-          // dispatch(
-          //   setCustomerId(response?.result?.customer_id?.toString()),
-          // );
-          // dispatch(setCustomerDetail(response?.result));
           dispatch(
             setCustomerId(response?.user?.customer_id?.toString()),
           );
+          dispatch(setRestautantDetails(response?.restaurant))
           dispatch(setCustomerDetail(response?.user));
          console.log('user', data)
           dispatch(setPassword(password))
@@ -242,6 +222,7 @@ const SignIn = ({navigation, route}) => {
         login_type: 'phone_no',
         phone_no: userValue,
         password: password,
+        rest_ID: "res_4074614",
         fcm_token: fcm_token,
       };
       console.log(data);
@@ -258,45 +239,34 @@ const SignIn = ({navigation, route}) => {
         .then(async response => {
           console.log('login response   : ', response);
           if (
-            response?.verified == false ||
-            response?.message == 'User is not verified'
+            response?.user?.verified == false
           ) {
-            navigation?.replace('Drawer');
-            // navigation?.navigate('Verification', {
-            //   response: response,
-            //   customer_id: response?.user?.customer_id,
-            //   phone_no: countryCode + phone_no,
-            // });
-            dispatch(setJoinAsGuest(false));
-            // console.log(response?.user?.customer_id, 'idhjvhjvhgvhg');
+            navigation.navigate('Verification',{
+              response: response?.user,
+              customer_id: response?.user?.customer_id,
+              otp: response?.verificationCode,
+              email: response?.user?.email
+            })
             
-            dispatch(
-              setCustomerId(response?.user?.customer_id?.toString()),
-            );
-            dispatch(setCustomerDetail(response?.user));
-
             clearFields();
           } else if (response?.status == false) {
             // showAlert(response?.message);
             handlePopup(dispatch,'Invalid Credentials', 'red');
-          } else {
-            // await AsyncStorage.setItem(
-            //   'customer_id',
-            //   response?.user?.customer_id?.toString(),
-            // );
-            // await AsyncStorage.setItem(
-            //   'customer_detail',
-            //   JSON.stringify(response?.user),
-            // );
+          }else if (response?.user?.trash === true) {
+            handlePopup(dispatch,'Account Delete Please login with different phone', 'red');
+  
+          }  
+          
+          else {
+           
             dispatch(setJoinAsGuest(false));
-            console.log(response?.user?.customer_id?.toString());
-            
+            // console.log(response?.user?.customer_id?.toString());
+            dispatch(setRestautantDetails(response?.restaurant))
             dispatch(
               setCustomerId(response?.user?.customer_id?.toString()),
             );
             dispatch(setPassword(password))
             dispatch(setCustomerDetail(response?.user));
-            // navigation?.popToTop()
             navigation?.replace('Drawer');
             clearFields();
           }
@@ -318,23 +288,7 @@ const SignIn = ({navigation, route}) => {
       // Optionally handle invalid input case
     }
 
-    // navigation?.navigate('Drawer')
-    // if (validate()) {
-
-      // console.log({user_name, phone_no, password,fcm_token});
-      // setLoading(false);
-      // if (phone_no == '+11234567890') {
-      //   navigation?.navigate('Verification', {
-      //     customer_id: '',
-      //     phone_no: countryCode + phone_no,
-      //   });
-      //   clearFields();
-      // } else
-      //  if (validate()) {
-       
-        // console.log('data  :  ', data);
-       
-      // }
+   
     }
   };
 
@@ -345,6 +299,51 @@ const SignIn = ({navigation, route}) => {
       iosClientId: '',
     });
   }, []);
+
+  const updateVerificationStatus = (customer_id, otp) => {
+    return new Promise((resolve, reject) => {
+      let data = {
+        customer_id: customer_id,
+        verified: true,
+        otp:otp
+      };
+      console.log('data  :  ', data);
+      fetch(api.update_verification_status, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+      })
+        .then(response => response.json())
+        .then(async response => {
+          console.log('response  :  ', response);
+          if (response?.status == false) {
+              handlePopup(dispatch, 'Something went wrong!', 'red')
+          } else {
+            handlePopup(dispatch, "Login Successfully", 'green')
+
+            let wallet = await createCustomerWallet(
+              response?.result?.customer_id,
+            );
+            console.log(wallet);
+            dispatch(
+              setCustomerId(response?.result?.customer_id?.toString()),
+            );
+            dispatch(setJoinAsGuest(false));
+            dispatch(setCustomerDetail(response?.result));
+            // navigation?.popToTop()
+            navigation?.navigate('Drawer');
+            clearFields();
+          }
+        })
+        .catch(err => {
+          console.log(err);
+          
+            handlePopup(dispatch, 'Something went wrong!', 'red')
+        });
+    });
+  };
 
   const handleGoogleSignIn = async () => {
     console.log('handleGoogleSignIn');
@@ -368,8 +367,8 @@ const SignIn = ({navigation, route}) => {
         let data = {
           login_type: 'google',
           email: email,
-          // password: password,
           fcm_token: fcm_token,
+          rest_ID: "res_4074614"
         };
         console.log('data  :  ', data);
         fetch(api.login, {
@@ -384,43 +383,28 @@ const SignIn = ({navigation, route}) => {
             console.log('response : ', response);
 
             if (
-              response?.verified == false ||
-              response?.message == 'User is not verified'
+              response?.user?.verified == false
             ) {
-              // navigation?.navigate('Verification', {
-              //   response: response,
-              //   customer_id: response?.user?.customer_id,
-              //   phone_no: countryCode + phone_no,
-              // });
+              updateVerificationStatus(response?.user?.customer_id,response?.verificationCode)
+              dispatch(setRestautantDetails(response?.restaurant))
 
-              navigation?.navigate('EmailVerification', {
-                response: response,
-                customer_id: response?.user?.customer_id,
-                email: email,
-              });
-
-              clearFields();
             } else if (response?.status == false) {
               handlePopup(dispatch,response?.message, 'red');
             setLoading(false);
             clearFields();
 
               // showAlert('Invalid Credentials');
-            } else {
-              await AsyncStorage.setItem(
-                'customer_id',
-                response?.user?.customer_id?.toString(),
-              );
-              await AsyncStorage.setItem(
-                'customer_detail',
-                JSON.stringify(response?.user),
-              );
+            }else if (response?.user?.trash === true) {
+              handlePopup(dispatch,'Account Delete Please login with different email', 'red');
+    
+            }  
+            else {
               dispatch(setJoinAsGuest(false));
               dispatch(
                 setCustomerId(response?.user?.customer_id?.toString()),
               );
               dispatch(setCustomerDetail(response?.user));
-              // navigation?.popToTop()
+              dispatch(setRestautantDetails(response?.restaurant))
               navigation?.replace('Drawer');
               clearFields();
             }
@@ -442,6 +426,7 @@ const SignIn = ({navigation, route}) => {
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         //alert('Play Services Not Available or Outdated');
       } else {
+
         handlePopup(dispatch,'Something went wrong!', 'red');
       }
     }
@@ -544,7 +529,7 @@ const SignIn = ({navigation, route}) => {
             width={wp(88)}
             leftIcon={<Google  />}
             borderColor={Colors.borderGray}
-            color={Colors.Black}
+            color={Colors.primary_text}
             onPress={() => handleGoogleSignIn()}
             style={{marginTop: 0}}
           />
@@ -560,15 +545,15 @@ const SignIn = ({navigation, route}) => {
                 <Text style={STYLE.rbSheetHeading}>Select an option</Text>
                 <TouchableOpacity
                   onPress={() => closeBtmSheet()}>
-                  <Ionicons name={'close'} size={22} color={'#1E2022'} />
+                  <Ionicons name={'close'} size={22} color={Colors.primary_text} />
                 </TouchableOpacity>
               </View>
 
               <TouchableOpacity style={STYLE.rowView} onPress={() =>toggleSelection('phone')} >
-                {/* <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/> */}
+                {/* <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/> */}
                 <Text
                   style={{
-                    color: '#56585B',
+                    color: Colors.secondary_text,
                     fontFamily: Fonts.PlusJakartaSans_Regular,
                     fontSize: RFPercentage(2),
                     marginLeft: wp(4)
@@ -579,10 +564,10 @@ const SignIn = ({navigation, route}) => {
               </TouchableOpacity  >
               <ItemSeparator />
               <TouchableOpacity style={STYLE.rowView} onPress={() => toggleSelection('email')}>
-                {/* <RadioButton color={Colors.Orange} uncheckedColor={Colors.Orange} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} /> */}
+                {/* <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} /> */}
                 <Text
                   style={{
-                    color: '#56585B',
+                    color: Colors.secondary_text,
                     fontFamily: Fonts.PlusJakartaSans_Regular,
                     fontSize: RFPercentage(2),
                     marginLeft: wp(4)
@@ -679,7 +664,7 @@ export default SignIn;
 //                       style={styles.input}
 //                       color="#212121"
 //                       placeholder="Username"
-//                       placeholderTextColor={'#595959'}
+//                       placeholderTextColor={Colors.secondary_text}
 //                       // onChangeText={text => setFullName(text)}
 //                       // value={fullName}
 //                     />
@@ -706,7 +691,7 @@ export default SignIn;
 //                       style={styles.input}
 //                       color="#212121"
 //                       placeholder="Phone Number"
-//                       placeholderTextColor={'#595959'}
+//                       placeholderTextColor={Colors.secondary_text}
 //                       keyboardType="phone-pad"
 //                       // onChangeText={text => setFullName(text)}
 //                       // value={fullName}

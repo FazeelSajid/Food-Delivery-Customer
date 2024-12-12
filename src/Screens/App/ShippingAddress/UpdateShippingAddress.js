@@ -243,7 +243,7 @@ const UpdateShippingAddress = ({navigation, route}) => {
           //   <Text
           //     onPress={() => navigation.replace('SelectPaymentMethod')}
           //     style={{
-          //       color: Colors.Orange,
+          //       color: Colors.primary_color,
           //       textDecorationLine: 'underline',
           //       fontFamily: Fonts.PlusJakartaSans_Bold,
           //     }}>
@@ -352,7 +352,7 @@ const UpdateShippingAddress = ({navigation, route}) => {
             <CheckBox
               value={checked}
               label={'redsfdfs'}
-              tintColors={{true: Colors.Orange, false: Colors.Orange}}
+              tintColors={{true: Colors.primary_color, false: Colors.primary_color}}
               onValueChange={() => {
                 setChecked(!checked);
               }}

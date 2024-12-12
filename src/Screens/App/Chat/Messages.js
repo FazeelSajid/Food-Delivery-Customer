@@ -346,9 +346,9 @@ function removeItemsByRestaurantId(restaurantId) {
 
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       <StackHeader title={'My Chats'} />
-      <View style={{paddingHorizontal: wp(0)}} >
+      <View style={{paddingHorizontal: wp(0),backgroundColor: `${Colors.primary_color}50`,}} >
 
       
       <TouchableOpacity style={styles.rowView} onPress={()=> handleSelectContact(contac)} >
@@ -389,14 +389,6 @@ export default Messages;
 
 const styles = StyleSheet.create({
   card: {flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20},
-  iconContainer: {
-    height: 50,
-    width: 50,
-    borderRadius: 50 / 2,
-    backgroundColor: '#FF572233',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   rowViewSB: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -405,31 +397,31 @@ const styles = StyleSheet.create({
   rowView: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.OrangeExtraLight,
+    
     paddingHorizontal: wp(6.5),
     paddingVertical: hp(2),
-    elevation: 7,
+    // elevation: 7,
     justifyContent: 'space-between',
   },
   title: {
     fontFamily: Fonts.Inter_SemiBold,
-    color: Colors.Black,
+    color: Colors.primary_text,
     fontSize: RFPercentage(2),
     lineHeight: 30,
   },
   timeText: {
     fontFamily: Fonts.Inter_Medium,
-    color: '#595959',
+    color: Colors.secondary_text,
     fontSize: RFPercentage(1.5),
   },
   description: {
     fontFamily: Fonts.Inter_Regular,
-    color: '#595959',
+    color: Colors.secondary_text,
     fontSize: RFPercentage(1.5),
     flex: 0.9,
   },
   restaurant_name:{
-    color: Colors.darkTextColor,
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_SemiBold,
     fontSize: RFPercentage(2.8),
     textAlign: 'center',

@@ -13,15 +13,7 @@ const NoDataFound = ({ loading, text, textStyle, svgHeight }) => {
     <>
       {!loading && (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          {/* <Text
-            style={{
-              fontFamily: Fonts.PlusJakartaSans_Bold,
-              color: '#0A212B',
-              fontSize: RFPercentage(1.8),
-              lineHeight: 30,
-            }}>
-            No Data Found
-          </Text> */}
+          
           <Empty height={svgHeight || hp(10)} />
           <Text style={[  styles.txtStyle, textStyle ]} >{text}</Text>
         </View>
@@ -35,7 +27,7 @@ export default NoDataFound;
 const styles = StyleSheet.create({
   txtStyle : {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.darkTextColor,
+    color: Colors.primary_text,
     fontSize: RFPercentage(1.7),
     marginTop: hp(2)
     

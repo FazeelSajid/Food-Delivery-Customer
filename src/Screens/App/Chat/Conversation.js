@@ -306,7 +306,7 @@ const Conversation = ({ navigation, route }) => {
             <Text
               style={[
                 styles.messageText,
-                isCustomer ? { color: Colors.White } : { color: Colors.Black },
+                isCustomer ? { color: Colors.secondary_color } : { color: Colors.primary_text },
               ]}
             >
               {item.message}
@@ -348,11 +348,11 @@ const Conversation = ({ navigation, route }) => {
           placeholder="Write message..."
           value={message}
           onChangeText={(text) => setMessage(text)}
-          placeholderTextColor={Colors.grayText}
+          placeholderTextColor={Colors.secondary_text}
         />
     
     <TouchableOpacity style={{marginHorizontal: wp('2%'),}} onPress={()=> cameraBtmSheetRef?.current?.open()} >
-        <Ionicons name="camera" size={wp('9')} color={Colors.Orange} />
+        <Ionicons name="camera" size={wp('9')} color={Colors.button.primary_button} />
 
         </TouchableOpacity>
         <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
@@ -394,29 +394,30 @@ const styles = StyleSheet.create({
     maxWidth: wp('70%'),
     borderRadius: wp('3%'),
     padding: wp('1%'),
-    overflow:'hidden'
+    overflow:'hidden',
   },
   customerBubble: {
-    backgroundColor: Colors.Orange,
+    backgroundColor: Colors.primary_color,
     borderTopRightRadius: 0,
     width: wp(62)
-    // borderColor: Colors.Orange,
+    // borderColor: Colors.primary_color,
     // borderWidth: wp(1)
   },
   restaurantBubble: {
-    backgroundColor: '#EDEDED',
+    backgroundColor: Colors.borderGray,
     borderTopLeftRadius: 0,
   },
   messageText: {
     fontSize: wp('4%'),
-    color: '#333333',
+    color: Colors.primary_text,
     marginBottom: hp('0.5%'),
     marginTop: hp('0.5%'),
+    marginLeft : wp('1%'),
     // width: wp(80)
   },
   timestamp: {
     fontSize: wp('3.2%'),
-    color: '#888888',
+    color: Colors.secondary_text,
     marginTop: hp('0.5%'),
   },
   // Image Styling
@@ -433,39 +434,39 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     // elevation: 3, // Shadow support for Android
     borderWidth: 1, // Optional: Add border for a sleek look
-    borderColor: '#ddd', // Border color
+    // borderColor: '#ddd', // Border color
     overflow: 'hidden',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.secondary_color,
     paddingVertical: hp('1%'),
     paddingHorizontal: wp('4%'),
     borderTopWidth: 1,
-    borderTopColor: '#EDEDED',
+    borderTopColor: Colors.borderGray,
   },
   textInput: {
     flex: 1,
     height: hp('5%'),
     borderWidth: 1,
-    borderColor: '#EDEDED',
+    borderColor: Colors.borderGray,
     borderRadius: wp('5%'),
     paddingHorizontal: wp('4%'),
-    backgroundColor: '#F9F9F9',
+    backgroundColor: Colors.secondary_color,
     fontSize: wp('4%'),
-    color: Colors.Black,
+    color: Colors.primary_text,
   },
   sendButton: {
     marginLeft: wp('2%'),
-    backgroundColor: Colors.Orange,
+    backgroundColor: Colors.button.primary_button,
     borderRadius: wp('5%'),
     padding: wp('3%'),
     justifyContent: 'center',
     alignItems: 'center',
   },
   sendText: {
-    color: '#FFFFFF',
+    color: Colors.button.primary_button_text ,
     fontSize: wp('5%'),
     fontWeight: 'bold',
   },

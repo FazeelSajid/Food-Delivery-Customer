@@ -43,8 +43,8 @@ const CustomerCard = ({
         <Avatar.Text
           size={50}
           label={getFirstTwoLettersOfName(showNameProfile)}
-          style={{backgroundColor: Colors.Orange}}
-          labelStyle={{color: Colors.White}}
+          style={{backgroundColor: Colors.button.primary_button}}
+          labelStyle={{color: Colors.button.primary_button_text}}
         />
       ) : (
         <Avatar.Image

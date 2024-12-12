@@ -263,6 +263,9 @@ const NearByDeals = ({ navigation, route }) => {
     // If the string length is less than or equal to 50, return it as is
     return str;
   }
+
+  // console.log({searchFilters});
+  
   return (
     <View style={styles.container}>
       {/* <Loader loading={loading} /> */}
@@ -272,112 +275,6 @@ const NearByDeals = ({ navigation, route }) => {
         translucent={false}
       />
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
-      {isSearch ? (
-        <ScrollView style={{ flex: 1 }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              width: wp(100),
-              paddingHorizontal: 20,
-              backgroundColor: 'red'
-            }}>
-            <Icons.SearchIconInActive />
-            <TextInput
-              placeholder="What would you like to eat?"
-              placeholderTextColor={'#757575'}
-              style={{ flex: 1, fontSize: RFPercentage(2) }}
-            />
-            <TouchableOpacity onPress={() => setIsSearch(!isSearch)}>
-              <Text
-                style={{
-                  color: Colors.Orange,
-                  textDecorationLine: 'underline',
-                  fontFamily: Fonts.PlusJakartaSans_Bold,
-                  fontSize: RFPercentage(1.8),
-                }}>
-                Cancel
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View
-            style={{
-              width: wp(100),
-              marginTop: 10,
-            }}>
-            <FlatList
-              ListHeaderComponent={() => <View style={{ width: 20 }} />}
-              ListFooterComponent={() => <View style={{ width: 20 }} />}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              data={searchFilters}
-              renderItem={({ item }) => (
-                <Chip
-                  title={item}
-                  selected={item == selected ? true : false}
-                  onPress={() => setSelected(item)}
-                  icon={item == 'Nearby' ? <Icons.MapPin /> : null}
-                />
-              )}
-            />
-          </View>
-          <ScrollView
-            horizontal
-            style={{
-              paddingHorizontal: 20,
-              paddingVertical: 20,
-              flex: 1,
-            }}>
-            <FlatList
-              scrollEnabled={false}
-              data={searchList}
-              showsVerticalScrollIndicator={false}
-              ListHeaderComponent={() => (
-                <Text
-                  style={{
-                    ...styles.heading,
-                    color: '#191A26',
-                    fontSize: RFPercentage(2.2),
-                  }}>
-                  Top Searches
-                </Text>
-              )}
-              ItemSeparatorComponent={() => (
-                <View
-                  style={{
-                    height: hp(0.1),
-                    marginVertical: 10,
-                    backgroundColor: '#E6E9ED',
-                  }}
-                />
-              )}
-              renderItem={({ item }) => (
-                <View style={styles.itemView}>
-                  <ImageBackground
-                    source={item.image}
-                    blurRadius={40}
-                    style={styles.imageContainer}>
-                    <Image source={item.image} style={styles.image} />
-                  </ImageBackground>
-                  <View style={styles.textContainer}>
-                    <Text style={styles.title}>{item?.name}</Text>
-                    <Text style={{ ...styles.title, color: Colors.Orange }}>
-                      $ {item?.price}
-                    </Text>
-                    <View style={styles.rowViewSB}>
-                      <Text style={styles.nameText}>by {item?.owner}</Text>
-                      <View style={styles.rowView}>
-                        <Icons.Rating />
-                        <Text style={styles.ratingText}>{item?.rating}</Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-              )}
-            />
-          </ScrollView>
-        </ScrollView>
-      ) : (
         <View style={{}}>
           <FlatList
             contentContainerStyle={{ alignItems: 'center', flexGrow: 1 }}
@@ -402,7 +299,7 @@ const NearByDeals = ({ navigation, route }) => {
             //   paddingHorizontal: 20,
             // }}
             data={deals}
-            refreshControl={<RefreshControl refreshing={loading} onRefresh={() => getDeals()} colors={[Colors.Orange]} />}
+            refreshControl={<RefreshControl refreshing={loading} onRefresh={() => getDeals()} colors={[Colors.primary_color]} />}
             ListEmptyComponent={() => !loading && <NoDataFound svgHeight={hp(15)} text={'No Deals'} textStyle={{ fontSize: RFPercentage(2.5) }} />}
             ItemSeparatorComponent={() => <View style={{ height: hp(3) }} />}
             renderItem={({ item }) => {
@@ -421,7 +318,7 @@ const NearByDeals = ({ navigation, route }) => {
                 <DealCard
                   image={
                     item?.images?.length > 0
-                      ? BASE_URL_IMAGE + item?.images[0]
+                      ? item?.images[0]
                       : ''
                   }
                   description={shortenString(item?.description)}
@@ -442,49 +339,16 @@ const NearByDeals = ({ navigation, route }) => {
                   }}
                   nameStyle={{ fontSize: RFPercentage(1.8) }}
                   descriptionStyle={{ fontSize: RFPercentage(1.5) }}
-                  priceStyle={{ fontSize: RFPercentage(2.2), color: Colors.Orange }}
+                  priceStyle={{ fontSize: RFPercentage(2.2), color: Colors.primary_color }}
                   iconSize={19}
                 />
-                // <FoodCardWithRating
-                //   onPress={() => {
-                //     navigation?.navigate('NearByDealsDetails', {
-                //       id: item?.deal_id,
-                //     });
-                //   }}
-                //   title={item?.name}
-                //   // image={item?.image}
-                //   image={
-                //     item?.images?.length > 0
-                //       ? BASE_URL_IMAGE + item?.images[0]
-                //       : ''
-                //   }
-                //   // description={item?.description}
-                //   price={item?.price}
-                //   rating={item?.rating}
-                //   // tag={item?.tag}
-                //   // tag={['Burger', 'Pizza', 'Drinks']}
-                //   tag={cuisineNames}
-                //   isTagArray={true}
-                //   nextIconWidth={26}
-                //   cardStyle={{
-                //     marginHorizontal: 0,
-                //     marginBottom: -9,
-                //     width: wp(90),
-                //     alignSelf: 'center',
-                //   }}
-                //   showNextButton={true}
-                //   showRating={false}
-                //   priceContainerStyle={{marginTop: 0}}
-                //   isFavorite={fav}
-                //   onRemove = {()=> removeFavoriteDeal( item?.deal_id,customer_id, favoriteDeals, dispatch, showAlert)}
-                //   addFav={()=> addFavoriteDeal( item?.deal_id, customer_id, dispatch, showAlert)}
-                // />
+                
               )
             }}
             ListFooterComponent={() => <View style={{ height: hp(3) }} />}
           />
         </View>
-      )}
+
     </View>
   );
 };
@@ -492,11 +356,11 @@ const NearByDeals = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.secondary_color ,
     alignItems: 'center',
   },
   heading: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.5),
     marginBottom: 10,
@@ -524,19 +388,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontSize: RFPercentage(1.7),
     lineHeight: 25,
   },
-  nameText: {
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: '#7E8CA0',
-    fontSize: RFPercentage(2),
-    lineHeight: 25,
-  },
+
   ratingText: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontSize: RFPercentage(2),
     lineHeight: 25,
     marginLeft: 5,
@@ -792,7 +651,7 @@ export default NearByDeals;
 //             <TouchableOpacity onPress={() => setIsSearch(!isSearch)}>
 //               <Text
 //                 style={{
-//                   color: Colors.Orange,
+//                   color: Colors.primary_color,
 //                   textDecorationLine: 'underline',
 //                   fontFamily: Fonts.PlusJakartaSans_Bold,
 //                   fontSize: RFPercentage(1.8),
@@ -862,7 +721,7 @@ export default NearByDeals;
 //                   </ImageBackground>
 //                   <View style={styles.textContainer}>
 //                     <Text style={styles.title}>{item?.name}</Text>
-//                     <Text style={{...styles.title, color: Colors.Orange}}>
+//                     <Text style={{...styles.title, color: Colors.primary_color}}>
 //                       $ {item?.price}
 //                     </Text>
 //                     <View style={styles.rowViewSB}>

@@ -11,9 +11,15 @@ import moment from 'moment';
 import { BASE_URL } from './globalVariables';
 import { Fonts } from '../constants';
 import { setPopUpColor, setPopUpMesage, setShowPopUp } from '../redux/AuthSlice';
+import { createNavigationContainerRef } from '@react-navigation/native';
 
+export const navigationRef = createNavigationContainerRef();
 
-
+export function navigate(name, params) {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate(name, params);
+  }
+}
 
 export const handlePopup = (dispatch, message, color) => {
   dispatch(setShowPopUp(true));
@@ -555,25 +561,25 @@ export const fetchApis = async (endPoint, method, setLoading, header, payload, d
 };
 export const fetchApisGet = async (endPoint, setLoading, dispatch) => {
 
-  setLoading(true)
+  setLoading &&setLoading(true)
   try {
     const response = await fetch(endPoint, {
       method: "GET",
     });
-    // console.log('Fetched apis...', response);
     // Check if the response is OK (status code 200 or 201)
     if (response.status === 200) {
 
       // Successfully processed request
       const jsonResponse = await response.json();
-      setLoading(false)
+      setLoading &&setLoading(false);
+      // console.log('Fetched APIs:', endPoint); // Correctly log the response
 
       // console.log(jsonResponse.Response.apiResponse, 'jsonResponse');
 
       return jsonResponse;
     } else if (response.status === 400) {
       const errorData = await response.json();
-      setLoading(false)
+      setLoading &&setLoading(false)
       showAlert(`Bad Request: ${errorData.message || 'Invalid data sent.'}`);
       handlePopup(dispatch, 'Something is went wrong', 'red')
       console.log(errorData.message);
@@ -581,7 +587,7 @@ export const fetchApisGet = async (endPoint, setLoading, dispatch) => {
 
     } else if (response.status === 401) {
       // Unauthorized - invalid or missing token
-      setLoading(false)
+      setLoading &&setLoading(false)
       // showAlert( 'Unauthorized: Invalid or missing token.');s
       handlePopup(dispatch, 'Something is went wrong', 'red')
       // console.log('fetchapi func, Unauthorized: Invalid or missing token');
@@ -591,7 +597,7 @@ export const fetchApisGet = async (endPoint, setLoading, dispatch) => {
       // showAlert('Forbidden: You do not have permission to perform this action.');
       handlePopup(dispatch, 'Something is went wrong', 'red')
       // console.log('fetchapi func, Forbidden: You do not have permission to perform this action.' )
-      setLoading(false)
+      setLoading &&setLoading(false)
 
       // Forbidden - you do not have permission
       // throw new Error('Forbidden: You do not have permission to perform this actio n.');
@@ -599,7 +605,7 @@ export const fetchApisGet = async (endPoint, setLoading, dispatch) => {
       // console.log(endPoint);
 
       // showAlert( 'Not Found: The requested resource was not found.');
-      setLoading(false)
+      setLoading &&setLoading(false)
       handlePopup(dispatch, 'Something is went wrong', 'red')
 
       // console.log('fetchapi func, Not Found: The requested resource was not found.');
@@ -610,7 +616,7 @@ export const fetchApisGet = async (endPoint, setLoading, dispatch) => {
       // throw new Error('Not Found: The requested resource was not found.');
     } else if (response.status === 500) {
       // showAlert( 'Server Error: An error occurred on the server.');
-      setLoading(false)
+      setLoading &&setLoading(false)
       // console.log('Server Error: An error occurred on the server.');
       handlePopup(dispatch, 'Something is went wrong', 'red')
       // Internal Server Error - server-side error
@@ -618,13 +624,13 @@ export const fetchApisGet = async (endPoint, setLoading, dispatch) => {
     } else {
       // showAlert( `Unexpected error: ${response.statusText}`);
       handlePopup(dispatch, 'Something is went wrong', 'red')
-      setLoading(false)
+      setLoading &&setLoading(false)
       // Handle other status codes
       // throw new Error(`Unexpected error: ${response.statusText}`);
       console.log(`Unexpected error: ${response.statusText}`);
 
     }
-    // setLoading(false)
+    // setLoading &&setLoading(false)
 
 
     // setTimeout(() => {
@@ -643,7 +649,7 @@ export const fetchApisGet = async (endPoint, setLoading, dispatch) => {
       console.log(error, 'error');
 
       showAlert(`Please check your internet connection.`);
-      setLoading(false)
+      setLoading &&setLoading(false)
 
 
       return
@@ -652,7 +658,7 @@ export const fetchApisGet = async (endPoint, setLoading, dispatch) => {
 
   }
   finally{
-    setLoading(false)
+    setLoading &&setLoading(false)
   }
 
 };

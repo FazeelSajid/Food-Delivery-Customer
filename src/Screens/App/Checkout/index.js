@@ -305,14 +305,14 @@ const Checkout = ({ navigation, route }) => {
   //       //   },
   //       // },
   //       // colors: {
-  //       //   primary: Colors.Orange,
+  //       //   primary: Colors.primary_color,
   //       //   background: '#FFFFFF',
   //       //   componentBackground: '#FFFFFF',
   //       //   componentBorder: '#000000',
   //       //   componentDivider: '#000000',
-  //       //   primaryText: Colors.Orange,
-  //       //   secondaryText: Colors.Orange,
-  //       //   componentText: Colors.Orange,
+  //       //   primaryText: Colors.primary_color,
+  //       //   secondaryText: Colors.primary_color,
+  //       //   componentText: Colors.primary_color,
   //       //   placeholderText: '#000000',
   //       // },
   //     },
@@ -357,14 +357,14 @@ const Checkout = ({ navigation, route }) => {
         //   },
         // },
         // colors: {
-        //   primary: Colors.Orange,
+        //   primary: Colors.primary_color,
         //   background: '#FFFFFF',
         //   componentBackground: '#FFFFFF',
         //   componentBorder: '#000000',
         //   componentDivider: '#000000',
-        //   primaryText: Colors.Orange,
-        //   secondaryText: Colors.Orange,
-        //   componentText: Colors.Orange,
+        //   primaryText: Colors.primary_color,
+        //   secondaryText: Colors.primary_color,
+        //   componentText: Colors.primary_color,
         //   placeholderText: '#000000',
         // },
       },
@@ -427,7 +427,7 @@ const Checkout = ({ navigation, route }) => {
       style={{
         height: hp(0.1),
         marginVertical: 10,
-        backgroundColor: '#00000026',
+        backgroundColor: Colors.borderGray,
       }}
     />
   );
@@ -444,46 +444,7 @@ const Checkout = ({ navigation, route }) => {
     handleSendPushNotification(`Customer placed a new order`);
   };
   // handle update phone :  for that we send otp to user number and then after verify we update the user phone number
-  const handleSendCode = async () => {
-    try {
-      if (countryCode?.length == 0) {
-        showAlert('Please Enter Country');
-        return;
-      } else if (newPhoneNO?.length == 0) {
-        showAlert('Please Enter Phone Number');
-        return;
-      } else {
-        // navigation?.navigate('Verification_Phone', {
-        //   // confirmResult: response,
-        //   phone_no: countryCode + newPhoneNO,
-        //   screen: 'checkout',
-        // });
-
-        setLoading(true);
-        firebase
-          .auth()
-          .signInWithPhoneNumber(countryCode + newPhoneNO)
-          .then(response => {
-            console.log('confirmResult  :  ', response);
-            // setConfirmResult(response);
-            // setTimeout(() => refOTP.current.focusField(0), 250);
-            dispatch(setOtpConfirm(response));
-            navigation?.navigate('Verification_Phone', {
-              // confirmResult: response,
-              phone_no: countryCode + newPhoneNO,
-              screen: 'checkout',
-            });
-          })
-          .catch(error => {
-            showAlert(error.message);
-            console.log(error);
-          })
-          .finally(() => setLoading(false));
-      }
-    } catch (error) {
-      console.log('error :  ', error);
-    }
-  };
+ 
   const handleSendPushNotification = async text => {
     const receiver_fcm = await getUserFcmToken();
     if (receiver_fcm) {
@@ -540,11 +501,11 @@ const Checkout = ({ navigation, route }) => {
     await MakeOrderPayment(order_id, customer_id)
       .then(response => {
         console.log({ response }, { order_id, customer_id }, 'make orderPayment');
-        dispatch(setWalletTotalAmount(walletTotalAmount - Bill.total_amount))
 
 
         if (response.status === true) {
           handlePopup(dispatch, response.message, 'green')
+          dispatch(setWalletTotalAmount(walletTotalAmount - Bill.total_amount))
         } else {
           handlePopup(dispatch, response.error, 'red')
         }
@@ -570,7 +531,11 @@ const Checkout = ({ navigation, route }) => {
       // payment_option, total_amount must be Provided ", "status": false
       if (!location_id) {
         showBtmSheet()
-      } else {
+      }else if (!selected_payment_type) {
+        ref_RBSheetPaymentOption?.current?.open();
+      } 
+      
+      else {
         setLoading(true);
         // let customer_Id = await AsyncStorage.getItem('customer_id');
         console.log('customer_Id  :  ', customer_id);
@@ -859,12 +824,7 @@ const Checkout = ({ navigation, route }) => {
     
     if (checkPromoCode) {
 
-      // calculatePreOrderdetails(selected_payment_type, promoCode)
-      // setInValidPromoCode(false);
-      // setIsPromocodeApplied(true)
-
       try {
-        // Calculate subtotal
         let subtotal = 0;
         const cartItemIds = cart.map(item => {
           const price = parseInt(
@@ -876,10 +836,6 @@ const Checkout = ({ navigation, route }) => {
           subtotal += price * quantity;
           return item.cart_item_id;
         });
-
-        // console.log({cartItemIds});
-
-        // Update Redux store with calculated data
         dispatch(setBill({ cartItemIds, subtotal: subtotal.toFixed(2) }));
 
         // Prepare request body
@@ -891,11 +847,8 @@ const Checkout = ({ navigation, route }) => {
           sub_total: subtotal.toFixed(2),
           location_id: location.id,
         };
+        console.log('Promo code ', body);
         
-
-        // console.log({ cartItemIds, body });
-
-        // API call to calculate pre-order details
         fetch(api.calculatePreOrder, {
           method: 'POST',
           body: JSON.stringify(body),
@@ -913,21 +866,26 @@ const Checkout = ({ navigation, route }) => {
                   delivery_charges: response?.result?.delivery_charges.toFixed(2),
                   gst_charges: response?.result?.gst_charges.toFixed(2),
                   total_amount: response?.result?.total_amount.toFixed(2),
+                  discount_charges: response?.result?.discount_in_perc.toFixed(2),
+                  
+                  
                   // subtotal: response?.result?.sub_total.toFixed(2),
                 })
               );
               setInValidPromoCode(false);
-      setIsPromocodeApplied(true)
+              setIsPromocodeApplied(true)
               // navigation?.navigate('Checkout');
             }else{
-              calculatePreOrderdetails()
+              setIsPromocodeApplied(false)
+              calculatePreOrderdetails(false, false)
               handlePopup(dispatch, response.message, 'red')
               setInValidPromoCode(true);
               setIsPromocodeApplied(false)
             }
           })
           .catch(error => {
-            // console.log('Error in calculatePreOrderDetails API call: ', error);
+            console.log(error);
+            
             handlePopup(dispatch, 'Something went wrong', 'red')
           });
       } catch (error) {
@@ -981,6 +939,7 @@ const Checkout = ({ navigation, route }) => {
       handlePopup(dispatch, 'Invalid Promo Code', 'red')
       setInValidPromoCode(true);
       setIsPromocodeApplied(false)
+      calculatePreOrderdetails(false, false);
     }
   }
   }
@@ -1046,13 +1005,13 @@ const Checkout = ({ navigation, route }) => {
         const body = {
           customer_id: customer_id,
           cart_items_ids: cartItemIds,
-          promo_code: isPromocodeApplied && promoCode, // optional
+          promo_code: promoCod ? promoCode: null, // optional
           payment_option: paymentType || selected_payment_type,
           sub_total: subtotal.toFixed(2),
           location_id: location.id,
         };
 
-        console.log({ cartItemIds, body });
+        console.log('calculate pre order', {  body });
 
         // API call to calculate pre-order details
         fetch(api.calculatePreOrder, {
@@ -1094,7 +1053,7 @@ const Checkout = ({ navigation, route }) => {
 
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.White }}>
+    <View style={{ flex: 1, backgroundColor: Colors.secondary_color }}>
       <Loader loading={loading} />
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
 
@@ -1147,8 +1106,8 @@ const Checkout = ({ navigation, route }) => {
         </View>
         <ItemSeparator />
         <View style={[styles.rowViewSB, { width: wp(80), alignSelf: 'center', alignItems: 'center', marginTop: 10, marginBottom: 10 }]} >
-          <TextInput placeholder='Promo Code' placeholderTextColor={'#B0B0B0'} style={{ borderRadius: 10, backgroundColor: '#F5F6FA', width: wp(60), paddingLeft: wp(5), marginRight: wp(2), color: Colors.Black }} value={promoCode} onChangeText={text => setPromoCode(text)} />
-          <CustomButton text={'Apply'} textStyle={{ color: Colors.White, fontSize: RFPercentage(2) }} containerStyle={{ backgroundColor: Colors.Orange, paddingHorizontal: wp(5), paddingVertical: hp(1.3), borderRadius: 10 }} onPress={() => verifyPromoCode(promoCode)} pressedRadius={10} isLoading={false} loaderColor={Colors.White}  />
+          <TextInput placeholder='Promo Code' placeholderTextColor={'#B0B0B0'} style={{ borderRadius: 10, backgroundColor: '#F5F6FA', width: wp(60), paddingLeft: wp(5), marginRight: wp(2), color: Colors.primary_text }} value={promoCode} onChangeText={text => setPromoCode(text)} />
+          <CustomButton text={'Apply'} textStyle={{ color: Colors.button.primary_button_text, fontSize: RFPercentage(2) }} containerStyle={{ backgroundColor: Colors.button.primary_button, paddingHorizontal: wp(5), paddingVertical: hp(1.3), borderRadius: 10 }} onPress={() => verifyPromoCode(promoCode)} pressedRadius={10} isLoading={false} loaderColor={Colors.button.primary_button_text}  />
         </View>
 
         {isPromocodeApplied && (
@@ -1202,7 +1161,7 @@ const Checkout = ({ navigation, route }) => {
               style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text
                 style={{
-                  color: Colors.Orange,
+                  color: Colors.button.primary_button,
                   fontFamily: Fonts.Inter_SemiBold,
                   fontSize: RFPercentage(1.8),
                   textTransform: 'capitalize',
@@ -1211,7 +1170,7 @@ const Checkout = ({ navigation, route }) => {
               </Text>
               <Ionicons
                 name="chevron-forward"
-                color={Colors.Orange}
+                color={Colors.button.primary_button}
                 size={18}
               />
             </TouchableOpacity>
@@ -1219,7 +1178,7 @@ const Checkout = ({ navigation, route }) => {
             <View >
               <Text
                 style={{
-                  color: Colors.Orange,
+                  color: Colors.primary_color,
                   fontFamily: Fonts.PlusJakartaSans_Bold,
                   fontSize: RFPercentage(2.4),
                 }}>
@@ -1251,7 +1210,7 @@ const Checkout = ({ navigation, route }) => {
           ) : <View >
             <Text
               style={{
-                color: Colors.Orange,
+                color: Colors.primary_color,
                 fontFamily: Fonts.PlusJakartaSans_Bold,
                 fontSize: RFPercentage(2.4),
               }}>
@@ -1303,15 +1262,11 @@ const Checkout = ({ navigation, route }) => {
             {
               isPromocodeApplied &&  <View style={styles.rowViewSB}>
               <Text style={styles.subText1}>Discount</Text>
-              <Text style={styles.subText1}>£{bill.gst_charges}</Text>
+              <Text style={styles.subText1}>£{bill.discount_charges}</Text>
             </View>
             }
           
-            {/* <View style={styles.rowViewSB}>
-              <Text style={styles.subText1}>Service Charges</Text>
-              <Text style={styles.subText1}>£{service_fee}</Text>
-            </View> */}
-
+           
             <ItemSeparator />
             <View style={styles.rowViewSB}>
               <Text style={styles.title}>Total</Text>
@@ -1376,7 +1331,7 @@ const Checkout = ({ navigation, route }) => {
                 }}>
                 <Text
                   style={{
-                    color: Colors.Text,
+                    color: Colors.primary_text,
                     fontFamily: Fonts.PlusJakartaSans_Bold,
                     fontSize: RFPercentage(1.9),
                   }}>
@@ -1390,7 +1345,7 @@ const Checkout = ({ navigation, route }) => {
               <View style={{ flex: 1 }}>
                 <Text
                   style={{
-                    color: Colors.Text,
+                    color: Colors.primary_text,
                     fontFamily: Fonts.Inter_SemiBold,
                     fontSize: RFPercentage(1.8),
                     marginHorizontal: 10,
@@ -1444,8 +1399,8 @@ const Checkout = ({ navigation, route }) => {
                   style={styles.rowView}>
                   <RadioButton
                     value="first"
-                    uncheckedColor={Colors.Orange}
-                    color={Colors.Orange}
+                    uncheckedColor={Colors.button.primary_button}
+                    color={Colors.button.primary_button}
                     status={
                       selected_payment_type === 'cash' ? 'checked' : 'unchecked'
                     }
@@ -1456,7 +1411,7 @@ const Checkout = ({ navigation, route }) => {
                   />
                   <Text
                     style={{
-                      color: '#56585B',
+                      color: Colors.secondary_text,
                       fontFamily: Fonts.PlusJakartaSans_Regular,
                       marginTop: -2,
                       fontSize: RFPercentage(1.8),
@@ -1472,8 +1427,8 @@ const Checkout = ({ navigation, route }) => {
                   style={styles.rowView}>
                   <RadioButton
                     value="card"
-                    uncheckedColor={Colors.Orange}
-                    color={Colors.Orange}
+                    uncheckedColor={Colors.button.primary_button}
+                    color={Colors.button.primary_button}
                     status={
                       selected_payment_type === 'card' ? 'checked' : 'unchecked'
                     }
@@ -1483,7 +1438,7 @@ const Checkout = ({ navigation, route }) => {
                   />
                   <Text
                     style={{
-                      color: '#56585B',
+                      color: Colors.secondary_text,
                       fontFamily: Fonts.PlusJakartaSans_Regular,
                       marginTop: -2,
                       fontSize: RFPercentage(1.8),
@@ -1500,8 +1455,8 @@ const Checkout = ({ navigation, route }) => {
                   style={styles.rowView}>
                   <RadioButton
                     value="card"
-                    uncheckedColor={Colors.Orange}
-                    color={Colors.Orange}
+                    uncheckedColor={Colors.primary_color}
+                    color={Colors.primary_color}
                     status={
                       selected_payment_type === 'wallet'
                         ? 'checked'
@@ -1515,7 +1470,7 @@ const Checkout = ({ navigation, route }) => {
                   />
                   <Text
                     style={{
-                      color: '#56585B',
+                      color: Colors.secondary_text,
                       fontFamily: Fonts.PlusJakartaSans_Regular,
                       marginTop: -2,
                       fontSize: RFPercentage(1.8),
@@ -1610,7 +1565,7 @@ const Checkout = ({ navigation, route }) => {
               </View>
               <View style={{ alignItems: 'center' }} >
                 <Alert height={80} />
-                <Text style={{ marginTop: hp(3), fontSize: RFPercentage(2.4), color: Colors.Black, textAlign: 'center' }}>
+                <Text style={{ marginTop: hp(3), fontSize: RFPercentage(2.4), color: Colors.primary_text, textAlign: 'center' }}>
                   You don't have enough amount in wallet</Text>
               </View>
 
@@ -1658,7 +1613,7 @@ const Checkout = ({ navigation, route }) => {
                 <View style={{ ...styles.rowViewSB, marginBottom: 20 }}>
                   <Text
                     style={{
-                      color: '#0A212B',
+                      color: Colors.primary_text ,
                       fontFamily: Fonts.PlusJakartaSans_Bold,
                       fontSize: RFPercentage(2.5),
                     }}>
@@ -1668,7 +1623,7 @@ const Checkout = ({ navigation, route }) => {
                 <View style={{ paddingHorizontal: 10 }}>
                   <Text
                     style={{
-                      color: Colors.Orange,
+                      color: Colors.primary_color,
                       fontFamily: Fonts.PlusJakartaSans_Bold,
                       fontSize: RFPercentage(2.2),
                       marginBottom: 14,
@@ -1684,7 +1639,7 @@ const Checkout = ({ navigation, route }) => {
                   />
                   <Text
                     style={{
-                      color: '#A2A2A2',
+                      color: Colors.secondary_text,
                       marginTop: -15,
                       fontSize: RFPercentage(1.5),
                       marginLeft: 14,
@@ -1736,7 +1691,7 @@ export default Checkout;
 
 const styles = StyleSheet.create({
   heading: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.Inter_SemiBold,
     fontSize: RFPercentage(2),
     marginTop: 10,
@@ -1756,7 +1711,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#FF572233',
+    backgroundColor: `${Colors.primary_color}30`,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1770,30 +1725,30 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   subText: {
-    color: '#8D93A1',
+    color: Colors.secondary_text,
     fontFamily: Fonts.Inter_Regular,
     fontSize: RFPercentage(1.7),
   },
   subText1: {
-    color: '#0C0B0B',
+    color: Colors.primary_text,
     fontFamily: Fonts.Inter_Regular,
     fontSize: RFPercentage(2),
     lineHeight: 30,
   },
   walletBalance: {
-    color: '#0C0B0B',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2),
     lineHeight: 15,
     letterSpacing: wp(0.3)
   },
   title: {
-    color: '#191A26',
+    color: Colors.primary_text,
     fontSize: RFPercentage(2.3),
     fontFamily: Fonts.Inter_Bold,
   },
   paymentType: {
-    color: Colors.Black,
+    color: Colors.primary_text,
     fontSize: RFPercentage(2.3),
     fontFamily: Fonts.PlusJakartaSans_Medium,
     marginLeft: wp(4),
@@ -1816,12 +1771,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   rbSheetHeading: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(1.9),
   },
   btmsheettext: {
-    color: '#56585B',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     marginLeft: wp(5),
     fontSize: RFPercentage(1.9),

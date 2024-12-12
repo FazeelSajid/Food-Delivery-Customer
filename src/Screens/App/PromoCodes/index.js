@@ -92,7 +92,7 @@ const PromoCodes = ({ navigation, route }) => {
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.White }}>
+    <View style={{ flex: 1, backgroundColor: Colors.secondary_color }}>
       <Loader loading={loading} />
       <FlatList
         ListHeaderComponent={() => <StackHeader title={'Promocodes'} />}
@@ -101,7 +101,7 @@ const PromoCodes = ({ navigation, route }) => {
         renderItem={({ item, index }) => (
           <TouchableOpacity style={{  paddingHorizontal: 25, marginVertical: 5, overflow: 'hidden' }}>
             <Image
-              source={{ uri: BASE_URL_IMAGE + item.image }}
+              source={{ uri: item.image }}
               style={{ width: '100%', height: 190, borderRadius: wp(2.5)  }}  // Try setting a fixed height to test
               onError={(error) => console.log('Image Load Error:', error.nativeEvent.error)}
             />
@@ -117,7 +117,7 @@ export default PromoCodes;
 const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
-    borderColor: '#DADADA',
+    // borderColor: Colors.secondary_text,
     borderRadius: 10,
     padding: 15,
     paddingVertical: 12,
@@ -130,16 +130,16 @@ const styles = StyleSheet.create({
   boldText: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.2),
-    color: Colors.Text,
+    color: Colors.primary_text,
   },
   codeText: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.5),
-    color: Colors.Orange,
+    color: Colors.primary_color,
   },
-  description: {
-    color: '#8D93A1',
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(1.5),
-  },
+  // description: {
+  //   color: '#8D93A1',
+  //   fontFamily: Fonts.PlusJakartaSans_Medium,
+  //   fontSize: RFPercentage(1.5),
+  // },
 });

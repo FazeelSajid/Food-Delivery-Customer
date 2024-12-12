@@ -4,13 +4,14 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
+import { Colors } from '../../constants';
 
 const ItemSeparator = ({width, style}) => (
   <View
     style={{
       height: hp(0.15),
       marginVertical: 15,
-      backgroundColor: '#00000026',
+      backgroundColor: Colors.borderGray,
       width: width ? width : wp(90),
       alignSelf: 'center',
       ...style,

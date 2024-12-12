@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../constants/api';
 import { handlePopup } from '../helpers';
+import { setCustomerCartId } from '../../redux/AuthSlice';
 
 export const getCustomerCart = (id, dispatch) => {
   return new Promise((resolve, reject) => {
@@ -18,6 +19,7 @@ export const getCustomerCart = (id, dispatch) => {
           // console.log(response);
           
           resolve(response?.customer);
+          dispatch(setCustomerCartId(response?.customer?.cart_id))
         })
         .catch(err => {
           handlePopup(dispatch, 'Something is went wrong', 'red')
@@ -151,7 +153,7 @@ export const getCartItems = (cart_id, dispatch) => {
       fetch(api.get_cart_items + cart_id)
         .then(response => response.json())
         .then(response => {
-          // console.log({response});
+          console.log({response});
           
           if (response?.status == false) {
             resolve([]);

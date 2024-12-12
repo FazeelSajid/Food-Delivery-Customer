@@ -39,68 +39,68 @@ const CButton = ({
   
   return (
     <TouchableOpacity
-      activeOpacity={activeOpacity ? activeOpacity : 0.8}
-      disabled={disabled ? disabled : loading}
-      style={{
-        ...styles.btn,
-        height: height ? height : hp(5.8),
-        width: width ? width : wp(90),
-        padding: padding ? padding : 0,
-        borderWidth: transparent ? 1 : 0,
-        borderColor: borderColor? borderColor : Colors.Orange,
-        backgroundColor: transparent
-          ? 'transparent'
-          : bgColor
-          ? bgColor
-          : isDarkMode
-          ? Colors.Text
-          : Colors.Orange,
-        marginTop: marginTop ? marginTop : hp(1.5),
-        ...style,
-      }}
-      onPress={onPress}>
-      {loading && (
-        <ActivityIndicator
-          color={transparent || isDarkMode ? Colors.Orange : Colors.White}
-          size={'small'}
-        />
-      )}
-      {leftIcon && leftIcon}
-      {title && (
-        <Text
-          style={{
-            ...styles.btnText,
-            fontWeight: bold ? 'bold' : 'normal',
-            color: transparent
-              ? color
-                ? color
-                : isDarkMode
-                ? Colors.White
-                : Colors.Orange
-              : color
+    activeOpacity={activeOpacity ? activeOpacity : 0.8}
+    disabled={disabled ? disabled : loading}
+    style={{
+      ...styles.btn,
+      height: height ? height : hp(5.8),
+      width: width ? width : wp(90),
+      padding: padding ? padding : 0,
+      borderWidth: transparent ? 1 : 0,
+      borderColor: borderColor? borderColor : Colors.button.primary_button,
+      backgroundColor: transparent
+        ? Colors.button.secondary_button
+        : bgColor
+        ? bgColor
+        : isDarkMode
+        ? Colors.primary_text
+        :  Colors.button.primary_button,
+      marginTop: marginTop ? marginTop : hp(1.5),
+      ...style,
+    }}
+    onPress={onPress}>
+    {loading && (
+      <ActivityIndicator
+        color={transparent || isDarkMode ? Colors.button.primary_button : Colors.button.secondary_button}
+        size={'small'}
+      />
+    )}
+    {leftIcon && leftIcon}
+    {title && (
+      <Text
+        style={{
+          ...styles.btnText,
+          fontWeight: bold ? 'bold' : 'normal',
+          color: transparent
+            ? color
               ? color
               : isDarkMode
-              ? Colors.White
-              : Colors.White,
-            fontSize: txtSize,
-            // textTransform: 'uppercase',
-            ...textStyle,
-          }}>
-          {title}
-        </Text>
-      )}
+              ? Colors.button.primary_button_text
+              : Colors.button.secondary_button_text
+            : color
+            ? color
+            : isDarkMode
+            ? Colors.button.primary_button_text
+            : Colors.button.primary_button_text,
+          fontSize: txtSize,
+          // textTransform: 'uppercase',
+          ...textStyle,
+        }}>
+        {title}
+      </Text>
+    )}
 
-      {iconImage && (
-        <Image
-          source={iconImage}
-          style={{
-            height: wp(6.5),
-            width: wp(6.5),
-            resizeMode: 'contain',
-          }}
-        />
-      )}
-    </TouchableOpacity>
+    {iconImage && (
+      <Image
+        source={iconImage}
+        style={{
+          height: wp(6.5),
+          width: wp(6.5),
+          resizeMode: 'contain',
+        }}
+      />
+    )}
+  </TouchableOpacity>
   );
 };
 
@@ -108,7 +108,7 @@ export default CButton;
 
 const styles = StyleSheet.create({
   btn: {
-    backgroundColor: '#10A37F',
+    backgroundColor: Colors.button.primary_button,
     // padding: hp(2),
     alignItems: 'center',
     justifyContent: 'center',
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   btnText: {
-    color: '#fff',
+    color: Colors.button.primary_button_text,
     fontSize: 14,
     fontWeight: '500',
     marginHorizontal: wp(3),

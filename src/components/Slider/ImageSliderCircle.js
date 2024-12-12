@@ -13,7 +13,7 @@ const ImageSliderCircle = ({data, marginBottom}) => {
       width: wp(52),
       height: wp(52),
       borderRadius: wp(52),
-      backgroundColor: '#ccc',
+      backgroundColor: Colors.secondary_color,
       marginHorizontal: wp(4.5),
       overflow: 'hidden',
     },
@@ -30,7 +30,7 @@ const ImageSliderCircle = ({data, marginBottom}) => {
       width: wp(2.2),
       height: wp(2.2),
       borderRadius: wp(2.2) / 2,
-      backgroundColor: Colors.Orange,
+      backgroundColor: Colors.primary_color,
       margin: 0,
       marginHorizontal: 2,
     },
@@ -38,9 +38,9 @@ const ImageSliderCircle = ({data, marginBottom}) => {
       width: wp(2.2),
       height: wp(2.2),
       borderRadius: wp(2.2) / 2,
-      backgroundColor: '#D9D9D9',
+      backgroundColor:Colors.secondary_color,
       //   borderWidth: 1,
-      //   borderColor: Colors.Orange,
+      //   borderColor: Colors.primary_color,
       opacity: 0.7,
       marginHorizontal: 2,
     },
@@ -64,7 +64,7 @@ const ImageSliderCircle = ({data, marginBottom}) => {
             <View style={styles.imageCard}>
               <Image
                 // source={item.image}
-                source={{uri: BASE_URL_IMAGE + item?.image}}
+                source={{uri: item?.image}}
                 style={{
                   width: '100%',
                   height: '100%',

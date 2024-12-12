@@ -195,7 +195,7 @@ const NearByRestaurants = ({navigation, route}) => {
               title={item?.user_name}
               // image={item?.image}
               image={
-                item?.images?.length > 0 ? BASE_URL_IMAGE + item?.images[0] : ''
+                item?.images?.length > 0 ?  item?.images[0] : ''
               }
               // tag={item?.tag}
               // tag={item?.working_hours ? item?.working_hours : ''}

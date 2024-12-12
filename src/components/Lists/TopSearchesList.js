@@ -9,7 +9,7 @@ const TopSearchesList = ({data, onRemove, onPress, text}) => {
     <View style={{paddingHorizontal: 30, marginTop: -15}}>
       <Text
         style={{
-          color: Colors.Orange,
+          color: Colors.primary_color,
           fontFamily: Fonts.PlusJakartaSans_Bold,
           marginBottom: 10,
         }}>
@@ -30,7 +30,7 @@ const TopSearchesList = ({data, onRemove, onPress, text}) => {
                 style={{
                   marginLeft: 10,
                   flex: 1,
-                  color: '#0A212B',
+                  color: Colors.primary_text,
                   fontFamily: Fonts.PlusJakartaSans_Regular,
                   fontSize: RFPercentage(1.59),
                 }}>

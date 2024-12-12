@@ -284,7 +284,7 @@ const SearchNearByDeals = ({ navigation, route }) => {
   }, [searchQuery]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.White }}>
+    <View style={{ flex: 1, backgroundColor: Colors.secondary_color }}>
       <Loader loading={loading} />
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
 
@@ -365,7 +365,7 @@ const SearchNearByDeals = ({ navigation, route }) => {
                 <DealCard
                 image={
                   item?.images?.length > 0
-                    ? BASE_URL_IMAGE + item?.images[0]
+                    ? item?.images[0]
                     : ''
                 }
                 description={shortenString(item?.description)}
@@ -386,7 +386,7 @@ const SearchNearByDeals = ({ navigation, route }) => {
                 }}
                 nameStyle={{ fontSize: RFPercentage(1.8) }}
                 descriptionStyle={{ fontSize: RFPercentage(1.5) }}
-                priceStyle={{ fontSize: RFPercentage(2.2), color: Colors.Orange }}
+                priceStyle={{ fontSize: RFPercentage(2.2), color: Colors.primary_color }}
                 iconSize={19}
               />
                 // <FoodCardWithRating

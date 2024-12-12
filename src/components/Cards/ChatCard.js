@@ -13,7 +13,6 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import CBadge from '../CBadge';
 import {useNavigation} from '@react-navigation/native';
 import { widthPercentageToDP } from 'react-native-responsive-screen';
-
 const ChatCard = ({profile, user_name, message, created_at, unread_count, onpress}) => {
   const navigation = useNavigation();
 
@@ -25,7 +24,7 @@ const ChatCard = ({profile, user_name, message, created_at, unread_count, onpres
       style={styles.card}>
       
       {
-        profile ? <Avatar.Image source={profile} size={40} /> : <View style={{backgroundColor: Colors.Orange, paddingHorizontal: widthPercentageToDP(4),paddingVertical: widthPercentageToDP(2.2), borderRadius: widthPercentageToDP(10), }} ><Text style={{color: Colors.White, fontSize: RFPercentage(2.4), padding: 0}} >{avatarLetter}</Text></View>
+        profile ? <Avatar.Image source={profile} size={40} /> : <View style={{backgroundColor: Colors.button.primary_button, paddingHorizontal: widthPercentageToDP(4),paddingVertical: widthPercentageToDP(2.2), borderRadius: widthPercentageToDP(10), }} ><Text style={{color: Colors.button.primary_button_text, fontSize: RFPercentage(2.4), padding: 0}} >{avatarLetter}</Text></View>
       }
       <View style={{marginLeft: 10, flex: 1}}>
         <View style={styles.rowViewSB}>
@@ -37,7 +36,7 @@ const ChatCard = ({profile, user_name, message, created_at, unread_count, onpres
                 unread_count > 0
                   ? Fonts.PlusJakartaSans_Bold
                   : Fonts.Inter_Medium,
-              color: unread_count > 0 ? Colors.Text : '#595959',
+              color: unread_count > 0 ? Colors.primary_text : Colors.secondary_text,
             }}>
             {created_at}
           </Text>
@@ -51,7 +50,7 @@ const ChatCard = ({profile, user_name, message, created_at, unread_count, onpres
                 unread_count > 0
                   ? Fonts.PlusJakartaSans_Bold
                   : Fonts.Inter_Regular,
-              color: unread_count > 0 ? Colors.Text : '#595959',
+              color: unread_count > 0 ? Colors.primary_text : Colors.secondary_text,
             }}
             numberOfLines={1}>
             {message}
@@ -67,14 +66,7 @@ export default ChatCard;
 
 const styles = StyleSheet.create({
   card: {flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20},
-  iconContainer: {
-    height: 50,
-    width: 50,
-    borderRadius: 50 / 2,
-    backgroundColor: '#FF572233',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+ 
   rowViewSB: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -82,18 +74,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.Inter_SemiBold,
-    color: Colors.Black,
+    color: Colors.primary_text,
     fontSize: RFPercentage(2),
     lineHeight: 30,
   },
   timeText: {
     fontFamily: Fonts.Inter_Medium,
-    color: '#595959',
+    color: Colors.secondary_text,
     fontSize: RFPercentage(1.5),
   },
   description: {
     fontFamily: Fonts.Inter_Regular,
-    color: '#595959',
+    color: Colors.secondary_text,
     fontSize: RFPercentage(1.5),
     flex: 0.9,
   },

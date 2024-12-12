@@ -7,8 +7,8 @@ const CBadge = ({text}) => {
   return (
     <Badge
       style={{
-        color: Colors.White,
-        backgroundColor: Colors.Orange,
+        color: Colors.button.primary_button_text,
+        backgroundColor: Colors.button.primary_button,
       }}>
       {text}
     </Badge>

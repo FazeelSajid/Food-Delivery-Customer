@@ -327,12 +327,12 @@ const OrderHistory = ({navigation, route}) => {
   );
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       <Loader loading={loading} />
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView refreshControl={ 
          <RefreshControl
-            colors={[Colors.Orange, Colors.OrangeLight]}
+            colors={[Colors.primary_color]}
             refreshing={refresh}
             onRefresh={() => onRefresh()}
           />} contentContainerStyle={{flexGrow: 1}}>
@@ -403,7 +403,7 @@ const OrderHistory = ({navigation, route}) => {
             <View style={{paddingHorizontal: 30, marginTop: -15}}>
               <Text
                 style={{
-                  color: Colors.Orange,
+                  color: Colors.primary_color,
                   fontFamily: Fonts.PlusJakartaSans_Bold,
                   marginBottom: 18,
                 }}>
@@ -501,7 +501,7 @@ const OrderHistory = ({navigation, route}) => {
                     }}
                     image={
                       cart_item && cart_item?.itemData?.images?.length > 0
-                        ? BASE_URL_IMAGE + cart_item?.itemData?.images[0]
+                        ? cart_item?.itemData?.images[0]
                         : ''
                     }
                     title={

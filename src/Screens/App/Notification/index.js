@@ -13,6 +13,7 @@ import Loader from '../../../components/Loader';
 import moment from 'moment';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
 import { useSelector } from 'react-redux';
+
 const Notification = ({navigation, route}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -113,7 +114,7 @@ const Notification = ({navigation, route}) => {
       style={{
         height: hp(0.15),
         marginVertical: 15,
-        backgroundColor: '#00000026',
+        backgroundColor: Colors.borderGray,
         width: wp(90),
         alignSelf: 'center',
       }}
@@ -125,13 +126,13 @@ const Notification = ({navigation, route}) => {
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       {/* <Loader loading={loading} /> */}
       <FlatList
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            colors={[Colors.Orange]}
+            colors={[Colors.primary_color]}
             onRefresh={() => onRefresh()}
           />
         }
@@ -141,7 +142,10 @@ const Notification = ({navigation, route}) => {
         ItemSeparatorComponent={() => <ItemSeparator />}
         contentContainerStyle={{paddingBottom: 30}}
         renderItem={({item, index}) => {
-          console.log(item);
+          if (index === 0) {
+            console.log({item});
+          }
+          
           
           
           
@@ -177,7 +181,7 @@ const Notification = ({navigation, route}) => {
               // <Avatar.Image
               //   source={item?.profile}
               //   size={50}
-              //   style={{backgroundColor: Colors.Orange}}
+              //   style={{backgroundColor: Colors.primary_color}}
               // />
               <View style={styles.iconContainer}>
                 <Icons.OrderInProcess />
@@ -207,7 +211,7 @@ const styles = StyleSheet.create({
     height: 50,
     width: 50,
     borderRadius: 50 / 2,
-    backgroundColor: '#FF572233',
+    backgroundColor: `${Colors.primary_color}30`,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -218,18 +222,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.Inter_SemiBold,
-    color: Colors.Black,
+    color: Colors.primary_text,
     fontSize: RFPercentage(1.7),
     lineHeight: 30,
   },
   timeText: {
     fontFamily: Fonts.Inter_Medium,
-    color: '#595959',
+    color: Colors.secondary_text,
     fontSize: RFPercentage(1.5),
   },
   description: {
     fontFamily: Fonts.Inter_Regular,
-    color: '#595959',
+    color: Colors.secondary_text,
     fontSize: RFPercentage(1.5),
   },
 });

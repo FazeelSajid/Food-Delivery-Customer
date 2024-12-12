@@ -110,7 +110,7 @@ const AllOrders = () => {
               // price={item?.price}
               image={
                 cart_item && cart_item?.itemData?.images?.length > 0
-                  ? BASE_URL_IMAGE + cart_item?.itemData?.images[0]
+                  ? cart_item?.itemData?.images[0]
                   : ''
               }
               title={

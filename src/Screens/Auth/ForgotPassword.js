@@ -148,7 +148,7 @@ const ForgotPassword = ({navigation, route}) => {
   // };
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={{flexGrow: 1}}

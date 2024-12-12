@@ -33,6 +33,7 @@ const initialState = {
   dealsRecentResearch : [],
   customer_id: null,
   customer_detail: null,
+  customerCartId: null,
   selectedLanguage: 'English',
   signUpWith: '',
   password : '',
@@ -50,6 +51,37 @@ const initialState = {
     total_amount: 0
   },
   contacts: [],
+  restautantDetails: null,
+  Colors: {
+    button: {
+      primary_button: "#FF5722",
+      primary_button_text: "#FFFFFF",
+      secondary_button: "#FFFFFF",
+      secondary_button_text: "#FF5722",
+      secondary_button_border: "#FF5722",
+    },
+    primary_color: "#FF5722",
+    primary_text: '#0A212B',
+    secondary_text: '#56585B',
+    secondary_color: '#FFFFFF',
+    icon: "#FF5722",
+
+  Orange: 'green',
+  OrangeLight: '#F99145',
+  OrangeExtraLight: '#FFF6F3',
+  White: '#FFFFFF',
+  Black: '#000000',
+  Text: '#0A212B',
+  grayText: '#999999',
+  borderGray: '#EAE9E9',
+  favoriteHeart: '#B00020',
+  darkTextColor: '#545151',
+  pending: '#C08C22',
+  preparing: '#22A3C0',
+  outForDelivery : '#225AC0',
+  completed:'#19BA46',
+  cancelled: 'red'
+}
 }
 const AuthSlice = createSlice({
   name: 'authSlice',
@@ -134,6 +166,15 @@ const AuthSlice = createSlice({
     setContacts (state, action) {
       state.contacts = action.payload;
     },
+    setColors (state, action) {
+      state.Colors = {...state.Colors,...action.payload}
+    },
+    setCustomerCartId (state, action) {
+      state.customerCartId = action.payload;
+    },
+    setRestautantDetails (state, action) {
+      state.restautantDetails = action.payload;
+    },
     
     resetState(state, action) {
       return initialState;
@@ -167,6 +208,9 @@ export const {
   setSetAllLocation,
   setBill,
   setContacts,
+  setColors,
+  setCustomerCartId,
+  setRestautantDetails
 } = AuthSlice.actions;
 
 export default AuthSlice.reducer;

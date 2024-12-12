@@ -270,7 +270,7 @@ const SearchRestaurants = ({navigation, route}) => {
                 // image={item?.image}
                 image={
                   item?.images?.length > 0
-                    ? BASE_URL_IMAGE + item?.images[0]
+                    ?  item?.images[0]
                     : ''
                 }
                 // tag={item?.tag}

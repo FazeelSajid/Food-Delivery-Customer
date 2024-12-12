@@ -44,7 +44,7 @@ const UpdateLocation = ({navigation}) => {
               <Ionicons
                 name={'chevron-back'}
                 size={hp(3)}
-                color={Colors.Orange}
+                color={Colors.primary_color}
               />
               {/* )} */}
             </TouchableOpacity>

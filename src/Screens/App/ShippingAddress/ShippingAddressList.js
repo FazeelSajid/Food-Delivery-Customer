@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     elevation: 5,
 
     borderWidth: 0,
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
   },
   rowViewSB: {
     flexDirection: 'row',
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   },
   label: {
     borderWidth: 1,
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
     width: 50,
     alignItems: 'center',
     justifyContent: 'center',
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   labelText: {
     fontFamily: Fonts.PoppinsRegular,
     fontSize: RFPercentage(2),
-    color: Colors.Orange,
+    color: Colors.primary_color,
     textTransform: 'capitalize',
   },
 

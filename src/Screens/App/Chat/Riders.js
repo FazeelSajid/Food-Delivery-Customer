@@ -91,7 +91,7 @@ const Riders = () => {
     },
   ]);
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       <FlatList
         data={data}
         ListHeaderComponent={() => <View style={{height: 20}} />}
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     height: 50,
     width: 50,
     borderRadius: 50 / 2,
-    backgroundColor: '#FF572233',
+    backgroundColor:`${Colors.primary_color}30`,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -131,18 +131,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.Inter_SemiBold,
-    color: Colors.Black,
+    color: Colors.primary_text,
     fontSize: RFPercentage(2),
     lineHeight: 30,
   },
   timeText: {
     fontFamily: Fonts.Inter_Medium,
-    color: '#595959',
+    color: Colors.secondary_text,
     fontSize: RFPercentage(1.5),
   },
   description: {
     fontFamily: Fonts.Inter_Regular,
-    color: '#595959',
+    color: Colors.secondary_text,
     fontSize: RFPercentage(1.5),
     flex: 0.9,
   },

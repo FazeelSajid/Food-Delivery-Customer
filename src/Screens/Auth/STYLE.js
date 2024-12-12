@@ -8,7 +8,7 @@ import {
 import {RFPercentage} from 'react-native-responsive-fontsize';
 
 export default STYLE = StyleSheet.create({
-  container: {flex: 1, backgroundColor: 'white'},
+  container: {flex: 1, backgroundColor: Colors.secondary_color},
   authBGContainer: {position: 'relative', left: -wp(4)},
   authBGImage: {
     height: hp(30),
@@ -21,18 +21,18 @@ export default STYLE = StyleSheet.create({
     top: StatusBar.currentHeight + 10,
   },
   topScreenBTn: {
-    color: Colors.Orange,
+    color: Colors.button.primary_button,
     fontFamily: Fonts.PlusJakartaSans_SemiBold,
     fontSize: RFPercentage(2),
   },
   heading: {
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_SemiBold,
     fontSize: RFPercentage(3.5),
     marginBottom: hp(4),
   },
   txtForgotPassword: {
-    color: Colors.Orange,
+    color: Colors.button.primary_button,
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.PlusJakartaSans_SemiBold,
     textAlign: 'right',
@@ -40,7 +40,7 @@ export default STYLE = StyleSheet.create({
     marginTop: -15,
   },
   orText: {
-    color: '#91909A',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     fontSize: RFPercentage(2),
     marginVertical: hp(5)
@@ -54,7 +54,7 @@ export default STYLE = StyleSheet.create({
     paddingBottom: 20,
   },
   googleIconContainer: {
-    borderColor: '#C1C0C8',
+    borderColor: Colors.borderGray,
     borderWidth: 1,
     width: wp(13),
     height: wp(13),
@@ -69,11 +69,11 @@ export default STYLE = StyleSheet.create({
   screenTitle: {
     fontFamily: Fonts.PlusJakartaSans_SemiBold,
     fontSize: RFPercentage(3.2),
-    color: '#1D1D20',
+    color: Colors.primary_text,
     textAlign: 'center',
   },
   screenDesc: {
-    color: '#818181',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     fontSize: RFPercentage(1.8),
     textAlign: 'center',
@@ -92,7 +92,7 @@ export default STYLE = StyleSheet.create({
     width : wp(88)
   },
   rbSheetHeading: {
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2),
   },

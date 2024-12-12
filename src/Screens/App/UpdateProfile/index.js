@@ -146,7 +146,7 @@ const UpdateProfile = ({navigation, route}) => {
 
   return (
     <ScrollView
-      contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.White}}
+      contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.secondary_color}}
       keyboardShouldPersistTaps="handled">
       <Loader loading={loading} />
 
@@ -157,7 +157,7 @@ const UpdateProfile = ({navigation, route}) => {
           <CInput
             heading={'User name'}
             // placeholder="John Doe"
-            value={customer.name}
+            value={customer?.name}
             onChangeText={text => setCustomer(prev => {
               return{
                 ...prev,
@@ -171,7 +171,7 @@ const UpdateProfile = ({navigation, route}) => {
             heading={'Phone Number'}
             placeholder="0000 0000000"
             keyboardType="numeric"
-            value={customer.phoneNo}
+            value={customer?.phoneNo}
             onChangeText={text => setCustomer(prev => {
               return{
                 ...prev,
@@ -194,7 +194,7 @@ const UpdateProfile = ({navigation, route}) => {
             heading={'Email Address'}
             placeholder="example@example.com"
             keyboardType="email-address"
-            value={customer.email}
+            value={customer?.email}
             onChangeText={text => setCustomer(prev => {
               return{
                 ...prev,
@@ -262,7 +262,7 @@ export default UpdateProfile;
 
 const styles = StyleSheet.create({
   headingStyle: {
-    color: '#292323',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_SemiBold,
     fontSize: RFPercentage(1.8),
     marginTop: -5,

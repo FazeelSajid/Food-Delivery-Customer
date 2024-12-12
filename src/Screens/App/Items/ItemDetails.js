@@ -29,6 +29,7 @@ import api from '../../../constants/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   checkRestaurantTimings,
+  fetchApisGet,
   getRestaurantDetail,
   handlePopup,
   showAlert,
@@ -40,7 +41,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   addItemToCart,
   clearCartItems,
+  getCartItems,
   getCustomerCart,
+  removeCartItemQuantity,
   removeItemFromCart,
   updateCartItemQuantity,
 } from '../../../utils/helpers/cartapis';
@@ -68,84 +71,147 @@ import NoDataFound from '../../../components/NotFound/NoDataFound';
 const ItemDetails = ({ navigation, route }) => {
   const ref_RBSheetSuccess = useRef();
   const dispatch = useDispatch();
-  const { customer_id, showPopUp, popUpColor, PopUpMesage, join_as_guest } = useSelector(store => store.store)
+  const { customer_id, showPopUp, popUpColor, PopUpMesage, join_as_guest, customerCartId } = useSelector(store => store.store)
 
   const { cart, cart_restaurant_id, my_cart } = useSelector(store => store.cart);
   const ref_RBSheet = useRef();
   const ref_cartAlert = useRef();
+  const removeBtmSheet = useRef()
   const ref_RBSheetResClosed = useRef();
   const { favoriteItems } = useSelector(store => store.favorite);
-
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-
   const [count, setCount] = useState(0);
-
   const [itemDetail, setItemDetail] = useState('');
-  const [restaurantDetails, setRestaurantDetails] = useState('');
-
+  // const [restaurantDetails, setRestaurantDetails] = useState('');
   const [data, setData] = useState([]);
-
   // const [isFavorite, setIsFavorite] = useState(false);
-
   const [restaurant_timings, setRestaurant_timings] = useState('')
-
   const btmSheetRef = useRef()
-
-
   const [selectedVariation, setSelectedVariation] = useState({
     variation_id: '',
     variation_name: '',
     variation_price: '',
   });
-  const [variationPrice, setVariationPrice] = useState(null);
+  const [variations, setVariations] = useState([]);
+  const [variationCount, setVariationCount] = useState();
+  const isItemFavorite = (id) => {
+    return favoriteItems.some(item => item?.item?.item_id === route?.params?.id);
+  };
+  const isFavorite = isItemFavorite()
 
   // console.log(route?.params?.id);
 
 
   // Function to handle radio button press
 
+  // console.log(variations);
+  
+
 
   const showBtmSheet = () => {
-    // setSelectedVariation(null)
     btmSheetRef?.current?.open()
-
-
-
   }
+
   const closeBtmSheet = () => {
     btmSheetRef?.current?.close()
   }
-  // console.log(my_cart);
-
-  const checkVariationInCart = (variation_id) => {
-    const filter = my_cart?.filter(
-      item => item?.item_id == route?.params?.id,
-    );
-    if (filter?.length > 0) {
-      const totalQuantity = filter.reduce((sum, item) => sum + item.quantity, 0);
-      setCount(totalQuantity)
-      // const checkVariation = filter?.filter(
-      //   item =>
-      //     item?.variation_id == variation_id,
-      // )
-      // if (checkVariation.length > 0) {
-      //   console.log(checkVariation[0]?.quantity);
-      //   setCount(checkVariation[0]?.quantity)
-      //   return checkVariation
-      // }else{
-      //   setCount(0)
-      //   return []
-      // }
+  const checkVariationInCart = async (array) => {
+    if (!route?.params?.id) return;
+  
+    // Fetch and update cart items
+    // const cartItems = await getCartItems(customerCartId, dispatch);
+    let cartItems;
+    const response = await fetchApisGet(api.get_cart_items + customerCartId , false, dispatch)
+    if (response.status) {
+      console.log(response);
+      
+      dispatch(updateMyCartList(response.result));
+      cartItems = response.result;
     }
-  }
 
-  const isItemFavorite = (id) => {
-    return favoriteItems.some(item => item?.item?.item_id === id);
+  
+    // Filter items matching the route ID
+    const filteredItems = cartItems?.filter(item => item?.item_id === route?.params?.id);
+  
+
+      // Calculate total quantity
+      const totalQuantity = filteredItems?.reduce((sum, item) => sum + (item?.quantity || 0), 0);
+      setCount(totalQuantity||0);
+  
+      // Create matching variations
+      const matchingVariations = filteredItems?.map(item => ({
+        variation_id: item?.variation_id,
+        variation_name: item?.itemData?.variationData?.variation_name,
+        price: parseFloat(item?.itemData?.variationData?.price || 0),
+        quantity: item?.quantity || 0,
+        sub_total: item?.sub_total || 0,
+        cart_item_id: item?.cart_item_id,
+        cart_id: item?.cart_id,
+        item_id: item?.item_id,
+      }));
+  
+      // Map item prices with matching variations
+      const array3 = (Array.isArray(array) 
+      ? array 
+      : Array.isArray(itemDetail?.item_prices) 
+          ? itemDetail.item_prices 
+          : []
+  ).map(item2 => {
+      if (!item2) return {}; // Fallback for undefined `item2`
+  
+      const match = matchingVariations?.find(item1 => item1?.variation_id === item2?.variation_id);
+      return match || item2; // Use match if found, else fallback to item2
+  });
+  
+      
+  
+      console.log({ matchingVariations });
+      console.log({array3});
+      
+      setVariations(array3);
+
   };
-  const isFavorite = isItemFavorite(route?.params?.id)
-    ;
+  
+
+
+  const add_item_to_cart = async (variation_id, quantity) => {
+    try {
+      setLoading(true);
+  
+      const data = {
+        item_id: route?.params?.id?.toString(),
+        cart_id: customerCartId?.toString(),
+        item_type: 'item',
+        comments: 'Adding item to cart',
+        quantity: quantity,
+        variation_id: variation_id,
+      };
+  
+      console.log('Data for Add to Cart:', data);
+  
+      const response = await addItemToCart(data, dispatch);
+  
+      if (response?.status) {
+        // Refresh cart and show success message
+        checkVariationInCart(variation_id);
+        // ref_RBSheetSuccess?.current?.open();
+      } else {
+        handlePopup(dispatch, response?.message, 'red');
+      }
+    } catch (error) {
+      console.error('Error adding item to cart:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  
+
+    
+
+
 
   // const removeFavorite = async id => {
   //   setLoading(true);
@@ -212,15 +278,12 @@ const ItemDetails = ({ navigation, route }) => {
   //     .finally(() => setLoading(false));
   // };
 
-  const onIncrement = () => {
-    setCount(count + 1);
-  };
 
-  const onDecrement = () => {
-    if (count > 1) {
-      setCount(count - 1);
-    }
-  };
+  // const onDecrement = () => {
+  //   if (count > 1) {
+  //     setCount(count - 1);
+  //   }
+  // };
 
   // const handleDelete = async item => {
   //   try {
@@ -266,103 +329,103 @@ const ItemDetails = ({ navigation, route }) => {
   //   }
   // };
 
-  const handleOnRemove = async () => {
-    // setLoading(true);
+  // const handleOnRemove = async () => {
+  //   // setLoading(true);
 
-    const checkVariation = checkVariationInCart(selectedVariation.variation_id)
-    //  console.log(checkVariation);
+  //   const checkVariation = checkVariationInCart(selectedVariation.variation_id)
+  //   //  console.log(checkVariation);
 
-    if (count === 0) {
-      return
-    } else if (count === 1 && checkVariation.length > 0) {
-      removeItemFromCart(checkVariation[0]?.cart_id, checkVariation[0]?.cart_item_id, dispatch)
-        .then(response => {
-          if (response?.status == true) {
-            console.log('response  :  ', response);
-            const filter = my_cart.filter(
-              element => element?.cart_item_id != checkVariation?.cart_item_id,
-            );
-            // console.log('filter, from remove from cart' ,filter );
-            setCount(0)
-            dispatch(addToCart(filter));
+  //   if (count === 0) {
+  //     return
+  //   } else if (count === 1 && checkVariation.length > 0) {
+  //     removeItemFromCart(customerCartId, checkVariation[0]?.cart_item_id, dispatch)
+  //       .then(response => {
+  //         if (response?.status == true) {
+  //           console.log('response  :  ', response);
+  //           const filter = my_cart.filter(
+  //             element => element?.cart_item_id != checkVariation?.cart_item_id,
+  //           );
+  //           // console.log('filter, from remove from cart' ,filter );
+  //           setCount(0)
+  //           dispatch(addToCart(filter));
 
-            //my_cart
-            dispatch(removeItemFromMyCart(item?.cart_item_id));
-            dispatch(updateMyCartList(filter));
-
-
-          } else {
-            handlePopup(dispatch, response?.message, 'red');
-          }
-        })
-        .catch(error => {
-          console.log('error: ', error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-    else {
-      let obj = {
-        cart_item_id: checkVariation[0]?.cart_item_id,
-        quantity: count - 1,
-      };
-
-      // console.log(obj);
-
-      updateCartItemQuantity(obj, dispatch)
-        .then(response => {
-          if (response.status === true) {
-            const newData = my_cart?.map(item => {
-              if (item?.item_id == route?.params?.id) {
-                return {
-                  ...item,
-                  quantity: checkVariation[0]?.quantity - 1,
-                };
-              } else {
-                return { ...item };
-              }
-            });
-            setCount(count - 1)
-            dispatch(addToCart(newData));
-            dispatch(updateMyCartList(newData));
-            handlePopup(dispatch, response.message, 'green')
-          } else {
-            handlePopup(dispatch, response.message, 'red')
-          }
-        })
-
-      // also update quantity in redux
-
-      // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-      // ref_RBSheetSuccess?.current?.open();
-    }
+  //           //my_cart
+  //           dispatch(removeItemFromMyCart(item?.cart_item_id));
+  //           dispatch(updateMyCartList(filter));
 
 
+  //         } else {
+  //           handlePopup(dispatch, response?.message, 'red');
+  //         }
+  //       })
+  //       .catch(error => {
+  //         console.log('error: ', error);
+  //       })
+  //       .finally(() => {
+  //         setLoading(false);
+  //       });
+  //   }
+  //   else {
+  //     let obj = {
+  //       cart_item_id: checkVariation[0]?.cart_item_id,
+  //       quantity: count - 1,
+  //     };
 
-    // // remove all items of previous restaurant
-    // clearCartItems()
-    //   .then(response => {
-    //     //add new item
-    //     dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-    //     console.log(
-    //       'new cart restaurant_id : ',
-    //       restaurantDetails?.restaurant_id,
-    //     );
-    //     // //my_cart
-    //     // dispatch(clearMyCart());
-    //     //my_cart
-    //     dispatch(updateMyCartList([]));
+  //     // console.log(obj);
 
-    //     add_item_to_cart();
-    //   })
-    //   .catch(error => {
-    //     console.log('error : ', error);
-    //   })
-    //   .finally(() => {
-    //     setLoading(false);
-    //   });
-  };
+  //     updateCartItemQuantity(obj, dispatch)
+  //       .then(response => {
+  //         if (response.status === true) {
+  //           const newData = my_cart?.map(item => {
+  //             if (item?.item_id == route?.params?.id) {
+  //               return {
+  //                 ...item,
+  //                 quantity: checkVariation[0]?.quantity - 1,
+  //               };
+  //             } else {
+  //               return { ...item };
+  //             }
+  //           });
+  //           setCount(count - 1)
+  //           dispatch(addToCart(newData));
+  //           dispatch(updateMyCartList(newData));
+  //           handlePopup(dispatch, response.message, 'green')
+  //         } else {
+  //           handlePopup(dispatch, response.message, 'red')
+  //         }
+  //       })
+
+  //     // also update quantity in redux
+
+  //     // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+  //     // ref_RBSheetSuccess?.current?.open();
+  //   }
+
+
+
+  //   // // remove all items of previous restaurant
+  //   // clearCartItems()
+  //   //   .then(response => {
+  //   //     //add new item
+  //   //     dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+  //   //     console.log(
+  //   //       'new cart restaurant_id : ',
+  //   //       restaurantDetails?.restaurant_id,
+  //   //     );
+  //   //     // //my_cart
+  //   //     // dispatch(clearMyCart());
+  //   //     //my_cart
+  //   //     dispatch(updateMyCartList([]));
+
+  //   //     add_item_to_cart();
+  //   //   })
+  //   //   .catch(error => {
+  //   //     console.log('error : ', error);
+  //   //   })
+  //   //   .finally(() => {
+  //   //     setLoading(false);
+  //   //   });
+  // };
 
   // const validate = () => {
   //   if (cart_restaurant_id == null) {
@@ -379,47 +442,52 @@ const ItemDetails = ({ navigation, route }) => {
   //     return true;
   //   }
   // };
+  
+  
+  
+  // const add_item_to_cart = async (id) => {
+  //   setLoading(true);
+  //   // let customer_id = await AsyncStorage.getItem('customer_id');
+  //   console.log('customer_Id :  ', customer_id);
+  //   // let cart = await getCustomerCart(customer_id, dispatch);
+  //   console.log('______cart    :  ', customerCartId);
+  //   let data = {
+  //     item_id: route?.params?.id?.toString(),
+  //     cart_id: customerCartId.toString(),
+  //     item_type: 'item',
+  //     comments: 'Adding item in cart',
+  //     quantity: count?.toString(),
+  //     variation_id: selectedVariation?.variation_id
+  //   };
 
-  const add_item_to_cart = async (id) => {
-    setLoading(true);
-    // let customer_id = await AsyncStorage.getItem('customer_id');
-    console.log('customer_Id :  ', customer_id);
-    let cart = await getCustomerCart(customer_id, dispatch);
-    console.log('______cart    :  ', cart?.cart_id);
-    let data = {
-      item_id: route?.params?.id?.toString(),
-      cart_id: cart?.cart_id?.toString(),
-      item_type: 'item',
-      comments: 'Adding item in cart',
-      quantity: count?.toString(),
-      variation_id: selectedVariation?.variation_id
-    };
+  //   console.log('data   :  ', data);
 
-    console.log('data   :  ', data);
+  //   await addItemToCart(data, dispatch)
+  //     .then(async response => {
+  //       console.log('response ', response);
+  //       if (response?.status == true) {
+  //         // navigation?.navigate('MyCart');
+  //         // cart_restaurant_id
+  //         // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
+  //         //my_cart
+  //         // let cartItems = await getCartItems(customerCartId, dispatch);
+  //         // dispatch(updateMyCartList(cartItems));
+  //         checkVariationInCart(selectedVariation?.variation_id)
 
-    await addItemToCart(data, dispatch)
-      .then(response => {
-        console.log('response ', response);
-        if (response?.status == true) {
-          // navigation?.navigate('MyCart');
-          // cart_restaurant_id
-          dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-          //my_cart
-          dispatch(addItemToMYCart(response?.result));
-          // setSelectedVariation(null)
+  //         // setSelectedVariation(null)
 
-          ref_RBSheetSuccess?.current?.open();
-        } else {
-          handlePopup(dispatch, response?.message, 'red');
-        }
-      })
-      .catch(error => {
-        console.log('error  :  ', error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+  //         ref_RBSheetSuccess?.current?.open();
+  //       } else {
+  //         handlePopup(dispatch, response?.message, 'red');
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.log('error  :  ', error);
+  //     })
+  //     .finally(() => {
+  //       setLoading(false);
+  //     });
+  // };
 
   // const filter = my_cart?.filter(
   //   item => item?.item_id == route?.params?.id,
@@ -428,7 +496,7 @@ const ItemDetails = ({ navigation, route }) => {
 
 useEffect(()=> {
 
-  if (itemDetail?.item_prices?.length === 1) {
+  if (itemDetail) {
   //  console.log(itemDetail.item_prices[0]);
    setSelectedVariation({
     variation_id: itemDetail.item_prices[0].variation_id,
@@ -436,125 +504,99 @@ useEffect(()=> {
     variation_price: itemDetail.item_prices[0].price,
   });
 
-  checkVariationInCart(itemDetail.item_prices[0].variation_id)
+  // checkVariationInCart(itemDetail.item_prices[0].variation_id)
 
    
   }
 }, [itemDetail])
 
-
-  const handleAddToCart = async (variation_id,) => {
-    // console.log(id, 'id');
-    // setSelectedVariation(id)
-
-    if (count == 0) {
-      handlePopup(dispatch, 'Please select quantity', 'red');
-      setLoading(false);
-    } else {
-      const filter = my_cart?.filter(
-        item => item?.item_id == route?.params?.id,
-      );
-      // console.log(filter, 'filter');
-      // const OtherFilter = filter.filter(
-      //   item => item.variation_id === id
-      // )
+const closeRmoveBtmSheet = () => {
+  removeBtmSheet?.current?.close()
+}
 
 
-      // checkVariationInCart(selectedVariation.variation_id)
-      if (filter?.length > 0) {
-        const checkVariation = filter?.filter(
-          item =>
-            item?.variation_id == selectedVariation?.variation_id,
-        )
+const handleDecrement = async (variation_id, item_id) => {
+  if (variation_id === null) {
+    showRmoveBtmSheet();
+    return;
+  }
 
-        // console.log( 'checkVariation', checkVariation.length > 0);
+  const filteredItems = my_cart?.filter(item => item.item_id == item_id);
+
+  if (filteredItems?.length > 0) {
+    const matchingVariation = filteredItems?.filter(item => item.variation_id == variation_id);
 
 
-        if (checkVariation.length === 0) {
-          add_item_to_cart();
-          // closeBtmSheet()
-        } else {
-          // console.log('check variation icon' , checkVariation);
+    if (matchingVariation?.length > 0) {
+      const [variation] = matchingVariation;
 
-          let obj = {
-            cart_item_id: checkVariation[0]?.cart_item_id,
-            quantity: count,
-          };
-
-          await updateCartItemQuantity(obj, dispatch);
-
-          // also update quantity in redux
-          const newData = my_cart?.map(item => {
-            if (item?.item_id == route?.params?.id) {
-              return {
-                ...item,
-                quantity: checkVariation[0]?.quantity + 1,
-              };
-            } else {
-              return { ...item };
-            }
-          });
-          dispatch(updateMyCartList(newData));
-          dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-          ref_RBSheetSuccess?.current?.open();
-        }
-
+      if (variation?.quantity === 1) {
+        await removeCartItemQuantity({
+          item_id: variation.cart_item_id,
+          cart_id: variation.cart_id,
+        }).then(response => {
+          if (response.status) {
+            checkVariationInCart(variation_id)
+            handlePopup(dispatch, `${itemDetail?.item_name} removed from cart`, 'green');
+            // setVariationCount(0);
+            setCount(count - 1);
+          }
+        });
       } else {
-        add_item_to_cart();
-        // closeBtmSheet()
+        const updatedItem = {
+          cart_item_id: variation.cart_item_id,
+          quantity: variation.quantity - 1,
+        };
 
+        await updateCartItemQuantity(updatedItem, dispatch).then(response => {
+          if (response.status) {
+            handlePopup(dispatch, `1 ${itemDetail?.item_name} removed from cart`, 'green');
+            checkVariationInCart(variation_id);
+            setCount(count - 1);
+          }
+        });
       }
-
     }
+  }
+};
 
 
-    // if item already exists in card then we will only update quantity of that item
+// console.log({variations}); 
 
-    // setLoading(true);
-    // let time_obj = await checkRestaurantTimings(
-    //   restaurantDetails?.restaurant_id,
-    // );
-    // console.log('time_obj?.isClosed : ', time_obj?.isClosed);
-    // setLoading(false);
-    // if (time_obj?.isClosed) {
-    //   setRestaurant_timings(time_obj);
-    //   ref_RBSheetResClosed.current.open();
-    //   return;
-    // } else if (validate()) {
-    //   // if item already exists in card then we will only update quantity of that item
-    //   const filter = my_cart?.filter(
-    //     item => item?.item_id == route?.params?.id,
-    //   );
-    //   if (filter?.length > 0) {
-    //     let obj = {
-    //       cart_item_id: filter[0]?.cart_item_id,
-    //       quantity: filter[0]?.quantity + count,
-    //     };
-    //     await updateCartItemQuantity(obj);
-    //     // also update quantity in redux
-    //     const newData = my_cart?.map(item => {
-    //       if (item?.item_id == route?.params?.id) {
-    //         return {
-    //           ...item,
-    //           quantity: filter[0]?.quantity + count,
-    //         };
-    //       } else {
-    //         return {...item};
-    //       }
-    //     });
-    //     dispatch(updateMyCartList(newData));
-    //     dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-    //     ref_RBSheetSuccess?.current?.open();
-    //   } else {
-    //     add_item_to_cart();
-    //   }
-    // }
-  };
+const showRmoveBtmSheet = async () => {
+  if (itemDetail.item_prices?.length > 1) {
+    
+    removeBtmSheet?.current?.open()
+  } else {
+    handleDecrement(itemDetail.item_prices[0].variation_id, itemDetail.item_id, itemDetail?.item_name,)
+  }
+  
+ 
+}
 
+const handleAddToCart = async (variation_id, quantity) => {
 
+  const filteredItems = my_cart?.filter(item => item?.item_id === route?.params?.id) || [];
+  const existingVariation = filteredItems.find(
+    item => item?.variation_id === variation_id
+  );
 
-  // console.log( checkVariationInCart(selectedVariation.variation_id), 'checkVariationInCart');
+  if (existingVariation) {
+    // Update quantity for the existing variation
+    const updateData = {
+      cart_item_id: existingVariation.cart_item_id,
+      quantity: quantity,
+    };
+    await updateCartItemQuantity(updateData, dispatch);
 
+    // Refresh cart data and open success sheet
+    checkVariationInCart(variation_id);
+    // ref_RBSheetSuccess?.current?.open();
+  } else {
+    // Add new item to the cart
+    add_item_to_cart(variation_id, quantity);
+  }
+};
 
   const getItemDetails = async id => {
     setFetching(true);
@@ -570,11 +612,7 @@ useEffect(()=> {
 
         })
 
-        checkVariationInCart(food?.item_prices[0]?.variation_id)
-
-
-        // let restaurant_details = await getRestaurantDetail(food?.restaurant_id);
-        // setRestaurantDetails(restaurant_details);
+        checkVariationInCart(response?.result?.item_prices)
         let imageList = [];
         for (const item of food?.images) {
           let obj = {
@@ -588,10 +626,6 @@ useEffect(()=> {
       .finally(() => setFetching(false));
   };
 
-  // useEffect(() => {
-  //   if (route?.params?.type == 'favorite') setIsFavorite(true);
-  // }, [route?.params]);
-
   useEffect(() => {
     setFetching(true)
     let item_id = route?.params?.id;
@@ -604,60 +638,19 @@ useEffect(()=> {
   }, []);
 
 
-  const handlePress = async (id) => {
-    // setSelectedVariation(id);
-
-    const filter = my_cart?.filter(
-      item => item?.item_id == route?.params?.id,
-    );
-    if (filter?.length > 0) {
-      let obj = {
-        cart_item_id: filter[0]?.cart_item_id,
-        quantity: filter[0]?.quantity + count,
-      };
-      await updateCartItemQuantity(obj, dispatch);
-      // also update quantity in redux
-      const newData = my_cart?.map(item => {
-        if (item?.item_id == route?.params?.id) {
-          return {
-            ...item,
-            quantity: filter[0]?.quantity + count,
-          };
-        } else {
-          return { ...item };
-        }
-      });
-      dispatch(updateMyCartList(newData));
-      dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-      ref_RBSheetSuccess?.current?.open();
-      closeBtmSheet()
-    } else {
-      add_item_to_cart(id);
-      closeBtmSheet()
-
-    }
-
-
-  };
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     let item_id = route?.params?.id;
-  //     if (item_id) {
-  //       getItemDetails(item_id);
-  //     }
-  //   }, []),
-  // );
-
+  // console.log(variations);
+  
+  
   return (
     <View style={styles.container}>
-      <Loader loading={fetching} bgColor={Colors.White} />
+      
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, }}>
         {
           itemDetail ?
-            <View style={{ flexGrow: 1, backgroundColor: Colors.Orange }} >
-              <StatusBar backgroundColor={loading ? Colors.White : Colors.Orange} barStyle={'light-content'} />
+            <View style={{ flexGrow: 1, backgroundColor: Colors.primary_color }} >
+              <StatusBar backgroundColor={loading ? Colors.secondary_color : Colors.primary_color} barStyle={'light-content'} />
               <StackHeader
                 enableStatusBar={false}
                 titleColor={'white'}
@@ -689,20 +682,22 @@ useEffect(()=> {
                     <Text style={{ ...styles.itemName, flex: 1 }}>
                       {itemDetail?.item_name}
                     </Text>
-                    <View
+                    
+                    {
+                      itemDetail.item_prices?.length > 1 ?   <View
                       style={{
                         ...styles.rowView,
-                        backgroundColor: '#FFFFFF4F',
+                        backgroundColor: `${Colors.secondary_color}40`,
                         borderRadius: 15,
                       }}>
                       <TouchableOpacity
-                        onPress={() => handleOnRemove()}
+                        onPress={() => showRmoveBtmSheet()}
                         style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
-                        <AntDesign name="minus" color="white" size={16} />
+                        <AntDesign name="minus" color={Colors.secondary_color} size={16} />
                       </TouchableOpacity>
                       <Text
                         style={{
-                          color: '#FFFFFF',
+                          color: Colors.secondary_color,
                           fontFamily: Fonts.PlusJakartaSans_Bold,
                           fontSize: RFPercentage(1.7),
                           marginTop: -2,
@@ -710,23 +705,47 @@ useEffect(()=> {
                         {count}
                       </Text>
                       <TouchableOpacity
-                        onPress={() => onIncrement()}
+                        onPress={() => showRmoveBtmSheet()}
                         style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
-                        <AntDesign name="plus" color="white" size={16} />
+                        <AntDesign name="plus" color={Colors.secondary_color} size={16} />
+                      </TouchableOpacity>
+                    </View>:   <View
+                      style={{
+                        ...styles.rowView,
+                        backgroundColor: `${Colors.secondary_color}40`,
+                        borderRadius: 15,
+                      }}>
+                      <TouchableOpacity
+                        onPress={() =>  handleDecrement(itemDetail.item_prices[0].variation_id, itemDetail.item_id, itemDetail?.item_name)}
+                        style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
+                        <AntDesign name="minus" color={Colors.secondary_color} size={16} />
+                      </TouchableOpacity>
+                      <Text
+                        style={{
+                          color: Colors.secondary_color,
+                          fontFamily: Fonts.PlusJakartaSans_Bold,
+                          fontSize: RFPercentage(1.7),
+                          marginTop: -2,
+                        }}>
+                        {count}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() =>  handleAddToCart(itemDetail.item_prices[0].variation_id, count+1)}
+                        style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
+                        <AntDesign name="plus" color={Colors.secondary_color} size={16} />
                       </TouchableOpacity>
                     </View>
+                    }
                   </View>
                 </View>
                 <View
                   style={{
                     flex: 1,
-                    backgroundColor: 'white',
+                    backgroundColor: Colors.secondary_color,
                     borderTopLeftRadius: 30,
                     borderTopRightRadius: 30,
                     marginTop: 5,
                   }}>
-
-
                   {/* <ImageSlider data={data} marginBottom={1} /> */}
                   <ImageSliderCircle data={data} marginBottom={1} />
                   <View style={{ paddingHorizontal: 20, flex: 1, }}>
@@ -737,7 +756,7 @@ useEffect(()=> {
                           <View style={styles.variationContainer} >
                             <TouchableOpacity onPress={showBtmSheet} style={[styles.rowViewSB, { alignItems: 'center' }]} >
                               <Text style={styles.sizeText} >Variations</Text>
-                              <Ionicons name={'chevron-down'} size={19} color={Colors.Orange} />
+                              <Ionicons name={'chevron-down'} size={19} color={Colors.primary_color} />
                             </TouchableOpacity>
                             <Text style={styles.variationName} >{selectedVariation?.variation_name}</Text>
                           </View>
@@ -767,14 +786,12 @@ useEffect(()=> {
                           style={styles.description}>
                           {itemDetail?.description}
                         </Text>
-                        
-
                         </View>
                     }
 
                   </View>
                   <ItemSeparator width={wp(100)} />
-                  <View style={{ marginBottom: wp(2) }} >
+                  {/* <View style={{ marginBottom: wp(2) }} >
                     <CButton
                       title="Add to Cart"
                       // width={wp(70)}
@@ -793,15 +810,17 @@ useEffect(()=> {
                         }
                       }}
                     />
-                  </View>
+                  </View> */}
                 </View>
               </View>
             </View>
-            : <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }} >
+            : fetching ?<Loader loading={fetching} bgColor={Colors.secondary_color} />:
+            
+            <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }} >
               <StackHeader
                 enableStatusBar={false}
-                titleColor={Colors.Orange}
-                backIconColor={Colors.Orange}
+                titleColor={Colors.primary_color}
+                backIconColor={Colors.primary_color}
                 title={'Details'}
               /><NoDataFound text={'Oops Something went wrong'} svgHeight={hp(20)} /></View>
         }
@@ -817,7 +836,7 @@ useEffect(()=> {
         okText={'Remove'}
         cancelText={'No'}
         onOk={() => {
-          handleOnRemove();
+          // handleOnRemove();
           ref_cartAlert?.current?.close();
         }}
         onCancel={() => {
@@ -903,8 +922,8 @@ useEffect(()=> {
               <View key={i} style={[styles.rowViewSB, { borderBottomColor: Colors.borderGray, borderBottomWidth: wp(0.3), paddingBottom: wp(1) }]}>
                 <TouchableOpacity style={styles.rowView} >
                   <RadioButton
-                    color={Colors.Orange} // Custom color for selected button
-                    uncheckedColor={Colors.Orange} // Color for unselected buttons
+                    color={Colors.primary_color} // Custom color for selected button
+                    uncheckedColor={Colors.primary_color} // Color for unselected buttons
                     status={selectedVariation?.variation_id === variation?.variation_id ? 'checked' : 'unchecked'}
                     onPress={() => {
                       setSelectedVariation({
@@ -929,6 +948,97 @@ useEffect(()=> {
         }
 
       />
+      <CRBSheetComponent
+        height={230}
+        refRBSheet={removeBtmSheet}
+        content={
+          <View style={{ width: wp(90) }} >
+            <View style={styles.rowViewSB} >
+              <Text style={[styles.variationTxt, { fontSize: RFPercentage(2) }]} >Select your variation</Text>
+              <TouchableOpacity
+                onPress={() => closeRmoveBtmSheet()}>
+                <Ionicons name={'close'} size={22} color={'#1E2022'} />
+              </TouchableOpacity>
+            </View>
+            {variations?.map((variation, i) => (
+              <View key={i} style={[styles.rowViewSB, { borderBottomColor: Colors.borderGray, borderBottomWidth: wp(0.3), paddingBottom: wp(1) }]}>
+                <TouchableOpacity style={styles.rowView} >
+                  <View>
+
+                  </View>
+                  <RadioButton
+                    color={Colors.primary_color} // Custom color for selected button
+                    uncheckedColor={Colors.primary_color} // Color for unselected buttons
+                    status={selectedVariation?.variation_id === variation?.variation_id ? 'checked' : 'unchecked'}
+                    // onPress={() => handleDecrement(variation?.variation_id, variation.item_id)}
+                  />
+                  <Text style={styles.variationText}>{variation.variation_name}</Text>
+                </TouchableOpacity>
+
+                  {
+                    variation?.cart_item_id ?  <View
+                    style={{
+                      ...styles.rowView,
+                      backgroundColor: `${Colors.primary_color}`,
+                      borderRadius: 15,
+                      paddingVertical: 5,
+                      flex: 0.3,
+                      alignSelf : 'flex-end',
+                      justifyContent: 'space-around'
+                    }}>
+                    <TouchableOpacity
+                      onPress={() => handleDecrement(variation?.variation_id, variation?.item_id)}
+                      style={{   backgroundColor: `${Colors.secondary_color}40`,
+                      borderRadius: wp(3),
+                      // paddingHorizontal: wp(0),
+                      // marginLeft: wp(2),
+                       }}>
+                      <AntDesign name="minus" color={Colors.secondary_color} size={16} />
+                    </TouchableOpacity>
+                    <Text
+                      style={{
+                        color: Colors.secondary_color,
+                        fontFamily: Fonts.PlusJakartaSans_Bold,
+                        fontSize: RFPercentage(1.5),
+                        marginTop: -2,
+                        backgroundColor: `${Colors.secondary_color}40`,
+                        borderRadius: wp(3),
+                        paddingHorizontal: wp(1.5),
+                        
+                      }}>
+                      {variation?.quantity}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => handleAddToCart(variation?.variation_id, variation?.quantity+1)}
+                      style={{   backgroundColor: `${Colors.secondary_color}40`,
+                      borderRadius: wp(3),
+                      paddingHorizontal: wp(0),
+                      // marginRight: wp(2),
+                       }}>
+                      <AntDesign name="plus" color={Colors.secondary_color} size={16} />
+                    </TouchableOpacity>
+                  </View> : <TouchableOpacity
+                      onPress={() => handleAddToCart(variation?.variation_id, 1)}
+                      style={{   backgroundColor: `${Colors.primary_color}`,
+                      borderRadius: wp(3),
+                      padding: wp(0.5),
+                      marginRight: wp(2)
+
+                      // marginRight: wp(2),
+                       }}>
+                      <AntDesign name="plus" color={Colors.secondary_color} size={16} />
+                    </TouchableOpacity>
+                  }
+                   
+          
+
+              </View>
+            ))}
+
+          </View>
+        }
+
+      />
     </View>
   );
 };
@@ -937,55 +1047,56 @@ export default ItemDetails;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.secondary_color,
     alignItems: 'center',
     // paddingHorizontal: 20,
   },
   heading: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#191A26',
+    color: Colors.primary_text,
     fontSize: RFPercentage(3),
     textAlign: 'center',
     paddingHorizontal: 10,
   },
   restaurantName: {
-    color: Colors.White,
+    color: Colors.secondary_color,
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(1.5),
   },
   itemName: {
-    color: Colors.White,
+    color: Colors.secondary_color,
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(2.8),
     marginVertical: 5,
     marginBottom: 15,
   },
   subText: {
-    color: '#8D93A1',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(2),
   },
-  timeCard: {
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#EAEDF3',
-    paddingHorizontal: 18,
-    paddingVertical: 5.5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  timeText: {
-    color: '#191A26',
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    marginLeft: 5,
-  },
-  title: {
-    color: '#191A26',
-    fontSize: RFPercentage(2.2),
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-  },
+  // timeCard: {
+  //   borderRadius: 20,
+  //   borderWidth: 1,
+  //   borderColor: '#EAEDF3',
+  //   paddingHorizontal: 18,
+  //   paddingVertical: 5.5,
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   marginVertical: 10,
+  // },
+  // timeText: {
+  //   color: '#191A26',
+  //   fontFamily: Fonts.PlusJakartaSans_Medium,
+  //   marginLeft: 5,
+  // },
+  // title: {
+  //   color: '#191A26',
+  //   fontSize: RFPercentage(2.2),
+  //   fontFamily: Fonts.PlusJakartaSans_Bold,
+  // },
+  
   rowViewSB: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -994,7 +1105,6 @@ const styles = StyleSheet.create({
   imageCard: {
     width: wp(90),
     height: hp(25),
-    // backgroundColor: '#ccc',
     marginHorizontal: wp(4.5),
     borderRadius: 10,
     overflow: 'hidden',
@@ -1007,7 +1117,7 @@ const styles = StyleSheet.create({
     width: wp(2.5),
     height: wp(2.5),
     borderRadius: wp(2.5) / 2,
-    backgroundColor: Colors.Orange,
+    backgroundColor: Colors.primary_color,
     margin: 0,
     marginHorizontal: 2,
   },
@@ -1015,9 +1125,9 @@ const styles = StyleSheet.create({
     width: wp(2.5),
     height: wp(2.5),
     borderRadius: wp(2.5) / 2,
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.secondary_color,
     borderWidth: 1,
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
     opacity: 0.7,
     marginHorizontal: 2,
   },
@@ -1026,14 +1136,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   descriptionTxt: {
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(1.7),
     marginTop: hp(2)
   },
   description: {
 
-    color: '#00000099',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(1.6),
     lineHeight: 20,
@@ -1041,7 +1151,7 @@ const styles = StyleSheet.create({
   },
   priceTxt: {
 
-    color: Colors.Black,
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_ExtraBold,
     fontSize: RFPercentage(2.2),
     lineHeight: 20,
@@ -1051,7 +1161,7 @@ const styles = StyleSheet.create({
   },
   variationName: {
 
-    color: '#00000099',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
     fontSize: RFPercentage(1.6),
     marginVertical: hp(0.5)
@@ -1061,14 +1171,14 @@ const styles = StyleSheet.create({
   },
   AboutContainer: {
     marginVertical: 10,
-    backgroundColor: '#FFF6F3',
+    backgroundColor: `${Colors.primary_color}10`,
     paddingHorizontal: wp(6),
     paddingVertical: hp(1.5),
     borderRadius: 15,
 
   },
   variationContainer: {
-    borderColor: Colors.Orange,
+    borderColor: Colors.primary_color,
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: wp(2),
@@ -1076,7 +1186,7 @@ const styles = StyleSheet.create({
 
   },
   variationTxt: {
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(1.7),
     marginBottom: hp(1)
@@ -1087,11 +1197,11 @@ const styles = StyleSheet.create({
   },
   variationText: {
     fontSize: RFPercentage(1.6),
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
   },
   sizeText: {
-    color: Colors.Orange,
+    color: Colors.primary_color,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(2.2),
     marginRight: wp(4)

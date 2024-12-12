@@ -15,7 +15,7 @@ import {
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import StackHeader from '../../../components/Header/StackHeader';
-import {Fonts, Images} from '../../../constants';
+import {Colors, Fonts, Images} from '../../../constants';
 import FoodCard from '../../../components/Cards/FoodCard';
 
 const Cuisines = ({navigation, route}) => {
@@ -110,7 +110,7 @@ const Cuisines = ({navigation, route}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.secondary_color,
     alignItems: 'center',
   },
 

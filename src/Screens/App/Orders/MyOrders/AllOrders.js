@@ -175,19 +175,19 @@ const func = async () => {
     if (item?.order_status == 'delivered') {
       navigation.navigate('OrderDetails', {
         type: 'completed',
-        id: item?.order_id,
+        // id: item?.order_id,
         item: item,
       });
     } else if (item?.order_status == 'cancelled') {
       navigation.navigate('OrderDetails', {
         type: 'cancelled',
-        id: item?.order_id,
+        // id: item?.order_id,
         item: item,
       });
     } else {
       navigation.navigate('OrderDetails', {
         type: 'all',
-        id: item?.order_id,
+        // id: item?.order_id,
         item: item,
       });
     }
@@ -210,7 +210,7 @@ const func = async () => {
       <FlatList
        refreshControl={
         <RefreshControl
-          colors={[Colors.Orange, Colors.OrangeLight]}
+          colors={[Colors.primary_color]}
           refreshing={refreshing}
           onRefresh={() => onRefresh()}
         />

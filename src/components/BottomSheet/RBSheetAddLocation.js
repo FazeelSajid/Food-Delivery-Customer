@@ -8,6 +8,7 @@ import {
 } from 'react-native-responsive-screen';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
+import { Colors } from '../../constants';
 
 const RBSheetAddLocation = ({refRBSheet}) => {
   const navigation = useNavigation();
@@ -50,7 +51,7 @@ const RBSheetAddLocation = ({refRBSheet}) => {
             }}>
             <Text
               style={{
-                color: '#FF5722',
+                color: Colors.primary_color,
                 fontSize: RFPercentage(1.8),
                 fontFamily: 'PlusJakartaSans-Regular',
                 fontWeight: 'bold',

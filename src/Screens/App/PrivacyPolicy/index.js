@@ -10,7 +10,7 @@ import {
 } from 'react-native-responsive-screen';
 const PrivacyPolicy = () => {
   return (
-    <ScrollView style={{flex: 1, backgroundColor: Colors.White}}>
+    <ScrollView style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       <StackHeader title={'Privacy Policy'} headerStyle={{paddingBottom: 10}} />
 
       {/* <WebView
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   text: {
-    color: '#595959',
+    color: Colors.secondary_text,
     fontFamily: Fonts.PlusJakartaSans_Regular,
     fontSize: RFPercentage(1.5),
     lineHeight: 25,

@@ -113,7 +113,7 @@ const Setting = ({ navigation, route }) => {
   };
 
   const handleDelete = () =>{
-    fetch(api. delete_customer + 201730, {
+    fetch(api.delete_customer + customer_id, {
       method: 'DELETE',
     })
     .then(response => response.json())
@@ -203,7 +203,7 @@ const Setting = ({ navigation, route }) => {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.White }}>
+    <View style={{ flex: 1, backgroundColor: Colors.secondary_color }}>
       {join_as_guest ? (
         <RBSheetGuestUser
           showCloseButton={false}
@@ -236,7 +236,7 @@ const Setting = ({ navigation, route }) => {
             <View style={{ alignItems: 'center' }}>
               <View
                 style={{
-                  backgroundColor: Colors.Orange,
+                  backgroundColor: Colors.button.primary_button,
                   borderRadius: 10,
                   height: 65,
                   width: 70,
@@ -247,7 +247,7 @@ const Setting = ({ navigation, route }) => {
                 }}>
                 <Text
                   style={{
-                    color: Colors.White,
+                    color: Colors.button.primary_button_text,
                     fontFamily: Fonts.Inter_SemiBold,
                     fontSize: RFPercentage(2.8),
                     letterSpacing: 1.5,
@@ -257,7 +257,7 @@ const Setting = ({ navigation, route }) => {
               </View>
               <Text
                 style={{
-                  color: Colors.Orange,
+                  color: Colors.primary_color,
                   fontFamily: Fonts.PlusJakartaSans_SemiBold,
                   fontSize: RFPercentage(2.2),
                   //   letterSpacing: 1.5,
@@ -267,7 +267,7 @@ const Setting = ({ navigation, route }) => {
               </Text>
               <Text
                 style={{
-                  color: '#757575',
+                  color: Colors.secondary_text,
                   fontFamily: Fonts.PlusJakartaSans_Medium,
                   fontSize: RFPercentage(2),
                   //   letterSpacing: 1.5,
@@ -276,7 +276,7 @@ const Setting = ({ navigation, route }) => {
               </Text>
               <Text
                 style={{
-                  color: '#757575',
+                  color: Colors.secondary_text,
                   fontFamily: Fonts.PlusJakartaSans_Medium,
                   fontSize: RFPercentage(2),
                   //   letterSpacing: 1.5,
@@ -457,7 +457,7 @@ export default Setting;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#F6F6F6',
+    backgroundColor: `${Colors.secondary_text}10`,
     paddingHorizontal: 18,
     paddingVertical: 15,
     borderRadius: 10,
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   cardTitle: {
-    color: '#292323',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
   },
   cardIconSize: 25,

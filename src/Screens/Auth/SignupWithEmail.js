@@ -23,6 +23,7 @@ import {
   setCustomerDetail,
   setCustomerId,
   setJoinAsGuest,
+  setRestautantDetails,
   setSignUpWith
 } from '../../redux/AuthSlice';
 import api from '../../constants/api';
@@ -93,7 +94,6 @@ const SignUpWithEmail = ({navigation, route}) => {
   };
 
   const validate = () => {
-    // Email Validation
     if (!userEmail || userEmail.length === 0) {
       handlePopup(dispatch, 'Please Enter email address' ,'red')
       return false;
@@ -102,13 +102,11 @@ const SignUpWithEmail = ({navigation, route}) => {
       return false;
     }
   
-    // Country Code Validation
     if (!countryCode || countryCode.length === 0) {
       handlePopup(dispatch, 'Please Enter Country', 'red')
       return false;
     }
   
-    // Password Validation
     if (!password || password.length === 0) {
       dispatch(dispatch, 'Please Enter Password','red')
       return false;
@@ -159,11 +157,7 @@ const SignUpWithEmail = ({navigation, route}) => {
       console.log({userEmail, phone_no, password, fcm_token, userName});
       let fcm_token = await getUserFcmToken();
       console.log( 'SignUp token',fcm_token);
-      
-      
-
       if (validate()) {
-   
         setLoading(true);
         let data = {
          user_name: userName.toLowerCase(),
@@ -189,8 +183,10 @@ const SignUpWithEmail = ({navigation, route}) => {
               handlePopup(dispatch, response?.message, 'red')
             } else if(response.result.verified === false){
               navigation.navigate('Verification',{
-                response,
+                response: response?.result,
                 customer_id: response?.result?.customer_id,
+                otp: response?.verifyCode,
+                email: response?.result?.email
               })
             } 
             
@@ -222,12 +218,21 @@ const SignUpWithEmail = ({navigation, route}) => {
       }
     // }
   };
+  useEffect(() => {
+    GoogleSignin.configure({
+      androidClientId:
+        // '293745886997-4i5fm6s806fpea20r9qq7383pdtedl65.apps.googleusercontent.com',
+        '499293962734-j707393fo8gbhl4r3offkknvgmc5scid.apps.googleusercontent.com',
+      iosClientId: '',
+    });
+  }, []);
 
-  const updateVerificationStatus = customer_id => {
+  const updateVerificationStatus = (customer_id, otp) => {
     return new Promise((resolve, reject) => {
       let data = {
         customer_id: customer_id,
         verified: true,
+        otp:otp
       };
       console.log('data  :  ', data);
       fetch(api.update_verification_status, {
@@ -241,30 +246,36 @@ const SignUpWithEmail = ({navigation, route}) => {
         .then(async response => {
           console.log('response  :  ', response);
           if (response?.status == false) {
-            resolve(false);
+              handlePopup(dispatch, 'Something went wrong!', 'red')
           } else {
-            resolve(true);
+            handlePopup(dispatch, 'SignUp Successfully', 'green')
+
+
+            let wallet = await createCustomerWallet(
+              response?.result?.customer_id,
+            );
+            console.log(wallet);
+            dispatch(
+              setCustomerId(response?.result?.customer_id?.toString()),
+            );
+            dispatch(setJoinAsGuest(false));
+            dispatch(setCustomerDetail(response?.result));
+
+            // navigation?.popToTop()
+            navigation?.navigate('Drawer');
+            clearFields();
           }
         })
         .catch(err => {
-          resolve(false);
+            handlePopup(dispatch, 'Something went wrong!', 'red')
         });
     });
   };
 
-  useEffect(() => {
-    GoogleSignin.configure({
-      androidClientId:
-        // '293745886997-4i5fm6s806fpea20r9qq7383pdtedl65.apps.googleusercontent.com',
-        '499293962734-j707393fo8gbhl4r3offkknvgmc5scid.apps.googleusercontent.com',
-      iosClientId: '',
-    });
-  }, []);
-
   const handleGoogleSignUp = async () => {
     console.log('handleGoogleSignIn');
     try {
-      // await GoogleSignin.signOut();
+      await GoogleSignin.signOut();
 
       await GoogleSignin.hasPlayServices({
         // Check if device has Google Play Services installed
@@ -282,9 +293,13 @@ const SignUpWithEmail = ({navigation, route}) => {
         let data = {
           // phone_no: countryCode + phone_no,
           signup_type: 'email',
-          email: email,
+          email: "lifaw19906@iminko.com" ,
           user_name: user_name,
           fcm_token: fcm_token,
+          signup_type: "google",
+          rest_ID: "res_4074614",
+          
+
           // password: password,
         };
         console.log('data  :  ', data);
@@ -301,42 +316,27 @@ const SignUpWithEmail = ({navigation, route}) => {
             console.log('response  :  ', response);
             if (response?.status == false) {
               handlePopup(dispatch, response?.message, 'red')
-            } else {
+            } else if(response.result.verified === false){
+              
+              updateVerificationStatus(response?.result?.customer_id, response.verifyCode)
+              dispatch(setRestautantDetails(response?.restaurant))
+            } 
+            
+            else {
+              handlePopup(dispatch, response.message, 'green')
+              dispatch(setRestautantDetails(response?.restaurant))
+
               let wallet = await createCustomerWallet(
                 response?.result?.customer_id,
               );
-
-              console.log({wallet});
-
-              // navigation?.popToTop();
-              // navigation?.navigate('EmailVerification', {
-              //   response: response,
-              //   customer_id: response?.result?.customer_id,
-              //   email: email,
-              // });
-              let isUpdateVerificationStatus = await updateVerificationStatus(
-                response?.result?.customer_id,
-              );
-              console.log({isUpdateVerificationStatus});
-              if (!isUpdateVerificationStatus) {
-                return;
-              }
-              await AsyncStorage.setItem(
-                'customer_id',
-                response?.result?.customer_id?.toString(),
-              );
-              await AsyncStorage.setItem(
-                'customer_detail',
-                JSON.stringify(response?.result),
-              );
-
+              console.log(wallet);
               dispatch(
                 setCustomerId(response?.result?.customer_id?.toString()),
               );
+              dispatch(setJoinAsGuest(false));
               dispatch(setCustomerDetail(response?.result));
-              navigation.navigate('EnableLocation', {
-                customer_id: response?.result?.customer_id,
-              });
+              // navigation?.popToTop()
+              navigation?.navigate('Drawer');
               clearFields();
             }
           })
@@ -455,7 +455,7 @@ const SignUpWithEmail = ({navigation, route}) => {
             width={wp(88)}
             leftIcon={<Google  />}
             borderColor={Colors.borderGray}
-            color={Colors.Black}
+            color={Colors.primary_text}
             onPress={() => handleGoogleSignUp()}
           />
           </View>

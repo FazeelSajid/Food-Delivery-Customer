@@ -19,13 +19,13 @@ import { RFPercentage } from 'react-native-responsive-fontsize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import StackHeader from '../../../components/Header/StackHeader';
 import { Colors, Fonts, Icons, Images } from '../../../constants';
-import FoodCard from '../../../components/Cards/FoodCard';
-import Chip from '../../../components/Chip.js';
-import FoodCardWithRating from '../../../components/Cards/FoodCardWithRating';
+// import FoodCard from '../../../components/Cards/FoodCard';
+// import Chip from '../../../components/Chip.js';
+// import FoodCardWithRating from '../../../components/Cards/FoodCardWithRating';
 import api from '../../../constants/api';
 import Loader from '../../../components/Loader';
 import { BASE_URL_IMAGE } from '../../../utils/globalVariables';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   addItemToCart,
   clearCartItems,
@@ -37,7 +37,7 @@ import {
 } from '../../../utils/helpers/cartapis';
 import { checkRestaurantTimings, handlePopup, showAlert } from '../../../utils/helpers';
 import { useDispatch, useSelector } from 'react-redux';
-import RBSheetOtherRestaurantCartItem from '../../../components/BottomSheet/RBSheetOtherRestaurantCartItem';
+// import RBSheetOtherRestaurantCartItem from '../../../components/BottomSheet/RBSheetOtherRestaurantCartItem';
 import {
   addItemToMYCart,
   addToCart,
@@ -46,7 +46,7 @@ import {
 } from '../../../redux/CartSlice';
 import RBSheetSuccess from '../../../components/BottomSheet/RBSheetSuccess';
 import ItemLoading from '../../../components/Loader/ItemLoading';
-import RBSheetRestaurantClosed from '../../../components/BottomSheet/RBSheetRestaurantClosed';
+// import RBSheetRestaurantClosed from '../../../components/BottomSheet/RBSheetRestaurantClosed';
 import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RadioButton } from 'react-native-paper';
@@ -71,7 +71,7 @@ const SeeAllItems = ({ navigation, route }) => {
   const [isItemLoading, setIsItemLoading] = useState(false);
   const [Item, setItem] = useState()
   const [restaurant_timings, setRestaurant_timings] = useState('');
-  const {customer_id, showPopUp, popUpColor, PopUpMesage, cuisines, items} = useSelector(store => store.store)
+  const {customer_id, showPopUp, popUpColor, PopUpMesage, cuisines, items, customerCartId} = useSelector(store => store.store)
   const { favoriteItems } = useSelector(store => store.favorite);
   const [itemObj, setItemObj] = useState({})
   const [numColumns, setNumColumns] = useState(2)
@@ -81,6 +81,7 @@ const SeeAllItems = ({ navigation, route }) => {
   const [selectedVariation, setSelectedVariation] = useState(null);
 
  
+// console.log({customerCartId});
 
   const showBtmSheet = async (item) => {
     setSelectedVariation(null)
@@ -148,7 +149,6 @@ const SeeAllItems = ({ navigation, route }) => {
 
 
   const add_item_to_cart = async (id, type, name, item_id) => {
-    let cart = await getCustomerCart(customer_id, dispatch);
     // console.log('______cart    :  ', cart?.cart_id);
     console.log({item_id});
     
@@ -156,14 +156,14 @@ const SeeAllItems = ({ navigation, route }) => {
 
     let dataa = type === 'item' ? {
       item_id: item_id ? item_id : itemObj.id ,
-      cart_id: cart?.cart_id?.toString(),
+      cart_id: customerCartId.toString(),
       item_type: type,
       comments: 'Adding item in cart',
       quantity: 1,
       variation_id: id
     } : {
       item_id: id,
-      cart_id: cart?.cart_id?.toString(),
+      cart_id: customerCartId.toString(),
       item_type: 'deal',
       comments: '',
       quantity: 1,
@@ -174,7 +174,7 @@ const SeeAllItems = ({ navigation, route }) => {
 
 
     await addItemToCart(dataa, dispatch)
-      .then(response => {
+      .then(async  response => {
         console.log('response ', response);
         if (response?.status == true) {
           const newDataa = data?.map(element => {
@@ -192,6 +192,9 @@ const SeeAllItems = ({ navigation, route }) => {
           setData(newDataa);
           dispatch(addItemToMYCart(response?.result));
           setSelectedVariation(null)
+          let cartItems = await getCartItems(customerCartId, dispatch);
+            dispatch(updateMyCartList(cartItems));
+
 
           handlePopup(dispatch,`${name ? name : itemObj.name} is added to cart`, 'green');
         
@@ -290,18 +293,6 @@ const SeeAllItems = ({ navigation, route }) => {
                   }
                 });
                 setData(newDataa);
-                // const newData = my_cart?.map(item => {
-                //   // console.log( "item:  ",item);
-                  
-                //   if (item?.cart_item_id == checkVariation[0]?.cart_item_id) {
-                //     return {
-                //       ...item,
-                //       quantity: item?.quantity + 1,
-                //     };
-                //   } else {
-                //     return { ...item };
-                //   }
-                // });
                 let cartItems = await getCartItems(checkVariation[0]?.cart_id, dispatch);
                 dispatch(updateMyCartList(cartItems));
               }
@@ -357,10 +348,7 @@ const SeeAllItems = ({ navigation, route }) => {
   }
     const handleAddToCartDecrement = async (variation_id, item_id, name) => {
     setSelectedVariation(variation_id)
-    // console.log({variation_id, item_id});
-    // let cart = await getCustomerCart(customer_id, dispatch);
-    // console.log({cart});
-    
+  
 
     if (variation_id === null) {
       showRmoveBtmSheet()
@@ -782,7 +770,7 @@ const SeeAllItems = ({ navigation, route }) => {
 
       <View style={{}}>
         <FlatList
-          refreshControl={<RefreshControl refreshing={false} onRefresh={()=> getData()} colors={[Colors.Orange]} />}
+          refreshControl={<RefreshControl refreshing={false} onRefresh={()=> getData()} colors={[Colors.primary_color]} />}
           ListFooterComponent={() => <View style={{ height: hp(3) }} />}
           ListHeaderComponent={() => <StackHeader title={'Explore Items'} />}
           showsVerticalScrollIndicator={false}
@@ -804,7 +792,7 @@ const SeeAllItems = ({ navigation, route }) => {
 
                 <FoodCards
                   isFavorite={fav}
-                  image={BASE_URL_IMAGE + item?.images[0]}
+                  image={item?.images[0]}
                   description={item.description}
                   price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
                   heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
@@ -826,7 +814,7 @@ const SeeAllItems = ({ navigation, route }) => {
                           style={{
                             flexDirection: 'row',
                             alignItems: 'center',
-                            backgroundColor: '#FF57224F',
+                            backgroundColor: `${Colors.primary_color}30`,
                             borderRadius: 25,
                             paddingVertical: 2,
                             paddingHorizontal: 2,
@@ -847,13 +835,13 @@ const SeeAllItems = ({ navigation, route }) => {
                             }}>
                             <AntDesign
                               name="minus"
-                              color={Colors.Orange}
+                              color={Colors.primary_color}
                               size={16}
                             />
                           </TouchableOpacity>
                           <Text
                             style={{
-                              color: Colors.Orange,
+                              color: Colors.primary_color,
                               fontFamily: Fonts.PlusJakartaSans_Bold,
                               fontSize: RFPercentage(2),
                               marginTop: -2,
@@ -874,13 +862,14 @@ const SeeAllItems = ({ navigation, route }) => {
                             }}>
                             <AntDesign
                               name="plus"
-                              color={Colors.Orange}
+                              color={Colors.primary_color}
                               size={16}
                             />
                           </TouchableOpacity>
                         </View>
                       ) : (
                         <TouchableOpacity
+                        style={styles.addbtn}
                           onPress={() => {
                             setItem(item)
                             showBtmSheet(item)
@@ -890,7 +879,7 @@ const SeeAllItems = ({ navigation, route }) => {
                             // handelAddItem(item);
                             // setRestaurant_timings(item?.restaurant_timings);
                           }}>
-                          <AddButton width={wp(10)} height={hp(5)} />
+                          <AntDesign name="plus" size={12} color={Colors.button.primary_button_text} />
                         </TouchableOpacity>
                       )}
                     </>
@@ -937,8 +926,8 @@ const SeeAllItems = ({ navigation, route }) => {
               <View key={i} style={styles.rowViewSB}>
                 <View style={styles.rowView} >
                   <RadioButton
-                    color={Colors.Orange} // Custom color for selected button
-                    uncheckedColor={Colors.Orange} // Color for unselected buttons
+                    color={Colors.primary_color} // Custom color for selected button
+                    uncheckedColor={Colors.primary_color} // Color for unselected buttons
                     status={selectedVariation === variation.variation_id ? 'checked' : 'unchecked'}
                     onPress={() => handleAddToCart(variation.variation_id, itemObj.id)}
                   />
@@ -968,8 +957,8 @@ const SeeAllItems = ({ navigation, route }) => {
               <View key={i} style={styles.rowViewSB}>
                 <View style={styles.rowView} >
                   <RadioButton
-                    color={Colors.Orange} // Custom color for selected button
-                    uncheckedColor={Colors.Orange} // Color for unselected buttons
+                    color={Colors.primary_color} // Custom color for selected button
+                    uncheckedColor={Colors.primary_color} // Color for unselected buttons
                     status={selectedVariation === variation.variation_id ? 'checked' : 'unchecked'}
                     onPress={() => handleAddToCartDecrement(variation?.variation_id, variation.item_id)}
                   />
@@ -1017,15 +1006,15 @@ const SeeAllItems = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.secondary_color,
     alignItems: 'center',
   },
-  heading: {
-    color: Colors.Text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(2.5),
-    marginBottom: 10,
-  },
+  // heading: {
+  //   color: Colors.Text,
+  //   fontFamily: Fonts.PlusJakartaSans_Bold,
+  //   fontSize: RFPercentage(2.5),
+  //   marginBottom: 10,
+  // },
   itemView: {
     marginVertical: 10,
     flexDirection: 'row',
@@ -1047,25 +1036,25 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     flex: 1,
   },
-  title: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.Text,
-    fontSize: RFPercentage(1.7),
-    lineHeight: 25,
-  },
-  nameText: {
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: '#7E8CA0',
-    fontSize: RFPercentage(2),
-    lineHeight: 25,
-  },
-  ratingText: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.Text,
-    fontSize: RFPercentage(2),
-    lineHeight: 25,
-    marginLeft: 5,
-  },
+  // title: {
+  //   fontFamily: Fonts.PlusJakartaSans_Bold,
+  //   color: Colors.Text,
+  //   fontSize: RFPercentage(1.7),
+  //   lineHeight: 25,
+  // },
+  // nameText: {
+  //   fontFamily: Fonts.PlusJakartaSans_Medium,
+  //   color: '#7E8CA0',
+  //   fontSize: RFPercentage(2),
+  //   lineHeight: 25,
+  // },
+  // ratingText: {
+  //   fontFamily: Fonts.PlusJakartaSans_Bold,
+  //   color: Colors.Text,
+  //   fontSize: RFPercentage(2),
+  //   lineHeight: 25,
+  //   marginLeft: 5,
+  // },
   rowViewSB: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1076,21 +1065,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  radioButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  // radioButton: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  // },
   variationText: {
     fontSize: RFPercentage(1.6),
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Medium,
   },
   variationTxt: {
-    color: '#02010E',
+    color: Colors.primary_text,
     fontFamily: Fonts.PlusJakartaSans_Bold,
     fontSize: RFPercentage(1.7),
     marginBottom: hp(1)
   },
+  addbtn: {
+    backgroundColor: Colors.button.primary_button,
+    paddingHorizontal: wp(2),
+    paddingVertical: wp(2),
+    borderRadius: wp('50%'),
+  }
 
 });
 

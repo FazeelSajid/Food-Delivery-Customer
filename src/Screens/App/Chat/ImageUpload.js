@@ -80,7 +80,7 @@ const ImageUpload = ({ route, navigation }) => {
                             position: 'absolute',
                             top: hp(1.3),
                             marginLeft: wp(2),
-                            backgroundColor: Colors.White,
+                            backgroundColor: Colors.button.secondary_button,
                             borderRadius: wp(5),
                             padding: wp(1),
                             paddingHorizontal: wp(1.3)
@@ -88,7 +88,7 @@ const ImageUpload = ({ route, navigation }) => {
                         <Ionicons
                             name={'chevron-back'}
                             size={hp(3)}
-                            color={Colors.Black}
+                            color={Colors.button.secondary_button_text}
                         />
                     </TouchableOpacity>
                 </ImageBackground>
@@ -98,8 +98,9 @@ const ImageUpload = ({ route, navigation }) => {
                         style={styles.textInput}
                         placeholder="Write message..."
                         value={message}
-                        placeholderTextColor={Colors.grayText}
+                        placeholderTextColor={Colors.secondary_text}
                         onChangeText={(text) => setMessage(text)}
+                        selectionColor={`${Colors.primary_color}70`}
                     />
                     <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
                         <Text style={styles.sendText}>➤</Text>
@@ -112,7 +113,7 @@ const ImageUpload = ({ route, navigation }) => {
                     <Text style={[styles.modalHeading, styles.modalSubHeading]} >Are you sure to discard unsent message</Text>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: wp(10), marginBottom: 0 }} >
                         <CustomButton text={'Cancel'} textStyle={styles.cancelBtntext} containerStyle={styles.cancelBtnContainer} pressedRadius={wp(1.5)} onPress={() => setModalVisible(false)} />
-                        <CustomButton text={'Discard'} pressedRadius={wp(1.5)} textStyle={[styles.cancelBtntext, { color: Colors.White, }]} containerStyle={styles.discardBtnContainer} onPress={()=> {
+                        <CustomButton text={'Discard'} pressedRadius={wp(1.5)} textStyle={[styles.cancelBtntext, { color: Colors.button.primary_button_text, }]} containerStyle={styles.discardBtnContainer} onPress={()=> {
                             setModalVisible(false)
                             navigation.goBack()
                         }} />
@@ -132,51 +133,52 @@ export default ImageUpload;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.White,
+        backgroundColor: Colors.secondary_color,
         paddingTop: hp('5')
     },
     image: {
-        height: hp('85%'),
+        height: hp('92%'),
         resizeMode: 'cover',
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.OrangeExtraLight,
+        backgroundColor: `${Colors.primary_color}10`,
         paddingVertical: hp('1%'),
         paddingHorizontal: wp('4%'),
         borderTopWidth: 1,
-        borderTopColor: '#EDEDED',
+        borderTopColor: Colors.secondary_color,
     },
     textInput: {
         flex: 1,
         height: hp('5%'),
         borderWidth: 1,
-        borderColor: '#EDEDED',
+        borderColor: Colors.borderGray,
         borderRadius: wp('5%'),
         paddingHorizontal: wp('4%'),
-        backgroundColor: '#F9F9F9',
+        backgroundColor: Colors.secondary_color,
         fontSize: wp('4%'),
-        color: Colors.Black,
+        color: Colors.primary_text,
         fontFamily: Fonts.PlusJakartaSans_Regular,
     },
     sendButton: {
         marginLeft: wp('2%'),
-        backgroundColor: Colors.Orange,
+        backgroundColor: Colors.button.primary_button,
         borderRadius: wp('5%'),
         padding: wp('3%'),
         justifyContent: 'center',
         alignItems: 'center',
     },
     sendText: {
-        color: '#FFFFFF',
+        color: Colors.button.primary_button_text,
         fontSize: wp('5%'),
         fontWeight: 'bold',
+        
     },
-    modalContainer: { backgroundColor: Colors.White, height: hp(20), width: wp(80), alignSelf: 'center', borderRadius: wp(5), justifyContent: 'space-evenly' },
-    modalHeading: { color: Colors.Black, textAlign: 'center', fontSize: RFPercentage(2), fontFamily: Fonts.PlusJakartaSans_Medium },
+    modalContainer: { backgroundColor: Colors.secondary_color, height: hp(20), width: wp(80), alignSelf: 'center', borderRadius: wp(5), justifyContent: 'space-evenly' },
+    modalHeading: { color: Colors.primary_text, textAlign: 'center', fontSize: RFPercentage(2), fontFamily: Fonts.PlusJakartaSans_Medium },
     modalSubHeading: { fontFamily: Fonts.PlusJakartaSans_Regular, fontSize: RFPercentage(1.7) },
-    cancelBtntext: { color: Colors.Orange, fontFamily: Fonts.PlusJakartaSans_Regular },
-    cancelBtnContainer: { borderColor: Colors.Orange, borderWidth: wp(0.4), paddingHorizontal: wp(4), paddingVertical: hp(0.5), borderRadius: wp(1.5), alignItems: 'center' },
-    discardBtnContainer: {paddingHorizontal: wp(4), paddingVertical: hp(0.5), borderRadius: wp(1.5), alignItems: 'center', backgroundColor: Colors.Orange}
+    cancelBtntext: { color: Colors.button.secondary_button_text, fontFamily: Fonts.PlusJakartaSans_Regular },
+    cancelBtnContainer: { borderColor: Colors.button.secondary_button_text, borderWidth: wp(0.4), paddingHorizontal: wp(4), paddingVertical: hp(0.5), borderRadius: wp(1.5), alignItems: 'center', backgroundColor: Colors.button.secondary_button },
+    discardBtnContainer: {paddingHorizontal: wp(4), paddingVertical: hp(0.5), borderRadius: wp(1.5), alignItems: 'center', backgroundColor: Colors.button.primary_button}
 });

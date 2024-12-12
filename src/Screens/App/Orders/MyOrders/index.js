@@ -32,6 +32,7 @@ const MyOrders = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  
 
   const { showPopUp, popUpColor, PopUpMesage } = useSelector(store => store.store)
 
@@ -90,14 +91,14 @@ const MyOrders = () => {
   // );
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.White}}>
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       {/* <Loader loading={loading} /> */}
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <MenuHeader title={'My Orders'} />
       {/* <ScrollView
         refreshControl={
           <RefreshControl
-            colors={[Colors.Orange, Colors.OrangeLight]}
+            colors={[Colors.primary_color, Colors.primary_colorLight]}
             refreshing={refreshing}
             onRefresh={() => onRefresh()}
           />
@@ -108,14 +109,14 @@ const MyOrders = () => {
           renderScene={renderScene}
           onIndexChange={setIndex}
           initialLayout={{width: layout.width}}
-          sceneContainerStyle={{backgroundColor: Colors.White}}
+          sceneContainerStyle={{backgroundColor: Colors.secondary_color}}
           // pagerStyle={{backgroundColor: 'red'}}
           swipeEnabled={true}
           renderTabBar={props => (
             <TabBar
               {...props}
               style={{
-                backgroundColor: Colors.White,
+                backgroundColor: Colors.secondary_color,
                 marginTop: -15,
                 // paddingHorizontal: 20,
                 elevation: 4,
@@ -126,7 +127,7 @@ const MyOrders = () => {
               renderLabel={({route, focused, color}) => (
                 <Text
                   style={{
-                    color: focused ? Colors.Orange : '#979797',
+                    color: focused ? Colors.primary_color : Colors.secondary_text,
                     fontSize: hp(1.5),
                     fontFamily: focused
                       ? Fonts.Inter_Bold
@@ -138,13 +139,13 @@ const MyOrders = () => {
                   {route.title}
                 </Text>
               )}
-              activeColor={'#fff'}
+              // activeColor={'red'}
               // indicatorContainerStyle={{backgroundColor: 'red'}}
 
               indicatorStyle={{
                 padding: 1.5,
                 // marginBottom: -2,
-                backgroundColor: Colors.Orange,
+                backgroundColor: Colors.primary_color,
                 // width: '50%',
                 // alignSelf: 'center',
                 // width: 80,s
@@ -154,9 +155,9 @@ const MyOrders = () => {
               }}
             />
           )}
-          pressColor="white"
+          // pressColor="red"
           // pressOpacity={0}
-          activeColor={'#fff'}
+          // activeColor={'red'}
           indicatorContainerStyle={{
             backgroundColor: 'transparent',
           }}

@@ -9,7 +9,7 @@ const PriceText = ({text, fontSize, color, currencyColor, textColor}) => {
       <Text
         style={{
           ...styles.title,
-          color: color ? color : currencyColor ? currencyColor : Colors.Orange,
+          color: color ? color : currencyColor ? currencyColor : Colors.primary_color,
           fontSize: RFPercentage(1.8),
           position: 'absolute',
           // bottom: 4,
@@ -19,7 +19,7 @@ const PriceText = ({text, fontSize, color, currencyColor, textColor}) => {
       <Text
         style={{
           ...styles.title,
-          color: color ? color : textColor ? textColor : Colors.Orange,
+          color: color ? color : textColor ? textColor : Colors.primary_color,
           marginLeft: 11,
           fontSize: fontSize ? fontSize : RFPercentage(2),
         }}>
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.Text,
+    color: Colors.primary_text,
     fontSize: RFPercentage(2),
     lineHeight: 25,
   },

@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import CRBSheetComponent from './CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -42,7 +42,7 @@ const RBSheetRating = ({
       <View style={{width: wp(90)}}>
         <Text
           style={{
-            color: Colors.Text,
+            color: Colors.primary_text,
             fontFamily: Fonts.PlusJakartaSans_Bold,
             fontSize: RFPercentage(2.4),
             marginBottom: 20,
