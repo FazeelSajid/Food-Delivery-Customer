@@ -524,8 +524,8 @@ const Wallet = ({ navigation, route }) => {
         "description": "This is the payment description.",
         "redirect_urls": {
             
-            "return_url": "http://localhost:8082/success",
-            "cancel_url": "http://localhost:8082/return"
+            "return_url": "https://food-delivery-restaurant-portal.netlify.app/success",
+            "cancel_url": "https://food-delivery-restaurant-portal.netlify.app/return"
         }
     }
     console.log(body);
@@ -567,7 +567,7 @@ const Wallet = ({ navigation, route }) => {
  const handleNavigationStateChange = async (navState) => {
   console.log('Navigated URL:', navState.url);
 
-  if (navState.url.includes('http://localhost:8082/success')) {
+  if (navState.url.includes('https://food-delivery-restaurant-portal.netlify.app/success')) {
     // Call your withdrawal payment function
     // WithDrawPayment(connectedAccountId);
     setAccountLinkUrl(null);
@@ -607,7 +607,7 @@ const Wallet = ({ navigation, route }) => {
 
     // Perform necessary state updates or actions
   }
-   else if (navState.url.includes('http://localhost:8082/return')) {
+   else if (navState.url.includes('https://food-delivery-restaurant-portal.netlify.app/return')) {
     // Navigate to 'MyWallet' screen
     navigation.navigate('MyWallet');
     

@@ -41,7 +41,8 @@ const FoodCardWithRating = ({
   isFavorite,
   addFav,
   quantity,
-  onRemove
+  onRemove,
+  variation_name
 }) => {
   const navigation = useNavigation();
   return (
@@ -94,12 +95,6 @@ const FoodCardWithRating = ({
           </ImageBackground>
         </>
       )}
-
-      {/* <View style={styles.textContainer}>
-            {title && <Text style={styles.title}>{title}</Text>}
-            {description && <Text style={styles.description}>{description}</Text>}
-            {price && <Text style={styles.price}>{price}</Text>}
-          </View> */}
 
       <View style={{flex: 1, marginLeft: 15}}>
         <View style={styles.rowViewSB1}>
@@ -177,28 +172,18 @@ const FoodCardWithRating = ({
         </View>
         <Text style={styles.name}>{title ? title : ''}</Text>
 
-        {/* <View style={styles.rowViewSB1}>
-          <Text style={styles.name}>{title ? title : 'Green Salad'}</Text>
-          {showRatingOnBottom == true || showRating == false ? null : (
-            <View style={styles.rowView}>
-              <Icons.Rating />
-              <Text
-                style={{
-                  marginLeft: 5,
-                  color: Colors.secondary_text,
-                  fontFamily: Fonts.PlusJakartaSans_Bold,
-                  fontSize: RFPercentage(1.6),
-                }}>
-                {rating ? rating : '4.3'}
-              </Text>
-            </View>
-          )}
-        </View> */}
+      
 
         <View style={{...styles.rowViewSB, ...priceContainerStyle}}>
+          <View style={{flexDirection: 'row'}} >
           {quantity && <Text style={styles.quantity} >{quantity}</Text>}
+          <Text style={{color: Colors.primary_color, marginHorizontal: wp(2)}} >X</Text>
+          {variation_name && <Text style={styles.quantity} >{variation_name}</Text>}
           
           {price && <Text style={styles.priceText}>￡{price}</Text>}
+
+          </View>
+          
           {showNextButton == false ? null : (
             <TouchableOpacity onPress={isFavorite? onRemove : addFav}>
               {/* <View style={{height: 40, width: 40, backgroundColor: 'red'}} /> */}

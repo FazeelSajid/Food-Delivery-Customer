@@ -127,7 +127,6 @@ const Notification = ({navigation, route}) => {
 
   return (
     <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
-      {/* <Loader loading={loading} /> */}
       <FlatList
         refreshControl={
           <RefreshControl
@@ -138,18 +137,10 @@ const Notification = ({navigation, route}) => {
         }
         data={data}
         ListHeaderComponent={() => <StackHeader title={'Notifications'} />}
-        ListEmptyComponent={() => <NoDataFound loading={loading} />}
+        ListEmptyComponent={() =><NoDataFound loading={loading} text={'No Notifications'} textStyle={{fontSize: RFPercentage(2.4)}} svgHeight={hp(12)} />}
         ItemSeparatorComponent={() => <ItemSeparator />}
-        contentContainerStyle={{paddingBottom: 30}}
+        contentContainerStyle={{flexGrow:1}}
         renderItem={({item, index}) => {
-          if (index === 0) {
-            console.log({item});
-          }
-          
-          
-          
-          
-          
           return(
           <View style={styles.card}>
             {item?.orderData?.order_status == 'in_process' ||

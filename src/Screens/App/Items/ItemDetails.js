@@ -107,79 +107,79 @@ const ItemDetails = ({ navigation, route }) => {
   // Function to handle radio button press
 
   // console.log(variations);
-  
 
 
-  const showBtmSheet = () => {
-    btmSheetRef?.current?.open()
-  }
 
-  const closeBtmSheet = () => {
-    btmSheetRef?.current?.close()
-  }
+  // const showBtmSheet = () => {
+  //   btmSheetRef?.current?.open()
+  // }
+
+  // const closeBtmSheet = () => {
+  //   btmSheetRef?.current?.close()
+  // }
   const checkVariationInCart = async (array) => {
     if (!route?.params?.id) return;
-  
+
     // Fetch and update cart items
     // const cartItems = await getCartItems(customerCartId, dispatch);
     let cartItems;
-    const response = await fetchApisGet(api.get_cart_items + customerCartId , false, dispatch)
+    const response = await fetchApisGet(api.get_cart_items + customerCartId, false, dispatch)
     if (response.status) {
-      console.log(response);
-      
+      // console.log(response);
+
       dispatch(updateMyCartList(response.result));
       cartItems = response.result;
     }
 
-  
+
     // Filter items matching the route ID
     const filteredItems = cartItems?.filter(item => item?.item_id === route?.params?.id);
-  
 
-      // Calculate total quantity
-      const totalQuantity = filteredItems?.reduce((sum, item) => sum + (item?.quantity || 0), 0);
-      setCount(totalQuantity||0);
-  
-      // Create matching variations
-      const matchingVariations = filteredItems?.map(item => ({
-        variation_id: item?.variation_id,
-        variation_name: item?.itemData?.variationData?.variation_name,
-        price: parseFloat(item?.itemData?.variationData?.price || 0),
-        quantity: item?.quantity || 0,
-        sub_total: item?.sub_total || 0,
-        cart_item_id: item?.cart_item_id,
-        cart_id: item?.cart_id,
-        item_id: item?.item_id,
-      }));
-  
-      // Map item prices with matching variations
-      const array3 = (Array.isArray(array) 
-      ? array 
-      : Array.isArray(itemDetail?.item_prices) 
-          ? itemDetail.item_prices 
-          : []
-  ).map(item2 => {
+
+    // Calculate total quantity
+    const totalQuantity = filteredItems?.reduce((sum, item) => sum + (item?.quantity || 0), 0);
+    setCount(totalQuantity || 0);
+
+    // Create matching variations
+    const matchingVariations = filteredItems?.map(item => ({
+      variation_id: item?.variation_id,
+      variation_name: item?.itemData?.variationData?.variation_name,
+      price: parseFloat(item?.itemData?.variationData?.price || 0),
+      quantity: item?.quantity || 0,
+      sub_total: item?.sub_total || 0,
+      cart_item_id: item?.cart_item_id,
+      cart_id: item?.cart_id,
+      item_id: item?.item_id,
+    }));
+
+    // Map item prices with matching variations
+    const array3 = (Array.isArray(array)
+      ? array
+      : Array.isArray(itemDetail?.item_prices)
+        ? itemDetail.item_prices
+        : []
+    ).map(item2 => {
       if (!item2) return {}; // Fallback for undefined `item2`
-  
+
       const match = matchingVariations?.find(item1 => item1?.variation_id === item2?.variation_id);
       return match || item2; // Use match if found, else fallback to item2
-  });
-  
-      
-  
-      console.log({ matchingVariations });
-      console.log({array3});
-      
-      setVariations(array3);
+    });
+
+
+
+    console.log({ matchingVariations });
+    console.log({ array3 });
+
+    setVariations(array3);
 
   };
-  
+
 
 
   const add_item_to_cart = async (variation_id, quantity) => {
     try {
       setLoading(true);
-  
+
       const data = {
         item_id: route?.params?.id?.toString(),
         cart_id: customerCartId?.toString(),
@@ -188,11 +188,11 @@ const ItemDetails = ({ navigation, route }) => {
         quantity: quantity,
         variation_id: variation_id,
       };
-  
+
       console.log('Data for Add to Cart:', data);
-  
+
       const response = await addItemToCart(data, dispatch);
-  
+
       if (response?.status) {
         // Refresh cart and show success message
         checkVariationInCart(variation_id);
@@ -207,9 +207,9 @@ const ItemDetails = ({ navigation, route }) => {
     }
   };
 
-  
 
-    
+
+
 
 
 
@@ -442,9 +442,9 @@ const ItemDetails = ({ navigation, route }) => {
   //     return true;
   //   }
   // };
-  
-  
-  
+
+
+
   // const add_item_to_cart = async (id) => {
   //   setLoading(true);
   //   // let customer_id = await AsyncStorage.getItem('customer_id');
@@ -494,109 +494,109 @@ const ItemDetails = ({ navigation, route }) => {
   // );
   // console.log(filter, 'filter');
 
-useEffect(()=> {
+  useEffect(() => {
 
-  if (itemDetail) {
-  //  console.log(itemDetail.item_prices[0]);
-   setSelectedVariation({
-    variation_id: itemDetail.item_prices[0].variation_id,
-    variation_name: itemDetail.item_prices[0].variation_name,
-    variation_price: itemDetail.item_prices[0].price,
-  });
+    if (itemDetail) {
+      //  console.log(itemDetail.item_prices[0]);
+      setSelectedVariation({
+        variation_id: itemDetail.item_prices[0].variation_id,
+        variation_name: itemDetail.item_prices[0].variation_name,
+        variation_price: itemDetail.item_prices[0].price,
+      });
 
-  // checkVariationInCart(itemDetail.item_prices[0].variation_id)
-
-   
-  }
-}, [itemDetail])
-
-const closeRmoveBtmSheet = () => {
-  removeBtmSheet?.current?.close()
-}
+      // checkVariationInCart(itemDetail.item_prices[0].variation_id)
 
 
-const handleDecrement = async (variation_id, item_id) => {
-  if (variation_id === null) {
-    showRmoveBtmSheet();
-    return;
+    }
+  }, [itemDetail])
+
+  const closeRmoveBtmSheet = () => {
+    removeBtmSheet?.current?.close()
   }
 
-  const filteredItems = my_cart?.filter(item => item.item_id == item_id);
 
-  if (filteredItems?.length > 0) {
-    const matchingVariation = filteredItems?.filter(item => item.variation_id == variation_id);
+  const handleDecrement = async (variation_id, item_id) => {
+    if (variation_id === null) {
+      showRmoveBtmSheet();
+      return;
+    }
+
+    const filteredItems = my_cart?.filter(item => item.item_id == item_id);
+
+    if (filteredItems?.length > 0) {
+      const matchingVariation = filteredItems?.filter(item => item.variation_id == variation_id);
 
 
-    if (matchingVariation?.length > 0) {
-      const [variation] = matchingVariation;
+      if (matchingVariation?.length > 0) {
+        const [variation] = matchingVariation;
 
-      if (variation?.quantity === 1) {
-        await removeCartItemQuantity({
-          item_id: variation.cart_item_id,
-          cart_id: variation.cart_id,
-        }).then(response => {
-          if (response.status) {
-            checkVariationInCart(variation_id)
-            handlePopup(dispatch, `${itemDetail?.item_name} removed from cart`, 'green');
-            // setVariationCount(0);
-            setCount(count - 1);
-          }
-        });
-      } else {
-        const updatedItem = {
-          cart_item_id: variation.cart_item_id,
-          quantity: variation.quantity - 1,
-        };
+        if (variation?.quantity === 1) {
+          await removeCartItemQuantity({
+            item_id: variation.cart_item_id,
+            cart_id: variation.cart_id,
+          }).then(response => {
+            if (response.status) {
+              checkVariationInCart(variation_id)
+              handlePopup(dispatch, `${itemDetail?.item_name} removed from cart`, 'green');
+              // setVariationCount(0);
+              setCount(count - 1);
+            }
+          });
+        } else {
+          const updatedItem = {
+            cart_item_id: variation.cart_item_id,
+            quantity: variation.quantity - 1,
+          };
 
-        await updateCartItemQuantity(updatedItem, dispatch).then(response => {
-          if (response.status) {
-            handlePopup(dispatch, `1 ${itemDetail?.item_name} removed from cart`, 'green');
-            checkVariationInCart(variation_id);
-            setCount(count - 1);
-          }
-        });
+          await updateCartItemQuantity(updatedItem, dispatch).then(response => {
+            if (response.status) {
+              handlePopup(dispatch, `1 ${itemDetail?.item_name} removed from cart`, 'green');
+              checkVariationInCart(variation_id);
+              setCount(count - 1);
+            }
+          });
+        }
       }
     }
+  };
+
+
+  // console.log({variations}); 
+
+  const showRmoveBtmSheet = async () => {
+    if (itemDetail.item_prices?.length > 1) {
+
+      removeBtmSheet?.current?.open()
+    } else {
+      handleDecrement(itemDetail.item_prices[0].variation_id, itemDetail.item_id, itemDetail?.item_name,)
+    }
+
+
   }
-};
 
+  const handleAddToCart = async (variation_id, quantity) => {
 
-// console.log({variations}); 
+    const filteredItems = my_cart?.filter(item => item?.item_id === route?.params?.id) || [];
+    const existingVariation = filteredItems.find(
+      item => item?.variation_id === variation_id
+    );
 
-const showRmoveBtmSheet = async () => {
-  if (itemDetail.item_prices?.length > 1) {
-    
-    removeBtmSheet?.current?.open()
-  } else {
-    handleDecrement(itemDetail.item_prices[0].variation_id, itemDetail.item_id, itemDetail?.item_name,)
-  }
-  
- 
-}
+    if (existingVariation) {
+      // Update quantity for the existing variation
+      const updateData = {
+        cart_item_id: existingVariation.cart_item_id,
+        quantity: quantity,
+      };
+      await updateCartItemQuantity(updateData, dispatch);
 
-const handleAddToCart = async (variation_id, quantity) => {
-
-  const filteredItems = my_cart?.filter(item => item?.item_id === route?.params?.id) || [];
-  const existingVariation = filteredItems.find(
-    item => item?.variation_id === variation_id
-  );
-
-  if (existingVariation) {
-    // Update quantity for the existing variation
-    const updateData = {
-      cart_item_id: existingVariation.cart_item_id,
-      quantity: quantity,
-    };
-    await updateCartItemQuantity(updateData, dispatch);
-
-    // Refresh cart data and open success sheet
-    checkVariationInCart(variation_id);
-    // ref_RBSheetSuccess?.current?.open();
-  } else {
-    // Add new item to the cart
-    add_item_to_cart(variation_id, quantity);
-  }
-};
+      // Refresh cart data and open success sheet
+      checkVariationInCart(variation_id);
+      // ref_RBSheetSuccess?.current?.open();
+    } else {
+      // Add new item to the cart
+      add_item_to_cart(variation_id, quantity);
+    }
+  };
 
   const getItemDetails = async id => {
     setFetching(true);
@@ -639,11 +639,11 @@ const handleAddToCart = async (variation_id, quantity) => {
 
 
   // console.log(variations);
-  
-  
+
+
   return (
     <View style={styles.container}>
-      
+
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, }}>
@@ -682,60 +682,60 @@ const handleAddToCart = async (variation_id, quantity) => {
                     <Text style={{ ...styles.itemName, flex: 1 }}>
                       {itemDetail?.item_name}
                     </Text>
-                    
-                    {
-                      itemDetail.item_prices?.length > 1 ?   <View
-                      style={{
-                        ...styles.rowView,
-                        backgroundColor: `${Colors.secondary_color}40`,
-                        borderRadius: 15,
-                      }}>
-                      <TouchableOpacity
-                        onPress={() => showRmoveBtmSheet()}
-                        style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
-                        <AntDesign name="minus" color={Colors.secondary_color} size={16} />
-                      </TouchableOpacity>
-                      <Text
+
+                    {/* {
+                      itemDetail.item_prices?.length > 1 ? <View
                         style={{
-                          color: Colors.secondary_color,
-                          fontFamily: Fonts.PlusJakartaSans_Bold,
-                          fontSize: RFPercentage(1.7),
-                          marginTop: -2,
+                          ...styles.rowView,
+                          backgroundColor: `${Colors.secondary_color}40`,
+                          borderRadius: 15,
                         }}>
-                        {count}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => showRmoveBtmSheet()}
-                        style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
-                        <AntDesign name="plus" color={Colors.secondary_color} size={16} />
-                      </TouchableOpacity>
-                    </View>:   <View
-                      style={{
-                        ...styles.rowView,
-                        backgroundColor: `${Colors.secondary_color}40`,
-                        borderRadius: 15,
-                      }}>
-                      <TouchableOpacity
-                        onPress={() =>  handleDecrement(itemDetail.item_prices[0].variation_id, itemDetail.item_id, itemDetail?.item_name)}
-                        style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
-                        <AntDesign name="minus" color={Colors.secondary_color} size={16} />
-                      </TouchableOpacity>
-                      <Text
+                        <TouchableOpacity
+                          onPress={() => showRmoveBtmSheet()}
+                          style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
+                          <AntDesign name="minus" color={Colors.secondary_color} size={16} />
+                        </TouchableOpacity>
+                        <Text
+                          style={{
+                            color: Colors.secondary_color,
+                            fontFamily: Fonts.PlusJakartaSans_Bold,
+                            fontSize: RFPercentage(1.7),
+                            marginTop: -2,
+                          }}>
+                          {count}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => showRmoveBtmSheet()}
+                          style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
+                          <AntDesign name="plus" color={Colors.secondary_color} size={16} />
+                        </TouchableOpacity>
+                      </View> : <View
                         style={{
-                          color: Colors.secondary_color,
-                          fontFamily: Fonts.PlusJakartaSans_Bold,
-                          fontSize: RFPercentage(1.7),
-                          marginTop: -2,
+                          ...styles.rowView,
+                          backgroundColor: `${Colors.secondary_color}40`,
+                          borderRadius: 15,
                         }}>
-                        {count}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() =>  handleAddToCart(itemDetail.item_prices[0].variation_id, count+1)}
-                        style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
-                        <AntDesign name="plus" color={Colors.secondary_color} size={16} />
-                      </TouchableOpacity>
-                    </View>
-                    }
+                        <TouchableOpacity
+                          onPress={() => handleDecrement(itemDetail.item_prices[0].variation_id, itemDetail.item_id, itemDetail?.item_name)}
+                          style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
+                          <AntDesign name="minus" color={Colors.secondary_color} size={16} />
+                        </TouchableOpacity>
+                        <Text
+                          style={{
+                            color: Colors.secondary_color,
+                            fontFamily: Fonts.PlusJakartaSans_Bold,
+                            fontSize: RFPercentage(1.7),
+                            marginTop: -2,
+                          }}>
+                          {count}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => handleAddToCart(itemDetail.item_prices[0].variation_id, count + 1)}
+                          style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
+                          <AntDesign name="plus" color={Colors.secondary_color} size={16} />
+                        </TouchableOpacity>
+                      </View>
+                    } */}
                   </View>
                 </View>
                 <View
@@ -750,49 +750,202 @@ const handleAddToCart = async (variation_id, quantity) => {
                   <ImageSliderCircle data={data} marginBottom={1} />
                   <View style={{ paddingHorizontal: 20, flex: 1, }}>
                     {
-                      itemDetail?.item_prices?.length > 1 ? <View style={styles.AboutContainer}>
-                        <View style={styles.rowViewSB} >
+                      // itemDetail?.item_prices?.length > 1 ? <View style={styles.AboutContainer}>
+                      //   <View style={styles.rowViewSB} >
 
-                          <View style={styles.variationContainer} >
-                            <TouchableOpacity onPress={showBtmSheet} style={[styles.rowViewSB, { alignItems: 'center' }]} >
-                              <Text style={styles.sizeText} >Variations</Text>
-                              <Ionicons name={'chevron-down'} size={19} color={Colors.primary_color} />
-                            </TouchableOpacity>
-                            <Text style={styles.variationName} >{selectedVariation?.variation_name}</Text>
-                          </View>
-                          <Text style={styles.priceTxt} >£ {selectedVariation?.variation_price}</Text>
-                        </View>
-                        {/* <Vi></Vi> */}
+                      //     <View style={styles.variationContainer} >
+                      //       <TouchableOpacity onPress={showBtmSheet} style={[styles.rowViewSB, { alignItems: 'center' }]} >
+                      //         <Text style={styles.sizeText} >Variations</Text>
+                      //         <Ionicons name={'chevron-down'} size={19} color={Colors.primary_color} />
+                      //       </TouchableOpacity>
+                      //       <Text style={styles.variationName} >{selectedVariation?.variation_name}</Text>
+                      //     </View>
+                      //     <Text style={styles.priceTxt} >£ {selectedVariation?.variation_price}</Text>
+                      //   </View>
+                      //   {/* <Vi></Vi> */}
 
-                        <Text
-                          style={styles.descriptionTxt}>
-                          About the Food
-                        </Text>
-                        <Text
-                          style={styles.description}>
-                          {itemDetail?.description}
-                        </Text>
+                      //   <Text
+                      //     style={styles.descriptionTxt}>
+                      //     About the Food
+                      //   </Text>
+                      //   <Text
+                      //     style={styles.description}>
+                      //     {itemDetail?.description}
+                      //   </Text>
 
-                      </View>
-                        : <View style={styles.AboutContainer} >
-                          <View style={styles.rowViewSB}>
+                      // </View>
+                      // : 
+                      <View style={styles.AboutContainer} >
+                        <View style={styles.rowViewSB}>
                           <Text
-                            style={[styles.descriptionTxt, {marginTop: 0}]}>
+                            style={[styles.descriptionTxt, { marginTop: 0 }]}>
                             About the Food
                           </Text>
                           <Text style={[styles.priceTxt]} >£ {selectedVariation?.variation_price}</Text>
-                          </View>
-                          <Text
+                        </View>
+                        <Text
                           style={styles.description}>
                           {itemDetail?.description}
                         </Text>
-                        </View>
+                      </View>
                     }
 
                   </View>
                   <ItemSeparator width={wp(100)} />
-                  {/* <View style={{ marginBottom: wp(2) }} >
-                    <CButton
+
+                  <View style={{ marginBottom: wp(2) }}>
+                    {count === 0 ?  <CButton
+                      title="Add to Cart"
+                      // width={wp(70)}
+                      loading={loading}
+                      width={wp(90)}
+                      height={hp(6)}
+                      marginTop={-2}
+                      marginBottom={1}
+                      textStyle={{ textTransform: 'none' }}
+                      onPress={() => {
+                        console.log('join_as_guest  : ____ ', join_as_guest);
+                        if (join_as_guest) {
+                          ref_RBSheet?.current?.open();
+                        } else {
+                          if ( itemDetail.item_prices?.length > 1) {
+                            showRmoveBtmSheet()
+                          }else{
+                            handleAddToCart(
+                              itemDetail.item_prices[0]?.variation_id,
+                              count + 1
+                            )
+                          }
+                         
+                        }
+                      }}
+                    /> : (
+                      <View
+                        style={{
+                          ...styles.rowView,
+                          backgroundColor:  `${Colors.primary_color}`,
+                          borderRadius: wp(10),
+                          justifyContent: 'center',
+                          paddingVertical:hp(1) ,
+                          width: wp(90),
+                          alignSelf:'center'
+                        }}
+                      >
+                        <TouchableOpacity
+                          onPress={() =>
+                            itemDetail.item_prices?.length > 1
+                              ? showRmoveBtmSheet()
+                              : handleDecrement(
+                                itemDetail.item_prices[0]?.variation_id,
+                                itemDetail.item_id,
+                                itemDetail?.item_name
+                              )
+                          }
+                          style={{
+                            padding: 5,
+                            backgroundColor: `${Colors.secondary_color}40`,
+                            borderRadius: wp(5),
+                          }}
+                        >
+                          <AntDesign name="minus" color={Colors.secondary_color} size={18} />
+                        </TouchableOpacity>
+
+                        <Text
+                          style={{
+                            color: Colors.secondary_color,
+                            fontFamily: Fonts.PlusJakartaSans_Bold,
+                            fontSize:  RFPercentage(1.7),
+                            marginTop: -2,
+                            marginHorizontal: wp(3),
+                          }}
+                        >
+                          {count}
+                        </Text>
+
+                        <TouchableOpacity
+                          onPress={() =>
+                            itemDetail.item_prices?.length > 1
+                              ? showRmoveBtmSheet()
+                              : handleAddToCart(
+                                itemDetail.item_prices[0]?.variation_id,
+                                count + 1
+                              )
+                          }
+                          style={{
+                            padding: 5,
+                            backgroundColor: `${Colors.secondary_color}40`,
+                            borderRadius: wp(5),
+                          }}
+                        >
+                          <AntDesign name="plus" color={Colors.secondary_color} size={18} />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+
+
+
+                  {/* <View style={{ marginBottom: wp(2), }} > */}
+                  {/* {
+                      count === 0
+                    } */}
+                  {
+                    //   itemDetail.item_prices?.length > 1 ?   <View
+                    //   style={{
+                    //     ...styles.rowView,
+                    //     backgroundColor: `${Colors.primary_color}`,
+                    //     borderRadius: 15,
+                    //     justifyContent: 'center',
+                    //     paddingVertical: hp(1)
+                    //   }}>
+                    //   <TouchableOpacity
+                    //     onPress={() => showRmoveBtmSheet()}
+                    //     style={{padding: 5,  backgroundColor: `${Colors.secondary_color}40`,borderRadius : wp(5) }}>
+                    //     <AntDesign name="minus" color={Colors.secondary_color} size={18} />
+                    //   </TouchableOpacity>
+                    //   <Text
+                    //     style={{
+                    //       color: Colors.secondary_color,
+                    //       fontFamily: Fonts.PlusJakartaSans_Bold,
+                    //       fontSize: RFPercentage(2),
+                    //       marginTop: -2,
+                    //       marginHorizontal: wp(3)
+                    //     }}>
+                    //     {count}
+                    //   </Text>
+                    //   <TouchableOpacity
+                    //     onPress={() => showRmoveBtmSheet()}
+                    //     style={{padding: 5,  backgroundColor: `${Colors.secondary_color}40`,borderRadius : wp(5) }}>
+                    //     <AntDesign name="plus" color={Colors.secondary_color} size={18} />
+                    //   </TouchableOpacity>
+                    // </View>:   <View
+                    //   style={{
+                    //     ...styles.rowView,
+                    //     backgroundColor: `${Colors.secondary_color}40`,
+                    //     borderRadius: 15,
+                    //   }}>
+                    //   <TouchableOpacity
+                    //     onPress={() =>  handleDecrement(itemDetail.item_prices[0].variation_id, itemDetail.item_id, itemDetail?.item_name)}
+                    //     style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
+                    //     <AntDesign name="minus" color={Colors.secondary_color} size={18} />
+                    //   </TouchableOpacity>
+                    //   <Text
+                    //     style={{
+                    //       color: Colors.secondary_color,
+                    //       fontFamily: Fonts.PlusJakartaSans_Bold,
+                    //       fontSize: RFPercentage(1.7),
+                    //       marginTop: -2,
+                    //     }}>
+                    //     {count}
+                    //   </Text>
+                    //   <TouchableOpacity
+                    //     onPress={() =>  handleAddToCart(itemDetail.item_prices[0].variation_id, count+1)}
+                    //     style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
+                    //     <AntDesign name="plus" color={Colors.secondary_color} size={16} />
+                    //   </TouchableOpacity>
+                    // </View>
+                  }
+                  {/* <CButton
                       title="Add to Cart"
                       // width={wp(70)}
                       loading={loading}
@@ -809,40 +962,24 @@ const handleAddToCart = async (variation_id, quantity) => {
                           handleAddToCart()
                         }
                       }}
-                    />
-                  </View> */}
+                    /> */}
+                  {/* </View> */}
                 </View>
               </View>
             </View>
-            : fetching ?<Loader loading={fetching} bgColor={Colors.secondary_color} />:
-            
-            <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }} >
-              <StackHeader
-                enableStatusBar={false}
-                titleColor={Colors.primary_color}
-                backIconColor={Colors.primary_color}
-                title={'Details'}
-              /><NoDataFound text={'Oops Something went wrong'} svgHeight={hp(20)} /></View>
+            : fetching ? <Loader loading={fetching} bgColor={Colors.secondary_color} /> :
+
+              <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }} >
+                <StackHeader
+                  enableStatusBar={false}
+                  titleColor={Colors.primary_color}
+                  backIconColor={Colors.primary_color}
+                  title={'Details'}
+                /><NoDataFound text={'Oops Something went wrong'} svgHeight={hp(20)} /></View>
         }
       </ScrollView>
 
 
-      <RBSheetOtherRestaurantCartItem
-        refRBSheet={ref_cartAlert}
-        title={'Remove your previous items?'}
-        description={
-          'You still have products from another restaurant.Shall we start over with a fresh cart?'
-        }
-        okText={'Remove'}
-        cancelText={'No'}
-        onOk={() => {
-          // handleOnRemove();
-          ref_cartAlert?.current?.close();
-        }}
-        onCancel={() => {
-          ref_cartAlert?.current?.close();
-        }}
-      />
 
       <RBSheetGuestUser
         refRBSheet={ref_RBSheet}
@@ -868,7 +1005,8 @@ const handleAddToCart = async (variation_id, quantity) => {
         }}
       />
 
-      <ConfirmationModal
+      {/* <View> */}
+      {/* <ConfirmationModal
         visible={visible}
         setVisible={setVisible}
         title={'Confirmation'}
@@ -894,19 +1032,37 @@ const handleAddToCart = async (variation_id, quantity) => {
             />
           </View>
         }
-      />
+      /> */}
 
-      <RBSheetRestaurantClosed
+      {/* <RBSheetOtherRestaurantCartItem
+        refRBSheet={ref_cartAlert}
+        title={'Remove your previous items?'}
+        description={
+          'You still have products from another restaurant.Shall we start over with a fresh cart?'
+        }
+        okText={'Remove'}
+        cancelText={'No'}
+        onOk={() => {
+          // handleOnRemove();
+          ref_cartAlert?.current?.close();
+        }}
+        onCancel={() => {
+          ref_cartAlert?.current?.close();
+        }}
+      /> */}
+
+
+      {/* <RBSheetRestaurantClosed
         refRBSheet={ref_RBSheetResClosed}
         title={`“${restaurant_timings?.restaurant_details?.user_name
           }” is closed ${restaurant_timings?.closed_till
             ? ' till ' + restaurant_timings?.closed_till
             : '.'
           }`}
-      />
+      /> */}
 
 
-      <CRBSheetComponent
+      {/* <CRBSheetComponent
         height={230}
         refRBSheet={btmSheetRef}
         content={
@@ -947,7 +1103,10 @@ const handleAddToCart = async (variation_id, quantity) => {
           </View>
         }
 
-      />
+      /> */}
+
+      {/* </View> */}
+
       <CRBSheetComponent
         height={230}
         refRBSheet={removeBtmSheet}
@@ -970,29 +1129,30 @@ const handleAddToCart = async (variation_id, quantity) => {
                     color={Colors.primary_color} // Custom color for selected button
                     uncheckedColor={Colors.primary_color} // Color for unselected buttons
                     status={selectedVariation?.variation_id === variation?.variation_id ? 'checked' : 'unchecked'}
-                    // onPress={() => handleDecrement(variation?.variation_id, variation.item_id)}
+                  // onPress={() => handleDecrement(variation?.variation_id, variation.item_id)}
                   />
                   <Text style={styles.variationText}>{variation.variation_name}</Text>
                 </TouchableOpacity>
 
-                  {
-                    variation?.cart_item_id ?  <View
+                {
+                  variation?.cart_item_id ? <View
                     style={{
                       ...styles.rowView,
                       backgroundColor: `${Colors.primary_color}`,
                       borderRadius: 15,
                       paddingVertical: 5,
                       flex: 0.3,
-                      alignSelf : 'flex-end',
+                      alignSelf: 'flex-end',
                       justifyContent: 'space-around'
                     }}>
                     <TouchableOpacity
                       onPress={() => handleDecrement(variation?.variation_id, variation?.item_id)}
-                      style={{   backgroundColor: `${Colors.secondary_color}40`,
-                      borderRadius: wp(3),
-                      // paddingHorizontal: wp(0),
-                      // marginLeft: wp(2),
-                       }}>
+                      style={{
+                        backgroundColor: `${Colors.secondary_color}40`,
+                        borderRadius: wp(3),
+                        // paddingHorizontal: wp(0),
+                        // marginLeft: wp(2),
+                      }}>
                       <AntDesign name="minus" color={Colors.secondary_color} size={16} />
                     </TouchableOpacity>
                     <Text
@@ -1004,33 +1164,35 @@ const handleAddToCart = async (variation_id, quantity) => {
                         backgroundColor: `${Colors.secondary_color}40`,
                         borderRadius: wp(3),
                         paddingHorizontal: wp(1.5),
-                        
+
                       }}>
                       {variation?.quantity}
                     </Text>
                     <TouchableOpacity
-                      onPress={() => handleAddToCart(variation?.variation_id, variation?.quantity+1)}
-                      style={{   backgroundColor: `${Colors.secondary_color}40`,
-                      borderRadius: wp(3),
-                      paddingHorizontal: wp(0),
-                      // marginRight: wp(2),
-                       }}>
+                      onPress={() => handleAddToCart(variation?.variation_id, variation?.quantity + 1)}
+                      style={{
+                        backgroundColor: `${Colors.secondary_color}40`,
+                        borderRadius: wp(3),
+                        paddingHorizontal: wp(0),
+                        // marginRight: wp(2),
+                      }}>
                       <AntDesign name="plus" color={Colors.secondary_color} size={16} />
                     </TouchableOpacity>
                   </View> : <TouchableOpacity
-                      onPress={() => handleAddToCart(variation?.variation_id, 1)}
-                      style={{   backgroundColor: `${Colors.primary_color}`,
+                    onPress={() => handleAddToCart(variation?.variation_id, 1)}
+                    style={{
+                      backgroundColor: `${Colors.primary_color}`,
                       borderRadius: wp(3),
                       padding: wp(0.5),
                       marginRight: wp(2)
 
                       // marginRight: wp(2),
-                       }}>
-                      <AntDesign name="plus" color={Colors.secondary_color} size={16} />
-                    </TouchableOpacity>
-                  }
-                   
-          
+                    }}>
+                    <AntDesign name="plus" color={Colors.secondary_color} size={16} />
+                  </TouchableOpacity>
+                }
+
+
 
               </View>
             ))}
@@ -1096,7 +1258,7 @@ const styles = StyleSheet.create({
   //   fontSize: RFPercentage(2.2),
   //   fontFamily: Fonts.PlusJakartaSans_Bold,
   // },
-  
+
   rowViewSB: {
     flexDirection: 'row',
     alignItems: 'center',

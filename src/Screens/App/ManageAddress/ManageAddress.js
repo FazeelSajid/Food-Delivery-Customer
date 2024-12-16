@@ -21,6 +21,7 @@ import CButton from '../../../components/Buttons/CButton';
 import Loader from '../../../components/Loader';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
 import PopUp from '../../../components/Popup/PopUp';
+import { SwipeListView } from 'react-native-swipe-list-view';
 
 
 
@@ -41,9 +42,6 @@ const ManageAddress = ({navigation}) => {
 
         fetch(api.delete_location + id, {
             method: 'DELETE',
-            headers: {
-                // 'Content-Type': 'application/json'
-            }
         })
             .then(response => response.json())
             .then(response => {
@@ -55,8 +53,6 @@ const ManageAddress = ({navigation}) => {
                 else {
                     handlePopup(dispatch,'Location deleted successfully!', 'green')
                     setLocations((prevLocations) => prevLocations.filter((item) => item.location_id !== id));
-                    // console.log(response.message, id);
-
                 }
             })
 
@@ -66,25 +62,16 @@ const ManageAddress = ({navigation}) => {
 
 
     };
-
-    // console.log(location );
-
     const getLocation = async () => {
         setIsLoading(true)
         const response = await fetchApisGet(api.get_customer_location + customer_id, setIsLoading, dispatch)
-        console.log({response});
-
-
         if (response.status === false) {
             handlePopup(dispatch,response?.message, 'red')
             setIsLoading(false)
         }
         else {
             setLocations(response?.customerData?.locations)
-            // console.log(api.get_customer_location + customer_id);
-
             setIsLoading(false)
-            // console.log(response.customerData.locations[0]);
             dispatch(setLocation({
                 latitude: response?.customerData?.locations[0]?.latitude,
                 longitude: response?.customerData?.locations[0]?.longitude,
@@ -92,69 +79,23 @@ const ManageAddress = ({navigation}) => {
                 id: response?.customerData?.locations[0]?.location_id
             }))
             dispatch(setSetAllLocation(response?.customerData?.locations))
-
             dispatch(setSelectedPaymentType(''));
-            // dispatch(setSelectedPaymentString(''));
-
         }
-
-        // fetch(api.get_customer_location + customer_id, {
-        //     method: 'GET',
-        //     headers: {
-        //         // 'Content-Type': 'application/json'
-        //     }
-        // })
-        //     .then(response => response.json())
-        //     .then(response => {
-
-        //         if (response.status === false) {
-        //             handlePopup(dispatch,response?.message, 'red')
-        //             setIsLoading(false)
-        //         }
-        //         else {
-        //             setLocations(response?.customerData?.locations)
-        //             // console.log(api.get_customer_location + customer_id);
-
-        //             setIsLoading(false)
-        //             // console.log(response.customerData.locations[0]);
-        //             dispatch(setLocation({
-        //                 latitude: response?.customerData?.locations[0]?.latitude,
-        //                 longitude: response?.customerData?.locations[0]?.longitude,
-        //                 address: response?.customerData?.locations[0]?.address,
-        //                 id: response?.customerData?.locations[0]?.location_id
-        //             }))
-        //             dispatch(setSetAllLocation(response?.customerData?.locations))
-
-        //             dispatch(setSelectedPaymentType(''));
-        //             // dispatch(setSelectedPaymentString(''));
-
-        //         }
-
-        //         // update state with fetched data
-        //     })
-        //     .catch(err => {
-        //         console.log('Error in Login :  ', err);
-        //         handlePopup(dispatch,'Something went wrong!', 'red');
-        //     })
-        //     .finally(() => {
-        //         setIsLoading(false);
-        //     });
     }
-    const truncateString = (text, maxLength = 30) => {
-        if (text.length > maxLength) {
-            return text.slice(0, maxLength) + '...';
-        }
-        return text;
-    };
+  
 
     const renderRightActions = (itemId) => {
         return (
-            <TouchableOpacity
+            // <View style={{alignSelf: 'center',marginBottom: }} >
+                <TouchableOpacity
                 style={styles.deleteButton}
                 onPress={() => deleteItem(itemId)}
             >
                 <Ionicons name="trash-outline" size={24} color="white" />
             </TouchableOpacity>
+
+            // </View>
+            
         );
     };
 
@@ -177,27 +118,22 @@ const ManageAddress = ({navigation}) => {
                     return (
                         <Swipeable
                             renderRightActions={() => renderRightActions(item.location_id)} // Pass the item's id to delete
-
+                            
                         >
                             <TouchableOpacity onPress={() => {
-                                // console.log({
-                                //     latitude: item.latitude,
-                                //     longitude: item.longitude,
-                                //     address: item.address,
-                                //     id: item.location_id
-                                // });
-
                                 dispatch(setLocation({
                                     latitude: item.latitude,
                                     longitude: item.longitude,
                                     address: item.address,
-                                    id: item.location_id
+                                    id: item.location_id,
+                                    distance: item.distance
                                 }))
                                 dispatch(setUpdateLocation({
                                     latitude: item?.latitude,
                                     longitude: item?.longitude,
                                     address: item?.address,
-                                    id: item.location_id
+                                    id: item.location_id,
+                                    distance: item.distance
                                 }))
                                 dispatch(setSelectedPaymentType(''));
                                 dispatch(setSelectedPaymentString(''));
@@ -209,8 +145,13 @@ const ManageAddress = ({navigation}) => {
                                     <MapMarker />
                                 </View>
                                 <View style={{ flex: 1, marginLeft: wp(3) }}>
-                                    <Text style={styles.label}>{item.label}</Text>
-                                    <Text style={styles.address}>{truncateString(item.address)}</Text>
+                                    <Text style={styles.label} ellipsizeMode='tail' numberOfLines={1}>{item.label}</Text>
+                                    <Text style={styles.address} ellipsizeMode='tail' numberOfLines={1}  >{item.address}</Text>
+                                    <View style={{flexDirection: 'row'}} >
+                                    <Text style={styles.address}>Distance: </Text>
+                                    <Text style={styles.address}>{item.distance}</Text>
+                                    </View>
+                                    
                                 </View>
                                 <View style={{ flex: 0.2, alignItems: 'flex-end', justifyContent: 'center' }}>
                                     <RadioButton
@@ -222,19 +163,19 @@ const ManageAddress = ({navigation}) => {
                                                 latitude: item.latitude,
                                                 longitude: item.longitude,
                                                 address: item.address,
-                                                id: item.location_id
+                                                id: item.location_id,
+                                                distance: item.distance
                                             }))
 
                                             dispatch(setUpdateLocation({
                                                 latitude: item?.latitude,
                                                 longitude: item?.longitude,
                                                 address: item?.address,
-                                                id: item.location_id
+                                                id: item.location_id,
+                                                distance: item.distance
+
                                             }))
                                         }
-
-
-
                                         }
 
                                     />
@@ -245,39 +186,108 @@ const ManageAddress = ({navigation}) => {
                 }}
             />
 
-            {/* <View style={styles.listContainer} >
-                    <View style={{}}>
-                        <MapMarker/>
-                    </View>
-                    <View style={{flex: 1, marginLeft: wp(3), width: '100'}}>
-                        <Text style={styles.label}>Home</Text>
-                        <Text style={styles.address}>{'45 Maple Road, Bristol, Avon, B...'.length}</Text>
-                    </View>
-                    <View style={{flex: 0.2, alignItems: 'flex-end', justifyContent: 'center'}}>
-                    <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={ 'checked'}  />
-                    </View>
-                </View> */}
-            {/* <View style={styles.listContainer} >
-                    <View style={{}}>
-                        <MapMarker/>
-                    </View>
-                    <View style={{flex: 1, marginLeft: wp(3), width: '100'}}>
-                        <Text style={styles.label}>Home</Text>
-                        <Text style={styles.address}>45 Maple Road, Bristol, Avon, B...</Text>
-                    </View>
-                    <View style={{flex: 0.2, alignItems: 'flex-end', justifyContent: 'center'}}>
-                    <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={ 'checked'}  />
-                    </View>
-                </View> */}
+{/* <SwipeListView
+    // style={{backgroundColor: 'green'}}
+      scrollEnabled={false}
+      previewRowKey={'1'} 
+      previewOpenValue={-40} 
+      previewOpenDelay={3000}
+      previewDuration={3000}
+      previewRepeat={true}
+      previewFirstRow={true}
+      previewRowIndex={0}
+      style={{flex:1}}
+      contentContainerStyle={{ alignItems: 'center',flexGrow: 1 }}
+      refreshControl={<RefreshControl onRefresh={getLocation} colors={[Colors.primary_color]} refreshing={false} />}
+      ListEmptyComponent={() => !isLoading && <NoDataFound text={'No Addresses were added'} />}
+      keyExtractor={(item) => item.location_id.toString()} // Ensure each item has a unique id
+      data={locations}
+    //   extraData={data}
+   
+      disableRightSwipe={true}
+      rightOpenValue={-wp(18)}
+      renderItem={({item, rowMap}) => {
+        // console.log(item)  
+        
+        return(
+            <TouchableOpacity onPress={() => {
+                dispatch(setLocation({
+                    latitude: item.latitude,
+                    longitude: item.longitude,
+                    address: item.address,
+                    id: item.location_id
+                }))
+                dispatch(setUpdateLocation({
+                    latitude: item?.latitude,
+                    longitude: item?.longitude,
+                    address: item?.address,
+                    id: item.location_id
+                }))
+                dispatch(setSelectedPaymentType(''));
+                dispatch(setSelectedPaymentString(''));
 
+            }}
 
-            {/* </View> */}
+                style={styles.listContainer}>
+                <View>
+                    <MapMarker />
+                </View>
+                <View style={{ flex: 1, marginLeft: wp(3) }}>
+                    <Text style={styles.label} ellipsizeMode='tail' numberOfLines={1} >{item.label}</Text>
+                    <Text style={styles.address} ellipsizeMode='tail' numberOfLines={1}>{item.address}</Text>
+                    <View style={{flexDirection: 'row'}} >
+                    <Text style={styles.address}>Distance: </Text>
+                    <Text style={styles.address}>{item.distance}</Text>
+                    </View>
+                    
+                </View>
+                <View style={{ flex: 0.2, alignItems: 'flex-end', justifyContent: 'center' }}>
+                    <RadioButton
+                        color={Colors.button.primary_button}
+                        uncheckedColor={Colors.button.primary_button}
+                        status={location.id === item.location_id ? 'checked' : 'unchecked'}
+                        onPress={() => {
+                            dispatch(setLocation({
+                                latitude: item.latitude,
+                                longitude: item.longitude,
+                                address: item.address,
+                                id: item.location_id
+                            }))
 
+                            dispatch(setUpdateLocation({
+                                latitude: item?.latitude,
+                                longitude: item?.longitude,
+                                address: item?.address,
+                                id: item.location_id
+                            }))
+                        }
+                        }
+
+                    />
+                </View>
+            </TouchableOpacity>
+      )}}
+      renderHiddenItem={({item, rowMap}) => {
+        // console.log(selectedItem , item.cart_item_id, itemLoading)
+        return(
+            <View style={styles.rowBack} key={item.location_id} >
+                <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => deleteItem(item.location_id)}
+        >
+            <Ionicons name="trash-outline" size={24} color="white" />
+        </TouchableOpacity>
+            </View>
+            
+      )}}
+    /> */}
+         
             <View
                 style={{
-                    flex: 0.8,
+                    // flex: 0.8,
                     paddingBottom: 30,
                     justifyContent: 'flex-end',
+                    
                 }}>
                 <CButton
                     title="Add Address"
@@ -314,6 +324,8 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 10,
         marginBottom: 10,
+        // opacity: 2
+        
     },
     label: {
         color: Colors.primary_text,
@@ -329,8 +341,18 @@ const styles = StyleSheet.create({
         backgroundColor: 'red',
         justifyContent: 'center',
         alignItems: 'center',
-        width: wp(20),
-        height: hp(8),
-        borderRadius: 5,
+        width: wp(16),
+        height: hp(7),
+        // alignSelf: 'center',
+        // flex: 1,
+        borderRadius: wp(2),
+        marginTop: wp(3)
     },
+    rowBack: {
+        alignItems: 'flex-end',
+        // flex: 1,
+        // flexDirection: 'row',
+        // justifyContent: 'space-between',
+        // marginHorizontal: wp(1),
+      },
 })

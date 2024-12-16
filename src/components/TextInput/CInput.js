@@ -30,6 +30,7 @@ const CInput = props => {
           }}>
           {props?.heading}
         </Text>
+
       )}
 
       <TouchableOpacity
@@ -47,7 +48,7 @@ const CInput = props => {
           alignItems: 'center',
           backgroundColor: props?.backgroundColor
             ? props?.backgroundColor
-            : `${Colors.secondary_text}15`,
+            : `${Colors.secondary_text}12`,
           ...props?.containerStyle,
         }]}>
         <TouchableOpacity>{props?.leftContent}</TouchableOpacity>

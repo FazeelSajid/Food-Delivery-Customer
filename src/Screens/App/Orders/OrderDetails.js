@@ -155,7 +155,7 @@ const OrderDetails = ({ navigation, route }) => {
     })
       .then(response => response.json())
       .then(async response => {
-        console.log('response  :  ', response);
+        // console.log('response  :  ', response);
         if (response?.error == false) {
           setVisible(true);
         } else {
@@ -209,7 +209,7 @@ const OrderDetails = ({ navigation, route }) => {
     })
       .then(response => response.json())
       .then(async response => {
-        console.log('response  :   ', response);
+        // console.log('response  :   ', response);
         if (response?.status == false) {
           setLoading(false);
           handlePopup(dispatch, response?.message, 'red')
@@ -225,7 +225,7 @@ const OrderDetails = ({ navigation, route }) => {
           let notification_type = 'rating';
           let order_id = orderDetails?.order_id
 
-          handleSendPushNotification(description, fcm_token); // sending push notification
+          // handleSendPushNotification(description, fcm_token); // sending push notification
           console.log(
             'Store_Restaurant_Notification____________________ called.....',
           );
@@ -274,7 +274,7 @@ const OrderDetails = ({ navigation, route }) => {
     })
       .then(response => response.json())
       .then(async response => {
-        console.log('response Rate Rider  :   ', response);
+        // console.log('response Rate Rider  :   ', response);
         if (response?.status == false) {
           setLoading(false);
           handlePopup(dispatch, 'Something went wrong', 'red')
@@ -287,7 +287,7 @@ const OrderDetails = ({ navigation, route }) => {
           let notification_type = 'rating';
           let order_id = orderDetails?.order_id
 
-          handleSendPushNotification(description, fcm_token); // sending push notification
+          // handleSendPushNotification(description, fcm_token); // sending push notification
           // storing notification to db
           Store_Rider_Notification(
             rider_id,
@@ -314,15 +314,15 @@ const OrderDetails = ({ navigation, route }) => {
   const handleSubmitRating = async () => {
     if (rating > 0) {
       if (isRateResturant) {
-        console.log('rate resturant');
+        // console.log('rate resturant');
         handleRateRestaurant();
       } else {
-        console.log('rate rider');
+        // console.log('rate rider');
         handleRateRider();
       }
     }
 
-    console.log('handleSubmitRating  :  called.....', rating, ratingComment);
+    // console.log('handleSubmitRating  :  called.....', rating, ratingComment);
     // if (rating > 0) {
     //   if (isRateResturant) {
     //     //send notification to restaurant
@@ -334,47 +334,47 @@ const OrderDetails = ({ navigation, route }) => {
     // }
   };
 
-  const handleSendPushNotification = async (text, receiver_fcm) => {
-    console.log({ text, receiver_fcm });
-    // const receiver_fcm = await getUserFcmToken();
-    if (receiver_fcm) {
-      let body = {
-        to: receiver_fcm,
-        notification: {
-          title: 'Rating',
-          body: text ? text : '',
-          // mutable_content: true,
-          sound: 'default',
-        },
-        data: {
-          // user_id: user,
-          type: 'chat',
-        },
-        priority: 'high',
-      };
+  // const handleSendPushNotification = async (text, receiver_fcm) => {
+  //   console.log({ text, receiver_fcm });
+  //   // const receiver_fcm = await getUserFcmToken();
+  //   if (receiver_fcm) {
+  //     let body = {
+  //       to: receiver_fcm,
+  //       notification: {
+  //         title: 'Rating',
+  //         body: text ? text : '',
+  //         // mutable_content: true,
+  //         sound: 'default',
+  //       },
+  //       data: {
+  //         // user_id: user,
+  //         type: 'chat',
+  //       },
+  //       priority: 'high',
+  //     };
 
-      var requestOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `key=${firebase_server_key}`,
-        },
-        body: JSON.stringify(body),
-      };
+  //     var requestOptions = {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `key=${firebase_server_key}`,
+  //       },
+  //       body: JSON.stringify(body),
+  //     };
 
-      fetch('https://fcm.googleapis.com/fcm/send', requestOptions)
-        .then(response => response.text())
-        .then(response => {
-          let res = JSON.parse(response);
-          console.log('push notification response :  ', res);
-        })
-        .catch(err => {
-          console.log('error :  ', err);
-        });
-    } else {
-      console.log('receiver_fcm not found');
-    }
-  };
+  //     fetch('https://fcm.googleapis.com/fcm/send', requestOptions)
+  //       .then(response => response.text())
+  //       .then(response => {
+  //         let res = JSON.parse(response);
+  //         console.log('push notification response :  ', res);
+  //       })
+  //       .catch(err => {
+  //         console.log('error :  ', err);
+  //       });
+  //   } else {
+  //     console.log('receiver_fcm not found');
+  //   }
+  // };
 
   const getDetail = async (id) => {
     console.log(api.get_order_by_id + id);
@@ -388,7 +388,7 @@ const OrderDetails = ({ navigation, route }) => {
         
         setTypee('cancelled')
       }
-      else if (response?.result?.order_id === "delivered") {
+      else if (response?.result?.order_status === "delivered") {
         setTypee('completed')
       }
       else {
@@ -424,7 +424,7 @@ const OrderDetails = ({ navigation, route }) => {
     //   .finally(() => setLoading(false));
   };
 
-  // console.log(orderDetails, 'orderDetails') 
+  // console.log(typee, 'orderDetails') 
 
   useEffect(() => {
     let id = route?.params?.id;
@@ -471,7 +471,6 @@ const OrderDetails = ({ navigation, route }) => {
     return subtotal;
   };
 
-  console.log(orderDetails?.cart_items_Data?.[0],'asdasd');
   
   return (
     <View style={styles.container}>
@@ -587,7 +586,7 @@ const OrderDetails = ({ navigation, route }) => {
           <View style={{ padding: 20 }}>
             {orderDetails?.cart_items_Data &&
               orderDetails?.cart_items_Data?.map((item, key) => {
-                // console.log(item.price);
+                console.log(item?.itemData,' dfsdfwe');
                 // {item?.item_type == 'deal' ? item.price * item?.quantity : item?.variationData?.price * item?.quantity}
 
                 return (

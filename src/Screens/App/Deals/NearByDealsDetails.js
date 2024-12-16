@@ -392,7 +392,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
 
 
 
-  // console.log(itemDetail);
+  console.log(itemDetail);
 
 
   return (
@@ -447,13 +447,7 @@ const NearByDealsDetails = ({ navigation, route }) => {
                               : addFavoriteDeal(route?.params?.id, customer_id, dispatch, showAlert)
                           }
                         }}
-                        style={{
-                          position: 'absolute',
-                          right: 5,
-                          top: 5,
-                          padding: 10,
-                          zIndex: 999,
-                        }}>
+                        style={styles.favIconContainer}>
                         {isFavorite ? (
                           <AntDesign name="heart" size={24} color={Colors.button.primary_button} />
                         ) : (
@@ -503,11 +497,11 @@ const NearByDealsDetails = ({ navigation, route }) => {
                 return (
                   <View style={{ height: hp(15) }} >
                     <FoodCardWithRating
-                      onPress={() =>
-                        navigation?.navigate('ItemDetails', {
-                          id: item?.item_id,
-                        })
-                      }
+                      // onPress={() =>
+                      //   navigation?.navigate('ItemDetails', {
+                      //     id: item?.item_id,
+                      //   })
+                      // }
                       title={item?.item_name}
                       image={
                         // item.image
@@ -516,7 +510,8 @@ const NearByDealsDetails = ({ navigation, route }) => {
                           : ''
                       }
                       // price={item?.variations[0]?.price}
-                      quantity={`${item.variations[0].quantity} ${item.variations[0].variation_name} ${item?.item_name}  `}
+                      quantity={`${item.variations[0].quantity}`}
+                      variation_name = {item.variations[0].variation_name}
                       rating={item?.rating}
                       tag={item?.cuisineData?.cuisine_name}
                       isTagArray={false}
@@ -718,29 +713,20 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     marginBottom: 15,
   },
+  favIconContainer:{
+    backgroundColor: Colors.button.secondary_button, 
+    borderRadius: wp(100), 
+    paddingHorizontal: wp(3),
+    position: 'absolute',
+    right: 5,
+    top: 5,
+    padding: 10,
+    zIndex: 999,
+  },
 
-  // timeCard: {
-  //   borderRadius: 20,
-  //   borderWidth: 1,
-  //   borderColor: '#EAEDF3',
-  //   paddingHorizontal: 18,
-  //   paddingVertical: 5.5,
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   marginVertical: 10,
-  // },
+ 
   iconContainer: { backgroundColor: Colors.button.secondary_button, marginTop: hp(0.5), marginLeft: wp(2), borderRadius: wp(100), paddingHorizontal: 2 },
-  // timeText: {
-  //   color: '#191A26',
-  //   fontFamily: Fonts.PlusJakartaSans_Medium,
-  //   marginLeft: 5,
-  // },
-  // title: {
-  //   color: Colors.primary_color,
-  //   fontSize: RFPercentage(2.2),
-  //   fontFamily: Fonts.PlusJakartaSans_Bold,
-  // },
+
   rowView: {
     flexDirection: 'row',
     alignItems: 'center',

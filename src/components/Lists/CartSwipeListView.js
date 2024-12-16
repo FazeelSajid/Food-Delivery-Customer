@@ -69,20 +69,21 @@ const CartSwipeListView = ({data, onDecrement, onIncrement, onDelete, ListFooter
                           }}style={styles.image} />
           </ImageBackground>
           <View style={styles.textContainer}>
-            <Text style={styles.title}>{item?.item_type == 'item'
+            <Text style={styles.title}  ellipsizeMode='tail' numberOfLines={1}  >{item?.item_type == 'item'
                           ? item?.itemData?.item_name
                           : item?.itemData?.name}</Text>
             <Text style={styles.nameText} ellipsizeMode='tail' numberOfLines={1} >{item?.itemData?.description }</Text>
             {item?.itemData?.variationData?.variation_name && <Text style={styles.variation_name}>{item?.itemData?.variationData?.variation_name}</Text>}
             <View style={styles.rowViewSB}>
-              {/* <Text style={{...styles.title, color: Colors.primary_color}}>
-                ${item.price}
-              </Text> */}
+            
               <PriceText text={item?.itemData?.variationData ? item?.itemData?.variationData.price * item?.quantity : item?.itemData?.price ? item?.itemData?.price * item?.quantity: item?.sub_total * item?.quantity } />
               <View style={styles.rowView}>
-                <TouchableOpacity onPress={() => onDecrement(item)}>
+                {
+                  item?.quantity != 1  &&  <TouchableOpacity onPress={() => onDecrement(item)}>
                   <Icons.Remove />
                 </TouchableOpacity>
+                }
+               
                 <Text style={styles.countText}>{item?.quantity}</Text>
                 <TouchableOpacity onPress={() => onIncrement(item)}>
                   <Icons.AddFilled />

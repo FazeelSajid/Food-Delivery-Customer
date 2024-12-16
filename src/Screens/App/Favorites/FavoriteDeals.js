@@ -7,7 +7,7 @@ import api from '../../../constants/api';
 import {BASE_URL_IMAGE} from '../../../utils/globalVariables';
 import Loader from '../../../components/Loader';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
-import {showAlert} from '../../../utils/helpers';
+import {handlePopup} from '../../../utils/helpers';
 import { getFavoriteDeals, removeFavoriteDeal } from '../../../utils/helpers/FavoriteApis';
 import { useDispatch, useSelector } from 'react-redux';
 import DealCard from '../../../components/Cards/DealCard';
@@ -23,7 +23,6 @@ import PopUp from '../../../components/Popup/PopUp';
 const FavoriteDeals = ({}) => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
-  // const [data, setData] = useState([]);
   const {customer_id, showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store)
   const { favoriteDeals} = useSelector(store => store.favorite);
   const dispatch = useDispatch()
@@ -53,12 +52,12 @@ const FavoriteDeals = ({}) => {
   //         const filter = data.filter(item => item?.favourite_deal_id != id);
   //         setData(filter);
   //       } else {
-  //         showAlert(response?.message);
+  //         handlePopup(response?.message);
   //       }
   //     })
   //     .catch(err => {
   //       console.log('Error   ', err);
-  //       showAlert('Something Went Wrong');
+  //       handlePopup('Something Went Wrong');
   //     })
   //     .finally(() => {
   //       setLoading(false);
@@ -148,14 +147,9 @@ const FavoriteDeals = ({}) => {
   // useEffect(() => {
   //   getData();
   // }, []);
+ 
   const add_item_to_cart = async (id, type) => {
-
-    // let customer_id = await AsyncStorage.getItem('customer_id');
-    // console.log('customer_Id :  ', customer_id);
     let cart = await getCustomerCart(customer_id, dispatch);
-    console.log('______cart    :  ', cart?.cart_id);
-
-
     let data =  {
       item_id: id,
       cart_id: cart?.cart_id?.toString(),
@@ -168,19 +162,12 @@ const FavoriteDeals = ({}) => {
 
     await addItemToCart(data, dispatch)
       .then(response => {
-        console.log('response ', response);
         if (response?.status == true) {
-          // navigation?.navigate('MyCart');
-          // cart_restaurant_id
-          // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-          //my_cart
+          
           dispatch(addItemToMYCart(response?.result));
-          // setSelectedVariation(null)
-
-          // ref_RBSheetSuccess?.current?.open();
-          showAlert(`${itemObj.name} is added to cart`, 'green');
+          handlePopup(dispatch,`${itemObj.name} is added to cart`, 'green');
         } else {
-          showAlert(response?.message);
+          handlePopup(dispatch,response?.message);
         }
       })
       .catch(error => {
@@ -202,12 +189,9 @@ const FavoriteDeals = ({}) => {
   );
 
   const shortenString = (str) => {
-    // Check if the string length exceeds 50
     if (str.length > 35) {
-      // Cut the string to 50 characters and append "..."
       return str.substring(0, 20) + '...';
     }
-    // If the string length is less than or equal to 50, return it as is
     return str;
   }
 
@@ -229,7 +213,7 @@ const FavoriteDeals = ({}) => {
       await updateCartItemQuantity(obj, dispatch)
        .then(response => {
         if (response.status === true) {
-         showAlert('Item quantity updated', 'green')
+         handlePopup(dispatch, 'Item quantity updated', 'green')
          const newData = my_cart?.map(item => {
           if (item?.item_id == deal.deal_id) {
             return {
@@ -240,7 +224,6 @@ const FavoriteDeals = ({}) => {
             return { ...item };
           }
         });
-        // also update quantity in redux
         dispatch(updateMyCartList(newData));
         }
        })
@@ -248,26 +231,23 @@ const FavoriteDeals = ({}) => {
       add_item_to_cart(deal.deal_id, 'deal');
 
     }
-    // }
   };
   
 
   return (
     <View style={{flex: 1,}}>
       <Loader loading={loading} />
-      {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
       <FlatList
         data={favoriteDeals}
         key={numColumns}
         numColumns={numColumns}
-        contentContainerStyle={{alignItems: 'center',}}
-        // ItemSeparatorComponent={<View style={{width: wp(10), height: hp(20), backgroundColor: 'green'}} />}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={() => <View style={{height: 10}} />}
         ListFooterComponent={() => <View style={{height: 20}} />}
-        ListEmptyComponent={() => <NoDataFound />}
+        contentContainerStyle={{flexGrow:1}}
+        ListEmptyComponent={() => <NoDataFound loading={loading} text={'No Deals'} textStyle={{fontSize: RFPercentage(2.4)}} svgHeight={hp(12)} />}
         renderItem={({item}) => {
-          // console.log(item);
+          console.log(item.deal);
           
           return(
 
@@ -288,7 +268,7 @@ const FavoriteDeals = ({}) => {
                   });
                 }}
             isFavorite={true}
-            heartPress={() => removeFavoriteDeal( item?.deal?.deal_id,customer_id, favoriteDeals, dispatch, showAlert)}
+            heartPress={() => removeFavoriteDeal( item?.deal?.deal_id,customer_id, favoriteDeals, dispatch)}
             addToCartpress={() => handleDealAddToCart(item?.deal)} 
             imageStyle={{ width: wp(42),
               height: hp('16.5%')}}

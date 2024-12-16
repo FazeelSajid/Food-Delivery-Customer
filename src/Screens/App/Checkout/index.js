@@ -82,47 +82,7 @@ import Alert from '../../../Assets/svg/alert.svg';
 import WalletActive from '../../../Assets/svg/WalletActiveBg.svg';
 
 const Checkout = ({ navigation, route }) => {
-  const dispatch = useDispatch();
-  const { showPopUp, popUpColor, PopUpMesage, walletTotalAmount, join_as_guest, promos, Bill, customer_detail } = useSelector(store => store.store)
-  const [topUpAmount, setTopUpAmount] = useState('');
-  const {
-    cart,
-    cart_restaurant_id,
-    selected_payment_type,
-  } = useSelector(store => store.cart);
-  const btmSheetRef = useRef()
-  const WithDrawBtmSheet = useRef()
-  const ref_RBSheet = useRef();
-  const ref_RBSheetPhoneNo = useRef(null);
-  const ref_RBSheetPaymentOption = useRef(null);
-  const ref_RBSheetGuestUser = useRef(null);
-  const ref_RBTopUpSheet = useRef(null);
-  const [loading, setLoading] = useState(false);
-  const [phoneNo, setPhoneNo] = useState();
-  // const [location, setLocation] = useState('');
-  // const [location_id, setLocation_id] = useState('');
-  const [promoCode, setPromoCode] = useState('');
-  // const [checked, setChecked] = React.useState('cash');
-  // const [selectPaymentMethod, setSelectPaymentMethod] = useState('');
-  const [newPhoneNO, setNewPhoneNO] = useState(customer_detail?.phone_no);
-  const [countryCode, setCountryCode] = useState('+92');
-  // const [total_amount, setTotal_amount] = useState(0);
-  // const [subtotal, setSubtotal] = useState(0);
-  // const [platform_fee, setPlatform_fee] = useState(0);
-  // const [delivery_charges, setDelivery_charges] = useState(0);
-  // const [service_fee, setService_fee] = useState(4);
-  const [service_fee, setService_fee] = useState(0);
-  const [inValidPromoCode, setInValidPromoCode] = useState(false);
-  const [promoCodeDetail, setPromoCodeDetail] = useState(null);
-  const [isPromocodeApplied, setIsPromocodeApplied] = useState(false);
-  const [comments, setComments] = useState('');
-  const [selected_card, setSelected_card] = useState('');
-  const { customer_id, location } = useSelector(store => store.store);
-  const [cartItemIds, setCartItemIds] = useState([])
-  const location_id = location.id
-  const [ bill, setbill] = useState({})
-
-  // const [Bill, setBill] = useState({
+   // const [Bill, setBill] = useState({
   //   total_amount: 0,
   //   subtotal: 0,
   //   cartItemIds: [],
@@ -130,128 +90,15 @@ const Checkout = ({ navigation, route }) => {
   //   gst_charges: 0,
   //   total_amount: 0
   // })
-  const [data, setData] = useState([
-    // {
-    //   id: 0,
-    //   image: Images.food1,
-    //   title: 'Fresh Orange splash',
-    //   description: 'Mix fresh real orange',
-    //   price: 13.2,
-    //   count: 1,
-    // },
-    // {
-    //   id: 1,
-    //   image: Images.food2,
-    //   title: 'Fresh Orange splash',
-    //   description: 'Mix fresh real orange',
-    //   price: 13.2,
-    //   count: 1,
-    // },
-    // {
-    //   id: 2,
-    //   image: Images.food3,
-    //   title: 'Fresh Orange',
-    //   description: 'Mix fresh real orange',
-    //   price: 13.2,
-    //   count: 1,
-    // },
-  ]);
-  const addPaymentToWallet = async amount => {
-    await AddPaymentToCustomerWallet(amount, customer_id)
-      .then(response => {
-        console.log('AddPaymentToCustomerWallet : ', response);
-        dispatch(setWalletTotalAmount(response?.result?.available_amount))
-      })
-      .catch(error => console.log(error));
-  };
-  // ____________________________ stripe payment ________________________________
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const fetchPaymentSheetParams = async (total_amount) => {
-    // console.log('fetchPaymentSheetParams called...');
-
-    let customer_stripe_id = await GetCustomerStripeId(customer_id);
-    console.log({ customer_stripe_id });
-
-
-    try {
-      const response = await fetch(`${BASE_URL}payment/pay`, {
-        method: 'POST',
-        headers: {
-
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: total_amount * 100,  // Amount in cents
-          currency: 'usd',
-          stripe_customer_id: customer_stripe_id
-        }),
-      });
-
-      // Check if the response is successful
-      if (!response.ok) {
-        console.error('Failed to fetch payment sheet parameters:', response.statusText);
-        setLoading(false);
-        handlePopup(dispatch, 'Something is went wrong', 'red');
-        return null;
-      }
-
-      // Parse the response as JSON
-      const responseData = await response.json();
-
-      // Check if the API returned an error status in the response JSON
-      if (responseData.status === false) {
-        console.error('Error in response:', responseData.message);
-        setLoading(false);
-        handlePopup(dispatch, 'Something is went wrong', 'red');
-        return null;
-      }
-
-      // Assuming the responseData contains the fields: paymentIntent, ephemeralKey, and customer
-      const { paymentIntent, ephemeralKey, customer } = responseData;
-
-      // console.log('Fetched Payment Params:', { paymentIntent, ephemeralKey, customer });
-
-      return {
-        paymentIntent,
-        ephemeralKey,
-        customer,
-      };
-    } catch (error) {
-      console.error('Error in getting Stripe params from wallet screen:', error);
-      setLoading(false);
-      handlePopup(dispatch, 'Something is went wrong', 'red');
-      return null;
-    }
-  };
-
-  // console.log({Bill});
-  
-
-
-  const openPaymentSheetForTopUp = async () => {
-    // console.log('openpaymentSheet');
-    const { error } = await presentPaymentSheet();
-
-
-    setLoading(false);
-    if (error) {
-      // Alert.alert(`Error code: ${error.code}`, error.message);
-      handlePopup(dispatch, 'Something went wrong', 'red')
-      console.log(error);
-
-      if (error.code == 'Canceled') {
-        // user cancel payment
-        // for now we do nothing...
-      } else {
-        // showAlertLongLength(error.message);
-        handlePopup(dispatch, error.message, 'red')
-      }
-    } else {
-      // handle success
-      console.log('Success', 'Your order is confirmed!');
-      addPaymentToWallet(topUpAmount)
-    }
-  };
+  // const [total_amount, setTotal_amount] = useState(0);
+  // const [subtotal, setSubtotal] = useState(0);
+  // const [platform_fee, setPlatform_fee] = useState(0);
+  // const [delivery_charges, setDelivery_charges] = useState(0);
+  // const [service_fee, setService_fee] = useState(4);
+  // const [location, setLocation] = useState('');
+  // const [location_id, setLocation_id] = useState('');
+  // const [checked, setChecked] = React.useState('cash');
+  // const [selectPaymentMethod, setSelectPaymentMethod] = useState('');
   // const openPaymentSheet = async () => {
   //   // console.log('openpaymentSheet');
   //   const { error } = await presentPaymentSheet();
@@ -334,354 +181,107 @@ const Checkout = ({ navigation, route }) => {
   //     openPaymentSheet();
   //   }
   // }};
-  const initializePaymentSheetForTopUp = async () => {
-    setLoading(true);
-    const { paymentIntent, ephemeralKey, customer } =
-      await fetchPaymentSheetParams(topUpAmount);
-    initStripe({
-      publishableKey: STRIPE_PUBLISH_KEY,
-    });
-
-    console.log({ paymentIntent, ephemeralKey, customer });
-
-
-    const { error } = await initPaymentSheet({
-      appearance: {
-        // shapes: {
-        //   borderRadius: 12,
-        //   borderWidth: 0.5,
-        // },
-        // primaryButton: {
-        //   shapes: {
-        //     borderRadius: 20,
-        //   },
-        // },
-        // colors: {
-        //   primary: Colors.primary_color,
-        //   background: '#FFFFFF',
-        //   componentBackground: '#FFFFFF',
-        //   componentBorder: '#000000',
-        //   componentDivider: '#000000',
-        //   primaryText: Colors.primary_color,
-        //   secondaryText: Colors.primary_color,
-        //   componentText: Colors.primary_color,
-        //   placeholderText: '#000000',
-        // },
-      },
-      merchantDisplayName: 'Food Delivery',
-      customerId: customer,
-      customerEphemeralKeySecret: ephemeralKey,
-      paymentIntentClientSecret: paymentIntent,
-      // Set `allowsDelayedPaymentMethods` to true if your business can handle payment
-      //methods that complete payment after a delay, like SEPA Debit and Sofort.
-      // allowsDelayedPaymentMethods: true,
-      // defaultBillingDetails: {
-      //   name: 'Jane Doe',
-      // },
-    });
-    setLoading(false);
-    if (!error) {
-      // setLoading(true);
-      // console.log('setLoading');
-      openPaymentSheetForTopUp()
-    }
-  };
-  //________________________________________________________________
-
-  const handleAddQuantity = async item => {
-    const newData = data?.map(element => {
-      if (element?.id == item.id) {
-        return {
-          ...element,
-          count: element.count + 1,
-        };
-      } else {
-        return {
-          ...element,
-        };
-      }
-    });
-    setData(newData);
-  };
-  const handleRemoveQuantity = async item => {
-    const newData = data?.map(element => {
-      if (element?.id == item.id) {
-        return {
-          ...element,
-          count: element.count - 1,
-        };
-      } else {
-        return {
-          ...element,
-        };
-      }
-    });
-    setData(newData);
-  };
-  const handleDelete = async item => {
-    const filter = data.filter(element => element?.id != item?.id);
-    setData(filter);
-  };
-  const ItemSeparator = () => (
-    <View
-      style={{
-        height: hp(0.1),
-        marginVertical: 10,
-        backgroundColor: Colors.borderGray,
-      }}
-    />
-  );
-
-  // useEffect(() => {
-  //   console.log('route?.params?.selectPaymentMethod  : ', route?.params);
-  //   route?.params?.selectPaymentMethod &&
-  //     setSelectPaymentMethod(route?.params?.selectPaymentMethod);
-  //   setChecked(route?.params?.checked);
-  // }, [route?.params?.selectPaymentMethod]);
-
-  const handlePlaceOrder = async () => {
-    //send notification to restaurant and rider both that new order is placed
-    handleSendPushNotification(`Customer placed a new order`);
-  };
+   // const handlePlaceOrder = async () => {
+  //   //send notification to restaurant and rider both that new order is placed
+  //   handleSendPushNotification(`Customer placed a new order`);
+  // };
   // handle update phone :  for that we send otp to user number and then after verify we update the user phone number
  
-  const handleSendPushNotification = async text => {
-    const receiver_fcm = await getUserFcmToken();
-    if (receiver_fcm) {
-      let body = {
-        to: receiver_fcm,
-        notification: {
-          title: 'New Order',
-          body: text ? text : '',
-          // mutable_content: true,
-          sound: 'default',
-        },
-        data: {
-          // user_id: user,
-          type: 'order',
-        },
-        priority: 'high',
-      };
+  // const handleSendPushNotification = async text => {
+  //   const receiver_fcm = await getUserFcmToken();
+  //   if (receiver_fcm) {
+  //     let body = {
+  //       to: receiver_fcm,
+  //       notification: {
+  //         title: 'New Order',
+  //         body: text ? text : '',
+  //         // mutable_content: true,
+  //         sound: 'default',
+  //       },
+  //       data: {
+  //         // user_id: user,
+  //         type: 'order',
+  //       },
+  //       priority: 'high',
+  //     };
 
-      var requestOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `key=${firebase_server_key}`,
-        },
-        body: JSON.stringify(body),
-      };
+  //     var requestOptions = {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `key=${firebase_server_key}`,
+  //       },
+  //       body: JSON.stringify(body),
+  //     };
 
-      fetch('https://fcm.googleapis.com/fcm/send', requestOptions)
-        .then(response => response.text())
-        .then(response => {
-          let res = JSON.parse(response);
-          console.log('push notification response :  ', res);
-        })
-        .catch(err => {
-          console.log('error :  ', err);
-        });
-    } else {
-      console.log('receiver_fcm not found');
-    }
-  };
-  const clear_Cart_items = () => {
-    clearCartItems()
-      .then(response => {
-        dispatch(setCartRestaurantId(null));
-        dispatch(addToCart([]));
-        dispatch(setOrderComment(''));
-      })
-      .catch(error => {
-        console.log('error : ', error);
-      });
-  };
-  const makeOrderPayment = async order_id => {
-    // console.log('order_id  : ', order_id);
-    await MakeOrderPayment(order_id, customer_id)
-      .then(response => {
-        console.log({ response }, { order_id, customer_id }, 'make orderPayment');
+  //     fetch('https://fcm.googleapis.com/fcm/send', requestOptions)
+  //       .then(response => response.text())
+  //       .then(response => {
+  //         let res = JSON.parse(response);
+  //         console.log('push notification response :  ', res);
+  //       })
+  //       .catch(err => {
+  //         console.log('error :  ', err);
+  //       });
+  //   } else {
+  //     console.log('receiver_fcm not found');
+  //   }
+  // };
+  // const clear_Cart_items = () => {
+  //   clearCartItems()
+  //     .then(response => {
+  //       dispatch(setCartRestaurantId(null));
+  //       dispatch(addToCart([]));
+  //       dispatch(setOrderComment(''));
+  //     })
+  //     .catch(error => {
+  //       console.log('error : ', error);
+  //     });
+  // };
+    // const handleVerifyPromoCode = async promoCode => {
+  //   console.log({ promoCode });
 
+  //   setInValidPromoCode(true);
+  //   fetch(
+  //     api.verify_promo_code +
+  //     `?promo_code=${promoCode}`,
+  //   )
+  //     .then(response => response.json())
+  //     .then(response => {
+  //       console.log(response);
 
-        if (response.status === true) {
-          handlePopup(dispatch, response.message, 'green')
-          dispatch(setWalletTotalAmount(walletTotalAmount - Bill.total_amount))
-        } else {
-          handlePopup(dispatch, response.error, 'red')
-        }
-      })
-      .catch(error => console.log('makeOrderPayment', error));
-  };
-  // console.log(location_id);
-  const placeOrder = async () => {
-    if (!newPhoneNO) {
-      ref_RBSheetPhoneNo?.current?.open()
-    } else {
-      // // addPaymentToWallet(6);
-      // makeOrderPayment(200832);
-      // return;
-      // if (selected_payment_type == 'card') {
-      //   showAlertLongLength(
-      //     'Cart Payment is not handled yet. Try Cash on Delivery Option',
-      //   );
-      //   return;
-      // }
+  //       Keyboard.dismiss();
+  //       if (response.status == false) {
+  //         // console.log(response);
 
-      // "message": "customer_id , cart_items_ids , restaurant_id , phone_no ,
-      // payment_option, total_amount must be Provided ", "status": false
-      if (!location_id) {
-        showBtmSheet()
-      }else if (!selected_payment_type) {
-        ref_RBSheetPaymentOption?.current?.open();
-      } 
-      
-      else {
-        setLoading(true);
-        // let customer_Id = await AsyncStorage.getItem('customer_id');
-        console.log('customer_Id  :  ', customer_id);
-        //show on success   : ref_RBSheet?.current?.open();
+  //         setInValidPromoCode(false);
+  //         // calculateTotalAmount();
+  //       } else {
+  //         setIsPromocodeApplied(true);
+  //         setInValidPromoCode(true);
+  //         setPromoCodeDetail(response?.result[0]);
+  //         // Input: Total amount
+  //         const totalAmount = subtotal; // Replace this with your actual total amount
 
-        // Note : res_id is missing in cart detail so latter on we will create spearate order for every restaurant;
+  //         // Calculate the discount
+  //         const discountPercentage = 30 / 100; // 30 percent as a decimal
+  //         const discount = totalAmount * discountPercentage;
 
-        // let res_details = await getRestaurantDetail(cart_restaurant_id);
-        // let pickup_location = res_details?.location;
-        // let dropOff_Location = location.address;
-        // let delivery_time = await getEstimatedDeliveryTime(
-        //   pickup_location,
-        //   dropOff_Location,
-        // );
-        // console.log(
-        //   '___________________ delivery_time : ____________',
-        //   delivery_time,
-        // );
+  //         // Calculate the discounted price
+  //         const discountedPrice = totalAmount - discount;
 
-        let items = cart ? cart : [];
-        items = items?.map(item => item.cart_item_id);
-        // items = items?.map(item => item.item_id);
-        let data = {
-          customer_id: customer_id,
-          cart_items_ids: items,
-          description: 'Order creating',
-          location_id: location_id,
-          address: location.address,
-          restaurant_id: cart_restaurant_id,
-          phone_no: countryCode + newPhoneNO,
-          promo_code: isPromocodeApplied ? promoCode : '',
-          payment_option: selected_payment_type,
-          // payment_option: 'card',
-          customer_payment: selected_payment_type === 'card' ? parseInt(Bill.total_amount, 10) : 0, // card -> total amount :  cash->0
-          sub_total: parseInt(Bill.subtotal, 10),
-          comments: comments,
-          Estimated_delivery_time: 45,
-          // Estimated_delivery_time: delivery_time,
-          // delivery_charges: delivery_charges,
-          // platform_fees: platform_fee == 0 ? 5 : platform_fee,
-        };
+  //         // Output the result
+  //         // console.log(`Total amount: $${totalAmount}`);
+  //         // console.log(`Discounted amount: $${discountedPrice}`);
 
-        // setLoading(false);
-        // return;
-        // let data = {
-        //   customer_id: '200658',
-        //   cart_items_ids: [200685],
-        //   description: 'Order creating',
-        //   location_id: 200033,
-        //   address: 'Address 1',
-        //   restaurant_id: 'res_5691714',
-        //   phone_no: 92349892347,
-        //   promo_code: 200033,
-        //   payment_option: 'card',
-        //   customer_payment: 1,
-        //   total_amount: '2000',
-        //   comments: 'comments',
-        //   Estimated_delivery_time: 30,
-        // };
-        // console.log(data);
-
-        fetch(api.create_order, {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: {
-            'Content-type': 'application/json; charset=UTF-8',
-          },
-        })
-          .then(response => response.json())
-          .then(async response => {
-            console.log(data);
-
-            console.log(response.result);
-
-            if (response.error == false) {
-              // clear_Cart_items(); //remove all items from cart
-              // dispatch(setSelectedPaymentType(''));
-              dispatch(setCartRestaurantId(null));
-              dispatch(addToCart([]));
-              dispatch(updateMyCartList([]));
-              dispatch(setOrderComment(''));
-              if (selected_payment_type == 'card') {
-                // addPaymentToWallet(parseInt(Bill.total_amount));
-                makeOrderPayment(response?.result?.order_id,);
-              }
-              ref_RBSheet?.current?.open();
-
-            } else {
-              // dispatch(setSelectedPaymentType(''));
-              setTimeout(() => {
-                handlePopup(dispatch, response.message, 'red');
-              }, 200);
-            }
-            // console.log('create order response  :  ', response);
-          })
-          .catch(err => {
-            console.log('Error in create order :  ', err);
-            handlePopup(dispatch, 'Something went wrong', 'red');
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      }
-    }
-  };
-
-  const extractCartItemIds = (itemsArray) => {
-    return itemsArray.map(item => item.cart_item_id);
-  };
-
-  // console.log(promoCodeDetail?.promo_code_id );
-
-  const calculateTotalAmount = () => {
-
-    const cartItemIds = extractCartItemIds(cart)
-    dispatch(setBill({ cartItemIds: cartItemIds }))
-
-    try {
-      let total = 0;
-      for (const item of cart) {
-        // console.log(item);
-
-        // console.log('item?.itemData?.price :  ', item?.itemData?.variationData?.price);
-        // let price = item?.itemData?.price ? parseInt(item?.itemData?.variationData?.price) : 0
-        let price = parseInt(item?.itemData?.variationData?.price ? item?.itemData?.variationData?.price : item?.itemData?.price)
-        let quantity = item?.quantity ? parseInt(item?.quantity) : 1;
-        total = total + price * quantity;
-        // console.log({price, quantity,});
-
-
-        // console.log('total : ', total);
-      }
-
-      dispatch(setBill({ subtotal: total.toFixed(2) })
-      )      // setSubtotal(total.toFixed(2));
-      // let totalAmount = total + service_fee;
-      // let totalAmount = total + delivery_charges + platform_fee;
-      // console.log(totalAmount, 'total amount');
-
-      // setTotal_amount(total.toFixed(2));
-    } catch (error) {
-      console.log('error in calculating total amount : ', error);
-    }
-  };
-
-  // const handleEditAddress = async () => {
+  //         setSubtotal(discountedPrice.toFixed(2));
+  //         let totalAmount1 = discountedPrice + service_fee;
+  //         setTotal_amount(totalAmount1.toFixed(2));
+  //       }
+  //     })
+  //     .catch(err => console.log('error : ', err));
+  // };
+    // const handleEditAddress = async () => {
   //   let shipping_address = await getShippingAddress();
   //   console.log('shipping_address  :  ', shipping_address?.location_id);
   //   if (shipping_address) {
@@ -749,76 +349,338 @@ const Checkout = ({ navigation, route }) => {
   // useEffect(() => {
   //   getCustomerData();
   // }, []);
-
-  useEffect(() => {
-   setbill(Bill)
-  }, [Bill]);
-
-  // const getSelectedCard = async () => {
+    // const getSelectedCard = async () => {
   //   let card = await AsyncStorage.getItem('selected_card');
   //   if (card) {
   //     card = JSON.parse(card);
   //     // setSelected_card(card);
   //   }
   // };
+    // const getSelectedCard = async () => {
+  //   let card = await AsyncStorage.getItem('selected_card');
+  //   if (card) {
+  //     card = JSON.parse(card);
+  //     // setSelected_card(card);
+  //   }
+  // };
+  // useEffect(() => {
+  //   const delayDebounceFn = setTimeout(() => {
+  //     console.log('promocode : ', promoCode);
+  //     // Send Axios request here
+  //     handleVerifyPromoCode(promoCode);
+  //   }, 200);
+
+  //   return () => clearTimeout(delayDebounceFn);
+  // }, [promoCode]);
+  
+  const dispatch = useDispatch();
+  const { showPopUp, popUpColor, PopUpMesage, walletTotalAmount, join_as_guest, promos, Bill, customer_detail } = useSelector(store => store.store)
+  const [topUpAmount, setTopUpAmount] = useState('');
+  const {
+    cart,
+    cart_restaurant_id,
+    selected_payment_type,
+  } = useSelector(store => store.cart);
+  const btmSheetRef = useRef()
+  const WithDrawBtmSheet = useRef()
+  const ref_RBSheet = useRef();
+  const ref_RBSheetPhoneNo = useRef(null);
+  const ref_RBSheetPaymentOption = useRef(null);
+  const ref_RBSheetGuestUser = useRef(null);
+  const ref_RBTopUpSheet = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [phoneNo, setPhoneNo] = useState();
+  const [promoCode, setPromoCode] = useState('');
+  const [newPhoneNO, setNewPhoneNO] = useState(customer_detail?.phone_no);
+  const [countryCode, setCountryCode] = useState('+92');
+  const [service_fee, setService_fee] = useState(0);
+  const [inValidPromoCode, setInValidPromoCode] = useState(false);
+  const [promoCodeDetail, setPromoCodeDetail] = useState(null);
+  const [isPromocodeApplied, setIsPromocodeApplied] = useState(false);
+  const [comments, setComments] = useState('');
+  const [selected_card, setSelected_card] = useState('');
+  const { customer_id, location } = useSelector(store => store.store);
+  const [cartItemIds, setCartItemIds] = useState([])
+  const location_id = location.id
+  const [ bill, setbill] = useState({})
+
+  // console.log(selected_payment_type);
+  
+
+  const addPaymentToWallet = async amount => {
+    await AddPaymentToCustomerWallet(amount, customer_id)
+      .then(response => {
+        console.log('AddPaymentToCustomerWallet : ', response);
+        dispatch(setWalletTotalAmount(response?.result?.available_amount))
+      })
+      .catch(error => console.log(error));
+  };
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const fetchPaymentSheetParams = async (total_amount) => {
+
+    let customer_stripe_id = await GetCustomerStripeId(customer_id);
+    console.log({ customer_stripe_id });
+
+    try {
+      const response = await fetch(`${BASE_URL}payment/pay`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: total_amount * 100,  // Amount in cents
+          currency: 'usd',
+          stripe_customer_id: customer_stripe_id
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to fetch payment sheet parameters:', response.statusText);
+        setLoading(false);
+        handlePopup(dispatch, 'Something is went wrong', 'red');
+        return null;
+      }
+
+      const responseData = await response.json();
+
+      if (responseData.status === false) {
+        console.error('Error in response:', responseData.message);
+        setLoading(false);
+        handlePopup(dispatch, 'Something is went wrong', 'red');
+        return null;
+      }
+      const { paymentIntent, ephemeralKey, customer } = responseData;
+      return {
+        paymentIntent,
+        ephemeralKey,
+        customer,
+      };
+    } catch (error) {
+      console.error('Error in getting Stripe params from wallet screen:', error);
+      setLoading(false);
+      handlePopup(dispatch, 'Something is went wrong', 'red');
+      return null;
+    }
+  };
+
+  const openPaymentSheetForTopUp = async () => {
+    const { error } = await presentPaymentSheet();
+
+
+    setLoading(false);
+    if (error) {
+      handlePopup(dispatch, 'Something went wrong', 'red')
+      console.log(error);
+
+      if (error.code == 'Canceled') {
+        // user cancel payment
+        // for now we do nothing...
+      } else {
+        handlePopup(dispatch, error.message, 'red')
+      }
+    } else {
+      // handle success
+      console.log('Success', 'Your order is confirmed!');
+      addPaymentToWallet(topUpAmount)
+    }
+  };
+  
+  const initializePaymentSheetForTopUp = async () => {
+    setLoading(true);
+    const { paymentIntent, ephemeralKey, customer } =
+      await fetchPaymentSheetParams(topUpAmount);
+    initStripe({
+      publishableKey: STRIPE_PUBLISH_KEY,
+    });
+
+    console.log({ paymentIntent, ephemeralKey, customer });
+
+
+    const { error } = await initPaymentSheet({
+      appearance: {
+        // shapes: {
+        //   borderRadius: 12,
+        //   borderWidth: 0.5,
+        // },
+        // primaryButton: {
+        //   shapes: {
+        //     borderRadius: 20,
+        //   },
+        // },
+        // colors: {
+        //   primary: Colors.primary_color,
+        //   background: '#FFFFFF',
+        //   componentBackground: '#FFFFFF',
+        //   componentBorder: '#000000',
+        //   componentDivider: '#000000',
+        //   primaryText: Colors.primary_color,
+        //   secondaryText: Colors.primary_color,
+        //   componentText: Colors.primary_color,
+        //   placeholderText: '#000000',
+        // },
+      },
+      merchantDisplayName: 'Food Delivery',
+      customerId: customer,
+      customerEphemeralKeySecret: ephemeralKey,
+      paymentIntentClientSecret: paymentIntent,
+    });
+    setLoading(false);
+    if (!error) {
+      openPaymentSheetForTopUp()
+    }
+  };
+
+  const ItemSeparator = () => (
+    <View
+      style={{
+        height: hp(0.1),
+        marginVertical: 10,
+        backgroundColor: Colors.borderGray,
+      }}
+    />
+  );
+ 
+  const makeOrderPayment = async order_id => {
+    await MakeOrderPayment(order_id, customer_id)
+      .then(response => {
+        console.log({ response }, { order_id, customer_id }, 'make orderPayment');
+
+
+        if (response.status === true) {
+          handlePopup(dispatch, response.message, 'green')
+          dispatch(setWalletTotalAmount(walletTotalAmount - Bill.total_amount))
+        } else {
+          handlePopup(dispatch, response.error, 'red')
+        }
+      })
+      .catch(error => console.log('makeOrderPayment', error));
+  };
+  const placeOrder = async () => {
+    if (!newPhoneNO) {
+      ref_RBSheetPhoneNo?.current?.open()
+    } else {
+     
+      if (!location_id) {
+        showBtmSheet()
+      }else if (!selected_payment_type) {
+        ref_RBSheetPaymentOption?.current?.open();
+      }
+      
+      else {
+        setLoading(true);
+        console.log('customer_Id  :  ', customer_id);
+        let items = cart ? cart : [];
+        items = items?.map(item => item.cart_item_id);
+        let data = {
+          customer_id: customer_id,
+          cart_items_ids: items,
+          description: 'Order creating',
+          location_id: location_id,
+          address: location.address,
+          restaurant_id: cart_restaurant_id,
+          phone_no: countryCode + newPhoneNO,
+          promo_code: isPromocodeApplied ? promoCode : '',
+          payment_option: selected_payment_type,
+          customer_payment: selected_payment_type === 'card' ? parseInt(bill.total_amount, 10) : 0, // card -> total amount :  cash->0
+          sub_total: parseInt(bill.subtotal, 10),
+          comments: comments,
+          Estimated_delivery_time: 45,
+          
+        };
+
+    
+        fetch(api.create_order, {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        })
+          .then(response => response.json())
+          .then(async response => {
+            console.log(data);
+
+            console.log(response.result);
+
+            if (response.error == false) {
+            
+              dispatch(setCartRestaurantId(null));
+              dispatch(addToCart([]));
+              dispatch(updateMyCartList([]));
+              dispatch(setOrderComment(''));
+              if (selected_payment_type == 'card') {
+                makeOrderPayment(response?.result?.order_id,);
+              }
+              ref_RBSheet?.current?.open();
+
+            } else {
+              setTimeout(() => {
+                handlePopup(dispatch, response.message, 'red');
+              }, 200);
+            }
+          })
+          .catch(err => {
+            console.log('Error in create order :  ', err);
+            handlePopup(dispatch, 'Something went wrong', 'red');
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
+    }
+  };
+
+  const extractCartItemIds = (itemsArray) => {
+    return itemsArray.map(item => item.cart_item_id);
+  };
+
+  const calculateTotalAmount = () => {
+
+    const cartItemIds = extractCartItemIds(cart)
+    dispatch(setBill({ cartItemIds: cartItemIds }))
+
+    try {
+      let total = 0;
+      for (const item of cart) {
+        // console.log(item);
+
+        // console.log('item?.itemData?.price :  ', item?.itemData?.variationData?.price);
+        // let price = item?.itemData?.price ? parseInt(item?.itemData?.variationData?.price) : 0
+        let price = parseInt(item?.itemData?.variationData?.price ? item?.itemData?.variationData?.price : item?.itemData?.price)
+        let quantity = item?.quantity ? parseInt(item?.quantity) : 1;
+        total = total + price * quantity;
+        // console.log({price, quantity,});
+
+
+        // console.log('total : ', total);
+      }
+
+      dispatch(setBill({ subtotal: total.toFixed(2) })
+      )      // setSubtotal(total.toFixed(2));
+      // let totalAmount = total + service_fee;
+      // let totalAmount = total + delivery_charges + platform_fee;
+      // console.log(totalAmount, 'total amount');
+
+      // setTotal_amount(total.toFixed(2));
+    } catch (error) {
+      console.log('error in calculating total amount : ', error);
+    }
+  };
+
+  useEffect(() => {
+   setbill(Bill)
+  }, [Bill]);
+
   useFocusEffect(
     React.useCallback(() => {
       calculateTotalAmount();
-      // dispatch(setSelectedPaymentType(''));
-      // dispatch(setSelectedPaymentString(''));
-      // getCustomerData();
-      //
-      // getSelectedCard();
     }, []),
   );
 
-  // const handleVerifyPromoCode = async promoCode => {
-  //   console.log({ promoCode });
-
-  //   setInValidPromoCode(true);
-  //   fetch(
-  //     api.verify_promo_code +
-  //     `?promo_code=${promoCode}`,
-  //   )
-  //     .then(response => response.json())
-  //     .then(response => {
-  //       console.log(response);
-
-  //       Keyboard.dismiss();
-  //       if (response.status == false) {
-  //         // console.log(response);
-
-  //         setInValidPromoCode(false);
-  //         // calculateTotalAmount();
-  //       } else {
-  //         setIsPromocodeApplied(true);
-  //         setInValidPromoCode(true);
-  //         setPromoCodeDetail(response?.result[0]);
-  //         // Input: Total amount
-  //         const totalAmount = subtotal; // Replace this with your actual total amount
-
-  //         // Calculate the discount
-  //         const discountPercentage = 30 / 100; // 30 percent as a decimal
-  //         const discount = totalAmount * discountPercentage;
-
-  //         // Calculate the discounted price
-  //         const discountedPrice = totalAmount - discount;
-
-  //         // Output the result
-  //         // console.log(`Total amount: $${totalAmount}`);
-  //         // console.log(`Discounted amount: $${discountedPrice}`);
-
-  //         setSubtotal(discountedPrice.toFixed(2));
-  //         let totalAmount1 = discountedPrice + service_fee;
-  //         setTotal_amount(totalAmount1.toFixed(2));
-  //       }
-  //     })
-  //     .catch(err => console.log('error : ', err));
-  // };
 
   const verifyPromoCode = async (promoCodee) => {
     if (selected_payment_type.length === 0 ) {
-      handlePopup(dispatch, 'Please select a payment type', 'red')
+      ref_RBSheetPaymentOption?.current?.open();
     } else {
     const checkPromoCode = promos.find(item => item.code === promoCode)
     
@@ -838,7 +700,6 @@ const Checkout = ({ navigation, route }) => {
         });
         dispatch(setBill({ cartItemIds, subtotal: subtotal.toFixed(2) }));
 
-        // Prepare request body
         const body = {
           customer_id: customer_id,
           cart_items_ids: cartItemIds,
@@ -866,15 +727,11 @@ const Checkout = ({ navigation, route }) => {
                   delivery_charges: response?.result?.delivery_charges.toFixed(2),
                   gst_charges: response?.result?.gst_charges.toFixed(2),
                   total_amount: response?.result?.total_amount.toFixed(2),
-                  discount_charges: response?.result?.discount_in_perc.toFixed(2),
-                  
-                  
-                  // subtotal: response?.result?.sub_total.toFixed(2),
+                  discount_charges: response?.result?.discount.toFixed(2),
                 })
               );
               setInValidPromoCode(false);
               setIsPromocodeApplied(true)
-              // navigation?.navigate('Checkout');
             }else{
               setIsPromocodeApplied(false)
               calculatePreOrderdetails(false, false)
@@ -893,65 +750,19 @@ const Checkout = ({ navigation, route }) => {
         handlePopup(dispatch, 'Something went wrong', 'red')
       }
       finally{
-        // setCheckOutLoading(false);
       }
-      // try {
-      //   fetch(BASE_URL + 'promoCode/getDiscountByPromoCode?promo_code=' + promoCode)
-      //     .then(response => response.json())
-      //     .then(response => {
-      //       if (response.status) {
-      //         setIsPromocodeApplied(true);
-      //         setInValidPromoCode(true);
-      //         setPromoCodeDetail(checkPromoCode);
-      //         const discountPercentage = response.discount
-
-      //         const discountAmount = discountPercentage / 100;
-
-      //         const finalAmount = Bill.subtotal - discountAmount;
-
-      //         setBill(prev => {
-      //           return {
-      //             ...prev,
-      //             subtotal: finalAmount,
-      //             total_amount: finalAmount + Bill.delivery_charges + Bill.gst_charges
-
-
-      //           };
-      //         })
-      //       } else {
-      //         handlePopup(dispatch, 'Invalid Promo Code', 'red')
-      //         setInValidPromoCode(false);
-      //         setIsPromocodeApplied(false)
-      //       }
-      //     })
-      //     .catch(err => {
-      //       handlePopup(dispatch, 'Something is went wrong', 'red')
-      //       setInValidPromoCode(false);
-      //       setIsPromocodeApplied(false)
-
-      //     });
-      // } catch (error) {
-      //   handlePopup(dispatch, 'Something is went wrong', 'red')
-      //   setInValidPromoCode(false);
-      //   setIsPromocodeApplied(false)
-      // }
+     
     } else {
       handlePopup(dispatch, 'Invalid Promo Code', 'red')
       setInValidPromoCode(true);
       setIsPromocodeApplied(false)
       calculatePreOrderdetails(false, false);
+      // dispatch(setSelectedPaymentType(''))
+      
     }
   }
   }
-  // useEffect(() => {
-  //   const delayDebounceFn = setTimeout(() => {
-  //     console.log('promocode : ', promoCode);
-  //     // Send Axios request here
-  //     handleVerifyPromoCode(promoCode);
-  //   }, 200);
 
-  //   return () => clearTimeout(delayDebounceFn);
-  // }, [promoCode]);
 
   const showBtmSheet = () => {
     btmSheetRef?.current?.open()
@@ -979,7 +790,6 @@ const Checkout = ({ navigation, route }) => {
     if (!location_id) {
       showBtmSheet();
     } else {
-      // setCheckOutLoading(true);
 
 
       try {
@@ -996,9 +806,7 @@ const Checkout = ({ navigation, route }) => {
           return item.cart_item_id;
         });
 
-        // console.log({cartItemIds});
-
-        // Update Redux store with calculated data
+      
         dispatch(setBill({ cartItemIds, subtotal: subtotal.toFixed(2) }));
 
         // Prepare request body
@@ -1023,6 +831,9 @@ const Checkout = ({ navigation, route }) => {
         })
           .then(response => response.json())
           .then(response => {
+            console.log({ response });
+            console.log(api.calculatePreOrder);
+            
             if (!response.error) {
               console.log({ response });
 
@@ -1031,22 +842,18 @@ const Checkout = ({ navigation, route }) => {
                   delivery_charges: response?.result?.delivery_charges.toFixed(2),
                   gst_charges: response?.result?.gst_charges.toFixed(2),
                   total_amount: response?.result?.total_amount.toFixed(2),
-                  // subtotal: response?.result?.sub_total.toFixed(2),
+                  discount_charges: response?.result?.discount.toFixed(2),
                 })
               );
-              // navigation?.navigate('Checkout');
             }
           })
           .catch(error => {
-            // console.log('Error in calculatePreOrderDetails API call: ', error);
             handlePopup(dispatch, 'Something went wrong', 'red')
           });
       } catch (error) {
-        // console.log('Error in calculating subtotal or API request: ', error);
         handlePopup(dispatch, 'Something went wrong', 'red')
       }
       finally{
-        // setCheckOutLoading(false);
       }
     }
   };
@@ -1067,6 +874,13 @@ const Checkout = ({ navigation, route }) => {
             </View>
             <View style={styles.textContainer}>
               <Text style={styles.subText}>{location_id ? location.address : "Select Location"}</Text>
+              {
+                location_id &&    <View style={{flexDirection: 'row'}} > 
+                <Text style={[styles.subText]}>Distance: </Text>
+                <Text style={[styles.subText]}>{location.distance }</Text>
+                </View>
+              }
+           
             </View>
             <TouchableOpacity
               // onPress={() => navigation.navigate('UpdateLocation')}
@@ -1106,7 +920,7 @@ const Checkout = ({ navigation, route }) => {
         </View>
         <ItemSeparator />
         <View style={[styles.rowViewSB, { width: wp(80), alignSelf: 'center', alignItems: 'center', marginTop: 10, marginBottom: 10 }]} >
-          <TextInput placeholder='Promo Code' placeholderTextColor={'#B0B0B0'} style={{ borderRadius: 10, backgroundColor: '#F5F6FA', width: wp(60), paddingLeft: wp(5), marginRight: wp(2), color: Colors.primary_text }} value={promoCode} onChangeText={text => setPromoCode(text)} />
+          <TextInput placeholder='Promo Code' placeholderTextColor={Colors.secondary_text} style={{ borderRadius: 10, backgroundColor:  `${Colors.secondary_text}12`, width: wp(60), paddingLeft: wp(5), marginRight: wp(2), color: Colors.primary_text }} value={promoCode} onChangeText={text => setPromoCode(text)} />
           <CustomButton text={'Apply'} textStyle={{ color: Colors.button.primary_button_text, fontSize: RFPercentage(2) }} containerStyle={{ backgroundColor: Colors.button.primary_button, paddingHorizontal: wp(5), paddingVertical: hp(1.3), borderRadius: 10 }} onPress={() => verifyPromoCode(promoCode)} pressedRadius={10} isLoading={false} loaderColor={Colors.button.primary_button_text}  />
         </View>
 
@@ -1236,33 +1050,23 @@ const Checkout = ({ navigation, route }) => {
           }
 
 </View>
-
-          {/* <View style={{ height: hp(14), }} /> */}
-          {/* <Text style={styles.heading}>Detail Order</Text>
-          <CartSwipeListView
-            data={data}
-            onDecrement={item => handleRemoveQuantity(item)}
-            onIncrement={item => handleAddQuantity(item)}
-            onDelete={item => handleDelete(item)}
-          /> */}
-
-          <View style={{ marginBottom: 10,marginTop: wp(15), marginHorizontal: 20, backgroundColor: '#F5F6FA', paddingHorizontal: 15, borderRadius: 10,paddingBottom: 5 }}>
+          <View style={{ marginBottom: 10,marginTop: wp(15), marginHorizontal: 20, backgroundColor:  `${Colors.secondary_text}12`, paddingHorizontal: 15, borderRadius: 10,paddingBottom: 5 }}>
             <View style={styles.rowViewSB}>
               <Text style={styles.subText1}>Subtotal</Text>
-              <Text style={styles.subText1}>£{bill.subtotal}</Text>
+              <Text style={styles.subText1}>£{Bill.subtotal}</Text>
             </View>
             <View style={styles.rowViewSB}>
               <Text style={styles.subText1}>Delivery Charges</Text>
-              <Text style={styles.subText1}>£{bill.delivery_charges}</Text>
+              <Text style={styles.subText1}>£{Bill.delivery_charges}</Text>
             </View>
             <View style={styles.rowViewSB}>
               <Text style={styles.subText1}>GST Charges</Text>
-              <Text style={styles.subText1}>£{bill.gst_charges}</Text>
+              <Text style={styles.subText1}>£{Bill.gst_charges}</Text>
             </View>
-            {
-              isPromocodeApplied &&  <View style={styles.rowViewSB}>
+            { isPromocodeApplied &&
+              <View style={styles.rowViewSB}>
               <Text style={styles.subText1}>Discount</Text>
-              <Text style={styles.subText1}>£{bill.discount_charges}</Text>
+              <Text style={styles.subText1}>£{Bill.discount_charges}</Text>
             </View>
             }
           
@@ -1270,7 +1074,7 @@ const Checkout = ({ navigation, route }) => {
             <ItemSeparator />
             <View style={styles.rowViewSB}>
               <Text style={styles.title}>Total</Text>
-              <Text style={styles.title}>£{bill.total_amount}</Text>
+              <Text style={styles.title}>£{Bill.total_amount}</Text>
             </View>
           </View>
         <View
@@ -1446,38 +1250,7 @@ const Checkout = ({ navigation, route }) => {
                     Wallet Payment
                   </Text>
                 </TouchableOpacity>
-                {/* <ItemSeparator />
-                <TouchableOpacity
-                  onPress={() => {
-                    handlePaymentTypeChange('wallet', 'Wallet Payment')
-                 
-                  }}
-                  style={styles.rowView}>
-                  <RadioButton
-                    value="card"
-                    uncheckedColor={Colors.primary_color}
-                    color={Colors.primary_color}
-                    status={
-                      selected_payment_type === 'wallet'
-                        ? 'checked'
-                        : 'unchecked'
-                    }
-                    onPress={() => {
-                      dispatch(setSelectedPaymentType('wallet'));
-                      dispatch(setSelectedPaymentString('Wallet Payment'));
-                      ref_RBSheetPaymentOption?.current?.close();
-                    }}
-                  />
-                  <Text
-                    style={{
-                      color: Colors.secondary_text,
-                      fontFamily: Fonts.PlusJakartaSans_Regular,
-                      marginTop: -2,
-                      fontSize: RFPercentage(1.8),
-                    }}>
-                    Wallet Payment
-                  </Text>
-                </TouchableOpacity> */}
+                
               </View>
             </View>
           }
@@ -1514,7 +1287,7 @@ const Checkout = ({ navigation, route }) => {
           }}
         />
         <CRBSheetComponent
-          // height={170}
+          height={170}
           refRBSheet={btmSheetRef}
           content={
             <View style={{ width: wp(90) }} >
@@ -1700,7 +1473,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F6FA',
+    backgroundColor:  `${Colors.secondary_text}12`,
     padding: 10,
     paddingHorizontal: 10,
     borderRadius: 10,

@@ -56,7 +56,7 @@ const FoodCards = ({
           activeOpacity={0.9}
           onPress={addToCart}
         >
-        <AntDesign name="plus" size={iconSize ? iconSize : 12} color={Colors.button.primary_button_text} />
+        <AntDesign name="plus" size={iconSize ? iconSize : 15} color={Colors.button.primary_button_text} />
         </TouchableOpacity>}
         <Text style={styles.price}>£ {price}</Text>
       </View>
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.6),
     color: Colors.primary_text,
     marginVertical: hp(0.5),
   },

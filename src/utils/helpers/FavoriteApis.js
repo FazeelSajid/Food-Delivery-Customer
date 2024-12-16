@@ -38,7 +38,7 @@ export const getFavoriteDeals = async (customer_id, dispatch) => {
   }
 };
 
-export const removeFavoriteitem = async (id, customer_id, favoriteItems, dispatch, showAlert, setLoading,) => {
+export const removeFavoriteitem = async (id, customer_id, favoriteItems, dispatch, setLoading,) => {
 
   const favItem = favoriteItems.find(item => item?.item?.item_id === id);
 

@@ -7,8 +7,8 @@ import {
 import AddButton from '../../Assets/svg/addButton.svg';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Colors, Fonts } from '../../constants';
-
-const DealCard = ({
+import Heart from '../../Assets/svg/heartBlack.svg';
+import HeartActive from '../../Assets/svg/heartActive.svg';const DealCard = ({
   isFavorite,
   description,
   price,
@@ -33,7 +33,7 @@ const DealCard = ({
       
       {/* Cart Icon */}
       <TouchableOpacity style={styles.cartIconContainer} onPress={addToCartpress}>
-        <AntDesign name="plus" size={iconSize ? iconSize : 12} color={Colors.button.primary_button_text} />
+        <AntDesign name="plus" size={iconSize ? iconSize : 15} color={Colors.button.primary_button_text} />
       </TouchableOpacity>
 
       {/* Product Info */}
@@ -48,9 +48,11 @@ const DealCard = ({
           <Text style={[styles.priceText, priceStyle]}>£ {price}</Text>
           <TouchableOpacity onPress={heartPress}>
             {isFavorite ? (
-              <AntDesign name="heart" size={iconSize ? iconSize : 24} color={Colors.button.primary_button} />
+              // <AntDesign name="heart" size={iconSize ? iconSize : 24} color={Colors.button.primary_button} />
+              <HeartActive/>
             ) : (
-              <AntDesign name="hearto" size={iconSize ? iconSize : 24} color={Colors.button.primary_button} />
+              // <AntDesign name="hearto" size={iconSize ? iconSize : 24} color={Colors.button.primary_button} />
+              <Heart/>
             )}
           </TouchableOpacity>
         </View>

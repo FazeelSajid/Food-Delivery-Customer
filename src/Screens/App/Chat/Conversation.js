@@ -180,6 +180,7 @@ const Conversation = ({ navigation, route }) => {
       const formattedMessages = messages.map((msg, index) => ({
         ...msg,
         createdAt: new Date(msg.created_at),
+
       }));
       setMessages(formattedMessages.reverse());
     });
@@ -317,7 +318,10 @@ const Conversation = ({ navigation, route }) => {
 
         {/* Timestamp */}
         <Text style={styles.timestamp}>
-          {new Date(item.created_at).toLocaleTimeString([], {
+          { item.created_at ? new Date(item.created_at).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }) : new Date(item.timestamp).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
           })}

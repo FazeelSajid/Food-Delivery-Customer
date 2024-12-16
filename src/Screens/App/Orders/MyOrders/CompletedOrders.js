@@ -20,6 +20,9 @@ const CompletedOrders = () => {
 
   const navigation = useNavigation();
 
+  console.log('7678');
+  
+
 
   useEffect(() => {
     let filter = orders?.filter(item => item?.order_status == 'delivered');
@@ -38,10 +41,9 @@ const CompletedOrders = () => {
         ListFooterComponent={() => <View style={{height: 10}} />}
         ListEmptyComponent={() => <NoDataFound   text={"No Completed Orders"} textStyle={{fontSize: RFPercentage(3)}} />}
         renderItem={({item}) => {
-          // console.log(item?.cart_items_Data);
+          console.log(item.order_status);
           
-          let cart_item =
-            item?.cart_items_Data?.length > 0 ? item?.cart_items_Data[0] : null;
+          
           return (
             <OrderCard item={item} type = {item.order_status}  onPress={() =>
               navigation.navigate('OrderDetails', {

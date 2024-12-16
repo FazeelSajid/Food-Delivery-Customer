@@ -44,6 +44,7 @@ import {
   removeItemFromMyCart,
   setCartRestaurantId,
   setOrderComment,
+  setSelectedPaymentType,
   updateMyCartList,
 } from '../../../redux/CartSlice';
 import { getEstimatedDeliveryTime } from '../../../utils/helpers/location';
@@ -55,188 +56,7 @@ import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent
 import ItemSeparator from '../../../components/Separator/ItemSeparator';
 
 const MyCart = ({ navigation, route }) => {
-  const { cart_restaurant_id, my_cart, cart, selected_payment_type,
-    selected_payment_string } = useSelector(store => store.cart);
-
-  const { customer_id, showPopUp, popUpColor, PopUpMesage, promos, Bill, location } = useSelector(store => store.store)
-  const [selectedItem, setSelectedItem] = useState()
-  const [itemLoading, setItemLoading] = useState()
-  const [checkOutLoading, setCheckOutLoading] = useState()
-  const dispatch = useDispatch();
-  const keyboardHeight = useKeyboard();
-  const scrollViewRef = useRef();
-  const btmSheetRef = useRef();
-  const location_id = location?.id
-  const [loading, setLoading] = useState(false);
-
-  // console.log({promos});
-  // console.log({Bill}); 
-
-
-  useEffect(() => {
-    // console.log('keyboardHeight  : ', keyboardHeight);
-    scrollViewRef.current?.scrollToEnd();
-    // scrollViewRef.current?.scrollTo({y: 1180});
-  }, [keyboardHeight]);
-
-
-  // const [estimated_delivery_time, setEstimated_delivery_time] = useState(0);
-
-
-  const showBtmSheet = () => {
-    btmSheetRef?.current?.open()
-  }
-  const closeBtmSheet = () => {
-    btmSheetRef?.current?.close()
-  }
-  const [data, setData] = useState([
-    // {
-    //   id: 0,
-    //   image: Images.chinese,
-    //   title: 'Fresh Orange splash',
-    //   description: 'Mix fresh real orange',
-    //   price: '13.40',
-    //   count: 2,
-    // },
-    // {
-    //   id: 1,
-    //   image: Images.food8,
-    //   title: 'Fresh Orange splash',
-    //   description: 'Mix fresh real orange',
-    //   price: '13.40',
-    //   count: 2,
-    // },
-    // {
-    //   id: 2,
-    //   image: Images.food5,
-    //   title: 'Fresh Orange',
-    //   description: 'Mix fresh real orange',
-    //   price: '13.40',
-    //   count: 2,
-    // },
-  ]);
-
-  const handleAddQuantity = async item => {
-    try {
-      setLoading(true);
-      let obj = {
-        cart_item_id: item?.cart_item_id,
-        quantity: item?.quantity + 1,
-      };
-      console.log('data   :  ', obj);
-      await updateCartItemQuantity(obj, dispatch);
-      const newData = data?.map(element => {
-        if (element?.cart_item_id == item.cart_item_id) {
-          return {
-            ...element,
-            quantity: element.quantity + 1,
-          };
-        } else {
-          return {
-            ...element,
-          };
-        }
-      });
-      setData(newData);
-      dispatch(addToCart(newData));
-      //my_cart
-      dispatch(updateMyCartList(newData));
-      setLoading(false);
-    } catch (error) {
-      console.log('Error updating quantity : ', error);
-    }
-  };
-
-  const handleRemoveQuantity = async item => {
-    try {
-      if (item?.quantity > 1) {
-        setLoading(true);
-        let obj = {
-          cart_item_id: item?.cart_item_id,
-          quantity: item?.quantity - 1,
-        };
-        await updateCartItemQuantity(obj, dispatch);
-        const newData = data?.map(element => {
-          if (element?.item_id == item.item_id) {
-            return {
-              ...element,
-              quantity: element.quantity - 1,
-            };
-          } else {
-            return {
-              ...element,
-            };
-          }
-        });
-        setData(newData);
-        dispatch(addToCart(newData));
-        //my_cart
-        dispatch(updateMyCartList(newData));
-
-        if (newData?.length == 0) {
-          dispatch(setCartRestaurantId(null));
-        }
-        setLoading(false);
-      }
-    } catch (error) {
-      console.log('Error updating quantity : ', error);
-    }
-  };
-
-  // console.log(itemLoading);
-
-
-  const handleDelete = async item => {
-    // console.log(item);
-    setSelectedItem(item?.cart_item_id)
-    setItemLoading(true)
-
-    try {
-      // setLoading(true);
-      console.log('item   :  ', item?.cart_item_id);
-      // let customer_id = await AsyncStorage.getItem('customer_id');
-      let cart = await getCustomerCart(customer_id, dispatch);
-      console.log('cart  : ', cart);
-
-      removeItemFromCart(cart?.cart_id, item?.cart_item_id, dispatch)
-        .then(response => {
-          if (response?.status == true) {
-            console.log('response  :  ', response);
-            const filter = data.filter(
-              element => element?.cart_item_id != item?.cart_item_id,
-            );
-            // console.log('filter, from remove from cart' ,filter );
-
-            setData(filter);
-            dispatch(addToCart(filter));
-
-            //my_cart
-            // dispatch(removeItemFromMyCart(item?.cart_item_id));
-            dispatch(updateMyCartList(filter));
-
-            if (filter?.length == 0) {
-              dispatch(setCartRestaurantId(null));
-            }
-          } else {
-            setTimeout(() => {
-              showAlert(response?.message);
-            }, 500);
-          }
-        })
-        .catch(error => {
-          console.log('error: ', error);
-        })
-        .finally(() => {
-          setLoading(false);
-          setItemLoading(false);
-        });
-    } catch (error) {
-      setLoading(false);
-      console.log('error in delete item  :  ', error);
-    }
-  };
-
-  // const getDeliveryTime = async cartItems => {
+    // const getDeliveryTime = async cartItems => {
   //   let shipping_address = await getShippingAddress();
   //   let location = shipping_address?.address;
   //   if (location) {
@@ -255,115 +75,7 @@ const MyCart = ({ navigation, route }) => {
   //     setEstimated_delivery_time(0);
   //   }
   // };
-
-  const get_Cart_Items = async () => {
-    try {
-      setLoading(true);
-      // let customer_id = await AsyncStorage.getItem('customer_id');
-      let cart = await getCustomerCart(customer_id, dispatch);
-      let cartItems = await getCartItems(cart?.cart_id, dispatch);
-      // console.log(cartItems);
-
-      if (cartItems) {
-        dispatch(addToCart(cartItems));
-        setData(cartItems);
-        //my_cart
-        dispatch(updateMyCartList(cartItems));
-        if (!cart_restaurant_id && cartItems?.length > 0) {
-          dispatch(setCartRestaurantId(cartItems[0]?.itemData?.restaurant_id));
-        }
-        // getDeliveryTime(cartItems);
-      }
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      console.log('Error in getCartItems :  ', error);
-    }
-  };
-
-  const calculatePreOrderDetails = (paymentType, promoCode) => {
-    if (!location_id) {
-      showBtmSheet();
-    } else {
-      setCheckOutLoading(true);
-
-      try {
-        // Calculate subtotal
-        let subtotal = 0;
-        const cartItemIds = cart.map(item => {
-          const price = parseInt(
-            item?.itemData?.variationData?.price
-              ? item?.itemData?.variationData?.price
-              : item?.itemData?.price
-          );
-          const quantity = item?.quantity ? parseInt(item?.quantity) : 1;
-          subtotal += price * quantity;
-          return item.cart_item_id;
-        });
-
-        // console.log({cartItemIds});
-
-        // Update Redux store with calculated data
-        dispatch(setBill({ cartItemIds, subtotal: subtotal.toFixed(2) }));
-
-        // Prepare request body
-        const body = {
-          customer_id: customer_id,
-          cart_items_ids: cartItemIds,
-          promo_code: promoCode ? promoCode : '', // optional
-          payment_option: selected_payment_type ? selected_payment_type: 'cash',
-          sub_total: subtotal.toFixed(2),
-          location_id: location.id,
-        };
-
-        console.log({ body });
-
-        // API call to calculate pre-order details
-        fetch(api.calculatePreOrder, {
-          method: 'POST',
-          body: JSON.stringify(body),
-          headers: {
-            'Content-type': 'application/json; charset=UTF-8',
-          },
-        })
-          .then(response => response.json())
-          .then(response => {
-            if (!response.error) {
-              console.log({ response });
-
-              dispatch(
-                setBill({
-                  delivery_charges: response?.result?.delivery_charges,
-                  gst_charges: response?.result?.gst_charges,
-                  total_amount: response?.result?.total_amount,
-                })
-              );
-              navigation?.navigate('Checkout');
-            }
-            else{
-            handlePopup(dispatch, 'Something went wrong', 'red')
-            console.log({ response });
-
-            }
-          }
-        
-        )
-          .catch(error => {
-            // console.log('Error in calculatePreOrderDetails API call: ', error);
-            handlePopup(dispatch, 'Something went wrong', 'red')
-          });
-      } catch (error) {
-        // console.log('Error in calculating subtotal or API request: ', error);
-        handlePopup(dispatch, 'Something went wrong', 'red')
-      }
-      finally {
-        setCheckOutLoading(false);
-      }
-    }
-  };
-
-
-  // const extractCartItemIds = (itemsArray) => {
+    // const extractCartItemIds = (itemsArray) => {
   //   return itemsArray.map(item => item.cart_item_id);
   // };
 
@@ -451,6 +163,256 @@ const MyCart = ({ navigation, route }) => {
   // useEffect(() => {
   //   get_Cart_Items();
   // }, []);
+  const ref_RBSheetPaymentOption = useRef(null);
+
+  const { cart_restaurant_id, my_cart, cart, selected_payment_type,
+    selected_payment_string } = useSelector(store => store.cart);
+
+  const { customer_id, showPopUp, popUpColor, PopUpMesage, promos, Bill, location } = useSelector(store => store.store)
+  const [selectedItem, setSelectedItem] = useState()
+  const [itemLoading, setItemLoading] = useState()
+  const [checkOutLoading, setCheckOutLoading] = useState()
+  const dispatch = useDispatch();
+  const keyboardHeight = useKeyboard();
+  const scrollViewRef = useRef();
+  const btmSheetRef = useRef();
+  const location_id = location?.id
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    scrollViewRef.current?.scrollToEnd();
+    if (!selected_payment_type) {
+    dispatch(setSelectedPaymentType('cash'))
+      
+    }
+  }, [keyboardHeight]);
+
+  // console.log({selected_payment_type});
+
+  
+
+  const showBtmSheet = () => {
+    btmSheetRef?.current?.open()
+  }
+  const closeBtmSheet = () => {
+    btmSheetRef?.current?.close()
+  }
+  
+  const [data, setData] = useState([]);
+
+  const handleAddQuantity = async item => {
+    try {
+      setLoading(true);
+      let obj = {
+        cart_item_id: item?.cart_item_id,
+        quantity: item?.quantity + 1,
+      };
+      console.log('data   :  ', obj);
+      await updateCartItemQuantity(obj, dispatch);
+      const newData = data?.map(element => {
+        if (element?.cart_item_id == item.cart_item_id) {
+          return {
+            ...element,
+            quantity: element.quantity + 1,
+          };
+        } else {
+          return {
+            ...element,
+          };
+        }
+      });
+      setData(newData);
+      dispatch(addToCart(newData));
+      dispatch(updateMyCartList(newData));
+      setLoading(false);
+    } catch (error) {
+      console.log('Error updating quantity : ', error);
+    }
+  };
+
+  const handleRemoveQuantity = async item => {
+    try {
+      if (item?.quantity > 1) {
+        setLoading(true);
+        let obj = {
+          cart_item_id: item?.cart_item_id,
+          quantity: item?.quantity - 1,
+        };
+        await updateCartItemQuantity(obj, dispatch);
+        const newData = data?.map(element => {
+          if (element?.item_id == item.item_id) {
+            return {
+              ...element,
+              quantity: element.quantity - 1,
+            };
+          } else {
+            return {
+              ...element,
+            };
+          }
+        });
+        setData(newData);
+        dispatch(addToCart(newData));
+        //my_cart
+        dispatch(updateMyCartList(newData));
+
+        if (newData?.length == 0) {
+          dispatch(setCartRestaurantId(null));
+        }
+        setLoading(false);
+      }
+    } catch (error) {
+      console.log('Error updating quantity : ', error);
+    }
+  };
+
+
+
+  const handleDelete = async item => {
+    setSelectedItem(item?.cart_item_id)
+    setItemLoading(true)
+
+    try {
+      console.log('item   :  ', item?.cart_item_id);
+      let cart = await getCustomerCart(customer_id, dispatch);
+      console.log('cart  : ', cart);
+
+      removeItemFromCart(cart?.cart_id, item?.cart_item_id, dispatch)
+        .then(response => {
+          if (response?.status == true) {
+            console.log('response  :  ', response);
+            const filter = data.filter(
+              element => element?.cart_item_id != item?.cart_item_id,
+            );
+
+            setData(filter);
+            dispatch(addToCart(filter));
+
+            dispatch(updateMyCartList(filter));
+
+            if (filter?.length == 0) {
+              dispatch(setCartRestaurantId(null));
+            }
+          } else {
+              handlePopup(dispatch,response?.message, 'red');
+
+          }
+        })
+        .catch(error => {
+          console.log('error: ', error);
+        })
+        .finally(() => {
+          setLoading(false);
+          setItemLoading(false);
+        });
+    } catch (error) {
+      setLoading(false);
+      console.log('error in delete item  :  ', error);
+    }
+  };
+
+
+
+  const get_Cart_Items = async () => {
+    try {
+      setLoading(true);
+      let cart = await getCustomerCart(customer_id, dispatch);
+      let cartItems = await getCartItems(cart?.cart_id, dispatch);
+
+      if (cartItems) {
+        dispatch(addToCart(cartItems));
+        setData(cartItems);
+        dispatch(updateMyCartList(cartItems));
+        if (!cart_restaurant_id && cartItems?.length > 0) {
+          dispatch(setCartRestaurantId(cartItems[0]?.itemData?.restaurant_id));
+        }
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log('Error in getCartItems :  ', error);
+    }
+  };
+
+  const calculatePreOrderDetails = (paymentType, promoCode) => {
+    if (!location_id) {
+      showBtmSheet();
+    }else if (!selected_payment_type) {
+      ref_RBSheetPaymentOption.current.open()
+    }
+     else {
+      setCheckOutLoading(true);
+
+      try {
+        // Calculate subtotal
+        let subtotal = 0;
+        const cartItemIds = cart.map(item => {
+          const price = parseInt(
+            item?.itemData?.variationData?.price
+              ? item?.itemData?.variationData?.price
+              : item?.itemData?.price
+          );
+          const quantity = item?.quantity ? parseInt(item?.quantity) : 1;
+          subtotal += price * quantity;
+          return item.cart_item_id;
+        });
+
+       
+        dispatch(setBill({ cartItemIds, subtotal: subtotal.toFixed(2) }));
+
+        const body = {
+          customer_id: customer_id,
+          cart_items_ids: cartItemIds,
+          promo_code: promoCode ? promoCode : '', // optional
+          payment_option: selected_payment_type,
+          sub_total: subtotal.toFixed(2),
+          location_id: location.id,
+        };
+
+        console.log({ body });
+
+        fetch(api.calculatePreOrder, {
+          method: 'POST',
+          body: JSON.stringify(body),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        })
+          .then(response => response.json())
+          .then(response => {
+            if (!response.error) {
+              console.log({ response });
+
+              dispatch(
+                setBill({
+                  delivery_charges: response?.result?.delivery_charges,
+                  gst_charges: response?.result?.gst_charges,
+                  total_amount: response?.result?.total_amount,
+                })
+              );
+              navigation?.navigate('Checkout');
+            }
+            else{
+            handlePopup(dispatch, 'Something went wrong', 'red')
+            console.log({ response });
+
+            }
+          }
+        
+        )
+          .catch(error => {
+            handlePopup(dispatch, 'Something went wrong', 'red')
+          });
+      } catch (error) {
+        handlePopup(dispatch, 'Something went wrong', 'red')
+      }
+      finally {
+        setCheckOutLoading(false);
+      }
+    }
+  };
+
+
 
   useFocusEffect(
     React.useCallback(() => {
@@ -482,8 +444,6 @@ const MyCart = ({ navigation, route }) => {
                   fontSize: RFPercentage(2.2),
                 }}>
                 40 mins
-                {/* {estimated_delivery_time} mins */}
-
               </Text>
             </View>
           </View>
@@ -612,16 +572,8 @@ const MyCart = ({ navigation, route }) => {
                 </TouchableOpacity>
               </View>
               <TouchableOpacity style={styles.rowView} onPress={async () => {
-
-                // getRestaurants();
-                // getDeals();
-                // console.log(address);
                 navigation.navigate('ManageAddress')
                 closeBtmSheet()
-
-                // navigation.navigate('AddAddress', { address })
-
-
               }} >
                 <Icons.MarkerOutlineActive />
                 <Text style={styles.btmsheettext} >Manage Address</Text>
@@ -638,6 +590,60 @@ const MyCart = ({ navigation, route }) => {
             </View>
           }
         />
+          <CRBSheetComponent
+          refRBSheet={ref_RBSheetPaymentOption}
+          height={180}
+          content={
+            <View style={{ width: wp(90) }}>
+              <View style={styles.rowViewSB1}>
+                <Text style={styles.rbSheetHeading}>Select an option</Text>
+                <TouchableOpacity
+                  onPress={() => ref_RBSheetPaymentOption?.current?.close()}>
+                  <Ionicons name={'close'} size={22} color={'#1E2022'} />
+                </TouchableOpacity>
+              </View>
+              <View style={{ flex: 1 }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    dispatch(setSelectedPaymentType('cash'))
+                    ref_RBSheetPaymentOption?.current?.close()
+                  }}
+                  style={styles.rowView}>
+                
+                  <Text
+                    style={{
+                      color: Colors.secondary_text,
+                      fontFamily: Fonts.PlusJakartaSans_Regular,
+                      marginTop: -2,
+                      fontSize: RFPercentage(1.8),
+                    }}>
+                    Cash on Delivery
+                  </Text>
+                </TouchableOpacity>
+                <ItemSeparator />
+                <TouchableOpacity
+                  onPress={() => {
+                    dispatch(setSelectedPaymentType('card'))
+                    ref_RBSheetPaymentOption?.current?.close()
+
+                  }}
+                  style={styles.rowView}>
+                 
+                  <Text
+                    style={{
+                      color: Colors.secondary_text,
+                      fontFamily: Fonts.PlusJakartaSans_Regular,
+                      marginTop: -2,
+                      fontSize: RFPercentage(1.8),
+                    }}>
+                    Wallet Payment
+                  </Text>
+                </TouchableOpacity>
+                
+              </View>
+            </View>
+          }
+        />
         <View
           style={{
             flex: 1,
@@ -648,17 +654,11 @@ const MyCart = ({ navigation, route }) => {
             title="Checkout"
             loading={checkOutLoading}
             onPress={() => {
-              // console.log('data?.length : ', data);
               if (data?.length == 0) {
                 handlePopup(dispatch, 'Please Add Items in cart to checkout', 'red');
               } else {
-                // dispatch(setOrderComment(comments));
                 calculatePreOrderDetails()
-                // navigation?.navigate('Checkout');
-                // navigation?.navigate('Checkout', {
-                //   items: data,
-                //   comments: comments,
-                // });
+                
               }
             }}
           />
@@ -687,8 +687,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#F6F6F6',
-    // padding: 10,
     paddingHorizontal: 10,
     borderRadius: 10,
     overflow: 'hidden',
@@ -722,11 +720,7 @@ const styles = StyleSheet.create({
     width: '100%',
     resizeMode: 'cover',
   },
-  // subText: {
-  //   color: '#8D93A1',
-  //   fontFamily: Fonts.PlusJakartaSans_Medium,
-  //   fontSize: RFPercentage(2),
-  // },
+ 
   title: {
     color: Colors.primary_text,
     fontSize: RFPercentage(2),
@@ -742,7 +736,6 @@ const styles = StyleSheet.create({
   rowView: {
     flexDirection: 'row',
     alignItems: 'center',
-    // justifyContent: 'space-between'
   },
   rowViewSB1: {
     flexDirection: 'row',
@@ -768,7 +761,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.PlusJakartaSans_Bold,
   },
 
-  //swipe list view
   rowBack: {
     alignItems: 'center',
     flex: 1,

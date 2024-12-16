@@ -7,16 +7,19 @@ export const firebase_server_key =
   'AAAARGSehxU:APA91bG2viSqkARpqskf1Izg4PSBuqHTwxXBS49vU3XCZ4swWfMUDUmhfgpC5NAHXQYQVXL7e9cS80ppZz6EcQb1dJxZmjLouxqzLT6LkeZBRe7vZs48PP71QaNsFCu0vSUkDDxCDKdk';
 
 // Live Server
-export const BASE_URL = 'https://food-delivery-be.caprover-demo.mtechub.com/';
-export const BASE_URL_IMAGE = 'https://food-delivery-be.caprover-demo.mtechub.com/';
+// export const BASE_URL = 'https://food-delivery-be.caprover-demo.mtechub.com/';
+// export const BASE_URL_IMAGE = 'https://food-delivery-be.caprover-demo.mtechub.com/';
+
+export const BASE_URL = 'https://food-delivery-backend-testing.caprover.musuvillc.com/';
+export const BASE_URL_IMAGE = 'https://food-delivery-backend-testing.caprover.musuvillc.com/';
 
 // // Room
 // export const BASE_URL = 'http://192.168.100.118:3017/';
 // export const BASE_URL_IMAGE = 'http://192.168.100.118:3017/';
 
   // Ayyaz
-  // export const BASE_URL = 'http://192.168.8.101:3017/';
-  // export const BASE_URL_IMAGE = 'http://192.168.8.101:3017/';
+  // export const BASE_URL = 'http://192.168.100.32:3017/';
+  // export const BASE_URL_IMAGE = 'http://192.168.100.32:3017/';
 
 // Hotspot
 
