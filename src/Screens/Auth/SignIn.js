@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
-import {Colors, Fonts, Icons, Images} from '../../constants';
+import {Fonts, Icons, Images} from '../../constants';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -17,7 +17,7 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import CInput from '../../components/TextInput/CInput';
 import Feather from 'react-native-vector-icons/Feather';
 import CButton from '../../components/Buttons/CButton';
-import STYLE from './STYLE';
+import { getStyles } from './STYLE';
 import {useKeyboard} from '../../utils/UseKeyboardHook';
 import {useDispatch, useSelector} from 'react-redux';
 import {
@@ -28,10 +28,8 @@ import {
   setPassword,
   setRestautantDetails
 } from '../../redux/AuthSlice';
-import {getUserFcmToken, handlePopup, showAlert} from '../../utils/helpers';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getUserFcmToken, handlePopup} from '../../utils/helpers';
 import api from '../../constants/api';
-import CInputWithCountryCode from '../../components/TextInput/CInputWithCountryCode';
 import {
   GoogleSignin,
   GoogleSigninButton,
@@ -39,16 +37,14 @@ import {
 } from '@react-native-google-signin/google-signin';
 import CRBSheetComponent from '../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { RadioButton } from 'react-native-paper';
-import Google from '../../Assets/svg/Googlee.svg';
 import PopUp from '../../components/Popup/PopUp';
 
 
 const SignIn = ({navigation, route}) => {
   const dispatch = useDispatch();
   const btmSheetRef = useRef()
-  const { signUpWith } = useSelector(store => store.store)
-  const {showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store);
+  const {showPopUp, popUpColor, PopUpMesage, signUpWith, Colors} = useSelector(store => store.store);
+  const STYLE = getStyles(Colors)
 
 
   const showBtmSheet = () => {
@@ -80,7 +76,6 @@ const SignIn = ({navigation, route}) => {
     />
   );
 
-  const keyboardHeight = useKeyboard();
   const scrollViewRef = useRef();
   
 
@@ -94,7 +89,6 @@ const SignIn = ({navigation, route}) => {
 
   const clearFields = () => {
     setShowPass(false);
-    // setUser_name('');
     setPhone_no('');
     setPasswords('');
   };
@@ -104,9 +98,7 @@ const SignIn = ({navigation, route}) => {
       handlePopup(dispatch, 'Please Enter email address', 'red');
       return false;
     } 
-    // Check if userValue is a valid email
     const isEmail = /\S+@\S+\.\S+/.test(userValue);
-    // Check if userValue is a valid phone number
     const isPhone = /^[+]?[0-9]{10,15}$/.test(userValue);
   
     if (!isEmail && !isPhone) {
@@ -114,39 +106,20 @@ const SignIn = ({navigation, route}) => {
       return false;
     }
   
-    // Check if password is empty
     if (!password || password.length === 0) {
       handlePopup(dispatch, 'Please Enter Password', 'red');
       return false;
     }
-  
-    // All validations passed
-    return true;
+      return true;
   };
-  // const validate = () => {
-  //   if (countryCode?.length == 0) {
-  //     showAlert('Please Enter Country');
-  //     return false;
-  //   } else if (phone_no?.length == 0) {
-  //     showAlert('Please Enter Phone No');
-  //     return false;
-  //   } else if (password?.length == 0) {
-  //     showAlert('Please Enter Password');
-  //     return false;
-  //   } else {
-  //     return true;
-  //   }
-  // };
 
   const handleLogin = async () => {
 
     if (validate()) {
-    // console.log('countryCode + phone_no   :  ', countryCode + phone_no);
     setLoading(true);
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\+?[0-9\s-]+$/;
-    // console.log(emailRegex);
     
     let fcm_token = await getUserFcmToken();
     console.log({fcm_token});
@@ -161,7 +134,6 @@ const SignIn = ({navigation, route}) => {
         rest_ID: "res_4074614",
     }
 
-    // console.log(data, 'dataaa');
     
 
     fetch(api.login, {
@@ -203,7 +175,6 @@ const SignIn = ({navigation, route}) => {
           dispatch(setCustomerDetail(response?.user));
          console.log('user', data)
           dispatch(setPassword(password))
-          // navigation?.popToTop()
           navigation?.replace('Drawer');
           clearFields();
         }
@@ -216,7 +187,6 @@ const SignIn = ({navigation, route}) => {
         setLoading(false);
       });
       console.log("Signing in with email:", userValue);
-      // Add email sign-in logic here
     } else if (phoneRegex.test(userValue)) {
       let data = {
         login_type: 'phone_no',
@@ -250,7 +220,6 @@ const SignIn = ({navigation, route}) => {
             
             clearFields();
           } else if (response?.status == false) {
-            // showAlert(response?.message);
             handlePopup(dispatch,'Invalid Credentials', 'red');
           }else if (response?.user?.trash === true) {
             handlePopup(dispatch,'Account Delete Please login with different phone', 'red');
@@ -260,7 +229,6 @@ const SignIn = ({navigation, route}) => {
           else {
            
             dispatch(setJoinAsGuest(false));
-            // console.log(response?.user?.customer_id?.toString());
             dispatch(setRestautantDetails(response?.restaurant))
             dispatch(
               setCustomerId(response?.user?.customer_id?.toString()),
@@ -281,11 +249,9 @@ const SignIn = ({navigation, route}) => {
         });
 
       console.log("Signing in with phone number:", userValue);
-      // Add phone sign-in logic here
     } else {
       handlePopup(dispatch,"Invalid input. Please enter a valid email or phone number.", 'red');
       setLoading(false);
-      // Optionally handle invalid input case
     }
 
    
@@ -332,7 +298,6 @@ const SignIn = ({navigation, route}) => {
             );
             dispatch(setJoinAsGuest(false));
             dispatch(setCustomerDetail(response?.result));
-            // navigation?.popToTop()
             navigation?.navigate('Drawer');
             clearFields();
           }
@@ -358,9 +323,6 @@ const SignIn = ({navigation, route}) => {
       const userInfo = await GoogleSignin.signIn();
       let email = userInfo?.user?.email;
       let name = userInfo?.user?.name;
-      // console.log('user email : ', email, name);
-      // console.log('userInfo  :   ', userInfo);
-      // return;
       let fcm_token = await getUserFcmToken();
       if (email) {
         setLoading(true);
@@ -420,11 +382,8 @@ const SignIn = ({navigation, route}) => {
     } catch (error) {
       console.log('Error Message', error);
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        //alert('User Cancelled the Login Flow');
       } else if (error.code === statusCodes.IN_PROGRESS) {
-        //alert('Signing In');
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        //alert('Play Services Not Available or Outdated');
       } else {
 
         handlePopup(dispatch,'Something went wrong!', 'red');
@@ -457,19 +416,6 @@ const SignIn = ({navigation, route}) => {
             value={userValue}
             onChangeText={text => setUserValue(text)}
           />
-          {/* <CInput
-            placeholder="Phone Number"
-            value={phone_no}
-            onChangeText={text => setPhone_no(text)}
-            keyboardType="numeric"
-          /> */}
-
-          {/* <CInputWithCountryCode
-            phoneNo={phone_no}
-            setPhoneNo={setPhone_no}
-            setCountryCode={setCountryCode}
-            countryCode={countryCode}
-          /> */}
 
           <CInput
             placeholder="Password"
@@ -510,7 +456,6 @@ const SignIn = ({navigation, route}) => {
           <CButton
             title="JOIN AS GUEST"
             height={hp(6.2)}
-            // marginTop={hp(10)}
             transparent={true}
             width={wp(88)}
             onPress={() => {
@@ -522,14 +467,13 @@ const SignIn = ({navigation, route}) => {
           <Text style={STYLE.orText}>-- Or --</Text>
           <View style={{}} >
           <CButton
-            title="Sign in with Google"
+            title="Sign in with Goole"
             height={hp(6.2)}
-            // marginTop={hp(10)}
             transparent={true}
             width={wp(88)}
-            leftIcon={<Google  />}
-            borderColor={Colors.borderGray}
-            color={Colors.primary_text}
+            leftIcon={<Icons.Googlee  />}
+            // borderColor={Colors.borderGray}
+            // color={Colors.primary_text}
             onPress={() => handleGoogleSignIn()}
             style={{marginTop: 0}}
           />
@@ -550,7 +494,6 @@ const SignIn = ({navigation, route}) => {
               </View>
 
               <TouchableOpacity style={STYLE.rowView} onPress={() =>toggleSelection('phone')} >
-                {/* <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/> */}
                 <Text
                   style={{
                     color: Colors.secondary_text,
@@ -564,7 +507,6 @@ const SignIn = ({navigation, route}) => {
               </TouchableOpacity  >
               <ItemSeparator />
               <TouchableOpacity style={STYLE.rowView} onPress={() => toggleSelection('email')}>
-                {/* <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} /> */}
                 <Text
                   style={{
                     color: Colors.secondary_text,
@@ -587,286 +529,3 @@ const SignIn = ({navigation, route}) => {
 
 export default SignIn;
 
-// const styles = StyleSheet.create({});
-
-// import React from 'react';
-// import {
-//   View,
-//   ImageBackground,
-//   Text,
-//   ScrollView,
-//   Image,
-//   KeyboardAvoidingView,
-//   TextInput,
-//   TouchableOpacity,
-//   StyleSheet,
-//   StatusBar,
-// } from 'react-native';
-
-// import {
-//   widthPercentageToDP as wp,
-//   heightPercentageToDP as hp,
-// } from 'react-native-responsive-screen';
-
-// import {RFPercentage} from 'react-native-responsive-fontsize';
-// import Ionicons from 'react-native-vector-icons/Ionicons';
-// import FontAwesome from 'react-native-vector-icons/FontAwesome';
-// import Feather from 'react-native-vector-icons/Feather';
-
-// const SignIn = ({navigation, route}) => {
-//   return (
-//     <KeyboardAvoidingView style={styles.container}>
-//       <ScrollView contentContainerStyle={styles.content}>
-//         <StatusBar
-//           backgroundColor={'transparent'}
-//           barStyle={'light-content'}
-//           translucent
-//         />
-//         <ImageBackground
-//           source={require('../../Assets/png/Auth/signInbg.png')}
-//           resizeMode="stretch"
-//           style={styles.image}>
-//           <View style={styles.mainBody}>
-//             <View style={styles.header}>
-//               <TouchableOpacity
-//                 onPress={() => navigation?.goBack()}
-//                 style={styles.backIcon}>
-//                 <Ionicons name="chevron-back" size={hp(4)} color="#FFFFFF" />
-//               </TouchableOpacity>
-//             </View>
-//             <View style={styles.textsContainer}>
-//               <Text style={styles.mainText}>Food Delivery App</Text>
-//               <Text style={styles.descriptionText}>
-//                 Sign in to our food delivery app and {'\n'} unlock a world of
-//                 culinary delights
-//               </Text>
-//             </View>
-//             <View style={styles.inputsbuttonContainer}>
-//               <View style={styles.inputsContainer}>
-//                 <View
-//                   style={{
-//                     ...styles.inputButton,
-//                     flexDirection: 'row',
-//                     backgroundColor: '#FFFFFF',
-//                     opacity: 0.7,
-//                     marginTop: hp(4),
-//                   }}>
-//                   <View
-//                     style={{
-//                       ...styles.iconContainer,
-//                       justifyContent: 'center',
-//                       alignItems: 'center',
-//                     }}>
-//                     <FontAwesome name="user-o" size={hp(2.3)} color="#595959" />
-//                   </View>
-//                   <View style={styles.inputContainer}>
-//                     <TextInput
-//                       style={styles.input}
-//                       color="#212121"
-//                       placeholder="Username"
-//                       placeholderTextColor={Colors.secondary_text}
-//                       // onChangeText={text => setFullName(text)}
-//                       // value={fullName}
-//                     />
-//                   </View>
-//                 </View>
-//                 <View
-//                   style={{
-//                     ...styles.inputButton,
-//                     flexDirection: 'row',
-//                     backgroundColor: '#FFFFFF',
-//                     opacity: 0.7,
-//                     marginTop: hp(4),
-//                   }}>
-//                   <View
-//                     style={{
-//                       ...styles.iconContainer,
-//                       justifyContent: 'center',
-//                       alignItems: 'center',
-//                     }}>
-//                     <Feather name="phone" size={hp(2.3)} color="#595959" />
-//                   </View>
-//                   <View style={styles.inputContainer}>
-//                     <TextInput
-//                       style={styles.input}
-//                       color="#212121"
-//                       placeholder="Phone Number"
-//                       placeholderTextColor={Colors.secondary_text}
-//                       keyboardType="phone-pad"
-//                       // onChangeText={text => setFullName(text)}
-//                       // value={fullName}
-//                     />
-//                   </View>
-//                 </View>
-//               </View>
-//               <TouchableOpacity onPress={() => navigation?.navigate('Drawer')}>
-//                 <View
-//                   style={{
-//                     ...styles.inputButton,
-//                     backgroundColor: '#FF5722',
-//                     marginTop: hp(4),
-//                   }}>
-//                   <Text style={styles.buttonText}>Sign In</Text>
-//                 </View>
-//               </TouchableOpacity>
-//             </View>
-//             <View style={styles.continueAscontainer}>
-//               <View style={styles.line} />
-//               <View style={styles.textContainer}>
-//                 <Text style={styles.descriptionText}>or continue as</Text>
-//               </View>
-//               <View style={styles.line} />
-//             </View>
-//             <View style={styles.optionsContainer}>
-//               <TouchableOpacity>
-//                 <View style={styles.optionContainer}>
-//                   <Image
-//                     source={require('../../Assets/png/Auth/google.png')}
-//                     resizeMode="contain"
-//                   />
-//                 </View>
-//               </TouchableOpacity>
-//               <TouchableOpacity>
-//                 <View style={styles.optionContainer}>
-//                   <Image
-//                     source={require('../../Assets/png/Auth/facebook.png')}
-//                     resizeMode="contain"
-//                   />
-//                 </View>
-//               </TouchableOpacity>
-//             </View>
-//             <View style={styles.signUpTextContainer}>
-//               <Text style={styles.descriptionText}>Don’t have an account?</Text>
-//               <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-//                 <Text style={{...styles.descriptionText, color: '#FF5722'}}>
-//                   {' '}
-//                   Sign Up
-//                 </Text>
-//               </TouchableOpacity>
-//             </View>
-//           </View>
-//         </ImageBackground>
-//       </ScrollView>
-//     </KeyboardAvoidingView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//   },
-//   content: {
-//     flexGrow: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   image: {
-//     flex: 1,
-//     alignItems: 'center',
-//   },
-//   mainBody: {
-//     flex: 1,
-//     backgroundColor: 'rgba(0, 0, 0, 0.45)',
-//     paddingTop: hp(1),
-//   },
-
-//   header: {
-//     height: hp(12),
-//     justifyContent: 'center',
-//     marginBottom: hp(5),
-//     marginTop: hp(1),
-//   },
-//   backIcon: {
-//     height: hp(5),
-//     width: wp(8),
-//     marginLeft: wp(6),
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   textsContainer: {
-//     height: hp(19),
-//     width: wp(100),
-//     justifyContent: 'center',
-//   },
-//   mainText: {
-//     color: '#FFFFFF',
-//     fontFamily: 'PlusJakartaSans-Regular',
-//     fontSize: RFPercentage(3.5),
-//     fontWeight: 'bold',
-//     textAlign: 'center',
-//     marginBottom: hp('2'),
-//     opacity: 0.9,
-//   },
-//   descriptionText: {
-//     color: '#FFFFFF',
-//     fontSize: RFPercentage(2),
-//     fontFamily: 'PlusJakartaSans-Regular',
-//     textAlign: 'center',
-//     opacity: 0.9,
-//   },
-//   inputsbuttonContainer: {
-//     height: hp(40),
-//   },
-//   inputsContainer: {
-//     height: hp(25),
-//   },
-//   iconContainer: {
-//     width: wp(10),
-//     height: '100%',
-//   },
-//   inputContainer: {
-//     width: wp(60),
-//     height: '100%',
-//   },
-//   input: {
-//     height: hp(6),
-//   },
-//   buttonText: {
-//     color: '#FFFFFF',
-//     fontSize: RFPercentage(2),
-//     textAlign: 'center',
-//     fontFamily: 'PlusJakartaSans-Regular',
-//   },
-//   inputButton: {
-//     height: hp(6.5),
-//     justifyContent: 'center',
-//     alignSelf: 'center',
-//     width: wp(83),
-//     borderRadius: hp(10),
-//   },
-//   continueAscontainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     marginTop: hp(2),
-//   },
-//   line: {
-//     width: wp(25),
-//     height: 1,
-//     backgroundColor: '#FFFFFF',
-//   },
-//   textContainer: {
-//     paddingHorizontal: 10,
-//   },
-//   optionsContainer: {
-//     height: hp(15),
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     flexDirection: 'row',
-//   },
-//   optionContainer: {
-//     width: wp(15),
-//     height: wp(15),
-//     borderRadius: hp(50),
-//     backgroundColor: '#FFFFFF',
-//     marginHorizontal: wp(5),
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   signUpTextContainer: {
-//     justifyContent: 'center',
-//     flexDirection: 'row',
-//   },
-// });
-
-// export default SignIn;

@@ -8,15 +8,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React from 'react';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import {Colors, Images, Fonts} from '../../constants';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import { Fonts} from '../../constants';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
 import PriceText from '../Text';
+import { useSelector } from 'react-redux';
 
 const OrdersCard = ({
   image,
@@ -28,6 +24,82 @@ const OrdersCard = ({
   disabled,
 }) => {
   const navigation = useNavigation();
+      const  {Colors } = useSelector(store => store.store);
+
+      const styles = StyleSheet.create({
+        itemView: {
+          marginVertical: 10,
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: Colors.secondary_color,
+          padding: 5,
+          paddingHorizontal: 10,
+          borderRadius: 10,
+          overflow: 'hidden',
+        },
+        imageContainer: {
+          width: 80,
+          height: 70,
+          borderRadius: 10,
+          overflow: 'hidden',
+        },
+        image: {
+          height: '100%',
+          width: '100%',
+          resizeMode: 'contain',
+        },
+        textContainer: {
+          marginLeft: 10,
+          flex: 1,
+        },
+        title: {
+          fontFamily: Fonts.Inter_SemiBold,
+          color: Colors.primary_text,
+          fontSize: RFPercentage(1.7),
+          lineHeight: 25,
+        },
+        nameText: {
+          fontFamily: Fonts.Inter_Regular,
+          color: Colors.primary_text,
+          opacity: 0.6,
+          fontSize: RFPercentage(1.5),
+          lineHeight: 16,
+        },
+        ratingText: {
+          fontFamily: Fonts.PlusJakartaSans_Bold,
+          color: Colors.primary_text,
+          fontSize: RFPercentage(2),
+          lineHeight: 25,
+          marginLeft: 5,
+        },
+        rowViewSB: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          flex: 1,
+          justifyContent: 'space-between',
+        },
+        rowView: {
+          flexDirection: 'row',
+          alignItems: 'center',
+        },
+        labelView: {
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          backgroundColor: Colors.primary_color,
+          padding: 4,
+          paddingHorizontal: 5,
+          minWidth: 80,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        labelText: {
+          color: Colors.button.primary_button_text,
+          fontSize: RFPercentage(1.4),
+          fontFamily: Fonts.PlusJakartaSans_Regular,
+        },
+      });
+  
   return (
     <TouchableOpacity
       disabled={disabled ? disabled : false}
@@ -70,76 +142,4 @@ const OrdersCard = ({
 
 export default OrdersCard;
 
-const styles = StyleSheet.create({
-  itemView: {
-    marginVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.secondary_color,
-    padding: 5,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  imageContainer: {
-    width: 80,
-    height: 70,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  image: {
-    height: '100%',
-    width: '100%',
-    resizeMode: 'contain',
-  },
-  textContainer: {
-    marginLeft: 10,
-    flex: 1,
-  },
-  title: {
-    fontFamily: Fonts.Inter_SemiBold,
-    color: Colors.primary_text,
-    fontSize: RFPercentage(1.7),
-    lineHeight: 25,
-  },
-  nameText: {
-    fontFamily: Fonts.Inter_Regular,
-    color: Colors.primary_text,
-    opacity: 0.6,
-    fontSize: RFPercentage(1.5),
-    lineHeight: 16,
-  },
-  ratingText: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.primary_text,
-    fontSize: RFPercentage(2),
-    lineHeight: 25,
-    marginLeft: 5,
-  },
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  rowView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  labelView: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: Colors.primary_color,
-    padding: 4,
-    paddingHorizontal: 5,
-    minWidth: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  labelText: {
-    color: Colors.button.primary_button_text,
-    fontSize: RFPercentage(1.4),
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-  },
-});
+

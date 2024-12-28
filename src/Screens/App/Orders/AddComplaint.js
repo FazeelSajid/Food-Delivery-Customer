@@ -8,7 +8,7 @@ import {
   Image,
 } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
-import {Colors, Fonts, Icons, Images} from '../../../constants';
+import { Fonts, Icons, Images} from '../../../constants';
 import StackHeader from '../../../components/Header/StackHeader';
 import CInput from '../../../components/TextInput/CInput';
 import {
@@ -23,13 +23,10 @@ import {
   showAlert,
   uploadImage,
 } from '../../../utils/helpers';
-import Feather from 'react-native-vector-icons/Feather';
 import CButton from '../../../components/Buttons/CButton';
 import VideoPlayer from 'react-native-video-player';
 import RBSheetSuccess from '../../../components/BottomSheet/RBSheetSuccess';
-import Loader from '../../../components/Loader';
 import api from '../../../constants/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
 import PopUp from '../../../components/Popup/PopUp';
 
@@ -39,7 +36,7 @@ const AddComplaint = ({navigation, route}) => {
   const [videoFile, setVideoFile] = useState(null);
   const [videoName, setVideoName] = useState(null);
   const [videoType, setVideoType] = useState(null);
-  const {customer_id,  showPopUp, popUpColor, PopUpMesage,} = useSelector(store => store.store)
+  const {customer_id,  showPopUp, popUpColor, PopUpMesage,Colors} = useSelector(store => store.store)
   const dispatch = useDispatch()
 
   const [complaintFor, setComplaintFor] = useState('rider');
@@ -233,6 +230,54 @@ const AddComplaint = ({navigation, route}) => {
     }
   };
 
+  const styles = StyleSheet.create({
+    imageContainer: {
+      width: '28%',
+      height: hp(9.5),
+      borderWidth: 1,
+      borderColor: Colors.borderGray,
+      borderRadius: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+   
+  
+    image: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+    rowViewSB: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+  
+    imageContainer1: {
+      width: '30%',
+      height: hp(11),
+      borderWidth: 1,
+      borderColor: Colors.borderGray,
+      borderRadius: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+      marginBottom: 15,
+    },
+  
+    radioButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    radioButtonText: {
+      marginLeft: 10,
+      color: Colors.primary_text,
+      fontSize: 14,
+      fontFamily: Fonts.PlusJakartaSans_Regular,
+    },
+  });
+
   return (
     <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       {/* <Loader loading={loading} /> */}
@@ -422,50 +467,4 @@ const AddComplaint = ({navigation, route}) => {
 
 export default AddComplaint;
 
-const styles = StyleSheet.create({
-  imageContainer: {
-    width: '28%',
-    height: hp(9.5),
-    borderWidth: 1,
-    borderColor: Colors.borderGray,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
- 
 
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  rowViewSB: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  imageContainer1: {
-    width: '30%',
-    height: hp(11),
-    borderWidth: 1,
-    borderColor: Colors.borderGray,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    marginBottom: 15,
-  },
-
-  radioButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  radioButtonText: {
-    marginLeft: 10,
-    color: Colors.primary_text,
-    fontSize: 14,
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-  },
-});

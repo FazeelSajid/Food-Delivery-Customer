@@ -1,9 +1,23 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Fonts} from '../../constants';
+import { Fonts} from '../../constants';
+import { useSelector } from 'react-redux';
 
 const PriceText = ({text, fontSize, color, currencyColor, textColor}) => {
+            const  {Colors } = useSelector(store => store.store)
+            const styles = StyleSheet.create({
+              rowView: {
+                flexDirection: 'row',
+                alignItems: 'center',
+              },
+              title: {
+                fontFamily: Fonts.PlusJakartaSans_Bold,
+                color: Colors.primary_text,
+                fontSize: RFPercentage(2),
+                lineHeight: 25,
+              },
+            });
   return (
     <View style={styles.rowView}>
       <Text
@@ -31,15 +45,4 @@ const PriceText = ({text, fontSize, color, currencyColor, textColor}) => {
 
 export default PriceText;
 
-const styles = StyleSheet.create({
-  rowView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  title: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.primary_text,
-    fontSize: RFPercentage(2),
-    lineHeight: 25,
-  },
-});
+

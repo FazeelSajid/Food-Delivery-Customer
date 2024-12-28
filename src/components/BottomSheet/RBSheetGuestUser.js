@@ -14,33 +14,29 @@ import {
 } from 'react-native-responsive-screen';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
-import {Fonts, Icons, Images, Colors} from '../../constants';
+import {Fonts, Icons, Images} from '../../constants';
 import Lottie from 'lottie-react-native';
 import CButton from '../Buttons/CButton';
+import { useSelector } from 'react-redux';
 const RBSheetGuestUser = ({
   refRBSheet,
-  content,
   height,
   title,
-  btnText,
-  onPress,
   textColor,
-  cancelText,
-  okText,
-  onCancel,
-  onOk,
   description,
   onSignIn,
   onSignUp,
   showCloseButton,
 }) => {
   const navigation = useNavigation();
+    const  {Colors } = useSelector(store => store.store);
+  
 
   return (
     <View style={{flex: 1}}>
       <RBSheet
         ref={refRBSheet}
-        height={height ? height : 340}
+        height={height ? height : 350}
         openDuration={300}
         // closeOnDragDown
 
@@ -130,4 +126,3 @@ const RBSheetGuestUser = ({
 
 export default RBSheetGuestUser;
 
-const styles = StyleSheet.create({});

@@ -8,6 +8,7 @@ import {
   ScrollView,
   RefreshControl,
   Image,
+  Button,
 } from 'react-native';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { RFPercentage } from 'react-native-responsive-fontsize';
@@ -15,7 +16,7 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-import { Colors,Images, Fonts, Icons } from '../../constants';
+import { Images, Fonts, Icons } from '../../constants';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import Feather from 'react-native-vector-icons/Feather';
 import CInput from '../../components/TextInput/CInput';
@@ -27,7 +28,7 @@ import {
 import NoDataFound from '../../components/NotFound/NoDataFound';
 import { fetchApisGet, handlePopup, showAlert } from '../../utils/helpers';
 import { useDispatch, useSelector } from 'react-redux';
-import { setLocation, setPromos, setCurrentLocation, setWalletTotalAmount, setSetAllLocation, setContacts } from '../../redux/AuthSlice';
+import { setLocation, setPromos, setCurrentLocation, setWalletTotalAmount, setSetAllLocation, setContacts, setColors } from '../../redux/AuthSlice';
 import { Badge, RadioButton } from 'react-native-paper';
 import CRBSheetComponent from '../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -47,12 +48,13 @@ import PopUp from '../../components/Popup/PopUp';
 import RBSheetGuestUser from '../../components/BottomSheet/RBSheetGuestUser';
 import socket from '../../utils/Socket';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { BASE_URL } from '../../utils/globalVariables';
 
 
 
 const Dashboard = ({ navigation, route }) => {
   const dispatch = useDispatch();
-  const {   customer_id, cuisines, items, deals, promos, currentLocation, showPopUp, popUpColor, PopUpMesage, join_as_guest, customerCartId } = useSelector(store => store.store);
+  const { customer_id, cuisines, items, deals, promos, currentLocation, showPopUp, popUpColor, PopUpMesage, join_as_guest, customerCartId, Colors } = useSelector(store => store.store);
   const { cart_restaurant_id, my_cart } = useSelector(store => store.cart);
   const { favoriteItems, favoriteDeals } = useSelector(store => store.favorite);
   const [isSearch, setIsSearch] = useState(false);
@@ -144,7 +146,7 @@ const Dashboard = ({ navigation, route }) => {
       style={{
         height: hp(0.1),
         marginVertical: 10,
-        backgroundColor:Colors.borderGray,
+        backgroundColor: Colors.borderGray,
       }}
     />
   );
@@ -183,12 +185,12 @@ const Dashboard = ({ navigation, route }) => {
 
     // Map item prices with matching variations
     const array3 = (Array.isArray(array)
-    ? array
-    : Array.isArray( itemObj.variations)
-      ? itemObj.variations
-      : []
-  ).map(item2 => {
-    if (!item2) return {}; // Fallback for undefined `item2`
+      ? array
+      : Array.isArray(itemObj.variations)
+        ? itemObj.variations
+        : []
+    ).map(item2 => {
+      if (!item2) return {}; // Fallback for undefined `item2`
 
       const match = matchingVariations?.find(item1 => item1?.variation_id === item2?.variation_id);
       return match || item2; // Use match if found, else fallback to item2
@@ -205,8 +207,8 @@ const Dashboard = ({ navigation, route }) => {
 
   const handleAddToCartDecrement = async (variation_id, item_id, name) => {
     setSelectedVariation(variation_id)
-    
-  
+
+
 
     if (variation_id === null) {
       showBtmSheet()
@@ -215,59 +217,59 @@ const Dashboard = ({ navigation, route }) => {
         item => item?.item_id == item_id
       );
 
-    
+
 
       if (filter?.length > 0) {
         const checkVariation = filter?.filter(
           item =>
             item?.variation_id == variation_id,
         )
-       
 
-        
+
+
 
         if (checkVariation.length > 0) {
 
           if (checkVariation[0]?.quantity === 1) {
-            await removeCartItemQuantity({item_id: checkVariation[0]?.cart_item_id, cart_id: checkVariation[0]?.cart_id })
-            .then(response => {
-              if (response.status) {
-                checkVariationInCart()
-                const newDataa = item?.map(element => {
-                  if (element?.item_id == item_id) {
-                    return {
-                      ...element,
-                      quantity: element.quantity ? element.quantity - 1 : 1,
-                    };
-                  } else {
-                    return {
-                      ...element,
-                    };
-                  }
-                });
-                setItems(newDataa);
-              
-                const newData = my_cart?.filter(item => item.cart_item_id !== checkVariation[0]?.cart_item_id);
-                dispatch(updateMyCartList(newData));
-                handlePopup(dispatch,`1 ${name ?  name : itemObj?.name} removed from cart`, 'green' )
-            } 
-              
-            })
-          }else{
+            await removeCartItemQuantity({ item_id: checkVariation[0]?.cart_item_id, cart_id: checkVariation[0]?.cart_id })
+              .then(response => {
+                if (response.status) {
+                  checkVariationInCart()
+                  const newDataa = item?.map(element => {
+                    if (element?.item_id == item_id) {
+                      return {
+                        ...element,
+                        quantity: element.quantity ? element.quantity - 1 : 1,
+                      };
+                    } else {
+                      return {
+                        ...element,
+                      };
+                    }
+                  });
+                  setItems(newDataa);
+
+                  const newData = my_cart?.filter(item => item.cart_item_id !== checkVariation[0]?.cart_item_id);
+                  dispatch(updateMyCartList(newData));
+                  handlePopup(dispatch, `1 ${name ? name : itemObj?.name} removed from cart`, 'green')
+                }
+
+              })
+          } else {
             let obj = {
               cart_item_id: checkVariation[0]?.cart_item_id,
               quantity: checkVariation[0]?.quantity - 1,
             };
-         
+
             // console.log({obj});
-            
+
             await updateCartItemQuantity(obj, dispatch)
               .then(response => {
-                console.log({response});
-                
+                console.log({ response });
+
                 if (response.status === true) {
                   checkVariationInCart()
-                  handlePopup(dispatch,`1 ${name ?  name : itemObj?.name} removed from cart`, 'green' )
+                  handlePopup(dispatch, `1 ${name ? name : itemObj?.name} removed from cart`, 'green')
                   const newDataa = item?.map(element => {
                     if (element?.item_id == item_id) {
                       return {
@@ -283,7 +285,7 @@ const Dashboard = ({ navigation, route }) => {
                   setItems(newDataa);
                   const newData = my_cart?.map(item => {
                     // console.log( "item:  ",item);
-                    
+
                     if (item?.cart_item_id == checkVariation[0]?.cart_item_id) {
                       return {
                         ...item,
@@ -298,7 +300,7 @@ const Dashboard = ({ navigation, route }) => {
               })
           }
 
-          
+
         }
       }
       //  else {
@@ -311,7 +313,7 @@ const Dashboard = ({ navigation, route }) => {
   const showBtmSheet = async (item) => {
 
     setSelectedVariation(null)
-   setItemObj({
+    setItemObj({
       id: item.item_id,
       variations: item?.item_prices,
       name: item?.item_name,
@@ -320,36 +322,36 @@ const Dashboard = ({ navigation, route }) => {
     if (item.item_prices.length > 1) {
       btmSheetRef?.current?.open()
       const matchingVariations = my_cart
-      .filter(itm => itm.item_id === item.item_id) 
-      .map(item => ({
-        variation_id: item.variation_id,
-        variation_name: item.itemData.variationData.variation_name,
-        price: parseFloat(item.itemData.variationData.price),
-        quantity: item.quantity,
-        sub_total: item.sub_total,
-        cart_item_id: item.cart_item_id,
-        cart_id: item.cart_id,
-        item_id: item.item_id
-  
-      }));
+        .filter(itm => itm.item_id === item.item_id)
+        .map(item => ({
+          variation_id: item.variation_id,
+          variation_name: item.itemData.variationData.variation_name,
+          price: parseFloat(item.itemData.variationData.price),
+          quantity: item.quantity,
+          sub_total: item.sub_total,
+          cart_item_id: item.cart_item_id,
+          cart_id: item.cart_id,
+          item_id: item.item_id
+
+        }));
 
       const array3 = (
-      
-      Array.isArray(item?.item_prices)
-        ? item?.item_prices
-        : []
-    ).map(item2 => {
-      if (!item2) return {}; // Fallback for undefined `item2`
 
-      const match = matchingVariations?.find(item1 => item1?.variation_id === item2?.variation_id);
-      return match || item2; // Use match if found, else fallback to item2
-    });
-  
+        Array.isArray(item?.item_prices)
+          ? item?.item_prices
+          : []
+      ).map(item2 => {
+        if (!item2) return {};
+
+        const match = matchingVariations?.find(item1 => item1?.variation_id === item2?.variation_id);
+        return match || item2;
+      });
+
       setVariations(array3)
     } else {
       handleAddToCartDecrement(item.item_prices[0].variation_id, item.item_id, item?.item_name,)
     }
-   
+
 
   }
   const closeBtmSheet = () => {
@@ -357,13 +359,8 @@ const Dashboard = ({ navigation, route }) => {
     setItemObj({})
   }
   const add_item_to_cart = async (id, type, name, item_id) => {
-    // console.log('______cart    :  ', cart?.cart_id);
-    // console.log({item_id});
-    
-
-
     let dataa = type === 'item' ? {
-      item_id: item_id ? item_id : itemObj.id ,
+      item_id: item_id ? item_id : itemObj.id,
       cart_id: customerCartId.toString(),
       item_type: type,
       comments: 'Adding item in cart',
@@ -376,13 +373,8 @@ const Dashboard = ({ navigation, route }) => {
       comments: '',
       quantity: 1,
     };
-
-    // console.log(dataa);
-    
-
-
     await addItemToCart(dataa, dispatch)
-      .then(async  response => {
+      .then(async response => {
         console.log('response ', response);
         if (response?.status == true) {
           checkVariationInCart()
@@ -402,13 +394,11 @@ const Dashboard = ({ navigation, route }) => {
           dispatch(addItemToMYCart(response?.result));
           setSelectedVariation(null)
           let cartItems = await getCartItems(customerCartId, dispatch);
-            dispatch(updateMyCartList(cartItems));
+          dispatch(updateMyCartList(cartItems));
+          handlePopup(dispatch, `${name ? name : itemObj.name} is added to cart`, 'green');
 
-
-          handlePopup(dispatch,`${name ? name : itemObj.name} is added to cart`, 'green');
-        
         } else {
-          handlePopup(dispatch,response?.message, 'red');
+          handlePopup(dispatch, response?.message, 'red');
         }
       })
       .catch(error => {
@@ -421,7 +411,7 @@ const Dashboard = ({ navigation, route }) => {
   const handleAddToCart = async (variation_id, item_id, name) => {
     setSelectedVariation(variation_id)
     console.log(variation_id, item_id);
-    
+
 
     if (variation_id === null) {
       showBtmSheet()
@@ -429,32 +419,26 @@ const Dashboard = ({ navigation, route }) => {
       const filter = my_cart?.filter(
         item => item?.item_id == item_id
       );
-    
+
 
       if (filter?.length > 0) {
         const checkVariation = filter?.filter(
           item =>
             item?.variation_id == variation_id,
         )
-
-        // console.log({checkVariation});
-        
-
         if (checkVariation.length === 0) {
-        add_item_to_cart(variation_id, 'item',name, item_id);
-          // closeBtmSheet()
+          add_item_to_cart(variation_id, 'item', name, item_id);
         } else {
 
           let obj = {
             cart_item_id: checkVariation[0]?.cart_item_id,
             quantity: checkVariation[0]?.quantity + 1,
           };
-          // closeBtmSheet()
           await updateCartItemQuantity(obj, dispatch)
-            .then(async(response) => {
+            .then(async (response) => {
               if (response.status === true) {
                 checkVariationInCart()
-                handlePopup(dispatch,`${name ?  name : itemObj.name} quantity updated`, 'green' )
+                handlePopup(dispatch, `${name ? name : itemObj.name} quantity updated`, 'green')
                 const newDataa = item?.map(element => {
                   if (element?.item_id == item_id) {
                     return {
@@ -474,19 +458,17 @@ const Dashboard = ({ navigation, route }) => {
             })
         }
       } else {
-        add_item_to_cart(variation_id, 'item',name, item_id);
-        // closeBtmSheet()
+        add_item_to_cart(variation_id, 'item', name, item_id);
       }
     }
   };
 
   const handleDelete = async (id, name) => {
-    // console.log('handleDeletex');
-    
+
     const filter = my_cart?.filter(
       item => item?.item_id == id
     );
-    const response = await removeCartItemQuantity({item_id: filter[0]?.cart_item_id, cart_id: filter[0]?.cart_id })
+    const response = await removeCartItemQuantity({ item_id: filter[0]?.cart_item_id, cart_id: filter[0]?.cart_id })
     if (response.status) {
       checkVariationInCart()
 
@@ -502,28 +484,16 @@ const Dashboard = ({ navigation, route }) => {
         }
       });
       setItems(newData);
-      // let cartItems = await getCartItems(filter[0]?.cart_id, dispatch);
-      // dispatch(updateMyCartList(cartItems));
-      // // setData(filter);
-      // dispatch(addToCart(cartItems)); 
-
       const cartData = my_cart?.filter(item => item.cart_item_id !== filter[0]?.cart_item_id);
       dispatch(updateMyCartList(cartData));
-
-      //my_cart
-      // dispatch(removeItemFromMyCart(item?.cart_item_id));
-      handlePopup(dispatch, `${name? name:itemObj.name} removed from cart`,'green' )
-    }else{
-      handlePopup(dispatch, `Unable to remove ${item.item_name} from cart`, 'red' )
+      handlePopup(dispatch, `${name ? name : itemObj.name} removed from cart`, 'green')
+    } else {
+      handlePopup(dispatch, `Unable to remove ${item.item_name} from cart`, 'red')
       closeBtmSheet()
     }
-
-    
-    // console.log({filter});
   }
 
   const handleDealAddToCart = async (deal) => {
-
     setItemObj({
       id: deal.deal_id,
       name: deal?.name,
@@ -531,22 +501,6 @@ const Dashboard = ({ navigation, route }) => {
     if (join_as_guest) {
       ref_RBSheetGuestUser?.current?.open()
     } else {
-
-
-
-
-      // setLoading(true);
-      // let time_obj = await checkRestaurantTimings(
-      //   restaurantDetails?.restaurant_id,
-      // );
-      // setLoading(false);
-      // if (time_obj?.isClosed) {
-      //   setRestaurant_timings(time_obj);
-      //   ref_RBSheetResClosed.current.open();
-      //   return;
-      // } else 
-      // if (validate()) {
-      // if item already exists in card then we will only update quantity of that item
       const filter = my_cart?.filter(
         item => item?.item_id == deal.deal_id,
       );
@@ -665,10 +619,6 @@ const Dashboard = ({ navigation, route }) => {
     const cuisineName = Cuisine?.filter(item => item?.cuisine_id === cusineId)[0]?.cuisine_name;
     return cuisineName;
   }
-  // const handleSearch = text => {
-  //   console.log('text : ', text);
-  //   setSearchQuery(text);
-  // };
 
   const handleSearch = () => {
     if (searchQuery?.length === 0) {
@@ -681,62 +631,35 @@ const Dashboard = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-    // const socket = io(BASE_URL);
-    // setSocket(socket);
-
-    // Fetch contacts on socket connection
     socket.on('connect', () => {
-        socket.emit('getContacts', { customer_id }); 
+      socket.emit('getContacts', { customer_id });
     });
-
-    // Listen for contacts data
     socket.on('contacts', (contactsData) => {
-        dispatch(setContacts(contactsData));  
-        
-    });
+      dispatch(setContacts(contactsData));
 
-  
+    });
     socket.on('error', (error) => {
-        console.error('Socket Error:', error.message);
+      console.error('Socket Error:', error.message);
     });
-
-    // Cleanup on component unmount
     return () => {
-        socket.disconnect();
+      socket.disconnect();
     };
-}, []);
+  }, []);
 
   const getAllItemByCuisine = async cuisine_id => {
     const response = await fetchApisGet(api.get_all_item_by_cuisine + cuisine_id, setLoading, dispatch);
-   let list = response?.result ? response?.result : [];
-        // setData(list);
-        let newList = [];
-        for (const item of list) {
-          const filter = my_cart?.filter(e => e?.item_id == item?.item_id);
-          // console.log("filter", filter);
-          
-          // getting restaurant timings
-          // let time_obj = await checkRestaurantTimings(item?.restaurant_id);
-          const totalQuantity = filter.reduce((sum, item) => sum + (item.quantity || 0), 0);
-          let obj = {
-            ...item,
-            quantity: totalQuantity,
-            // restaurant_timings: time_obj,
-          };
-          // console.log("filter", obj);
-          newList.push(obj);
-        }
+    let list = response?.result ? response?.result : [];
+    let newList = [];
+    for (const item of list) {
+      const filter = my_cart?.filter(e => e?.item_id == item?.item_id);
+      const totalQuantity = filter.reduce((sum, item) => sum + (item.quantity || 0), 0);
+      let obj = {
+        ...item,
+        quantity: totalQuantity,
+      };
+      newList.push(obj);
+    }
     setItems(newList);
-    // console.log(list, 'list');
-
-    // fetch(api.get_all_item_by_cuisine + cuisine_id)
-    //   .then(response => response.json())
-    //   .then(response => {
-    //     let list = response?.result ? response?.result : [];
-    //     setFilteredItems(list);
-    //   })
-    // .catch(err => console.log('error : ', err))
-    // .finally(() => setLoading(false));
   };
 
   const handleSelect = (id, selected, all) => {
@@ -786,14 +709,6 @@ const Dashboard = ({ navigation, route }) => {
     let list = response?.result ? response?.result : [];
     dispatch(setPromos(list))
     setPromoCodes(list);
-    // fetch(api.get_all_promocodes)
-    //   .then(response => response.json())
-    //   .then(response => {
-    //     let list = response?.result ? response?.result : [];
-    //     // console.log(list, 'badges');
-    //     setPromoCodes(list);
-    //   })
-    //   .catch(err => console.log('error getAllCuisines : ', err));
   };
   const getAllCuisines = async () => {
     const response = await fetchApisGet(api.get_all_cuisines, setLoading, dispatch);
@@ -803,10 +718,10 @@ const Dashboard = ({ navigation, route }) => {
   };
   const getDeals = async () => {
     setDealLoading(true)
-    const response = await fetchApisGet(api.get_all_deals_by_restaurant+'res_4074614', setDealLoading, dispatch);
+    const response = await fetchApisGet(api.get_all_deals_by_restaurant + 'res_4074614', setDealLoading, dispatch);
     let list = response?.result ? response?.result : [];
     dispatch(setdeals(list))
-   
+
   };
   const getCurrentLocatin = async () => {
     const { latitude, longitude, address, shortAdress } = await getCurrentLocation()
@@ -820,18 +735,14 @@ const Dashboard = ({ navigation, route }) => {
   const getAllItems = async () => {
     setItemLoading(true)
     const response = await fetchApisGet(api.get_all_items, setItemLoading, dispatch);
-   
+
     let list = response?.result ? response?.result : [];
-    // setData(list);
     let newList = [];
     for (const item of list) {
       const filter = my_cart?.filter(e => e?.item_id == item?.item_id);
-      // getting restaurant timings
-      // let time_obj = await checkRestaurantTimings(item?.restaurant_id);
       let obj = {
         ...item,
         quantity: filter?.length > 0 ? filter[0]?.quantity : 0,
-        // restaurant_timings: time_obj,
       };
       newList.push(obj);
     }
@@ -881,24 +792,18 @@ const Dashboard = ({ navigation, route }) => {
     }
     return str;
   }
-  
+
   const get_Cart_Items = async () => {
     try {
       setLoading(true);
-      // let customer_id = await AsyncStorage.getItem('customer_id');
       let cart = await getCustomerCart(customer_id, dispatch);
       let cartItems = await getCartItems(cart?.cart_id, dispatch);
-      // console.log(cartItems);
-
       if (cartItems) {
         dispatch(addToCart(cartItems));
-        // setData(cartItems);
-        //my_cart
         dispatch(updateMyCartList(cartItems));
         if (!cart_restaurant_id && cartItems?.length > 0) {
           dispatch(setCartRestaurantId(cartItems[0]?.itemData?.restaurant_id));
         }
-        // getDeliveryTime(cartItems);
       }
       setLoading(false);
     } catch (error) {
@@ -906,10 +811,8 @@ const Dashboard = ({ navigation, route }) => {
       console.log('Error in getCartItems :  ', error);
     }
   };
-  
-  const handleSubmit = async () => {
 
-    // setIsLoading(true)
+  const handleSubmit = async () => {
     const data = {
       house_number: '',
       street_number: '',
@@ -935,7 +838,7 @@ const Dashboard = ({ navigation, route }) => {
       .then(response => response.json())
       .then(async response => {
         // console.log(response);
-        console.log({response}, 'Submit customer_location');
+        console.log({ response }, 'Submit customer_location');
 
 
         if (response.status === false) {
@@ -944,9 +847,6 @@ const Dashboard = ({ navigation, route }) => {
 
         } else {
           handlePopup(dispatch, 'Address added successfully', 'green');
-          // clearFields()
-          // navigation.navigate('ManageAddress')
-          // closeBtmSheet()
           dispatch(setLocation({
             address: currentLocation?.shortAddress,
             longitude: currentLocation?.longitude,
@@ -957,11 +857,8 @@ const Dashboard = ({ navigation, route }) => {
         }
       })
       .catch(err => {
-        // console.log('Error in Login :  ', err);
-        // handlePopup(dispatch, 'Something went wrong!', 'red');
       })
       .finally(() => {
-        // setIsLoading(false);
       });
 
   }
@@ -969,21 +866,19 @@ const Dashboard = ({ navigation, route }) => {
     fetch(api.get_customer_location + customer_id, {
       method: 'GET',
       headers: {
-        // 'Content-Type': 'application/json'
       }
     })
       .then(response => response.json())
       .then(response => {
         if (response.status === false) {
           handlePopup(dispatch, response?.message, 'red');
-          // setIsLoading(false)
           getCurrentLocatin();  // Fetch and dispatch current location
-          handleSubmit(); 
+          handleSubmit();
         } else {
           const locations = response?.customerData?.locations || [];
 
-          console.log({response}, 'getcustomer_locations');
-          
+          console.log({ response }, 'getcustomer_locations');
+
 
           if (locations.length === 0) {
             // If no locations found, get the current location and add it to the backend
@@ -998,148 +893,149 @@ const Dashboard = ({ navigation, route }) => {
               id: locations[0]?.location_id,
             }));
             dispatch(setSetAllLocation(locations));
-
-            // dispatch(setSelectedPaymentType(''));
-            // dispatch(setSelectedPaymentString(''));
           }
         }
       })
       .catch(err => {
         console.log('Error in getCustomerLocations: ', err);
-        // handlePopup(dispatch, 'Something went wrong!', 'red');
       })
       .finally(() => {
-        // setIsLoading(false);
       });
   };
 
 
-  
-// console.log({itemLoading, dealLoading, loading, refresh});
-  // console.log({loading} || {itemLoading} || {dealLoading} || {refresh});
 
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: Colors.secondary_color, },
+    headerContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingTop: 10,
+      paddingBottom: 20,
+      paddingHorizontal: 20
+    },
+    topChip: {
+      backgroundColor: `${Colors.secondary_text}10`,
+      borderRadius: 25,
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      marginRight: 7,
+    },
+    topChipText: {
+      color: Colors.secondary_text,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+      fontSize: RFPercentage(1.7),
+      marginTop: -2,
+    },
+    headerTextView: {
+      height: hp(4),
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 0,
+      marginTop: hp(2),
+      paddingHorizontal: 20
+    },
+    headerText: {
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      fontSize: RFPercentage(1.9),
+      letterSpacing: 0.45,
+    },
+    viewAllText: {
+      color: Colors.button.primary_button,
+      fontSize: RFPercentage(1.8),
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+      textDecorationLine: 'underline',
+    },
+    container2: { flex: 1, backgroundColor: 'red', alignItems: 'flex-end' },
+    rbSheetHeading: {
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      fontSize: RFPercentage(2),
+    },
+    rowViewSB1: {
+      flexDirection: 'row',
+      justifyContent: 'space-bssetween',
+      marginBottom: 20,
+    },
+    rowView: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: wp(45),
+      marginLeft: wp(3)
+    },
+    btmsheettext: {
+      color: Colors.secondary_text,
+      fontFamily: Fonts.PlusJakartaSans_Regular,
+      marginLeft: wp(5),
+      fontSize: RFPercentage(1.9),
+    },
+    headerLocation: {
+      color: Colors.primary_text,
+      width: wp(60),
+      fontFamily: Fonts.PlusJakartaSans_Regular,
+      textAlign: "center",
+    },
+    paginationContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginTop: hp(2),
+    },
+    dot: {
+      height: wp(2),
+      borderRadius: wp(2.5),
+      marginHorizontal: wp(1),
+    },
+    floatingButton: {
+      position: 'absolute',
+      borderRadius: 30,
+      alignItems: 'center',
+      justifyContent: 'center',
+      bottom: 40,
+      right: 20,
+      overflow: 'hidden',
+      backgroundColor: Colors.button.primary_button,
+      paddingVertical: wp(3),
+      paddingHorizontal: wp(2.5),
 
-  // const getVariationsByItemId = async (item_id) => {
-  //   return new Promise((resolve, reject) => {
-  //     const itam = item.find(item => item.item_id === item_id); 
-  //     if (itam) {
-  //       resolve(itam.variations); 
-  //     } else {
-  //       reject(new Error("Item not found"))
-  //     }
-  //   });
-  // };
+    },
+    variationTxt: {
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      fontSize: RFPercentage(1.7),
+      marginBottom: hp(1)
+    },
+    radioButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    variationText: {
+      fontSize: RFPercentage(1.6),
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+    },
+    rowViewSB: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 10,
 
+    },
+    addbtn: {
+      backgroundColor: Colors.button.primary_button,
+      paddingHorizontal: wp(2),
+      paddingVertical: wp(2),
+      borderRadius: wp('50%'),
+    }
 
-  // console.log(Cuisine,'promos');
-
-
-  // const getCustomerData = async () => {
-  //   let customer_id = await AsyncStorage.getItem('customer_id');
-
-  //   let details = await getCustomerDetail(customer_id);
-  //   if (details) {
-  //     // setUserLocation(details?.location);
-  //     dispatch(
-  //       setLocation({
-  //         latitude: details?.latitude,
-  //         longitude: details?.longitude,
-  //         address: details?.location,
-  //       }),
-  //     );
-  //   }
-  // };
-
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     getCustomerData();
-  //   }, []),
-  // );
-  // console.log(searchedItems, "isFetching");
-  // const searchRestaurantByName = text => {
-  //   return new Promise((resolve, reject) => {
-  //     try {
-  //       fetch(api.search_restaurant_by_name + text)
-  //         .then(response => response.json())
-  //         .then(response => {
-  //           resolve(response?.result);
-  //         })
-  //         .catch(err => {
-  //           console.log('error : ', err);
-  //           resolve([]);
-  //         });
-  //     } catch (error) {
-  //       resolve([]);
-  //     }
-  //   });
-  // };
-
-  // Simulated search API function
-  // const debouncedSearch = debounce(searchApi, 2000);
-
-  // const getLocation = () => {
-  //   fetch(api.get_customer_location + customer_id, {
-  //     method: 'GET',
-  //     headers: {
-  //       // 'Content-Type': 'application/json'
-  //     }
-  //   })
-  //     .then(response => response.json())
-  //     .then(response => {
-
-  //       if (response.status === false) {
-  //         handlePopup(dispatch, response?.message, 'red')
-  //         // setIsLoading(false)
-  //       }
-  //       else {
-  //         // setLocations(response?.customerData?.locations)
-  //         // console.log(api.get_customer_location + customer_id);
-
-  //         // setIsLoading(false)
-  //         // console.log(response.customerData.locations[0]);
-  //         dispatch(setLocation({
-  //           latitude: response?.customerData?.locations[0]?.latitude,
-  //           longitude: response?.customerData?.locations[0]?.longitude,
-  //           address: response?.customerData?.locations[0]?.address,
-  //           id: response?.customerData?.locations[0]?.location_id
-  //         }))
-  //         dispatch(setSetAllLocation(response?.customerData?.locations))
-
-  //         dispatch(setSelectedPaymentType(''));
-  //         dispatch(setSelectedPaymentString(''));
-
-  //       }
-
-  //       // update state with fetched data
-  //     })
-  //     .catch(err => {
-  //       // console.log('Error in Login :  ', err);
-  //       // handlePopup(dispatch,'Something went wrong!', 'red');
-  //     })
-  //     .finally(() => {
-  //       // setIsLoading(false);
-  //     });
-  // }
-// const [variations, setVariations] = useState([])
-  // const [itemName, setItemName] = useState('')
-  // const isFocused = useIsFocused();
-  // const [Deals, setDeals] = useState([]);
-  // const [filteredRestaurant, setFilteredRestaurant] = useState([]);
-  // const [showFilteredData, setShowFilteredData] = useState(false);
-
-
-
-  // console.log({restautantDetails})
-
-
-
-  // console.log({Colors});
+  });
 
   return (
     <View style={styles.container}>
       <Loader loading={loading || itemLoading || dealLoading || refresh} />
       <>
-      {/* <View
+        {/* <View
         style={{
           position: 'absolute',
           bottom: 0,
@@ -1169,7 +1065,7 @@ const Dashboard = ({ navigation, route }) => {
         </View>
       </View> */}
       </>
-      
+
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
 
       <ScrollView
@@ -1191,8 +1087,8 @@ const Dashboard = ({ navigation, route }) => {
         {
           !isSearch && <View style={styles.headerContainer}>
             <TouchableOpacity onPress={() => navigation?.openDrawer()}>
-            <Feather name="menu" size={RFPercentage(3.2)} color={Colors.primary_color} />
-            
+              <Feather name="menu" size={RFPercentage(3.2)} color={Colors.primary_color} />
+
             </TouchableOpacity>
             <Text style={styles.headerLocation} ellipsizeMode='tail' numberOfLines={1} >{currentLocation.shortAddress}</Text>
 
@@ -1204,14 +1100,21 @@ const Dashboard = ({ navigation, route }) => {
 
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => navigation?.navigate('Notification')}>
+                onPress={() => {
+                  if (join_as_guest) {
+                    ref_RBSheetGuestUser?.current?.open()
+                  } else {
+                    navigation?.navigate('Notification')
+                  }
+
+                }}>
                 <Icons.NotificationWithDot />
               </TouchableOpacity>
             </View>
           </View>
         }
         <>
-         {/* <Text
+          {/* <Text
           style={{
             color: Colors.primary_text,
             fontFamily: Fonts.PlusJakartaSans_Bold,
@@ -1221,7 +1124,7 @@ const Dashboard = ({ navigation, route }) => {
           }}>
           Let’s find your favorite food!
         </Text> */}
-        {/* {location?.address && (
+          {/* {location?.address && (
           <TouchableOpacity
             onPress={() =>
               navigation.navigate('SelectLocation', {
@@ -1241,7 +1144,7 @@ const Dashboard = ({ navigation, route }) => {
           </TouchableOpacity>
         )} */}
         </>
-       
+
         <View style={{ marginVertical: 15 }}>
           {isSearch ? (
             <View style={{ paddingHorizontal: 20 }} >
@@ -1312,7 +1215,7 @@ const Dashboard = ({ navigation, route }) => {
                   style={{
                     ...styles.topChip,
                     backgroundColor: searchBtns.category
-                      ?Colors.button.primary_button
+                      ? Colors.button.primary_button
                       : `${Colors.secondary_text}10`,
                   }}>
                   <Text
@@ -1336,97 +1239,200 @@ const Dashboard = ({ navigation, route }) => {
                   <Text
                     style={{
                       ...styles.topChipText,
-                      color: searchBtns.price ? Colors.button.primary_button_text: Colors.secondary_text,
+                      color: searchBtns.price ? Colors.button.primary_button_text : Colors.secondary_text,
                     }}>
                     {!searchBtns.price ? 'Price ↑↓' : searchBtns.priceUp ? 'Price ↑' : 'Price ↓'}
                   </Text>
                 </TouchableOpacity>
               </View>
-                    {
-                      searchedItems.length > 0 &&
-                      <>
-                      <View style={styles.headerTextView}>
-                <Text style={[styles.headerText]}>Items</Text>
-              </View>
-             
-
-              <FlatList
-                scrollEnabled={false}
-                data={searchedItems}
-                numColumns={numColumns}
-                key={numColumns}
-                ListEmptyComponent={() => searchLoading ? <ItemLoading size={'large'} /> : <NoDataFound text={'No Items'} />}
-                renderItem={({ item, index }) => {
-                  const fav = isItemFavorite(item?.item_id)
-                  return (
-                    <FoodCards
-                      isFavorite={fav}
-                      image={item?.images[0]}
-                      description={shortenString(item?.description)}
-                      price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
-                      heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
-                      title={item?.item_name}
-                      item={item}
-                      id={item?.item_id}
-                      onPress={() =>
-                        navigation?.navigate('ItemDetails', {
-                          id: item?.item_id,
-                        })
-                      }
-                      addToCart={() => showBtmSheet(item)}
-                    />
-                  );
-                }}
-              />
-                      </>
-                    }
               {
-                filteredDeals.length > 0 &&  
+                searchedItems.length > 0 &&
                 <>
-                <View style={styles.headerTextView}>
-                <Text style={[styles.headerText]}>Deals</Text>
-              </View>
-              <FlatList
-                horizontal={filteredDeals.length > 0 ? true : false}
-                data={filteredDeals}
-                showsHorizontalScrollIndicator={false}
-                style={{ paddingHorizontal: 20 }}
-                ListEmptyComponent={() => {
-                  return searchQuery.length > 0 && searchLoading ? (
-                    <ItemLoading size="large" />
-                  ) : (
-                    <NoDataFound text="No Deals" />
-                  );
-                }
-                }
-                renderItem={({ item, index }) => {
-                  const cuisineIds = item?.items?.map(item => item?.cuisine_id);
-                  const cuisineNames = cuisineIds?.map(cuisineId =>
-                    setCusineNameByItemCusineId(cuisineId)
-                  );
-                  const fav = isDealFavorite(item?.deal_id)
-                
-                  return (
-                    <DealCard
-                      image={item?.images?.length > 0 && item?.images[0]}
-                      description={shortenString(item?.description)}
-                      price={item?.price}
-                      title={item?.name}
-                      onPress={() =>
-                        navigation?.navigate('NearByDealsDetails', {
-                          id: item?.deal_id,
-                        })
-                      }
-                      isFavorite={fav}
-                      heartPress={() => fav ? removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch, showAlert) : addFavoriteDeal(item?.deal_id, customer_id, dispatch, showAlert)}
-                      addToCartpress={() => handleDealAddToCart(item)}
-                    />
-                  );
-                }}
-              />
-              </>
+                  <View style={styles.headerTextView}>
+                    <Text style={[styles.headerText]}>Items</Text>
+                  </View>
+
+
+                  <FlatList
+                    scrollEnabled={false}
+                    data={searchedItems}
+                    numColumns={numColumns}
+                    key={numColumns}
+                    ListEmptyComponent={() => searchLoading ? <ItemLoading size={'large'} /> : <NoDataFound text={'No Items'} />}
+                    renderItem={({ item, index }) => {
+                      const fav = isItemFavorite(item?.item_id)
+                      return (
+                        <FoodCards
+                          isFavorite={fav}
+                          image={item?.images[0]}
+                          description={shortenString(item?.description)}
+                          price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
+                          heartPress={() => {
+                            if (join_as_guest) {
+                              ref_RBSheetGuestUser?.current?.open()
+                            } else {
+                              fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch) : addFavoriteitem(item?.item_id, customer_id, dispatch)
+                            }
+                          }}
+                          title={item?.item_name}
+                          item={item}
+                          id={item?.item_id}
+                          onPress={() =>
+                            navigation?.navigate('ItemDetails', {
+                              id: item?.item_id,
+                            })
+                          }
+                          newComponent={
+                            <>
+                              {isItemLoading && item?.item_id == itemObj?.id ? (
+                                <ItemLoading loading={isItemLoading} />
+                              ) : item?.quantity > 0 ? (
+                                <View
+                                  style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    backgroundColor: `${Colors.primary_color}30`,
+                                    borderRadius: 25,
+                                    paddingVertical: 2,
+                                    paddingHorizontal: 2,
+                                  }}>
+                                  <TouchableOpacity
+                                    onPress={() => {
+                                      if (item?.quantity === 1) {
+                                        handleDelete(item.item_id, item?.item_name)
+                                      } else {
+                                        if (item.item_prices.length > 1) {
+                                          showBtmSheet(item)
+                                        } else {
+                                          handleAddToCartDecrement(item.item_prices[0].variation_id, item.item_id, item?.item_name,)
+                                        }
+                                      }
+
+                                    }}
+                                    style={{
+                                      paddingHorizontal: 10,
+                                      paddingVertical: 5,
+                                    }}>
+                                    <AntDesign
+                                      name="minus"
+                                      color={Colors.primary_color}
+                                      size={16}
+                                    />
+                                  </TouchableOpacity>
+                                  <Text
+                                    style={{
+                                      color: Colors.primary_color,
+                                      fontFamily: Fonts.PlusJakartaSans_Bold,
+                                      fontSize: RFPercentage(2),
+                                      marginTop: -2,
+                                    }}>
+                                    {item?.quantity}
+                                  </Text>
+                                  <TouchableOpacity
+                                    onPress={() => {
+                                      if (item.item_prices.length > 1) {
+                                        showBtmSheet(item)
+                                      } else {
+                                        handleAddToCart(item.item_prices[0].variation_id, item.item_id, item?.item_name,)
+                                      }
+                                    }}
+
+                                    style={{
+                                      paddingHorizontal: 10,
+                                      paddingVertical: 5,
+                                    }}>
+                                    <AntDesign
+                                      name="plus"
+                                      color={Colors.primary_color}
+                                      size={16}
+                                    />
+                                  </TouchableOpacity>
+                                </View>
+                              ) : (
+                                <TouchableOpacity
+                                  style={styles.addbtn}
+                                  onPress={() => {
+                                    if (join_as_guest) {
+                                      ref_RBSheetGuestUser?.current?.open()
+                                    }
+                                    else if (item.item_prices.length > 1) {
+                                      showBtmSheet(item);
+                                    } else {
+                                      handleAddToCart(
+                                        item.item_prices[0].variation_id,
+                                        item.item_id,
+                                        item?.item_name
+                                      );
+                                    }
+                                  }}
+                                >
+                                  <AntDesign name="plus" size={12} color={Colors.button.primary_button_text} />
+                                </TouchableOpacity>
+
+                              )}
+                            </>
+                          }
+                        />
+                      );
+                    }}
+                  />
+                </>
               }
-             
+              {
+
+                filteredDeals.length > 0 &&
+                <>
+                  <View style={styles.headerTextView}>
+                    <Text style={[styles.headerText]}>Deals</Text>
+                  </View>
+                  <FlatList
+                    horizontal={filteredDeals.length > 0 ? true : false}
+                    data={filteredDeals}
+                    showsHorizontalScrollIndicator={false}
+                    style={{ paddingHorizontal: 20 }}
+                    ListEmptyComponent={() => {
+                      return searchQuery.length > 0 && searchLoading ? (
+                        <ItemLoading size="large" />
+                      ) : (
+                        <NoDataFound text="No Deals" />
+                      );
+                    }
+                    }
+                    renderItem={({ item, index }) => {
+                      const cuisineIds = item?.items?.map(item => item?.cuisine_id);
+                      const cuisineNames = cuisineIds?.map(cuisineId =>
+                        setCusineNameByItemCusineId(cuisineId)
+                      );
+                      const fav = isDealFavorite(item?.deal_id)
+
+                      return (
+                        <DealCard
+                          image={item?.images?.length > 0 && item?.images[0]}
+                          description={shortenString(item?.description)}
+                          price={item?.price}
+                          title={item?.name}
+                          onPress={() =>
+                            navigation?.navigate('NearByDealsDetails', {
+                              id: item?.deal_id,
+                            })
+                          }
+                          isFavorite={fav}
+                          heartPress={() => {
+                            if (join_as_guest) {
+                              ref_RBSheetGuestUser?.current?.open()
+                            }
+                            else {
+                              fav ? removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch) : addFavoriteDeal(item?.deal_id, customer_id, dispatch)
+                            }
+                          }}
+                          addToCartpress={() => handleDealAddToCart(item)}
+                        />
+                      );
+                    }}
+                  />
+                </>
+              }
+
             </View>
           ) : (
             <>
@@ -1521,7 +1527,7 @@ const Dashboard = ({ navigation, route }) => {
                 numColumns={numColumns}
                 keyExtractor={(item) => item.item_id.toString()}
                 style={{ paddingHorizontal: 10 }}
-                ListEmptyComponent={() => !loading || !itemLoading  && <NoDataFound text={'No Items'} />}
+                ListEmptyComponent={() => !loading || !itemLoading && <NoDataFound text={'No Items'} />}
                 renderItem={({ item, index }) => {
                   const fav = isItemFavorite(item?.item_id)
                   return (
@@ -1530,7 +1536,16 @@ const Dashboard = ({ navigation, route }) => {
                       image={item?.images?.length && item?.images[0]}
                       description={shortenString(item?.description)}
                       price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
-                      heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
+                      heartPress={() => {
+                        if (join_as_guest) {
+                          ref_RBSheetGuestUser?.current?.open()
+                        }
+                        else {
+                          fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch) : addFavoriteitem(item?.item_id, customer_id, dispatch)
+                        }
+                      }
+
+                      }
                       title={item?.item_name}
                       item={item}
                       id={item?.item_id}
@@ -1555,16 +1570,16 @@ const Dashboard = ({ navigation, route }) => {
                               }}>
                               <TouchableOpacity
                                 onPress={() => {
-                                  if ( item?.quantity === 1) {
+                                  if (item?.quantity === 1) {
                                     handleDelete(item.item_id, item?.item_name)
                                   } else {
                                     if (item.item_prices.length > 1) {
-                                      showBtmSheet(item) 
+                                      showBtmSheet(item)
                                     } else {
                                       handleAddToCartDecrement(item.item_prices[0].variation_id, item.item_id, item?.item_name,)
                                     }
                                   }
-                                 
+
                                 }}
                                 style={{
                                   paddingHorizontal: 10,
@@ -1588,12 +1603,12 @@ const Dashboard = ({ navigation, route }) => {
                               <TouchableOpacity
                                 onPress={() => {
                                   if (item.item_prices.length > 1) {
-                                    showBtmSheet(item) 
+                                    showBtmSheet(item)
                                   } else {
                                     handleAddToCart(item.item_prices[0].variation_id, item.item_id, item?.item_name,)
                                   }
                                 }}
-                                
+
                                 style={{
                                   paddingHorizontal: 10,
                                   paddingVertical: 5,
@@ -1607,26 +1622,26 @@ const Dashboard = ({ navigation, route }) => {
                             </View>
                           ) : (
                             <TouchableOpacity
-                            style={styles.addbtn}
-                            onPress={() => {
-                              if (join_as_guest) {
-                                ref_RBSheetGuestUser?.current?.open()
-                              }
-                             else if (item.item_prices.length > 1) {
-                                showBtmSheet(item);
-                              } else {
-                                handleAddToCart(
-                                  item.item_prices[0].variation_id,
-                                  item.item_id,
-                                  item?.item_name
-                                );
-                              }
-                            }}
-                          >
-                            <AntDesign name="plus" size={12} color={Colors.button.primary_button_text} />
-                          </TouchableOpacity>
-                          
-                )}
+                              style={styles.addbtn}
+                              onPress={() => {
+                                if (join_as_guest) {
+                                  ref_RBSheetGuestUser?.current?.open()
+                                }
+                                else if (item.item_prices.length > 1) {
+                                  showBtmSheet(item);
+                                } else {
+                                  handleAddToCart(
+                                    item.item_prices[0].variation_id,
+                                    item.item_id,
+                                    item?.item_name
+                                  );
+                                }
+                              }}
+                            >
+                              <AntDesign name="plus" size={12} color={Colors.button.primary_button_text} />
+                            </TouchableOpacity>
+
+                          )}
                         </>
                       }
                     />
@@ -1653,10 +1668,10 @@ const Dashboard = ({ navigation, route }) => {
                     setCusineNameByItemCusineId(cuisineId)
                   );
                   const fav = isDealFavorite(item?.deal_id)
-                  
+
                   return (
                     <DealCard
-                      image={item?.images?.length > 0 &&  item?.images[0]}
+                      image={item?.images?.length > 0 && item?.images[0]}
                       description={shortenString(item?.description)}
                       price={item?.price}
                       title={item?.name}
@@ -1666,14 +1681,21 @@ const Dashboard = ({ navigation, route }) => {
                         })
                       }
                       isFavorite={fav}
-                      heartPress={() => fav ? removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch, showAlert) : addFavoriteDeal(item?.deal_id, customer_id, dispatch, showAlert)}
-                      addToCartpress={() =>{
+                      heartPress={() => {
                         if (join_as_guest) {
                           ref_RBSheetGuestUser?.current?.open()
-                        }else{
+                        }
+                        else {
+                          fav ? removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch) : addFavoriteDeal(item?.deal_id, customer_id, dispatch)
+                        }
+                      }}
+                      addToCartpress={() => {
+                        if (join_as_guest) {
+                          ref_RBSheetGuestUser?.current?.open()
+                        } else {
                           handleDealAddToCart(item)
                         }
-                       }}
+                      }}
                     />
                   );
                 }}
@@ -1681,9 +1703,9 @@ const Dashboard = ({ navigation, route }) => {
             </>
           )}
         </View>
-       
-        {( showSearchedData) && (
-         
+
+        {(showSearchedData) && (
+
           <>
             {/* <View style={styles.headerTextView}>
                 <Text style={styles.headerText}>Item</Text>
@@ -1722,7 +1744,7 @@ const Dashboard = ({ navigation, route }) => {
               /> 
               */}
           </>
-          
+
         )}
 
         {showSearchedData && (
@@ -1805,11 +1827,11 @@ const Dashboard = ({ navigation, route }) => {
           // </View>
         )}
 
-       
+
         <View style={{ marginVertical: 0 }}>
           <>
-           {/* {!showFilteredData && !showSearchedData && ( */}
-          {/* <>
+            {/* {!showFilteredData && !showSearchedData && ( */}
+            {/* <>
               <View style={styles.headerTextView}>
                 <Text style={styles.headerText}>Our Cuisines</Text>
                 <TouchableOpacity
@@ -1860,7 +1882,7 @@ const Dashboard = ({ navigation, route }) => {
 
 
           </>
-          
+
           <CRBSheetComponent
             height={170}
             refRBSheet={locationBtmSheetRef}
@@ -1873,7 +1895,7 @@ const Dashboard = ({ navigation, route }) => {
                     <Ionicons name={'close'} size={22} color={'#1E2022'} />
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.rowView} onPress={async () => {closeLocationBtmSheet()}} >
+                <TouchableOpacity style={styles.rowView} onPress={async () => { closeLocationBtmSheet() }} >
                   <Icons.MarkerOutlineActive />
                   <Text style={styles.btmsheettext} >Current Location</Text>
                 </TouchableOpacity>
@@ -1891,7 +1913,16 @@ const Dashboard = ({ navigation, route }) => {
           />
         </View>
       </ScrollView>
-      <TouchableOpacity style={styles.floatingButton} activeOpacity={0.9} onPress={() => navigation.navigate('MyCart')}>
+      <TouchableOpacity style={styles.floatingButton} activeOpacity={0.9} onPress={() => {
+        if (join_as_guest) {
+          ref_RBSheetGuestUser?.current?.open()
+        }
+        else {
+          navigation.navigate('MyCart')
+        }
+      }
+      }
+      >
         <View>
           {my_cart?.length > 0 && (
             <Badge
@@ -1951,7 +1982,7 @@ const Dashboard = ({ navigation, route }) => {
                       width: wp(20)
                     }}>
                     <TouchableOpacity
-                      onPress={() =>  handleAddToCartDecrement(variation?.variation_id, variation.item_id)}
+                      onPress={() => handleAddToCartDecrement(variation?.variation_id, variation.item_id)}
                       style={{
                         backgroundColor: `${Colors.secondary_color}40`,
                         borderRadius: wp(3),
@@ -1969,13 +2000,13 @@ const Dashboard = ({ navigation, route }) => {
                         backgroundColor: `${Colors.secondary_color}40`,
                         borderRadius: wp(3),
                         paddingHorizontal: wp(1.5),
-                        
+
 
                       }}>
                       {variation?.quantity}
                     </Text>
                     <TouchableOpacity
-                      onPress={() =>  handleAddToCart(variation.variation_id, itemObj.id)}
+                      onPress={() => handleAddToCart(variation.variation_id, itemObj.id)}
                       style={{
                         backgroundColor: `${Colors.secondary_color}40`,
                         borderRadius: wp(3),
@@ -1985,7 +2016,7 @@ const Dashboard = ({ navigation, route }) => {
                       <AntDesign name="plus" color={Colors.secondary_color} size={16} />
                     </TouchableOpacity>
                   </View> : <TouchableOpacity
-                    onPress={() =>  handleAddToCart(variation.variation_id, itemObj.id)}
+                    onPress={() => handleAddToCart(variation.variation_id, itemObj.id)}
                     style={{
                       backgroundColor: `${Colors.primary_color}`,
                       borderRadius: wp(3),
@@ -2028,931 +2059,10 @@ const Dashboard = ({ navigation, route }) => {
           navigation?.replace('SignUp');
         }}
       />
+
     </View>
   );
 };
 
 export default Dashboard;
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.secondary_color, },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 10,
-    paddingBottom: 20,
-    paddingHorizontal: 20
-  },
-  topChip: {
-    backgroundColor: `${Colors.secondary_text}10`,
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    marginRight: 7,
-  },
-  topChipText: {
-    color: Colors.secondary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(1.7),
-    marginTop: -2,
-  },
-  headerTextView: {
-    height: hp(4),
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 0,
-    marginTop: hp(2),
-    paddingHorizontal: 20
-  },
-  headerText: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(1.9),
-    letterSpacing: 0.45,
-  },
-  viewAllText: {
-    color: Colors.button.primary_button,
-    fontSize: RFPercentage(1.8),
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    textDecorationLine: 'underline',
-  },
-  container2: { flex: 1, backgroundColor: 'red', alignItems: 'flex-end' },
-  rbSheetHeading: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(2),
-  },
-  rowViewSB1: {
-    flexDirection: 'row',
-    justifyContent: 'space-bssetween',
-    marginBottom: 20,
-  },
-  rowView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: wp(45),
-    marginLeft: wp(3)
-  },
-  btmsheettext: {
-    color: Colors.secondary_text,
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-    marginLeft: wp(5),
-    fontSize: RFPercentage(1.9),
-  },
-  headerLocation: {
-    color: Colors.primary_text,
-    width: wp(60),
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-    textAlign: "center",
-  },
-  paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: hp(2),
-  },
-  dot: {
-    height: wp(2),
-    borderRadius: wp(2.5),
-    marginHorizontal: wp(1),
-  },
-  floatingButton: {
-    position: 'absolute',
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    bottom: 40, 
-    right: 20, 
-    overflow: 'hidden',
-    backgroundColor: Colors.button.primary_button,
-    paddingVertical: wp(3),
-    paddingHorizontal: wp(2.5),
-
-  },
-  variationTxt: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(1.7),
-    marginBottom: hp(1)
-  },
-  radioButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  variationText: {
-    fontSize: RFPercentage(1.6),
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-  },
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-
-  },
-  addbtn: {
-    backgroundColor: Colors.button.primary_button,
-    paddingHorizontal: wp(2),
-    paddingVertical: wp(2),
-    borderRadius: wp('50%'),
-  }
-
-});
-
-// import React, {useState, useEffect, useRef} from 'react';
-// import {
-//   View,
-//   Text,
-//   StyleSheet,
-//   TextInput,
-//   TouchableOpacity,
-//   KeyboardAvoidingView,
-//   FlatList,
-//   Image,
-//   ScrollView,
-//   StatusBar,
-// } from 'react-native';
-// import {
-//   widthPercentageToDP as wp,
-//   heightPercentageToDP as hp,
-// } from 'react-native-responsive-screen';
-// import {RFPercentage} from 'react-native-responsive-fontsize';
-// import Feather from 'react-native-vector-icons/Feather';
-// import Ionicons from 'react-native-vector-icons/Ionicons';
-// import Entypo from 'react-native-vector-icons/Entypo';
-// import AntDesign from 'react-native-vector-icons/AntDesign';
-// import Notification from '../../Assets/svg/notification.svg';
-// import Search from '../../Assets/svg/searchDashboard';
-// import Star from '../../Assets/svg/starDashboard';
-// import LinearGradient from 'react-native-linear-gradient';
-// import {useNavigation} from '@react-navigation/native';
-// import RBSheetAddLocation from '../../components/BottomSheet/RBSheetAddLocation';
-// import {Fonts, Images} from '../../constants';
-// import {Avatar} from 'react-native-paper';
-
-// const Dashboard = ({navigation}) => {
-//   const ref_RBSheet = useRef();
-//   const [selectedCategory, setSelectedCategory] = useState('');
-
-//   const Categories = [
-//     {
-//       name: 'Continental',
-//       id: 1,
-//       image: require('../../Assets/png/Dashboard/food5.png'),
-//     },
-//     {
-//       name: 'Pakistani',
-//       id: 2,
-//       image: require('../../Assets/png/Dashboard/food2.png'),
-//     },
-//     {
-//       name: 'Thai',
-//       id: 3,
-//       image: require('../../Assets/png/Dashboard/food3.png'),
-//     },
-//     {
-//       name: 'Turkish',
-//       id: 4,
-//       image: require('../../Assets/png/Dashboard/food4.png'),
-//     },
-//     {
-//       name: 'Chinese',
-//       id: 5,
-//       image: require('../../Assets/png/Dashboard/food5.png'),
-//     },
-//     {
-//       name: 'Drinks',
-//       id: 6,
-//       image: require('../../Assets/png/Dashboard/food6.png'),
-//     },
-//   ];
-
-//   const Deals = [
-//     {
-//       id: 1,
-//       name: 'Chicken Noodle Special',
-//       restaurent: 'Grim Cafe & Eatery',
-//       price: '$2.5',
-//       image: require('../../Assets/png/Dashboard/img1.png'),
-//     },
-//     {
-//       id: 2,
-//       name: 'Chicken Noodle Special',
-//       restaurent: 'Grim Cafe & Eatery',
-//       price: '$2.0',
-//       image: Images.food8,
-//     },
-//     {
-//       id: 3,
-//       name: 'Chicken Noodle Special',
-//       restaurent: 'Grim Cafe & Eatery',
-//       price: '$1.0',
-//       image: require('../../Assets/png/Dashboard/img1.png'),
-//     },
-//     {
-//       id: 4,
-//       name: 'Chicken Noodle Special',
-//       restaurent: 'Grim Cafe & Eatery',
-//       price: '$3.5',
-//       image: Images.food8,
-//     },
-//   ];
-
-//   const Restaurents = [
-//     {
-//       id: 1,
-//       name: "Casetta Dell'Orso",
-//       rating: '4.5',
-//       image: require('../../Assets/png/Dashboard/res1.png'),
-//     },
-//     {
-//       id: 2,
-//       name: 'Grim Cafe & Eatery',
-//       rating: '4.0',
-//       image: require('../../Assets/png/Dashboard/res1.png'),
-//     },
-//     {
-//       id: 3,
-//       name: 'Grim Cafe & Eatery',
-//       rating: '5.0',
-//       image: require('../../Assets/png/Dashboard/res1.png'),
-//     },
-//     {
-//       id: 4,
-//       name: 'Grim Cafe & Eatery',
-//       rating: '3.5',
-//       image: require('../../Assets/png/Dashboard/res1.png'),
-//     },
-//   ];
-
-//   const Cuisine = [
-//     {
-//       name: 'Burgers',
-//       id: 1,
-//       image: Images.burger,
-//     },
-//     {
-//       name: 'Pizza',
-//       id: 2,
-//       image: Images.pasta,
-//     },
-//     {
-//       name: 'Fries',
-//       id: 3,
-//       image: Images.food3,
-//     },
-//     {
-//       name: 'Burgers',
-//       id: 4,
-//       image: require('../../Assets/png/Dashboard/food4.png'),
-//     },
-//     {
-//       name: 'Pizza',
-//       id: 5,
-//       image: require('../../Assets/png/Dashboard/food5.png'),
-//     },
-//     {
-//       name: 'Fries',
-//       id: 6,
-//       image: require('../../Assets/png/Dashboard/food6.png'),
-//     },
-//   ];
-
-//   return (
-//     <KeyboardAvoidingView style={styles.container}>
-//       <ScrollView
-//         contentContainerStyle={{flexGrow: 1}}
-//         keyboardShouldPersistTaps="handled">
-//         <LinearGradient
-//           colors={['#FF5722', '#F99145']}
-//           //style={{ flex: 1 }}
-//         >
-//           <StatusBar
-//             backgroundColor={'transparent'}
-//             barStyle={'light-content'}
-//             translucent={true}
-//           />
-//           <View style={styles.header}>
-//             <View style={styles.headerView}>
-//               <TouchableOpacity
-//                 onPress={() => navigation?.toggleDrawer()}
-//                 style={styles.headerIconContainer}>
-//                 <Feather name="menu" size={hp(3.5)} color="#FFFFFF" />
-//               </TouchableOpacity>
-//               <TouchableOpacity
-//                 onPress={() => {
-//                   // navigation?.navigate('AddLocation');
-//                   ref_RBSheet?.current?.open();
-//                 }}
-//                 style={styles.locationPickerContainer}>
-//                 <View>
-//                   <Ionicons
-//                     name="location-sharp"
-//                     size={hp(2)}
-//                     color="#FFFFFF"
-//                   />
-//                 </View>
-//                 <View>
-//                   <Text numberOfLines={1} style={styles.text}>
-//                     Location name
-//                   </Text>
-//                 </View>
-//                 <View>
-//                   <Entypo
-//                     name={'chevron-thin-down'}
-//                     size={hp(2)}
-//                     color="#FFFFFF"
-//                   />
-//                 </View>
-//               </TouchableOpacity>
-//               <TouchableOpacity
-//                 onPress={() => navigation.navigate('Notification')}
-//                 style={styles.headerIconContainer}>
-//                 <Notification />
-//               </TouchableOpacity>
-//             </View>
-//             <View style={{...styles.searchContainer}}>
-//               <View style={styles.searchIcon}>
-//                 <Search />
-//               </View>
-//               <View style={styles.inputContainer}>
-//                 <TextInput
-//                   style={styles.input}
-//                   color="#212121"
-//                   placeholder="What would you like to eat?"
-//                   placeholderTextColor={'#808D9E'}
-//                   // onChangeText={text => setFullName(text)}
-//                   // value={fullName}
-//                 />
-//               </View>
-//             </View>
-//           </View>
-//         </LinearGradient>
-//         <View style={styles.mainBody}>
-//           <View style={{...styles.viewCategoriesContainer, height: hp(14)}}>
-//             <View style={styles.headerTextView}>
-//               <Text style={styles.headerText}>Choose Category</Text>
-//               <TouchableOpacity
-//                 onPress={() => {
-//                   navigation.navigate('Categories');
-//                 }}>
-//                 <Text
-//                   style={{
-//                     ...styles.headerText,
-//                     color: '#FF5722',
-//                     fontSize: RFPercentage(1.8),
-//                   }}>
-//                   See All
-//                 </Text>
-//               </TouchableOpacity>
-//             </View>
-//             <View style={styles.categoryContainer}>
-//               <TouchableOpacity
-//                 onPress={() => setSelectedCategory('all')}
-//                 style={styles.categoryView}>
-//                 <View
-//                   style={{
-//                     ...styles.categoryImage,
-//                     backgroundColor:
-//                       selectedCategory == 'all' ? '#FF572245' : 'transparent',
-//                   }}>
-//                   {/* <View
-//                     style={{
-//                       ...styles.categoryImage,
-//                       width: '85%',
-//                       height: '85%',
-//                       overflow: 'hidden',
-//                     }}>
-//                     <Image
-//                       source={require('../../Assets/png/Dashboard/food1.png')}
-//                       resizeMode="contain"
-//                       style={styles.image}
-//                     />
-//                   </View> */}
-//                   <Avatar.Image source={Images.food1} size={wp(10)} />
-//                 </View>
-//                 <Text
-//                   style={{
-//                     ...styles.categoryText,
-//                     color: selectedCategory == 'all' ? '#FD451C' : '#000000',
-//                   }}>
-//                   All
-//                 </Text>
-//               </TouchableOpacity>
-//               <FlatList
-//                 horizontal={true}
-//                 showsHorizontalScrollIndicator={false}
-//                 data={Categories}
-//                 renderItem={({item}) => (
-//                   <TouchableOpacity
-//                     style={styles.categoryView}
-//                     onPress={() => setSelectedCategory(item.id)}>
-//                     <View
-//                       style={{
-//                         ...styles.categoryImage,
-//                         backgroundColor:
-//                           selectedCategory == item?.id
-//                             ? '#FF572245'
-//                             : 'transparent',
-//                       }}>
-//                       {/* <View
-//                         style={{
-//                           ...styles.categoryImage,
-//                           width: '85%',
-//                           height: '85%',
-//                           overflow: 'hidden',
-//                         }}> */}
-//                       {/* <Image
-//                           source={item.image}
-//                           resizeMode="contain"
-//                           style={styles.image}
-//                         /> */}
-
-//                       <Avatar.Image source={item.image} size={wp(10)} />
-//                       {/* </View> */}
-//                     </View>
-//                     <Text
-//                       style={{
-//                         ...styles.categoryText,
-
-//                         color:
-//                           selectedCategory == item?.id ? '#FD451C' : '#000000',
-//                       }}>
-//                       {item.name}
-//                     </Text>
-//                   </TouchableOpacity>
-//                 )}
-//               />
-//             </View>
-//           </View>
-//           <View style={styles.viewDealsContainer}>
-//             <View style={styles.headerTextView}>
-//               <Text style={styles.headerText}>Nearby Deals</Text>
-//               <Text
-//                 onPress={() => navigation?.navigate('Deals')}
-//                 style={{
-//                   ...styles.headerText,
-//                   color: '#FF5722',
-//                   fontSize: RFPercentage(1.8),
-//                 }}>
-//                 See All
-//               </Text>
-//             </View>
-//             <View style={styles.nearByContainer}>
-//               <FlatList
-//                 horizontal={true}
-//                 showsHorizontalScrollIndicator={false}
-//                 data={Deals}
-//                 renderItem={({item}) => (
-//                   <TouchableOpacity
-//                     onPress={() => navigation.navigate('DealsDetails')}
-//                     style={styles.nearByView}>
-//                     <View style={styles.nearByImage}>
-//                       <Image
-//                         source={item.image}
-//                         resizeMode="contain"
-//                         style={styles.image}
-//                       />
-//                     </View>
-//                     <Text
-//                       style={{
-//                         ...styles.categoryText,
-//                         fontSize: RFPercentage(1.5),
-//                         fontWeight: '600',
-//                       }}
-//                       numberOfLines={1}>
-//                       {item.name}
-//                     </Text>
-//                     <Text
-//                       style={{
-//                         ...styles.categoryText,
-//                         fontSize: RFPercentage(1.3),
-//                         color: '#FF5C01',
-//                       }}>
-//                       {item.restaurent}
-//                     </Text>
-//                     <Text
-//                       style={{
-//                         ...styles.categoryText,
-//                         fontSize: RFPercentage(2),
-//                         fontWeight: 'bold',
-//                       }}>
-//                       {item.price}
-//                     </Text>
-//                   </TouchableOpacity>
-//                 )}
-//               />
-//             </View>
-//           </View>
-//           <View style={styles.viewRestaurentContainer}>
-//             <View style={styles.headerTextView}>
-//               <Text style={styles.headerText}>Nearby Restaurents</Text>
-//               <Text
-//                 style={{
-//                   ...styles.headerText,
-//                   color: '#FF5722',
-//                   fontSize: RFPercentage(1.8),
-//                 }}
-//                 onPress={() => navigation.navigate('NearByRestaurants')}>
-//                 See All
-//               </Text>
-//             </View>
-//             <View style={styles.restaurentContainer}>
-//               <FlatList
-//                 horizontal={true}
-//                 showsHorizontalScrollIndicator={false}
-//                 data={Restaurents}
-//                 renderItem={({item}) => (
-//                   <TouchableOpacity
-//                     style={styles.restaurentView}
-//                     onPress={() => navigation?.navigate('RestaurantDetails')}>
-//                     <View style={styles.restaurentImage}>
-//                       <Image
-//                         source={item.image}
-//                         resizeMode="stretch"
-//                         style={styles.image}
-//                       />
-//                     </View>
-//                     <View style={styles.textView}>
-//                       <Text
-//                         style={{
-//                           ...styles.categoryText,
-//                           fontSize: RFPercentage(1.9),
-//                           fontWeight: '600',
-//                           marginBottom: hp(0.5),
-//                         }}
-//                         numberOfLines={1}>
-//                         {item.name}
-//                       </Text>
-//                       <Text
-//                         style={{
-//                           ...styles.categoryText,
-//                           fontSize: RFPercentage(1.6),
-//                           color: '#FF5C01',
-//                           marginBottom: hp(0.5),
-//                         }}>
-//                         Open until 10.30 PM
-//                       </Text>
-//                       <View style={styles.review}>
-//                         <Star />
-//                         <Text
-//                           style={{
-//                             ...styles.categoryText,
-//                             fontSize: RFPercentage(1.3),
-//                             fontWeight: '600',
-//                             paddingLeft: wp(1.2),
-//                           }}>
-//                           {item.rating}{' '}
-//                         </Text>
-//                         <Text
-//                           style={{
-//                             ...styles.categoryText,
-//                             fontSize: RFPercentage(1.3),
-//                             fontWeight: '600',
-//                             color: '#97999A',
-//                           }}>
-//                           (2,12k Review)
-//                         </Text>
-//                       </View>
-//                     </View>
-//                   </TouchableOpacity>
-//                 )}
-//               />
-//             </View>
-//           </View>
-//           <View style={styles.viewCusineContainer}>
-//             <View style={styles.headerTextView}>
-//               <Text style={styles.headerText}>Cuisines</Text>
-//               <Text
-//                 onPress={() => navigation?.navigate('Cuisines')}
-//                 style={{
-//                   ...styles.headerText,
-//                   color: '#FF5722',
-//                   fontSize: RFPercentage(1.8),
-//                 }}>
-//                 See All
-//               </Text>
-//             </View>
-//             <View style={styles.cuisineContainer}>
-//               <FlatList
-//                 horizontal={true}
-//                 showsHorizontalScrollIndicator={false}
-//                 data={Cuisine}
-//                 renderItem={({item}) => (
-//                   <TouchableOpacity
-//                     onPress={() => navigation.navigate('SpecificCuisines')}
-//                     style={styles.cuisineView}>
-//                     <View style={styles.cuisineImage}>
-//                       <Image
-//                         source={item.image}
-//                         resizeMode="stretch"
-//                         style={styles.image}
-//                       />
-//                     </View>
-//                     <Text
-//                       style={{
-//                         ...styles.categoryText,
-//                         fontSize: RFPercentage(1.9),
-//                         fontWeight: '600',
-//                         marginTop: hp(0.5),
-//                       }}
-//                       numberOfLines={1}>
-//                       {item.name}
-//                     </Text>
-//                   </TouchableOpacity>
-//                 )}
-//               />
-//             </View>
-//           </View>
-//           <View style={{...styles.viewCusineContainer, marginTop: -30}}>
-//             {/* <View style={styles.headerTextView}>
-//               <Text style={styles.headerText}>Items</Text>
-//               <Text
-//                 style={{
-//                   ...styles.headerText,
-//                   color: '#FF5722',
-//                   fontSize: RFPercentage(1.8),
-//                 }}>
-//                 See All
-//               </Text>
-//             </View> */}
-//             <View style={styles.cuisineContainer}>
-//               <FlatList
-//                 horizontal={true}
-//                 showsHorizontalScrollIndicator={false}
-//                 data={Cuisine}
-//                 renderItem={({item}) => (
-//                   <TouchableOpacity
-//                     onPress={() => navigation.navigate('SpecificCuisines')}
-//                     style={styles.cuisineView}>
-//                     <View style={styles.cuisineImage}>
-//                       <Image
-//                         source={item.image}
-//                         resizeMode="stretch"
-//                         style={styles.image}
-//                       />
-//                     </View>
-//                     <Text
-//                       style={{
-//                         ...styles.categoryText,
-//                         fontSize: RFPercentage(1.9),
-//                         fontWeight: '600',
-//                         marginTop: hp(0.5),
-//                       }}
-//                       numberOfLines={1}>
-//                       {item.name}
-//                     </Text>
-//                   </TouchableOpacity>
-//                 )}
-//               />
-//             </View>
-//           </View>
-//         </View>
-//         <RBSheetAddLocation refRBSheet={ref_RBSheet} />
-//       </ScrollView>
-//       <View style={styles.footer}></View>
-//     </KeyboardAvoidingView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     //  backgroundColor:"rgba(0, 0, 0, 0.3)",
-//   },
-//   header: {
-//     // alignSelf:"flex-start",
-//     height: hp(20),
-//     //  borderWidth:1,
-//     justifyContent: 'space-evenly',
-//     marginTop: StatusBar.currentHeight - 20,
-//   },
-//   headerView: {
-//     width: wp(100),
-//     height: '30%',
-//     //  borderWidth:1,
-//     flexDirection: 'row',
-//   },
-//   headerIconContainer: {
-//     width: wp(20),
-//     //borderWidth:1,
-//     // height:"60%",
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-
-//   locationPickerContainer: {
-//     width: wp(60),
-//     flexDirection: 'row',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     //borderWidth:1,
-//   },
-//   text: {
-//     textAlign: 'center',
-//     //borderWidth:1,
-//     width: wp(40),
-//     color: '#FFFFFF',
-//   },
-//   searchContainer: {
-//     width: wp(80),
-//     height: wp(11),
-//     borderRadius: hp(50),
-//     backgroundColor: '#FFFFFF',
-//     flexDirection: 'row',
-//     paddingHorizontal: wp(5),
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     alignSelf: 'center',
-//   },
-//   inputContainer: {
-//     //flexDirection:"row",
-//     flex: 1,
-//     height: wp(11),
-//     //borderRadius:hp(50),
-
-//     // justifyContent:"center",
-//     backgroundColor: '#FFFFFF',
-//     //alignItems:"center",
-//     //  borderWidth:1
-//   },
-//   input: {
-//     marginLeft: hp(1),
-//     height: hp(6),
-//   },
-//   searchIcon: {
-//     //borderWidth:1
-//   },
-//   mainBody: {
-//     flex: 1,
-//     justifyContent: 'space-between',
-//     height: hp(120),
-//     padding: wp(3),
-//     marginBottom: hp(1),
-//     // borderWidth:1
-//   },
-//   viewCategoriesContainer: {
-//     height: hp(17),
-//     // borderWidth:1
-//   },
-//   viewDealsContainer: {
-//     height: hp(25),
-//     // borderWidth:1
-//   },
-//   viewRestaurentContainer: {
-//     height: hp(21),
-//     // borderWidth:1
-//   },
-//   viewCusineContainer: {
-//     height: hp(20),
-//   },
-//   headerTextView: {
-//     // borderWidth:1,
-//     height: hp(4),
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     paddingHorizontal: 10,
-//   },
-//   headerText: {
-//     color: '#000000',
-//     fontFamily: Fonts.PlusJakartaSans_Bold,
-//     fontSize: RFPercentage(2),
-//     //lineHeight: 84,
-//     // fontWeight: 'bold',
-//     // textAlign: 'center',
-//     // marginBottom:hp("2"),
-//   },
-//   categoryContainer: {
-//     flex: 1,
-//     flexDirection: 'row',
-//   },
-//   categoryView: {
-//     //borderWidth:1,
-//     //  height:hp(5),
-//     //flex:1,
-//     width: wp(23),
-//     alignItems: 'center',
-//     justifyContent: 'space-between',
-//   },
-//   categoryImage: {
-//     borderWidth: 1,
-//     borderColor: '#E6E7EB',
-//     width: wp(15),
-//     height: wp(15),
-//     borderRadius: wp(15) / 2,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   categoryText: {
-//     color: '#000000',
-//     fontFamily: 'PlusJakartaSans-Regular',
-//     fontSize: RFPercentage(1.6),
-//     //lineHeight: 84,
-//     //fontWeight:"bold",
-//     // textAlign: 'center',
-//     // marginBottom:hp("2"),
-//   },
-//   image: {
-//     width: '100%',
-//     height: '100%',
-//   },
-//   nearByContainer: {
-//     flex: 1,
-//     flexDirection: 'row',
-//   },
-//   nearByView: {
-//     borderWidth: 1,
-//     //flex:1,
-//     borderColor: '#E6E7EB',
-//     width: wp(35),
-//     // height:"100%",
-//     borderRadius: hp(2),
-//     justifyContent: 'space-around',
-//     alignItems: 'center',
-//     marginRight: wp(2),
-//   },
-//   nearByImage: {
-//     //borderWidth:1,
-//     height: hp(9),
-//     width: wp(31),
-//     borderRadius: hp(2),
-//   },
-
-//   restaurentContainer: {
-//     flex: 1,
-//     flexDirection: 'row',
-//   },
-//   restaurentView: {
-//     borderWidth: 1,
-//     flexDirection: 'row',
-//     //flex:1,
-//     borderColor: '#E6E7EB',
-//     width: wp(75),
-//     // height:"100%",
-//     borderRadius: hp(2),
-//     // justifyContent:"space-evenly",
-//     alignItems: 'center',
-//     // paddingLeft:wp(0.5)
-//     marginRight: wp(2),
-//   },
-//   restaurentImage: {
-//     overflow: 'hidden',
-//     marginHorizontal: hp(1.5),
-//     // borderWidth:1,
-//     height: hp(13),
-//     width: wp(33),
-//     borderRadius: hp(2),
-//   },
-
-//   textView: {
-//     //  borderWidth:1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     // paddingVertical:hp(1),
-
-//     // justifyContent:"space-around"
-//   },
-//   review: {
-//     //borderWidth:1,
-//     flexDirection: 'row',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-
-//   cuisineContainer: {
-//     flex: 1,
-//     flexDirection: 'row',
-//   },
-//   cuisineView: {
-//     borderWidth: 1,
-//     borderColor: '#E6E7EB',
-//     width: wp(30),
-//     height: hp(13.5),
-//     borderRadius: hp(2),
-//     paddingTop: hp(1),
-//     alignItems: 'center',
-//     marginRight: wp(2),
-//   },
-//   cuisineImage: {
-//     //borderWidth:1,
-//     height: hp(8),
-//     width: wp(22),
-//     borderRadius: hp(2),
-//     overflow: 'hidden',
-//   },
-
-//   footer: {
-//     height: hp(7),
-//     // alignSelf:"flex-end",
-//     // backgroundColor:"blue",
-//     // borderWidth:1,
-//     position: 'absolute',
-//     bottom: 0,
-//     left: 0,
-//     right: 0,
-//     top: hp(93),
-//     //padding:10,
-//   },
-// });
-// export default Dashboard;

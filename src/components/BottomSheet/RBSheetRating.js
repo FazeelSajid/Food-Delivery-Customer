@@ -3,7 +3,7 @@ import React from 'react';
 import CRBSheetComponent from './CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {RadioButton} from 'react-native-paper';
-import {Colors, Fonts} from '../../constants';
+import { Fonts} from '../../constants';
 import CInput from '../TextInput/CInput';
 import {Rating, AirbnbRating} from 'react-native-ratings';
 import CButton from '../Buttons/CButton';
@@ -13,6 +13,7 @@ import {
 } from 'react-native-responsive-screen';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import RBSheet from 'react-native-raw-bottom-sheet';
+import { useSelector } from 'react-redux';
 
 const RBSheetRating = ({
   refRBSheet,
@@ -24,6 +25,7 @@ const RBSheetRating = ({
   comment,
   setComment,
 }) => {
+    const  {Colors } = useSelector(store => store.store);
   return (
     <RBSheet
       ref={refRBSheet}

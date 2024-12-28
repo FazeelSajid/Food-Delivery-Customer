@@ -7,9 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React, {useState, useEffect, useRef, useDebugValue} from 'react';
-import {Colors, Fonts, Icons} from '../../constants';
 import StackHeader from '../../components/Header/StackHeader';
-import {RFPercentage} from 'react-native-responsive-fontsize';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -18,17 +16,13 @@ import CButton from '../../components/Buttons/CButton';
 import CInput from '../../components/TextInput/CInput';
 import STYLE from './STYLE';
 import {useKeyboard} from '../../utils/UseKeyboardHook';
-import {handlePopup, showAlert} from '../../utils/helpers';
+import {handlePopup} from '../../utils/helpers';
 import api from '../../constants/api';
-import {firebase} from '@react-native-firebase/auth';
-import {useDispatch} from 'react-redux';
-import {setOtpConfirm} from '../../redux/AuthSlice';
-
-import CountryPicker from 'react-native-country-picker-modal';
-import CInputWithCountryCode from '../../components/TextInput/CInputWithCountryCode';
+import {useDispatch, useSelector} from 'react-redux';
 
 const ForgotPassword = ({navigation, route}) => {
   const dispatch = useDispatch();
+  const { Colors } = useSelector(store => store.store)
 
   const keyboardHeight = useKeyboard();
   const scrollViewRef = useRef();
@@ -107,45 +101,8 @@ const ForgotPassword = ({navigation, route}) => {
         setLoading(false);
       });
     }
-
-
-
-    // if (validate()) {
-    //   setLoading(true);
-    //   firebase
-    //     .auth()
-    //     .signInWithPhoneNumber(countryCode + phone_no)
-    //     .then(response => {
-    //       console.log('confirmResult  :  ', response);
-    //       // setConfirmResult(response);
-    //       // setTimeout(() => refOTP.current.focusField(0), 250);
-    //       dispatch(setOtpConfirm(response));
-    //       navigation?.navigate('Verification_Phone', {
-    //         // confirmResult: response,
-    //         phone_no: countryCode + phone_no,
-    //       });
-    //     })
-    //     .catch(error => {
-    //       showAlert(error.message);
-    //       console.log(error);
-    //     })
-    //     .finally(() => setLoading(false));
-    // }
   };
 
-   
-
-  // const validate = () => {
-  //   if (countryCode?.length == 0) {
-  //     showAlert('Please Enter Country');
-  //     return false;
-  //   } else if (phone_no?.length == 0) {
-  //     showAlert('Please Enter Phone Number');
-  //     return false;
-  //   } else {
-  //     return true;
-  //   }
-  // };
 
   return (
     <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
@@ -169,12 +126,7 @@ const ForgotPassword = ({navigation, route}) => {
             </Text>
           </View>
 
-          {/* <CInputWithCountryCode
-            phoneNo={phone_no}
-            setPhoneNo={setPhone_no}
-            setCountryCode={setCountryCode}
-            countryCode={countryCode}
-          /> */}
+          
 
           <CInput
             placeholder="Email"
@@ -182,13 +134,7 @@ const ForgotPassword = ({navigation, route}) => {
             onChangeText={text => setUserValue(text)}
           />
 
-          {/* <CInput
-            placeholder="Phone Number"
-            value={phone_no}
-            onChangeText={text => setPhone_no(text)}
-            // value={email}
-            // onChangeText={text => setEmail(text)}
-          /> */}
+        
           <View
             style={{
               // height: hp(47),
@@ -211,18 +157,3 @@ const ForgotPassword = ({navigation, route}) => {
 
 export default ForgotPassword;
 
-const styles = StyleSheet.create({
-  inputContainer: {
-    borderWidth: 1,
-    borderColor: '#DDDDDD',
-    borderRadius: 35,
-    width: wp(90),
-    marginVertical: 80,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  textInput: {
-    paddingHorizontal: 20,
-  },
-});

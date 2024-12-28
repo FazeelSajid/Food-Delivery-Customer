@@ -3,9 +3,7 @@ import {
   Text,
   View,
   ScrollView,
-  TextInput,
-  TurboModuleRegistry,
-  TouchableOpacity,
+
 } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import {
@@ -14,15 +12,14 @@ import {
 } from 'react-native-responsive-screen';
 import Snackbar from 'react-native-snackbar';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
-
-import {Colors, Fonts, Icons} from '../../constants';
+import {Fonts, Icons} from '../../constants';
 import StackHeader from '../../components/Header/StackHeader';
 import CButton from '../../components/Buttons/CButton';
 import STYLE from './STYLE';
 import RBSheetSuccess from '../../components/BottomSheet/RBSheetSuccess';
 import {useKeyboard} from '../../utils/UseKeyboardHook';
 import {firebase} from '@react-native-firebase/auth';
-import {showAlert, showAlertLongLength} from '../../utils/helpers';
+import {handlePopup} from '../../utils/helpers';
 import api from '../../constants/api';
 import Loader from '../../components/Loader';
 import {useDispatch, useSelector} from 'react-redux';
@@ -32,7 +29,7 @@ import {setCustomerDetail} from '../../redux/AuthSlice';
 const Verification_Phone = ({navigation, route}) => {
   const dispatch = useDispatch();
 
-  const {otpConfirm} = useSelector(store => store.store);
+  const {otpConfirm, Colors} = useSelector(store => store.store);
 
   const keyboardHeight = useKeyboard();
   const scrollViewRef = useRef();
@@ -87,7 +84,7 @@ const Verification_Phone = ({navigation, route}) => {
       })
       .catch(err => {
         console.log('Error in Login :  ', err);
-        showAlert('Something went wrong!');
+        handlePopup(dispatch,'Something went wrong!','red');
       })
       .finally(() => {
         setLoading(false);
@@ -144,12 +141,12 @@ const Verification_Phone = ({navigation, route}) => {
             } else {
               messageText = 'Something went wrong';
             }
-            showAlertLongLength(messageText, 'red', 3);
+            handlePopup(dispatch,messageText, 'red');
             setLoading(false);
           });
       } catch (error) {
         setLoading(false);
-        showAlert('Something went wrong');
+        handlePopup(dispatch,'Something went wrong','red');
         console.log('error : ', error);
       }
     } else {
@@ -174,21 +171,55 @@ const Verification_Phone = ({navigation, route}) => {
       .then(async response => {
         console.log('response  :  ', response);
         if (response?.status == false) {
-          showAlert(response?.message);
-          // showAlert('Invalid Credentials');
+          handlePopup(dispatch,response?.message, 'green');
         } else {
-          // showAlert(response.message, 'green');
           ref_RBSheet?.current?.open();
         }
       })
       .catch(err => {
         console.log('Error in Login :  ', err);
-        showAlert('Something went wrong!');
+        handlePopup(dispatch,'Something went wrong!', 'red');
       })
       .finally(() => {
         setLoading(false);
       });
   };
+
+  const styles = StyleSheet.create({
+    inputContainer: {
+      borderWidth: 1,
+      borderColor: Colors.borderGray,
+      borderRadius: 35,
+      width: wp(90),
+      marginTop: 50,
+      marginBottom: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+    },
+    textInput: {
+      paddingHorizontal: 20,
+    },
+    underlineStyleBase: {
+      color: Colors.Text,
+      fontSize: 24,
+      fontFamily: Fonts.Inter_Medium,
+      width: 48,
+      height: 50,
+      borderRadius: 30,
+      borderWidth: 0,
+      // borderBottomWidth: 1,
+      borderColor: Colors.borderGray,
+      // marginHorizontal: 2,
+      backgroundColor: '#F5F6FA',
+    },
+    underlineStyleHighLighted: {
+      borderColor: Colors.primary_color,
+      borderRadius: 30,
+      borderWidth: 1,
+    },
+  });
+  
 
   return (
     <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
@@ -222,7 +253,6 @@ const Verification_Phone = ({navigation, route}) => {
               ref={refOTP}
               style={{
                 height: 50,
-                // marginTop: hp(5),
               }}
               pinCount={6}
               code={otpCode}
@@ -240,20 +270,12 @@ const Verification_Phone = ({navigation, route}) => {
           </View>
           <View
             style={{
-              // height: hp(47),
               flex: 1,
               justifyContent: 'flex-end',
               paddingBottom: 30,
               marginBottom: 10,
             }}>
-            {/* <CButton
-                title="Send OTP"
-                height={hp(6)}
-                width={wp(82)}
-                onPress={() => handleSendOTPCode()}
-                loading={loading}
-              /> */}
-
+            
             <CButton
               title="VERIFY"
               height={hp(6)}
@@ -271,8 +293,6 @@ const Verification_Phone = ({navigation, route}) => {
           btnText={'OK'}
           onPress={() => {
             ref_RBSheet?.current?.close();
-            // navigation?.popToTop();
-            // navigation?.replace('Drawer');
             navigation.navigate('EnableLocation');
           }}
         />
@@ -283,37 +303,3 @@ const Verification_Phone = ({navigation, route}) => {
 
 export default Verification_Phone;
 
-const styles = StyleSheet.create({
-  inputContainer: {
-    borderWidth: 1,
-    borderColor: Colors.borderGray,
-    borderRadius: 35,
-    width: wp(90),
-    marginTop: 50,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  textInput: {
-    paddingHorizontal: 20,
-  },
-  underlineStyleBase: {
-    color: Colors.Text,
-    fontSize: 24,
-    fontFamily: Fonts.Inter_Medium,
-    width: 48,
-    height: 50,
-    borderRadius: 30,
-    borderWidth: 0,
-    // borderBottomWidth: 1,
-    borderColor: Colors.borderGray,
-    // marginHorizontal: 2,
-    backgroundColor: '#F5F6FA',
-  },
-  underlineStyleHighLighted: {
-    borderColor: Colors.primary_color,
-    borderRadius: 30,
-    borderWidth: 1,
-  },
-});

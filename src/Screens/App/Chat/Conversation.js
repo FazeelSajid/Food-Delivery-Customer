@@ -13,7 +13,6 @@ import Loader from '../../../components/Loader';
 import { io } from 'socket.io-client';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useSelector } from 'react-redux';
-import { Colors } from '../../../constants';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import CameraBottomSheet from '../../../components/BottomSheet/CameraBottomSheet';
 import { BASE_URL } from '../../../utils/globalVariables';
@@ -21,26 +20,9 @@ import { BASE_URL } from '../../../utils/globalVariables';
 const Conversation = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const contact = route?.params?.contact;
-  const { customer_id } = useSelector(store => store.store);
+  const { customer_id, Colors } = useSelector(store => store.store);
   const cameraBtmSheetRef = useRef()
   const [image, setImage] = useState()
-  const [imagePreview, setImagePreview] = useState(null);
-
-  // console.log(typeof(customer_id));
-
-  // console.log({ contact });
-
-
-
-
-  // const socketUrl = 'https://food-delivery-be.caprover-demo.mtechub.com/';
-
-  const socketUrl = 'http://192.168.100.239:3017'
-  // const customer_id = 202028;
-  // const rest_ID = 'res_4074614';
-  // const rider_id = "rider_1673186";
-
-
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
@@ -86,11 +68,10 @@ const Conversation = ({ navigation, route }) => {
   // }, []);
 
   const room_id = contact.room_id; // Use the room ID from the contact details
-    // console.log({room_id});
 
+  // console.log(contact, 'asdasasd');
+  
   useEffect(() => {
-    
-    
     const newSocket = io(BASE_URL);
     setSocket(newSocket);
     newSocket.on('connect', () => {
@@ -138,12 +119,13 @@ const Conversation = ({ navigation, route }) => {
       // }
 // console.log(room_id);
 
-      if (room_id) {
+      // if (room_id) {
         newSocket.emit('joinRoom', {
               room_id,
               rest_ID: contact.restaurant_id,
               customer_id: customer_id, // Example customer ID
-              rider_id: contact.rider_id
+              rider_id: contact.rider_id,
+              order_id: contact.order_id
             });
             newSocket.on('roomJoined', ({ roomId }) => {
               console.log(`Joined room: ${roomId}, conversations`);
@@ -156,25 +138,16 @@ const Conversation = ({ navigation, route }) => {
             //   customer_id: customer_id, // Example customer ID
             //   rider_id: null
             // });
-      } else {
-          newSocket.emit('joinRoom', customer_id);
-          newSocket.on('roomJoined', ({ roomId }) => {
-            console.log(`Joined room: ${roomId}, conversation Screen`);
-            setRoomId(roomId);
-          });
-          // console.log('else from customer conversation screen useeffect unexpectedly');
-        }
+      // } 
+      // else {
+      //     newSocket.emit('joinRoom', customer_id);
+      //     newSocket.on('roomJoined', ({ roomId }) => {
+      //       console.log(`Joined room: ${roomId}, conversation Screen`);
+      //       setRoomId(roomId);
+      //     });
+      //     // console.log('else from customer conversation screen useeffect unexpectedly');
+      //   }
   });
-
-    // Join the room
-   
-   
-
-    // Listen for room join confirmation and previous messages
-    // newSocket.on('roomJoined', ({ roomId }) => {
-    //   console.log(`Joined room: ${roomId}`);
-    //   setRoomId(roomId);
-    // });
 
     newSocket.on('previousMessages', ({ messages }) => {
       const formattedMessages = messages.map((msg, index) => ({
@@ -201,7 +174,6 @@ const Conversation = ({ navigation, route }) => {
   }, [contact]);
 
 
-// console.log(image.base64, 'base64');
 
   const sendMessage = () => {
     if (message.trim()) {
@@ -215,10 +187,10 @@ const Conversation = ({ navigation, route }) => {
           receiverId: contact.rider_id || contact.restaurant_id,
           message,
           image_url: image.base64,
+          order_id: contact.order_id
         });
        
         
-        setImagePreview(image.base64)
       } else {
         socket.emit('sendMessage', {
           roomId,
@@ -227,6 +199,7 @@ const Conversation = ({ navigation, route }) => {
           receiver_type: contact.rider_id ? 'rider' : 'restaurant',
           receiverId: contact.rider_id || contact.restaurant_id,
           message,
+          order_id: contact.order_id
         });
         console.log({
           roomId,
@@ -237,45 +210,20 @@ const Conversation = ({ navigation, route }) => {
           message,
          
         });
-
-        console.log('only text');
-        
       }
-     
-
-      
-      
-
-      // const newMessage = {
-      //   sender_type: 'customer',
-      //   sender_id: customer_id,
-      //   receiver_type: 'restaurant',
-      //   receiver_id: rest_ID,
-      //   message,
-      //   created_at: new Date().toISOString(),
-      // };
-
-      // setMessages((prevMessages) => [newMessage, ...prevMessages]);
 
       setMessage('');
       setImage(null)
-
     }
   };
 
 
-  // console.log({roomId});
   
 
   const renderItem = ({ item }) => {
-
-
-
     const isCustomer = item.sender_type === 'customer';
 
-    // console.log("Xchcek  kkķ",item.receiver_type)
-    // console.log( item?.image_url );
-
+    
     return (
       <View
         style={[
@@ -289,9 +237,7 @@ const Conversation = ({ navigation, route }) => {
             isCustomer ? styles.customerBubble : styles.restaurantBubble,
           ]}
         >
-          {/* Render the text message */}
-        
-          {/* Render the image professionally */}
+          
           {item?.image_url ? (
             <Image
               source={{ uri: item?.image_url }}
@@ -316,7 +262,6 @@ const Conversation = ({ navigation, route }) => {
 
         </View>
 
-        {/* Timestamp */}
         <Text style={styles.timestamp}>
           { item.created_at ? new Date(item.created_at).toLocaleTimeString([], {
             hour: '2-digit',
@@ -329,6 +274,101 @@ const Conversation = ({ navigation, route }) => {
       </View>
     );
   };
+  const styles = StyleSheet.create({
+    chatContainer: {
+      paddingHorizontal: wp('4%'),
+      paddingBottom: hp('2%'),
+    },
+    messageContainer: {
+      marginVertical: hp('1%'),
+      flexDirection: 'column',
+    },
+    messageRight: {
+      alignItems: 'flex-end',
+    },
+    messageLeft: {
+      alignItems: 'flex-start',
+    },
+    bubble: {
+      maxWidth: wp('70%'),
+      borderRadius: wp('3%'),
+      padding: wp('1%'),
+      overflow:'hidden',
+    },
+    customerBubble: {
+      backgroundColor: Colors.primary_color,
+      borderTopRightRadius: 0,
+      width: wp(62)
+     
+    },
+    restaurantBubble: {
+      backgroundColor: Colors.borderGray,
+      borderTopLeftRadius: 0,
+    },
+    messageText: {
+      fontSize: wp('4%'),
+      color: Colors.primary_text,
+      marginBottom: hp('0.5%'),
+      marginTop: hp('0.5%'),
+      marginLeft : wp('1%'),
+      // width: wp(80)
+    },
+    timestamp: {
+      fontSize: wp('3.2%'),
+      color: Colors.secondary_text,
+      marginTop: hp('0.5%'),
+    },
+    // Image Styling
+    chatImage: {
+      height: hp(30), // Set proportional height for better responsiveness
+      width: wp(60),  // Adjust width to fit bubble size
+      borderRadius: wp(2), // Add rounded corners
+      // marginTop: hp(1), // Add spacing from text
+      alignSelf: 'center', // Center the image
+      resizeMode: 'stretch', // Ensure the image covers the area proportionally
+      shadowColor: '#000', // Add shadow for depth
+      shadowOffset: { width: 0, height: 2 }, 
+      shadowOpacity: 0.3, 
+      shadowRadius: 4,
+      // elevation: 3, // Shadow support for Android
+      borderWidth: 1, // Optional: Add border for a sleek look
+      // borderColor: '#ddd', // Border color
+      overflow: 'hidden',
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: Colors.secondary_color,
+      paddingVertical: hp('1%'),
+      paddingHorizontal: wp('4%'),
+      borderTopWidth: 1,
+      borderTopColor: Colors.borderGray,
+    },
+    textInput: {
+      flex: 1,
+      height: hp('5%'),
+      borderWidth: 1,
+      borderColor: Colors.borderGray,
+      borderRadius: wp('5%'),
+      paddingHorizontal: wp('4%'),
+      backgroundColor: Colors.secondary_color,
+      fontSize: wp('4%'),
+      color: Colors.primary_text,
+    },
+    sendButton: {
+      marginLeft: wp('2%'),
+      backgroundColor: Colors.button.primary_button,
+      borderRadius: wp('5%'),
+      padding: wp('3%'),
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    sendText: {
+      color: Colors.button.primary_button_text ,
+      fontSize: wp('5%'),
+      fontWeight: 'bold',
+    },
+  });
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
       <ChatHeader
@@ -370,7 +410,8 @@ const Conversation = ({ navigation, route }) => {
           senderId: customer_id,
           receiver_type: contact.rider_id ? 'rider' : 'restaurant',
           receiverId: contact.rider_id || contact.restaurant_id,
-          socket : socket
+          socket : socket,
+          order_id: contact.order_id
           
         }} />
     </View>
@@ -379,99 +420,4 @@ const Conversation = ({ navigation, route }) => {
 
 export default Conversation;
 
-const styles = StyleSheet.create({
-  chatContainer: {
-    paddingHorizontal: wp('4%'),
-    paddingBottom: hp('2%'),
-  },
-  messageContainer: {
-    marginVertical: hp('1%'),
-    flexDirection: 'column',
-  },
-  messageRight: {
-    alignItems: 'flex-end',
-  },
-  messageLeft: {
-    alignItems: 'flex-start',
-  },
-  bubble: {
-    maxWidth: wp('70%'),
-    borderRadius: wp('3%'),
-    padding: wp('1%'),
-    overflow:'hidden',
-  },
-  customerBubble: {
-    backgroundColor: Colors.primary_color,
-    borderTopRightRadius: 0,
-    width: wp(62)
-    // borderColor: Colors.primary_color,
-    // borderWidth: wp(1)
-  },
-  restaurantBubble: {
-    backgroundColor: Colors.borderGray,
-    borderTopLeftRadius: 0,
-  },
-  messageText: {
-    fontSize: wp('4%'),
-    color: Colors.primary_text,
-    marginBottom: hp('0.5%'),
-    marginTop: hp('0.5%'),
-    marginLeft : wp('1%'),
-    // width: wp(80)
-  },
-  timestamp: {
-    fontSize: wp('3.2%'),
-    color: Colors.secondary_text,
-    marginTop: hp('0.5%'),
-  },
-  // Image Styling
-  chatImage: {
-    height: hp(30), // Set proportional height for better responsiveness
-    width: wp(60),  // Adjust width to fit bubble size
-    borderRadius: wp(2), // Add rounded corners
-    // marginTop: hp(1), // Add spacing from text
-    alignSelf: 'center', // Center the image
-    resizeMode: 'stretch', // Ensure the image covers the area proportionally
-    shadowColor: '#000', // Add shadow for depth
-    shadowOffset: { width: 0, height: 2 }, 
-    shadowOpacity: 0.3, 
-    shadowRadius: 4,
-    // elevation: 3, // Shadow support for Android
-    borderWidth: 1, // Optional: Add border for a sleek look
-    // borderColor: '#ddd', // Border color
-    overflow: 'hidden',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.secondary_color,
-    paddingVertical: hp('1%'),
-    paddingHorizontal: wp('4%'),
-    borderTopWidth: 1,
-    borderTopColor: Colors.borderGray,
-  },
-  textInput: {
-    flex: 1,
-    height: hp('5%'),
-    borderWidth: 1,
-    borderColor: Colors.borderGray,
-    borderRadius: wp('5%'),
-    paddingHorizontal: wp('4%'),
-    backgroundColor: Colors.secondary_color,
-    fontSize: wp('4%'),
-    color: Colors.primary_text,
-  },
-  sendButton: {
-    marginLeft: wp('2%'),
-    backgroundColor: Colors.button.primary_button,
-    borderRadius: wp('5%'),
-    padding: wp('3%'),
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sendText: {
-    color: Colors.button.primary_button_text ,
-    fontSize: wp('5%'),
-    fontWeight: 'bold',
-  },
-});
+

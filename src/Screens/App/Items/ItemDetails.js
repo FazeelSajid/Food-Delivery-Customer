@@ -8,31 +8,19 @@ import {
   StatusBar,
 } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
-import { Colors, Fonts, Icons, Images } from '../../../constants';
+import { Fonts} from '../../../constants';
 import StackHeader from '../../../components/Header/StackHeader';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { SwiperFlatList } from 'react-native-swiper-flatlist';
-import PriceText from '../../../components/Text';
-import ImageSlider from '../../../components/Slider/ImageSlider';
-import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
-import SuccessModal from '../../../components/Modal/SuccessModal';
-import Lottie from 'lottie-react-native';
 import ImageSliderCircle from '../../../components/Slider/ImageSliderCircle';
-import RBSheetConfirmation from '../../../components/BottomSheet/RBSheetConfirmation';
-import { useFocusEffect } from '@react-navigation/native';
 import Loader from '../../../components/Loader';
 import api from '../../../constants/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  checkRestaurantTimings,
   fetchApisGet,
-  getRestaurantDetail,
   handlePopup,
-  showAlert,
 } from '../../../utils/helpers';
 import CButton from '../../../components/Buttons/CButton';
 import ItemSeparator from '../../../components/Separator/ItemSeparator';
@@ -40,25 +28,15 @@ import RBSheetGuestUser from '../../../components/BottomSheet/RBSheetGuestUser';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addItemToCart,
-  clearCartItems,
-  getCartItems,
-  getCustomerCart,
   removeCartItemQuantity,
-  removeItemFromCart,
   updateCartItemQuantity,
 } from '../../../utils/helpers/cartapis';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {
-  addItemToMYCart,
-  addToCart,
-  removeItemFromMyCart,
-  setCartRestaurantId,
   updateMyCartList,
 } from '../../../redux/CartSlice';
-import RBSheetOtherRestaurantCartItem from '../../../components/BottomSheet/RBSheetOtherRestaurantCartItem';
-import { addFavoriteitem, getItemFavoriteStatus, removeFavoriteitem } from '../../../utils/helpers/FavoriteApis';
+import { addFavoriteitem, removeFavoriteitem } from '../../../utils/helpers/FavoriteApis';
 import RBSheetSuccess from '../../../components/BottomSheet/RBSheetSuccess';
-import RBSheetRestaurantClosed from '../../../components/BottomSheet/RBSheetRestaurantClosed';
 import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RadioButton } from 'react-native-paper';
@@ -71,7 +49,7 @@ import NoDataFound from '../../../components/NotFound/NoDataFound';
 const ItemDetails = ({ navigation, route }) => {
   const ref_RBSheetSuccess = useRef();
   const dispatch = useDispatch();
-  const { customer_id, showPopUp, popUpColor, PopUpMesage, join_as_guest, customerCartId } = useSelector(store => store.store)
+  const { customer_id, showPopUp, popUpColor, PopUpMesage, join_as_guest, customerCartId, Colors } = useSelector(store => store.store)
 
   const { cart, cart_restaurant_id, my_cart } = useSelector(store => store.cart);
   const ref_RBSheet = useRef();
@@ -101,31 +79,14 @@ const ItemDetails = ({ navigation, route }) => {
   };
   const isFavorite = isItemFavorite()
 
-  // console.log(route?.params?.id);
-
-
-  // Function to handle radio button press
-
-  // console.log(variations);
-
-
-
-  // const showBtmSheet = () => {
-  //   btmSheetRef?.current?.open()
-  // }
-
-  // const closeBtmSheet = () => {
-  //   btmSheetRef?.current?.close()
-  // }
+ 
   const checkVariationInCart = async (array) => {
     if (!route?.params?.id) return;
 
-    // Fetch and update cart items
-    // const cartItems = await getCartItems(customerCartId, dispatch);
+  
     let cartItems;
     const response = await fetchApisGet(api.get_cart_items + customerCartId, false, dispatch)
     if (response.status) {
-      // console.log(response);
 
       dispatch(updateMyCartList(response.result));
       cartItems = response.result;
@@ -497,14 +458,12 @@ const ItemDetails = ({ navigation, route }) => {
   useEffect(() => {
 
     if (itemDetail) {
-      //  console.log(itemDetail.item_prices[0]);
       setSelectedVariation({
         variation_id: itemDetail.item_prices[0].variation_id,
         variation_name: itemDetail.item_prices[0].variation_name,
         variation_price: itemDetail.item_prices[0].price,
       });
 
-      // checkVariationInCart(itemDetail.item_prices[0].variation_id)
 
 
     }
@@ -561,7 +520,6 @@ const ItemDetails = ({ navigation, route }) => {
   };
 
 
-  // console.log({variations}); 
 
   const showRmoveBtmSheet = async () => {
     if (itemDetail.item_prices?.length > 1) {
@@ -638,8 +596,151 @@ const ItemDetails = ({ navigation, route }) => {
   }, []);
 
 
-  // console.log(variations);
-
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: Colors.secondary_color,
+      alignItems: 'center',
+      // paddingHorizontal: 20,
+    },
+    heading: {
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      color: Colors.primary_text,
+      fontSize: RFPercentage(3),
+      textAlign: 'center',
+      paddingHorizontal: 10,
+    },
+    restaurantName: {
+      color: Colors.secondary_color,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+      fontSize: RFPercentage(1.5),
+    },
+    itemName: {
+      color: Colors.secondary_color,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+      fontSize: RFPercentage(2.8),
+      marginVertical: 5,
+      marginBottom: 15,
+    },
+    subText: {
+      color: Colors.secondary_text,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+      fontSize: RFPercentage(2),
+    },
+  
+    rowViewSB: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    imageCard: {
+      width: wp(90),
+      height: hp(25),
+      marginHorizontal: wp(4.5),
+      borderRadius: 10,
+      overflow: 'hidden',
+    },
+    sliderContainer: { marginVertical: 20, paddingHorizontal: 0, height: hp(30) },
+    paginationStyle: {
+      // marginBottom: hp(1),
+    },
+    paginationStyleItemActive: {
+      width: wp(2.5),
+      height: wp(2.5),
+      borderRadius: wp(2.5) / 2,
+      backgroundColor: Colors.primary_color,
+      margin: 0,
+      marginHorizontal: 2,
+    },
+    paginationStyleItemInactive: {
+      width: wp(2.5),
+      height: wp(2.5),
+      borderRadius: wp(2.5) / 2,
+      backgroundColor: Colors.secondary_color,
+      borderWidth: 1,
+      borderColor: Colors.primary_color,
+      opacity: 0.7,
+      marginHorizontal: 2,
+    },
+    rowView: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    descriptionTxt: {
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      fontSize: RFPercentage(1.7),
+      marginTop: hp(2)
+    },
+    description: {
+  
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+      fontSize: RFPercentage(1.6),
+      lineHeight: 20,
+  
+    },
+    priceTxt: {
+  
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_ExtraBold,
+      fontSize: RFPercentage(2.2),
+      lineHeight: 20,
+      marginLeft: wp(3),
+      marginVertical: hp(1)
+  
+    },
+    variationName: {
+  
+      color: Colors.secondary_text,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+      fontSize: RFPercentage(1.6),
+      marginVertical: hp(0.5)
+      // lineHeight: 20,
+      // marginLeft: wp(2)
+  
+    },
+    AboutContainer: {
+      marginVertical: 10,
+      backgroundColor: `${Colors.primary_color}10`,
+      paddingHorizontal: wp(6),
+      paddingVertical: hp(1.5),
+      borderRadius: 15,
+  
+    },
+    variationContainer: {
+      borderColor: Colors.primary_color,
+      borderWidth: 1,
+      borderRadius: 10,
+      paddingHorizontal: wp(2),
+      // alignItems: 'center',
+  
+    },
+    variationTxt: {
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      fontSize: RFPercentage(1.7),
+      marginBottom: hp(1)
+    },
+    radioButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    variationText: {
+      fontSize: RFPercentage(1.6),
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+    },
+    sizeText: {
+      color: Colors.primary_color,
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      fontSize: RFPercentage(2.2),
+      marginRight: wp(4)
+  
+  
+    }
+  
+  });
 
   return (
     <View style={styles.container}>
@@ -746,7 +847,6 @@ const ItemDetails = ({ navigation, route }) => {
                     borderTopRightRadius: 30,
                     marginTop: 5,
                   }}>
-                  {/* <ImageSlider data={data} marginBottom={1} /> */}
                   <ImageSliderCircle data={data} marginBottom={1} />
                   <View style={{ paddingHorizontal: 20, flex: 1, }}>
                     {
@@ -796,7 +896,6 @@ const ItemDetails = ({ navigation, route }) => {
                   <View style={{ marginBottom: wp(2) }}>
                     {count === 0 ?  <CButton
                       title="Add to Cart"
-                      // width={wp(70)}
                       loading={loading}
                       width={wp(90)}
                       height={hp(6)}
@@ -885,85 +984,7 @@ const ItemDetails = ({ navigation, route }) => {
 
 
 
-                  {/* <View style={{ marginBottom: wp(2), }} > */}
-                  {/* {
-                      count === 0
-                    } */}
-                  {
-                    //   itemDetail.item_prices?.length > 1 ?   <View
-                    //   style={{
-                    //     ...styles.rowView,
-                    //     backgroundColor: `${Colors.primary_color}`,
-                    //     borderRadius: 15,
-                    //     justifyContent: 'center',
-                    //     paddingVertical: hp(1)
-                    //   }}>
-                    //   <TouchableOpacity
-                    //     onPress={() => showRmoveBtmSheet()}
-                    //     style={{padding: 5,  backgroundColor: `${Colors.secondary_color}40`,borderRadius : wp(5) }}>
-                    //     <AntDesign name="minus" color={Colors.secondary_color} size={18} />
-                    //   </TouchableOpacity>
-                    //   <Text
-                    //     style={{
-                    //       color: Colors.secondary_color,
-                    //       fontFamily: Fonts.PlusJakartaSans_Bold,
-                    //       fontSize: RFPercentage(2),
-                    //       marginTop: -2,
-                    //       marginHorizontal: wp(3)
-                    //     }}>
-                    //     {count}
-                    //   </Text>
-                    //   <TouchableOpacity
-                    //     onPress={() => showRmoveBtmSheet()}
-                    //     style={{padding: 5,  backgroundColor: `${Colors.secondary_color}40`,borderRadius : wp(5) }}>
-                    //     <AntDesign name="plus" color={Colors.secondary_color} size={18} />
-                    //   </TouchableOpacity>
-                    // </View>:   <View
-                    //   style={{
-                    //     ...styles.rowView,
-                    //     backgroundColor: `${Colors.secondary_color}40`,
-                    //     borderRadius: 15,
-                    //   }}>
-                    //   <TouchableOpacity
-                    //     onPress={() =>  handleDecrement(itemDetail.item_prices[0].variation_id, itemDetail.item_id, itemDetail?.item_name)}
-                    //     style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
-                    //     <AntDesign name="minus" color={Colors.secondary_color} size={18} />
-                    //   </TouchableOpacity>
-                    //   <Text
-                    //     style={{
-                    //       color: Colors.secondary_color,
-                    //       fontFamily: Fonts.PlusJakartaSans_Bold,
-                    //       fontSize: RFPercentage(1.7),
-                    //       marginTop: -2,
-                    //     }}>
-                    //     {count}
-                    //   </Text>
-                    //   <TouchableOpacity
-                    //     onPress={() =>  handleAddToCart(itemDetail.item_prices[0].variation_id, count+1)}
-                    //     style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
-                    //     <AntDesign name="plus" color={Colors.secondary_color} size={16} />
-                    //   </TouchableOpacity>
-                    // </View>
-                  }
-                  {/* <CButton
-                      title="Add to Cart"
-                      // width={wp(70)}
-                      loading={loading}
-                      width={wp(90)}
-                      height={hp(6)}
-                      marginTop={-2}
-                      marginBottom={1}
-                      textStyle={{ textTransform: 'none' }}
-                      onPress={() => {
-                        console.log('join_as_guest  : ____ ', join_as_guest);
-                        if (join_as_guest) {
-                          ref_RBSheet?.current?.open();
-                        } else {
-                          handleAddToCart()
-                        }
-                      }}
-                    /> */}
-                  {/* </View> */}
+               
                 </View>
               </View>
             </View>
@@ -1129,7 +1150,6 @@ const ItemDetails = ({ navigation, route }) => {
                     color={Colors.primary_color} // Custom color for selected button
                     uncheckedColor={Colors.primary_color} // Color for unselected buttons
                     status={selectedVariation?.variation_id === variation?.variation_id ? 'checked' : 'unchecked'}
-                  // onPress={() => handleDecrement(variation?.variation_id, variation.item_id)}
                   />
                   <Text style={styles.variationText}>{variation.variation_name}</Text>
                 </TouchableOpacity>
@@ -1150,8 +1170,6 @@ const ItemDetails = ({ navigation, route }) => {
                       style={{
                         backgroundColor: `${Colors.secondary_color}40`,
                         borderRadius: wp(3),
-                        // paddingHorizontal: wp(0),
-                        // marginLeft: wp(2),
                       }}>
                       <AntDesign name="minus" color={Colors.secondary_color} size={16} />
                     </TouchableOpacity>
@@ -1174,7 +1192,6 @@ const ItemDetails = ({ navigation, route }) => {
                         backgroundColor: `${Colors.secondary_color}40`,
                         borderRadius: wp(3),
                         paddingHorizontal: wp(0),
-                        // marginRight: wp(2),
                       }}>
                       <AntDesign name="plus" color={Colors.secondary_color} size={16} />
                     </TouchableOpacity>
@@ -1185,8 +1202,6 @@ const ItemDetails = ({ navigation, route }) => {
                       borderRadius: wp(3),
                       padding: wp(0.5),
                       marginRight: wp(2)
-
-                      // marginRight: wp(2),
                     }}>
                     <AntDesign name="plus" color={Colors.secondary_color} size={16} />
                   </TouchableOpacity>
@@ -1206,169 +1221,4 @@ const ItemDetails = ({ navigation, route }) => {
 };
 export default ItemDetails;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.secondary_color,
-    alignItems: 'center',
-    // paddingHorizontal: 20,
-  },
-  heading: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.primary_text,
-    fontSize: RFPercentage(3),
-    textAlign: 'center',
-    paddingHorizontal: 10,
-  },
-  restaurantName: {
-    color: Colors.secondary_color,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(1.5),
-  },
-  itemName: {
-    color: Colors.secondary_color,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(2.8),
-    marginVertical: 5,
-    marginBottom: 15,
-  },
-  subText: {
-    color: Colors.secondary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(2),
-  },
-  // timeCard: {
-  //   borderRadius: 20,
-  //   borderWidth: 1,
-  //   borderColor: '#EAEDF3',
-  //   paddingHorizontal: 18,
-  //   paddingVertical: 5.5,
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   marginVertical: 10,
-  // },
-  // timeText: {
-  //   color: '#191A26',
-  //   fontFamily: Fonts.PlusJakartaSans_Medium,
-  //   marginLeft: 5,
-  // },
-  // title: {
-  //   color: '#191A26',
-  //   fontSize: RFPercentage(2.2),
-  //   fontFamily: Fonts.PlusJakartaSans_Bold,
-  // },
 
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  imageCard: {
-    width: wp(90),
-    height: hp(25),
-    marginHorizontal: wp(4.5),
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  sliderContainer: { marginVertical: 20, paddingHorizontal: 0, height: hp(30) },
-  paginationStyle: {
-    // marginBottom: hp(1),
-  },
-  paginationStyleItemActive: {
-    width: wp(2.5),
-    height: wp(2.5),
-    borderRadius: wp(2.5) / 2,
-    backgroundColor: Colors.primary_color,
-    margin: 0,
-    marginHorizontal: 2,
-  },
-  paginationStyleItemInactive: {
-    width: wp(2.5),
-    height: wp(2.5),
-    borderRadius: wp(2.5) / 2,
-    backgroundColor: Colors.secondary_color,
-    borderWidth: 1,
-    borderColor: Colors.primary_color,
-    opacity: 0.7,
-    marginHorizontal: 2,
-  },
-  rowView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  descriptionTxt: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(1.7),
-    marginTop: hp(2)
-  },
-  description: {
-
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(1.6),
-    lineHeight: 20,
-
-  },
-  priceTxt: {
-
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_ExtraBold,
-    fontSize: RFPercentage(2.2),
-    lineHeight: 20,
-    marginLeft: wp(3),
-    marginVertical: hp(1)
-
-  },
-  variationName: {
-
-    color: Colors.secondary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(1.6),
-    marginVertical: hp(0.5)
-    // lineHeight: 20,
-    // marginLeft: wp(2)
-
-  },
-  AboutContainer: {
-    marginVertical: 10,
-    backgroundColor: `${Colors.primary_color}10`,
-    paddingHorizontal: wp(6),
-    paddingVertical: hp(1.5),
-    borderRadius: 15,
-
-  },
-  variationContainer: {
-    borderColor: Colors.primary_color,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: wp(2),
-    // alignItems: 'center',
-
-  },
-  variationTxt: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(1.7),
-    marginBottom: hp(1)
-  },
-  radioButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  variationText: {
-    fontSize: RFPercentage(1.6),
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-  },
-  sizeText: {
-    color: Colors.primary_color,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(2.2),
-    marginRight: wp(4)
-
-
-  }
-
-});

@@ -7,36 +7,15 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {Colors, Fonts} from '../../constants';
+import { Fonts} from '../../constants';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import { uploadImage } from '../../utils/helpers';
+import { useSelector } from 'react-redux';
 
 const CameraBottomSheet = ({refRBSheet, onImagePick, obj}) => {
+  const  {Colors } = useSelector(store => store.store);
   const navigation = useNavigation();
-  // const Colors
 
-
-  // const handleUploadProfileImage = (img) => {
-  //   return new Promise(async (resolve, reject) => {
-  //     try {
-  //       let image = {
-  //         uri: img?.path,
-  //         name: img?.name,
-  //         type: img?.mime,
-  //       };
-  //       console.log('image :  ', image);
-  //       let filePath = await uploadImage(image);
-  //       if (filePath) {
-  //         resolve(filePath);
-  //       } else {
-  //         resolve('');
-  //       }
-  //     } catch (error) {
-  //       console.log('error handleUploadProfileImage :  ', error);
-  //       resolve('');
-  //     }
-  //   });
-  // };
 
   const takePhotoFromCamera = async () => {
     var options = {
@@ -137,6 +116,35 @@ const CameraBottomSheet = ({refRBSheet, onImagePick, obj}) => {
       });
   };
 
+  const styles = StyleSheet.create({
+    bottomtext: {
+      color: Colors.primary_text,
+      textAlign: 'center',
+      fontFamily: Fonts.Inter_Bold,
+      fontSize: hp(3),
+    },
+    optiontext: {
+      fontSize: hp(1.7),
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Regular,
+      marginLeft: wp(4),
+    },
+    maintext: {
+      fontSize: hp(2),
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+    },
+    modaltextview: {
+      flexDirection: 'row',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      width: wp(90),
+      borderRadius: 25,
+      // backgroundColor: Colors.AppBckGround_color,
+      paddingHorizontal: wp(10),
+    },
+  });
+
   return (
     <RBSheet
       ref={refRBSheet}
@@ -216,31 +224,4 @@ const CameraBottomSheet = ({refRBSheet, onImagePick, obj}) => {
 
 export default CameraBottomSheet;
 
-const styles = StyleSheet.create({
-  bottomtext: {
-    color: Colors.primary_text,
-    textAlign: 'center',
-    fontFamily: Fonts.Inter_Bold,
-    fontSize: hp(3),
-  },
-  optiontext: {
-    fontSize: hp(1.7),
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-    marginLeft: wp(4),
-  },
-  maintext: {
-    fontSize: hp(2),
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-  },
-  modaltextview: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    width: wp(90),
-    borderRadius: 25,
-    // backgroundColor: Colors.AppBckGround_color,
-    paddingHorizontal: wp(10),
-  },
-});
+

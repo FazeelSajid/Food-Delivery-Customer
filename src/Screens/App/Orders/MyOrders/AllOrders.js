@@ -1,13 +1,7 @@
 import {StyleSheet, Text, View, FlatList} from 'react-native';
 import React, {memo, useState, useEffect} from 'react';
-import {Colors, Images} from '../../../../constants';
-import OrdersCard from '../../../../components/Cards/OrdersCard';
-import FoodCardWithRating from '../../../../components/Cards/FoodCardWithRating';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../../../constants/api';
-import Loader from '../../../../components/Loader';
-import {BASE_URL_IMAGE} from '../../../../utils/globalVariables';
 import {useDispatch, useSelector} from 'react-redux';
 import NoDataFound from '../../../../components/NotFound/NoDataFound';
 import OrderCard from '../../../../components/Cards/OrderCard';
@@ -18,12 +12,11 @@ import {
 import { RefreshControl } from 'react-native-gesture-handler';
 import { setAllOrders } from '../../../../redux/OrderSlice';
 import { RFPercentage } from 'react-native-responsive-fontsize';
-import { getUserFcmToken } from '../../../../utils/helpers';
 const AllOrders = ({data}) => {
   const orders = useSelector(store => store.order.all_orders);
   const [UpcomingOrders, setUpcomingOrders] = useState()
   const [refreshing, setRefreshing] = useState(false);
-  const customer_id = useSelector(store => store.store.customer_id)
+  const {customer_id, Colors} = useSelector(store => store.store)
   const dispatch = useDispatch();
  
 
@@ -34,14 +27,7 @@ const AllOrders = ({data}) => {
       .then(response => response.json())
       .then(response => {
         let list = response?.result ? response?.result : [];
-        // console.log(response);
         
-        // console.log(list, 'list');
-        
-        // const filter = list?.filter(item => item?.cart_items_Data?.length > 0);
-        // const filter = list
-        // setData([...data, ...list]);
-        // console.log(filter, 'filter');
         
         dispatch(setAllOrders(list?.reverse()));
 
@@ -54,26 +40,17 @@ const AllOrders = ({data}) => {
       })
       .catch(err => console.log('error : ', err))
       .finally(() => {
-        // setLoading(false);
         setRefreshing(false);
       });
   };
 
-const func = async () => {
-  let fcm_token = await getUserFcmToken();
-  console.log({fcm_token});
-}
-  
+
   
  
   useFocusEffect(
     React.useCallback(() => {
       getData();
-    //   const filteredItems = orders.filter(
-    //     item => item.order_status !== "cancelled" && item.order_status !== "delivered"
-    // );
-    // setUpcomingOrders(filteredItems);
-    // console.log({filteredItems});
+  
     
 
     }, []),
@@ -83,111 +60,21 @@ const func = async () => {
   const navigation = useNavigation();
 
 
-  //     id: 0,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 1,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Preparing',
-  //   },
-  //   {
-  //     id: 2,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Ready to Deliver',
-  //   },
-  //   {
-  //     id: 3,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Out for Delivery',
-  //   },
-  //   {
-  //     id: 4,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 5,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 6,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 7,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  // ];
-
-  // const getData = async () => {
-  //   let customer_id = await AsyncStorage.getItem('customer_id');
-  //   console.log({customer_id});
-  //   setLoading(true);
-  //   fetch(api.get_all_order_by_customer_Id + customer_id)
-  //     .then(response => response.json())
-  //     .then(response => {
-  //       let list = response?.result ? response?.result : [];
-
-  //       const filter = list?.filter(item => item?.cart_items_Data?.length > 0);
-  //       console.log('filter  :   ', filter);
-  //       // setData([...data, ...list]);
-  //       setData(filter);
-  //     })
-  //     .catch(err => console.log('error : ', err))
-  //     .finally(() => setLoading(false));
-  // };
-
-  // useEffect(() => {
-  //   getData();
-  // }, []);
-
   const onOrderPress = item => {
     console.log('item  :  ', item?.order_status);
     if (item?.order_status == 'delivered') {
       navigation.navigate('OrderDetails', {
         type: 'completed',
-        // id: item?.order_id,
         item: item,
       });
     } else if (item?.order_status == 'cancelled') {
       navigation.navigate('OrderDetails', {
         type: 'cancelled',
-        // id: item?.order_id,
         item: item,
       });
     } else {
       navigation.navigate('OrderDetails', {
         type: 'all',
-        // id: item?.order_id,
         item: item,
       });
     }
@@ -195,16 +82,13 @@ const func = async () => {
   const onRefresh = () => {
     setRefreshing(true);
     getData();
-    // func()
   };
 
-  // console.log({UpcomingOrders});
   
   
 
   return (
     <View style={{flex: 1}}>
-      {/* <Loader loading={loading} /> */}
      
     
       <FlatList

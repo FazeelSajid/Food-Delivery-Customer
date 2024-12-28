@@ -9,7 +9,7 @@ import {
   RefreshControl
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
-import {Colors, Icons, Fonts, Images} from '../../../constants';
+import {Icons, Fonts, Images} from '../../../constants';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {
   widthPercentageToDP as wp,
@@ -47,12 +47,12 @@ import PopUp from '../../../components/Popup/PopUp';
 const OrderHistory = ({navigation, route}) => {
   const dispatch = useDispatch();
 
-  const {cart, cart_restaurant_id, my_cart} = useSelector(store => store.cart);
+  const { cart_restaurant_id, } = useSelector(store => store.cart);
 
   const ref_RBSheetResClosed = useRef();
 
   const ref_RBSheetSuccess = useRef();
-  const {customer_id, showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store)
+  const {customer_id, showPopUp, popUpColor, PopUpMesage, Colors} = useSelector(store => store.store)
   const [isSearch, setIsSearch] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,49 +160,6 @@ const OrderHistory = ({navigation, route}) => {
     }
   };
 
-  const handleAddToCart = async (item_id, restaurant_id, count, item_type) => {
-    // setLoading(true);
-    // let time_obj = await checkRestaurantTimings(
-    //   restaurantDetails?.restaurant_id,
-    // );
-    // console.log('time_obj?.isClosed : ', time_obj?.isClosed);
-    // setLoading(false);
-    // if (time_obj?.isClosed) {
-    //   setRestaurant_timings(time_obj);
-    //   ref_RBSheetResClosed.current.open();
-    //   return;
-    // } else
-
-    // if (validate(restaurant_id)) {
-    //   // if item already exists in card then we will only update quantity of that item
-    //   const filter = my_cart?.filter(item => item?.item_id == item_id);
-    //   if (filter?.length > 0) {
-    //     let obj = {
-    //       cart_item_id: filter[0]?.cart_item_id,
-    //       quantity: filter[0]?.quantity + count,
-    //     };
-    //     await updateCartItemQuantity(obj);
-    //     // also update quantity in redux
-    //     const newData = my_cart?.map(item => {
-    //       if (item?.item_id == item_id) {
-    //         return {
-    //           ...item,
-    //           quantity: filter[0]?.quantity + count,
-    //         };
-    //       } else {
-    //         return {...item};
-    //       }
-    //     });
-    //     dispatch(updateMyCartList(newData));
-    //     dispatch(setCartRestaurantId(restaurant_id));
-    //     ref_RBSheetSuccess?.current?.open();
-    //   } else {
-
-    add_item_to_cart(item_id, restaurant_id, count, item_type);
-
-    // }
-    // }
-  };
 
   //-------------------------------------------------- RE-ORDER --------------------------------------------------
 
@@ -251,8 +208,7 @@ const OrderHistory = ({navigation, route}) => {
   };
 
   const handleSearch = query => {
-    // setSearchQuery(query);
-    // const filteredData = data?.filter(item => item?.cart_items_Data?.length > 0 && item?.cart_items_Data?[0]?.itemData?.name==='test');
+  
     const filteredData = data?.filter(
       item =>
         (item?.cart_items_Data?.length > 0 &&
@@ -296,25 +252,6 @@ const OrderHistory = ({navigation, route}) => {
         
       );
   };
-  // const getData = async () => {
-  //   // let customer_id = await AsyncStorage.getItem('customer_id');
-  //   console.log({customer_id});
-  //   fetch(api.get_all_order_by_customer_Id + customer_id)
-  //     .then(response => response.json())
-  //     .then(response => {
-  //       let list = response?.result ? response?.result : [];
-  //       const filter = list?.filter(item => item?.cart_items_Data?.length > 0);
-  //       let completed_orders = filter?.filter(
-  //         item => item?.order_status == 'delivered',
-  //       );
-  //       // setData(filter?.reverse());
-  //       // dispatch(setOrderHistory(filter?.reverse()));
-  //       setData(completed_orders?.reverse());
-  //       dispatch(setOrderHistory(completed_orders?.reverse()));
-  //     })
-  //     .catch(err => console.log('error : ', err))
-  //     .finally(() => setLoading(false));
-  // };
 
   useEffect(() => {
     setLoading(true);
@@ -369,23 +306,12 @@ const OrderHistory = ({navigation, route}) => {
                         width={32}
                       />
                     }
-                    // rightContent={
-                    //   <TouchableOpacity
-                    //     style={{padding: 10, paddingRight: 0}}
-                    //     onPress={() => handleCloseSearch()}>
-                    //     <AntDesign
-                    //       name="closecircle"
-                    //       size={20}
-                    //       color={'#838383'}
-                    //     />
-                    //   </TouchableOpacity>
-                    // }
+                   
                   />
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
                   style={{paddingLeft: 15}}
-                  // onPress={() => setIsSearch(true)}
                   onPress={() => navigation?.navigate('SearchOrder')}>
                   <Icons.SearchIcon />
                 </TouchableOpacity>
@@ -439,7 +365,6 @@ const OrderHistory = ({navigation, route}) => {
               data={isSearch ? filteredData : data}
               showsVerticalScrollIndicator={false}
               scrollEnabled={false}
-              // ListHeaderComponent={() => <View style={{height: 10}} />}
               ListHeaderComponent={() => (
                 <Text
                   style={{
@@ -458,26 +383,7 @@ const OrderHistory = ({navigation, route}) => {
                     : null;
                 return (
                   <FoodCardOrderHistory
-                    // onPress={() => {
-                    //   // navigation.navigate('OrdersDetails', {
-                    //   //   type: 'order_history',
-                    //   // });
-                    //   navigation.navigate('OrderDetails', {
-                    //     type: 'history',
-                    //   });
-                    // }}
-                    // // disabled={true}
-                    // title={item?.title}
-                    // image={item?.image}
-                    // description={item?.description}
-                    // price={item?.price}
-                    // rating={item?.rating}
-                    // // label={item?.status}
-                    // // type={'all'}
-                    // imageContainerStyle={{flex: 0.3}}
-                    // cardStyle={{marginTop: 15}}
-                    // showNextButton={false}
-                    // showRatingOnBottom={true}
+                   
                     onPress={() =>
                       navigation.navigate('OrderDetails', {
                         type: 'history',
@@ -549,107 +455,3 @@ const OrderHistory = ({navigation, route}) => {
 };
 
 export default OrderHistory;
-
-// import {StyleSheet, Text, View, FlatList, ScrollView} from 'react-native';
-// import React from 'react';
-// import {Colors, Images} from '../../../constants';
-// import StackHeader from '../../../components/Header/StackHeader';
-// import OrdersCard from '../../../components/Cards/OrdersCard';
-
-// const OrderHistory = ({navigation, route}) => {
-//   const data = [
-//     {
-//       id: 0,
-//       image: Images.food1,
-//       title: 'Fresh Orange splash',
-//       description: 'Mix fresh real orange',
-//       price: 13.2,
-//       status: 'Order Placed',
-//     },
-//     {
-//       id: 1,
-//       image: Images.food2,
-//       title: 'Fresh Orange splash',
-//       description: 'Mix fresh real orange',
-//       price: 13.2,
-//       status: 'Preparing',
-//     },
-//     {
-//       id: 2,
-//       image: Images.food3,
-//       title: 'Fresh Orange',
-//       description: 'Mix fresh real orange',
-//       price: 13.2,
-//       status: 'Ready to Deliver',
-//     },
-//     {
-//       id: 3,
-//       image: Images.food4,
-//       title: 'Fresh Orange',
-//       description: 'Mix fresh real orange',
-//       price: 13.2,
-//       status: 'Out for Delivery',
-//     },
-//     {
-//       id: 4,
-//       image: Images.food5,
-//       title: 'Fresh Orange',
-//       description: 'Mix fresh real orange',
-//       price: 13.2,
-//       status: 'Order Placed',
-//     },
-//     {
-//       id: 5,
-//       image: Images.food6,
-//       title: 'Fresh Orange splash',
-//       description: 'Mix fresh real orange',
-//       price: 13.2,
-//       status: 'Order Placed',
-//     },
-//     {
-//       id: 6,
-//       image: Images.food7,
-//       title: 'Fresh Orange splash',
-//       description: 'Mix fresh real orange',
-//       price: 13.2,
-//       status: 'Order Placed',
-//     },
-//     {
-//       id: 7,
-//       image: Images.food8,
-//       title: 'Fresh Orange splash',
-//       description: 'Mix fresh real orange',
-//       price: 13.2,
-//       status: 'Order Placed',
-//     },
-//   ];
-//   return (
-//     <View style={{flex: 1, backgroundColor: Colors.White}}>
-//       <ScrollView>
-//         <StackHeader title={'Orders History'} />
-//         <View style={{flex: 1, paddingHorizontal: 20}}>
-//           <FlatList
-//             scrollEnabled={false}
-//             data={data}
-//             showsVerticalScrollIndicator={false}
-//             // ListHeaderComponent={() => <View style={{height: 10}} />}
-//             ListFooterComponent={() => <View style={{height: 10}} />}
-//             renderItem={({item}) => (
-//               <OrdersCard
-//                 title={item?.title}
-//                 image={item?.image}
-//                 description={item?.description}
-//                 price={item?.price}
-//                 type={'history'}
-//               />
-//             )}
-//           />
-//         </View>
-//       </ScrollView>
-//     </View>
-//   );
-// };
-
-// export default OrderHistory;
-
-// const styles = StyleSheet.create({});

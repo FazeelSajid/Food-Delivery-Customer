@@ -11,30 +11,20 @@ import {
   TextInput,
 } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
-import { Colors, Fonts, Icons, Images } from '../../../constants';
+import {  Fonts, Icons, Images } from '../../../constants';
 import StackHeader from '../../../components/Header/StackHeader';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-import CartSwipeListView from '../../../components/Lists/CartSwipeListView';
 import CButton from '../../../components/Buttons/CButton';
 import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import CInput from '../../../components/TextInput/CInput';
 import { RadioButton } from 'react-native-paper';
 import RBSheetSuccess from '../../../components/BottomSheet/RBSheetSuccess';
-import {
-  fetchApis,
-  getCustomerDetail,
-  getCustomerShippingAddress,
-  getRestaurantDetail,
-  getUserFcmToken,
-  handlePopup,
-  showAlert,
-  showAlertLongLength,
-} from '../../../utils/helpers';
+import {handlePopup,} from '../../../utils/helpers';
 import {
   BASE_URL,
   STRIPE_PUBLISH_KEY,
@@ -42,12 +32,9 @@ import {
 } from '../../../utils/globalVariables';
 import RBSheetGuestUser from '../../../components/BottomSheet/RBSheetGuestUser';
 import { useDispatch, useSelector } from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Loader from '../../../components/Loader';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../../constants/api';
-import { getShippingAddress } from '../../../utils/helpers/localStorage';
-import { clearCartItems } from '../../../utils/helpers/cartapis';
 import {
   addToCart,
   setCartRestaurantId,
@@ -56,33 +43,24 @@ import {
   setSelectedPaymentType,
   updateMyCartList,
 } from '../../../redux/CartSlice';
-import { firebase } from '@react-native-firebase/auth';
-import { setBill, setOtpConfirm, setWalletTotalAmount } from '../../../redux/AuthSlice';
+import { setBill, setWalletTotalAmount } from '../../../redux/AuthSlice';
 import CInputWithCountryCode from '../../../components/TextInput/CInputWithCountryCode';
 import {
   AddPaymentToCustomerWallet,
   MakeOrderPayment,
 } from '../../../utils/helpers/walletApis';
-import {
-  getDeliveryCharges,
-  getEstimatedDeliveryTime,
-  getPlatformFee,
-} from '../../../utils/helpers/location';
+
 import {
   initStripe,
-  StripeProvider,
-  usePaymentSheet,
+
   useStripe,
 } from '@stripe/stripe-react-native';
-import PaymentCard from '../../../components/Cards/PaymentCard';
 import CustomButton from '../../../components/Buttons/customButton';
 import { GetCustomerStripeId } from '../../../utils/helpers/stripeCardApis';
 import PopUp from '../../../components/Popup/PopUp';
-import Alert from '../../../Assets/svg/alert.svg';
-import WalletActive from '../../../Assets/svg/WalletActiveBg.svg';
 
 const Checkout = ({ navigation, route }) => {
-   // const [Bill, setBill] = useState({
+  // const [Bill, setBill] = useState({
   //   total_amount: 0,
   //   subtotal: 0,
   //   cartItemIds: [],
@@ -181,12 +159,12 @@ const Checkout = ({ navigation, route }) => {
   //     openPaymentSheet();
   //   }
   // }};
-   // const handlePlaceOrder = async () => {
+  // const handlePlaceOrder = async () => {
   //   //send notification to restaurant and rider both that new order is placed
   //   handleSendPushNotification(`Customer placed a new order`);
   // };
   // handle update phone :  for that we send otp to user number and then after verify we update the user phone number
- 
+
   // const handleSendPushNotification = async text => {
   //   const receiver_fcm = await getUserFcmToken();
   //   if (receiver_fcm) {
@@ -238,7 +216,7 @@ const Checkout = ({ navigation, route }) => {
   //       console.log('error : ', error);
   //     });
   // };
-    // const handleVerifyPromoCode = async promoCode => {
+  // const handleVerifyPromoCode = async promoCode => {
   //   console.log({ promoCode });
 
   //   setInValidPromoCode(true);
@@ -281,7 +259,7 @@ const Checkout = ({ navigation, route }) => {
   //     })
   //     .catch(err => console.log('error : ', err));
   // };
-    // const handleEditAddress = async () => {
+  // const handleEditAddress = async () => {
   //   let shipping_address = await getShippingAddress();
   //   console.log('shipping_address  :  ', shipping_address?.location_id);
   //   if (shipping_address) {
@@ -344,19 +322,19 @@ const Checkout = ({ navigation, route }) => {
   //       setLoading(false);
   //     });
   // };
-  
+
 
   // useEffect(() => {
   //   getCustomerData();
   // }, []);
-    // const getSelectedCard = async () => {
+  // const getSelectedCard = async () => {
   //   let card = await AsyncStorage.getItem('selected_card');
   //   if (card) {
   //     card = JSON.parse(card);
   //     // setSelected_card(card);
   //   }
   // };
-    // const getSelectedCard = async () => {
+  // const getSelectedCard = async () => {
   //   let card = await AsyncStorage.getItem('selected_card');
   //   if (card) {
   //     card = JSON.parse(card);
@@ -372,9 +350,9 @@ const Checkout = ({ navigation, route }) => {
 
   //   return () => clearTimeout(delayDebounceFn);
   // }, [promoCode]);
-  
+
   const dispatch = useDispatch();
-  const { showPopUp, popUpColor, PopUpMesage, walletTotalAmount, join_as_guest, promos, Bill, customer_detail } = useSelector(store => store.store)
+  const { showPopUp, popUpColor, PopUpMesage, walletTotalAmount, join_as_guest, promos, Bill, customer_detail, Colors } = useSelector(store => store.store)
   const [topUpAmount, setTopUpAmount] = useState('');
   const {
     cart,
@@ -402,10 +380,10 @@ const Checkout = ({ navigation, route }) => {
   const { customer_id, location } = useSelector(store => store.store);
   const [cartItemIds, setCartItemIds] = useState([])
   const location_id = location.id
-  const [ bill, setbill] = useState({})
+  const [bill, setbill] = useState({})
 
   // console.log(selected_payment_type);
-  
+
 
   const addPaymentToWallet = async amount => {
     await AddPaymentToCustomerWallet(amount, customer_id)
@@ -473,18 +451,15 @@ const Checkout = ({ navigation, route }) => {
       console.log(error);
 
       if (error.code == 'Canceled') {
-        // user cancel payment
-        // for now we do nothing...
       } else {
         handlePopup(dispatch, error.message, 'red')
       }
     } else {
-      // handle success
       console.log('Success', 'Your order is confirmed!');
       addPaymentToWallet(topUpAmount)
     }
   };
-  
+
   const initializePaymentSheetForTopUp = async () => {
     setLoading(true);
     const { paymentIntent, ephemeralKey, customer } =
@@ -539,7 +514,7 @@ const Checkout = ({ navigation, route }) => {
       }}
     />
   );
- 
+
   const makeOrderPayment = async order_id => {
     await MakeOrderPayment(order_id, customer_id)
       .then(response => {
@@ -559,13 +534,13 @@ const Checkout = ({ navigation, route }) => {
     if (!newPhoneNO) {
       ref_RBSheetPhoneNo?.current?.open()
     } else {
-     
+
       if (!location_id) {
         showBtmSheet()
-      }else if (!selected_payment_type) {
+      } else if (!selected_payment_type) {
         ref_RBSheetPaymentOption?.current?.open();
       }
-      
+
       else {
         setLoading(true);
         console.log('customer_Id  :  ', customer_id);
@@ -585,10 +560,10 @@ const Checkout = ({ navigation, route }) => {
           sub_total: parseInt(bill.subtotal, 10),
           comments: comments,
           Estimated_delivery_time: 45,
-          
+
         };
 
-    
+
         fetch(api.create_order, {
           method: 'POST',
           body: JSON.stringify(data),
@@ -603,7 +578,7 @@ const Checkout = ({ navigation, route }) => {
             console.log(response.result);
 
             if (response.error == false) {
-            
+
               dispatch(setCartRestaurantId(null));
               dispatch(addToCart([]));
               dispatch(updateMyCartList([]));
@@ -668,7 +643,7 @@ const Checkout = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-   setbill(Bill)
+    setbill(Bill)
   }, [Bill]);
 
   useFocusEffect(
@@ -679,88 +654,88 @@ const Checkout = ({ navigation, route }) => {
 
 
   const verifyPromoCode = async (promoCodee) => {
-    if (selected_payment_type.length === 0 ) {
+    if (selected_payment_type.length === 0) {
       ref_RBSheetPaymentOption?.current?.open();
     } else {
-    const checkPromoCode = promos.find(item => item.code === promoCode)
-    
-    if (checkPromoCode) {
+      const checkPromoCode = promos.find(item => item.code === promoCode)
 
-      try {
-        let subtotal = 0;
-        const cartItemIds = cart.map(item => {
-          const price = parseInt(
-            item?.itemData?.variationData?.price
-              ? item?.itemData?.variationData?.price
-              : item?.itemData?.price
-          );
-          const quantity = item?.quantity ? parseInt(item?.quantity) : 1;
-          subtotal += price * quantity;
-          return item.cart_item_id;
-        });
-        dispatch(setBill({ cartItemIds, subtotal: subtotal.toFixed(2) }));
+      if (checkPromoCode) {
 
-        const body = {
-          customer_id: customer_id,
-          cart_items_ids: cartItemIds,
-          promo_code: promoCode, // optional
-          payment_option: selected_payment_type,
-          sub_total: subtotal.toFixed(2),
-          location_id: location.id,
-        };
-        console.log('Promo code ', body);
-        
-        fetch(api.calculatePreOrder, {
-          method: 'POST',
-          body: JSON.stringify(body),
-          headers: {
-            'Content-type': 'application/json; charset=UTF-8',
-          },
-        })
-          .then(response => response.json())
-          .then(response => {
-            if (!response.error) {
-              console.log({ response });
-
-              dispatch(
-                setBill({
-                  delivery_charges: response?.result?.delivery_charges.toFixed(2),
-                  gst_charges: response?.result?.gst_charges.toFixed(2),
-                  total_amount: response?.result?.total_amount.toFixed(2),
-                  discount_charges: response?.result?.discount.toFixed(2),
-                })
-              );
-              setInValidPromoCode(false);
-              setIsPromocodeApplied(true)
-            }else{
-              setIsPromocodeApplied(false)
-              calculatePreOrderdetails(false, false)
-              handlePopup(dispatch, response.message, 'red')
-              setInValidPromoCode(true);
-              setIsPromocodeApplied(false)
-            }
-          })
-          .catch(error => {
-            console.log(error);
-            
-            handlePopup(dispatch, 'Something went wrong', 'red')
+        try {
+          let subtotal = 0;
+          const cartItemIds = cart.map(item => {
+            const price = parseInt(
+              item?.itemData?.variationData?.price
+                ? item?.itemData?.variationData?.price
+                : item?.itemData?.price
+            );
+            const quantity = item?.quantity ? parseInt(item?.quantity) : 1;
+            subtotal += price * quantity;
+            return item.cart_item_id;
           });
-      } catch (error) {
-        console.log('Error in calculating subtotal or API request: ', error);
-        handlePopup(dispatch, 'Something went wrong', 'red')
+          dispatch(setBill({ cartItemIds, subtotal: subtotal.toFixed(2) }));
+
+          const body = {
+            customer_id: customer_id,
+            cart_items_ids: cartItemIds,
+            promo_code: promoCode, // optional
+            payment_option: selected_payment_type,
+            sub_total: subtotal.toFixed(2),
+            location_id: location.id,
+          };
+          console.log('Promo code ', body);
+
+          fetch(api.calculatePreOrder, {
+            method: 'POST',
+            body: JSON.stringify(body),
+            headers: {
+              'Content-type': 'application/json; charset=UTF-8',
+            },
+          })
+            .then(response => response.json())
+            .then(response => {
+              if (!response.error) {
+                console.log({ response });
+
+                dispatch(
+                  setBill({
+                    delivery_charges: response?.result?.delivery_charges.toFixed(2),
+                    gst_charges: response?.result?.gst_charges.toFixed(2),
+                    total_amount: response?.result?.total_amount.toFixed(2),
+                    discount_charges: response?.result?.discount.toFixed(2),
+                  })
+                );
+                setInValidPromoCode(false);
+                setIsPromocodeApplied(true)
+              } else {
+                setIsPromocodeApplied(false)
+                calculatePreOrderdetails(false, false)
+                handlePopup(dispatch, response.message, 'red')
+                setInValidPromoCode(true);
+                setIsPromocodeApplied(false)
+              }
+            })
+            .catch(error => {
+              console.log(error);
+
+              handlePopup(dispatch, 'Something went wrong', 'red')
+            });
+        } catch (error) {
+          console.log('Error in calculating subtotal or API request: ', error);
+          handlePopup(dispatch, 'Something went wrong', 'red')
+        }
+        finally {
+        }
+
+      } else {
+        handlePopup(dispatch, 'Invalid Promo Code', 'red')
+        setInValidPromoCode(true);
+        setIsPromocodeApplied(false)
+        calculatePreOrderdetails(false, false);
+        // dispatch(setSelectedPaymentType(''))
+
       }
-      finally{
-      }
-     
-    } else {
-      handlePopup(dispatch, 'Invalid Promo Code', 'red')
-      setInValidPromoCode(true);
-      setIsPromocodeApplied(false)
-      calculatePreOrderdetails(false, false);
-      // dispatch(setSelectedPaymentType(''))
-      
     }
-  }
   }
 
 
@@ -773,14 +748,9 @@ const Checkout = ({ navigation, route }) => {
 
 
   const handlePaymentTypeChange = (type, string) => {
-    // console.log('selectPaymentMethod');
-
     dispatch(setSelectedPaymentType(type));
     dispatch(setSelectedPaymentString(string));
-    // setChecked(type);
-    // setSelectPaymentMethod(string);
     ref_RBSheetPaymentOption?.current?.close();
-
     calculatePreOrderdetails(type)
   };
 
@@ -790,8 +760,6 @@ const Checkout = ({ navigation, route }) => {
     if (!location_id) {
       showBtmSheet();
     } else {
-
-
       try {
         // Calculate subtotal
         let subtotal = 0;
@@ -806,20 +774,20 @@ const Checkout = ({ navigation, route }) => {
           return item.cart_item_id;
         });
 
-      
+
         dispatch(setBill({ cartItemIds, subtotal: subtotal.toFixed(2) }));
 
         // Prepare request body
         const body = {
           customer_id: customer_id,
           cart_items_ids: cartItemIds,
-          promo_code: promoCod ? promoCode: null, // optional
+          promo_code: promoCod ? promoCode : null, // optional
           payment_option: paymentType || selected_payment_type,
           sub_total: subtotal.toFixed(2),
           location_id: location.id,
         };
 
-        console.log('calculate pre order', {  body });
+        console.log('calculate pre order', { body });
 
         // API call to calculate pre-order details
         fetch(api.calculatePreOrder, {
@@ -833,7 +801,7 @@ const Checkout = ({ navigation, route }) => {
           .then(response => {
             console.log({ response });
             console.log(api.calculatePreOrder);
-            
+
             if (!response.error) {
               console.log({ response });
 
@@ -853,10 +821,109 @@ const Checkout = ({ navigation, route }) => {
       } catch (error) {
         handlePopup(dispatch, 'Something went wrong', 'red')
       }
-      finally{
+      finally {
       }
     }
   };
+
+
+const styles = StyleSheet.create({
+  heading: {
+    color: Colors.primary_text,
+    fontFamily: Fonts.Inter_SemiBold,
+    fontSize: RFPercentage(2),
+    marginTop: 10,
+  },
+  itemView: {
+    marginVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${Colors.secondary_text}12`,
+    padding: 10,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  imageContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: `${Colors.primary_color}30`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textContainer: {
+    marginLeft: 15,
+    flex: 1,
+  },
+  image: {
+    height: '100%',
+    width: '100%',
+    resizeMode: 'contain',
+  },
+  subText: {
+    color: Colors.secondary_text,
+    fontFamily: Fonts.Inter_Regular,
+    fontSize: RFPercentage(1.7),
+  },
+  subText1: {
+    color: Colors.primary_text,
+    fontFamily: Fonts.Inter_Regular,
+    fontSize: RFPercentage(2),
+    lineHeight: 30,
+  },
+  walletBalance: {
+    color: Colors.primary_text,
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    fontSize: RFPercentage(2),
+    lineHeight: 15,
+    letterSpacing: wp(0.3)
+  },
+  title: {
+    color: Colors.primary_text,
+    fontSize: RFPercentage(2.3),
+    fontFamily: Fonts.Inter_Bold,
+  },
+  paymentType: {
+    color: Colors.primary_text,
+    fontSize: RFPercentage(2.3),
+    fontFamily: Fonts.PlusJakartaSans_Medium,
+    marginLeft: wp(4),
+    textAlign: 'center'
+  },
+  rowView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rowViewSB: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  rowViewSB1: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  rbSheetHeading: {
+    color: Colors.primary_text,
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    fontSize: RFPercentage(1.9),
+  },
+  btmsheettext: {
+    color: Colors.secondary_text,
+    fontFamily: Fonts.PlusJakartaSans_Regular,
+    marginLeft: wp(5),
+    fontSize: RFPercentage(1.9),
+  },
+  wallet: {
+    marginTop: hp(1.5),
+    flexDirection: 'row'
+  }
+});
 
 
   return (
@@ -875,16 +942,14 @@ const Checkout = ({ navigation, route }) => {
             <View style={styles.textContainer}>
               <Text style={styles.subText}>{location_id ? location.address : "Select Location"}</Text>
               {
-                location_id &&    <View style={{flexDirection: 'row'}} > 
-                <Text style={[styles.subText]}>Distance: </Text>
-                <Text style={[styles.subText]}>{location.distance }</Text>
+                location_id && <View style={{ flexDirection: 'row' }} >
+                  <Text style={[styles.subText]}>Distance: </Text>
+                  <Text style={[styles.subText]}>{location.distance}</Text>
                 </View>
               }
-           
+
             </View>
             <TouchableOpacity
-              // onPress={() => navigation.navigate('UpdateLocation')}
-              // onPress={() => navigation.navigate('ShippingAddress')}
               onPress={() => {
                 if (join_as_guest) {
                   ref_RBSheetGuestUser?.current?.open();
@@ -920,8 +985,8 @@ const Checkout = ({ navigation, route }) => {
         </View>
         <ItemSeparator />
         <View style={[styles.rowViewSB, { width: wp(80), alignSelf: 'center', alignItems: 'center', marginTop: 10, marginBottom: 10 }]} >
-          <TextInput placeholder='Promo Code' placeholderTextColor={Colors.secondary_text} style={{ borderRadius: 10, backgroundColor:  `${Colors.secondary_text}12`, width: wp(60), paddingLeft: wp(5), marginRight: wp(2), color: Colors.primary_text }} value={promoCode} onChangeText={text => setPromoCode(text)} />
-          <CustomButton text={'Apply'} textStyle={{ color: Colors.button.primary_button_text, fontSize: RFPercentage(2) }} containerStyle={{ backgroundColor: Colors.button.primary_button, paddingHorizontal: wp(5), paddingVertical: hp(1.3), borderRadius: 10 }} onPress={() => verifyPromoCode(promoCode)} pressedRadius={10} isLoading={false} loaderColor={Colors.button.primary_button_text}  />
+          <TextInput placeholder='Promo Code' placeholderTextColor={Colors.secondary_text} style={{ borderRadius: 10, backgroundColor: `${Colors.secondary_text}12`, width: wp(60), paddingLeft: wp(5), marginRight: wp(2), color: Colors.primary_text }} value={promoCode} onChangeText={text => setPromoCode(text)} />
+          <CustomButton text={'Apply'} textStyle={{ color: Colors.button.primary_button_text, fontSize: RFPercentage(2) }} containerStyle={{ backgroundColor: Colors.button.primary_button, paddingHorizontal: wp(5), paddingVertical: hp(1.3), borderRadius: 10 }} onPress={() => verifyPromoCode(promoCode)} pressedRadius={10} isLoading={false} loaderColor={Colors.button.primary_button_text} />
         </View>
 
         {isPromocodeApplied && (
@@ -1006,7 +1071,7 @@ const Checkout = ({ navigation, route }) => {
                     ref_RBSheetPaymentOption?.current?.open();
                   }
                 }}>
-                  <WalletActive />
+                  <Icons.WalletActive />
                   <Text style={styles.paymentType}>Wallet Payment</Text>
                 </TouchableOpacity>
                 <View>
@@ -1038,7 +1103,6 @@ const Checkout = ({ navigation, route }) => {
                   ref_RBSheetPaymentOption?.current?.open();
                 }
               }}>
-                {/* <WalletActive /> */}
                 <Text style={styles.paymentType}>Cash On Delivery</Text>
               </TouchableOpacity>
 
@@ -1049,34 +1113,34 @@ const Checkout = ({ navigation, route }) => {
 
           }
 
-</View>
-          <View style={{ marginBottom: 10,marginTop: wp(15), marginHorizontal: 20, backgroundColor:  `${Colors.secondary_text}12`, paddingHorizontal: 15, borderRadius: 10,paddingBottom: 5 }}>
+        </View>
+        <View style={{ marginBottom: 10, marginTop: wp(15), marginHorizontal: 20, backgroundColor: `${Colors.secondary_text}12`, paddingHorizontal: 15, borderRadius: 10, paddingBottom: 5 }}>
+          <View style={styles.rowViewSB}>
+            <Text style={styles.subText1}>Subtotal</Text>
+            <Text style={styles.subText1}>£{Bill.subtotal}</Text>
+          </View>
+          <View style={styles.rowViewSB}>
+            <Text style={styles.subText1}>Delivery Charges</Text>
+            <Text style={styles.subText1}>£{Bill.delivery_charges}</Text>
+          </View>
+          <View style={styles.rowViewSB}>
+            <Text style={styles.subText1}>GST Charges</Text>
+            <Text style={styles.subText1}>£{Bill.gst_charges}</Text>
+          </View>
+          {isPromocodeApplied &&
             <View style={styles.rowViewSB}>
-              <Text style={styles.subText1}>Subtotal</Text>
-              <Text style={styles.subText1}>£{Bill.subtotal}</Text>
-            </View>
-            <View style={styles.rowViewSB}>
-              <Text style={styles.subText1}>Delivery Charges</Text>
-              <Text style={styles.subText1}>£{Bill.delivery_charges}</Text>
-            </View>
-            <View style={styles.rowViewSB}>
-              <Text style={styles.subText1}>GST Charges</Text>
-              <Text style={styles.subText1}>£{Bill.gst_charges}</Text>
-            </View>
-            { isPromocodeApplied &&
-              <View style={styles.rowViewSB}>
               <Text style={styles.subText1}>Discount</Text>
               <Text style={styles.subText1}>£{Bill.discount_charges}</Text>
             </View>
-            }
-          
-           
-            <ItemSeparator />
-            <View style={styles.rowViewSB}>
-              <Text style={styles.title}>Total</Text>
-              <Text style={styles.title}>£{Bill.total_amount}</Text>
-            </View>
+          }
+
+
+          <ItemSeparator />
+          <View style={styles.rowViewSB}>
+            <Text style={styles.title}>Total</Text>
+            <Text style={styles.title}>£{Bill.total_amount}</Text>
           </View>
+        </View>
         <View
           style={{
             flex: 1,
@@ -1085,7 +1149,6 @@ const Checkout = ({ navigation, route }) => {
           }}>
           <CButton
             title="PLACE ORDER"
-            // onPress={() => navigation.replace('ShippingAddress')}
             onPress={() => {
               if (join_as_guest) {
                 ref_RBSheetGuestUser?.current?.open();
@@ -1097,26 +1160,9 @@ const Checkout = ({ navigation, route }) => {
               } else {
                 placeOrder();
               }
-              // else {
-              //   ref_RBSheetPaymentOption?.current?.open();
-              // }
+             
             }}
-          // onPress={() => {
-          //   if (join_as_guest) {
-          //     ref_RBSheetGuestUser?.current?.open();
-          //   } else if (selected_payment_string?.length > 0) {
-          //     if (selected_payment_type == 'card') {
-          //       if (walletTotalAmount < Bill.total_amount) {
-          //         WithDrawBtmSheet?.current?.open();
-          //         return
-          //     }else placeOrder()
-          //     } else {
-          //       placeOrder();
-          //     }
-          //   } else {
-          //     ref_RBSheetPaymentOption?.current?.open();
-          //   }
-          // }}
+        
           />
         </View>
 
@@ -1250,7 +1296,7 @@ const Checkout = ({ navigation, route }) => {
                     Wallet Payment
                   </Text>
                 </TouchableOpacity>
-                
+
               </View>
             </View>
           }
@@ -1337,7 +1383,7 @@ const Checkout = ({ navigation, route }) => {
                 </TouchableOpacity>
               </View>
               <View style={{ alignItems: 'center' }} >
-                <Alert height={80} />
+                <Icons.Alert height={80} />
                 <Text style={{ marginTop: hp(3), fontSize: RFPercentage(2.4), color: Colors.primary_text, textAlign: 'center' }}>
                   You don't have enough amount in wallet</Text>
               </View>
@@ -1386,7 +1432,7 @@ const Checkout = ({ navigation, route }) => {
                 <View style={{ ...styles.rowViewSB, marginBottom: 20 }}>
                   <Text
                     style={{
-                      color: Colors.primary_text ,
+                      color: Colors.primary_text,
                       fontFamily: Fonts.PlusJakartaSans_Bold,
                       fontSize: RFPercentage(2.5),
                     }}>
@@ -1462,100 +1508,3 @@ const Checkout = ({ navigation, route }) => {
 
 export default Checkout;
 
-const styles = StyleSheet.create({
-  heading: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.Inter_SemiBold,
-    fontSize: RFPercentage(2),
-    marginTop: 10,
-  },
-  itemView: {
-    marginVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor:  `${Colors.secondary_text}12`,
-    padding: 10,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  imageContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    overflow: 'hidden',
-    backgroundColor: `${Colors.primary_color}30`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  textContainer: {
-    marginLeft: 15,
-    flex: 1,
-  },
-  image: {
-    height: '100%',
-    width: '100%',
-    resizeMode: 'contain',
-  },
-  subText: {
-    color: Colors.secondary_text,
-    fontFamily: Fonts.Inter_Regular,
-    fontSize: RFPercentage(1.7),
-  },
-  subText1: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.Inter_Regular,
-    fontSize: RFPercentage(2),
-    lineHeight: 30,
-  },
-  walletBalance: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(2),
-    lineHeight: 15,
-    letterSpacing: wp(0.3)
-  },
-  title: {
-    color: Colors.primary_text,
-    fontSize: RFPercentage(2.3),
-    fontFamily: Fonts.Inter_Bold,
-  },
-  paymentType: {
-    color: Colors.primary_text,
-    fontSize: RFPercentage(2.3),
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    marginLeft: wp(4),
-    textAlign: 'center'
-  },
-  rowView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  rowViewSB1: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  rbSheetHeading: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(1.9),
-  },
-  btmsheettext: {
-    color: Colors.secondary_text,
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-    marginLeft: wp(5),
-    fontSize: RFPercentage(1.9),
-  },
-  wallet: {
-    marginTop: hp(1.5),
-    flexDirection: 'row'
-  }
-});

@@ -1,10 +1,13 @@
 import {StyleSheet, Text, View, TouchableOpacity, FlatList} from 'react-native';
 import React from 'react';
 import ItemSeparator from '../Separator/ItemSeparator';
-import {Fonts, Icons, Colors, Images} from '../../constants';
+import {Fonts, Icons} from '../../constants';
 import {RFPercentage} from 'react-native-responsive-fontsize';
+import { useSelector } from 'react-redux';
 
 const TopSearchesList = ({data, onRemove, onPress, text}) => {
+
+  const  {Colors } = useSelector(store => store.store);
   return (
     <View style={{paddingHorizontal: 30, marginTop: -15}}>
       <Text
@@ -50,4 +53,3 @@ const TopSearchesList = ({data, onRemove, onPress, text}) => {
 
 export default TopSearchesList;
 
-const styles = StyleSheet.create({});

@@ -4,10 +4,11 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-import { Colors } from '../../constants';
-
-const ItemSeparator = ({width, style}) => (
-  <View
+import { useSelector } from 'react-redux';
+const ItemSeparator = ({width, style}) => {
+        const  {Colors } = useSelector(store => store.store)
+  return(
+    <View
     style={{
       height: hp(0.15),
       marginVertical: 15,
@@ -17,7 +18,11 @@ const ItemSeparator = ({width, style}) => (
       ...style,
     }}
   />
-);
+  )
+}
+
+ 
+
 
 export default ItemSeparator;
 

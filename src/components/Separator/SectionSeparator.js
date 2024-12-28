@@ -1,9 +1,10 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {widthPercentageToDP} from 'react-native-responsive-screen';
-import { Colors } from '../../constants';
+import { useSelector } from 'react-redux';
 
 const SectionSeparator = () => {
+        const  {Colors } = useSelector(store => store.store)
   return (
     <View
       style={{
@@ -17,4 +18,3 @@ const SectionSeparator = () => {
 
 export default SectionSeparator;
 
-const styles = StyleSheet.create({});

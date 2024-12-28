@@ -1,15 +1,13 @@
 import {StyleSheet, Text, View, FlatList, RefreshControl} from 'react-native';
 import React, {useState, useEffect} from 'react';
-import {Colors, Fonts, Icons, Images} from '../../../constants';
+import {Fonts, Icons, Images} from '../../../constants';
 import StackHeader from '../../../components/Header/StackHeader';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-import {Avatar} from 'react-native-paper';
 import {GetAllNotifications} from '../../../utils/helpers/notificationApis';
-import Loader from '../../../components/Loader';
 import moment from 'moment';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
 import { useSelector } from 'react-redux';
@@ -17,7 +15,7 @@ import { useSelector } from 'react-redux';
 const Notification = ({navigation, route}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { customer_id } = useSelector(store => store.store);
+  const { customer_id, Colors } = useSelector(store => store.store);
   const [data, setData] = useState([
     // {
     //   id: 0,
@@ -124,7 +122,40 @@ const Notification = ({navigation, route}) => {
     setRefreshing(true);
     getData();
   };
+  
 
+  const styles = StyleSheet.create({
+    card: {flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20},
+    iconContainer: {
+      height: 50,
+      width: 50,
+      borderRadius: 50 / 2,
+      backgroundColor: `${Colors.primary_color}30`,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    rowViewSB: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    title: {
+      fontFamily: Fonts.Inter_SemiBold,
+      color: Colors.primary_text,
+      fontSize: RFPercentage(1.7),
+      lineHeight: 30,
+    },
+    timeText: {
+      fontFamily: Fonts.Inter_Medium,
+      color: Colors.secondary_text,
+      fontSize: RFPercentage(1.5),
+    },
+    description: {
+      fontFamily: Fonts.Inter_Regular,
+      color: Colors.secondary_text,
+      fontSize: RFPercentage(1.5),
+    },
+  });
   return (
     <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       <FlatList
@@ -196,35 +227,4 @@ const Notification = ({navigation, route}) => {
 
 export default Notification;
 
-const styles = StyleSheet.create({
-  card: {flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20},
-  iconContainer: {
-    height: 50,
-    width: 50,
-    borderRadius: 50 / 2,
-    backgroundColor: `${Colors.primary_color}30`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    fontFamily: Fonts.Inter_SemiBold,
-    color: Colors.primary_text,
-    fontSize: RFPercentage(1.7),
-    lineHeight: 30,
-  },
-  timeText: {
-    fontFamily: Fonts.Inter_Medium,
-    color: Colors.secondary_text,
-    fontSize: RFPercentage(1.5),
-  },
-  description: {
-    fontFamily: Fonts.Inter_Regular,
-    color: Colors.secondary_text,
-    fontSize: RFPercentage(1.5),
-  },
-});
+

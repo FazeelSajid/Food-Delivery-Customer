@@ -8,10 +8,12 @@ import {
 } from 'react-native-responsive-screen';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
-import { Colors } from '../../constants';
+import { useSelector } from 'react-redux';
 
 const RBSheetAddLocation = ({refRBSheet}) => {
   const navigation = useNavigation();
+    const  {Colors } = useSelector(store => store.store);
+  
   return (
     <View style={{flex: 1}}>
       <RBSheet
@@ -68,4 +70,3 @@ const RBSheetAddLocation = ({refRBSheet}) => {
 
 export default RBSheetAddLocation;
 
-const styles = StyleSheet.create({});

@@ -3,31 +3,20 @@ import {
   Text,
   View,
   ScrollView,
-  Image,
-  ImageBackground,
   TouchableOpacity,
   FlatList,
-  useWindowDimensions,
   StatusBar,
-  Dimensions,
-  TurboModuleRegistry,
-  Alert,
-  Linking,
   RefreshControl,
 } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
-import { Colors, Icons, Images, Fonts } from '../../../constants';
+import {  Icons, Images, Fonts } from '../../../constants';
 import StackHeader from '../../../components/Header/StackHeader';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import { RFPercentage } from 'react-native-responsive-fontsize';
-// import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
-// import AllOrders from './AllOrders';
-// import RefundedOrders from './RefundedOrders';
 import CButton from '../../../components/Buttons/CButton';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../../constants/api';
 import { fetchApis, handlePopup, showAlert, showAlertLongLength } from '../../../utils/helpers';
 import Loader from '../../../components/Loader';
@@ -36,12 +25,9 @@ import {
   GetWalletAmount,
 } from '../../../utils/helpers/walletApis';
 import { useDispatch, useSelector } from 'react-redux';
-// import { setAllOrders } from '../../../redux/OrderSlice';
 import { useFocusEffect } from '@react-navigation/native';
-// import PaymentCard from '../ ../../components/Cards/PaymentCard';
 import { BASE_URL, BASE_URL_IMAGE, STRIPE_PUBLISH_KEY } from '../../../utils/globalVariables';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
-// import FoodCardWithRating from '../../../components/Cards/FoodCardWithRating';
 import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
 import CInput from '../../../components/TextInput/CInput';
 import {
@@ -58,20 +44,14 @@ import { setWalletTotalAmount } from '../../../redux/AuthSlice';
 import WebView from 'react-native-webview';
 
 const Wallet = ({ navigation, route }) => {
-  const { customer_id, walletTotalAmount , customer_detail} = useSelector(store => store.store);
+  const { customer_id, walletTotalAmount , customer_detail, Colors} = useSelector(store => store.store);
   const [accountLinkUrl, setAccountLinkUrl] = useState(null); 
-  const [connectedAccountId, setConnectedAccountId] = useState()
-  const [refreshing, setRefreshing] = useState(false)
   const ref_RBWithdrawSheet = useRef();
   const { showPopUp, popUpColor, PopUpMesage } = useSelector(store => store.store)
-  // cus_OnAmBpSP6erYtF
   const ref_RBTopUpSheet = useRef();
-  const orders = useSelector(store => store.order.all_orders);
   const dispatch = useDispatch();
   const [transactions, setTrasactions] = useState([])
   const [loading, setLoading] = useState(false);
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [cardList, setCardList] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
   const [topUpAmount, setTopUpAmount] = useState();
   const [WithdrawAmount, setWithdrawAmount] = useState('');
@@ -82,50 +62,13 @@ const Wallet = ({ navigation, route }) => {
   const closeBtmSheet = () => {
     btmSheetRef?.current?.close()
   }
-  // console.log(customer_detail.user_name);
 
 
 
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  // let confirmCardPayment = useConfirmPayment();
 
-  // const totalWidth = Dimensions.get('screen').width;
-  // const renderScene = SceneMap({
-  //   first: AllOrders,
-  //   second: RefundedOrders,
-  // });
-
-  // const layout = useWindowDimensions();
-  // const [index, setIndex] = React.useState(0);
-  // const [routes] = React.useState([
-  //   { key: 'first', title: 'All Orders' },
-  //   { key: 'second', title: 'Refunded Orders' },
-  // ]);
   
-  // const fetchPaymentDetail = async data => {
-  //   try {
-  //     let url = BASE_URL + 'payment/pay3';
-  //     const response = await fetch(url, {
-  //       method: 'POST',
-  //       headers: {
-  //         Accept: 'application/json',
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(data),
-  //     });
-  //     let res = await response.json();
-  //     console.log(res);
-  //     const client_secret = res?.paymentIntent?.client_secret;
-  //     console.log('client_secret : ', client_secret);
-  //     return {
-  //       client_secret,
-  //     };
-  //   } catch (error) {
-  //     showAlert(error);
-  //   }
-  // };
   const fetchPaymentSheetParams = async () => {
-    // console.log('fetchPaymentSheetParams called...');
 
     let customer_stripe_id = await GetCustomerStripeId(customer_id);
     console.log({ customer_stripe_id });
@@ -145,25 +88,19 @@ const Wallet = ({ navigation, route }) => {
         }),
       });
 
-      // Check if the response is successful
       if (!response.ok) {
         console.error('Failed to fetch payment sheet parameters:', response.statusText);
         return null;
       }
 
-      // Parse the response as JSON
       const responseData = await response.json();
 
-      // Check if the API returned an error status in the response JSON
       if (responseData.status === false) {
         console.error('Error in response:', responseData.message);
         return null;
       }
 
-      // Assuming the responseData contains the fields: paymentIntent, ephemeralKey, and customer
       const { paymentIntent, ephemeralKey, customer } = responseData;
-
-      // console.log('Fetched Payment Params:', { paymentIntent, ephemeralKey, customer });
 
       return {
         paymentIntent,
@@ -198,39 +135,7 @@ const Wallet = ({ navigation, route }) => {
           return null;
       }
   };
-  
-  const WithDrawPayment = async (AccId) => {
-      try {
-          const response = await fetch(`${BASE_URL}payment/transferPayment`, {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json",
-              },
-              body: JSON.stringify(
-                {
-                  amount: parseInt(WithdrawAmount),
-                  currency:"usd",
-                  stripe_account_id: AccId
-              }
-              )
-          });
-          const result = await response.json();
-  
-          if (result.status) {
-              // Open the Stripe onboarding URL in the browser
-              handlePopup(dispatch, "Withdrawal successfull", 'green' )
-              dispatch(setWalletTotalAmount(parseInt(walletTotalAmount) - parseInt(WithdrawAmount)))
-              setAccountLinkUrl(null)
-          } else {
-            handlePopup(dispatch, result.message, 'red' )
-              // throw new Error(result.message);
-             
-          }
-      } catch (error) {
-         
-          console.error("Error creating WithDraw:", error);
-      }
-  };
+
   const createAccountLink = async () => {
     try {
         const response = await fetch(`${BASE_URL}payment/createAccountLink?customer_id=${customer_id}`, {
@@ -242,14 +147,11 @@ const Wallet = ({ navigation, route }) => {
         const result = await response.json();
 
         if (result.status) {
-            // Alert.alert("Redirecting", "Please complete your account setup.");
-            // Open the Stripe onboarding URL in the browser
             setAccountLinkUrl(result.result.url)
         } else {
             throw new Error(result.message);
         }
     } catch (error) {
-        // Alert.alert("Error", error.message || "Failed to create account link.");
         console.error("Error creating account link:", error);
     }
 };
@@ -265,13 +167,6 @@ const Wallet = ({ navigation, route }) => {
         await createAccountLink()
     }
 };
-
-// Usage: Add a button in your component that triggers handleAccountSetup
-// Pass the customer's ID as a parameter
-
-
-  
-
   const openPaymentSheet = async () => {
     const { error } = await presentPaymentSheet();
     setLoading(false);
@@ -283,7 +178,7 @@ const Wallet = ({ navigation, route }) => {
         // user cancel payment
         // for now we do nothing...
       } else {
-        showAlertLongLength(error.message);
+        handlePopup(dispatch,error.message,'red');
       }
     } else {
       // handle success
@@ -321,24 +216,9 @@ const Wallet = ({ navigation, route }) => {
 
     const { error } = await initPaymentSheet({
       appearance: {
-        // shapes: {
-        //   borderRadius: 12,
-        //   borderWidth: 0.5,
-        // },
-        // primaryButton: {
-        //   shapes: {
-        //     borderRadius: 20,
-        //   },
-        // },
+       
         colors: {
-          // primary: Colors.primary_color,
-          // background: '#FFFFFF',
-          // componentBackground: '#FFFFFF',
-          // componentBorder: '#000000',
-          // componentDivider: '#000000',
-          // primaryText: Colors.primary_color,
-          // secondaryText: Colors.primary_color,
-          // componentText: Colors.primary_color,
+         
           placeholderText: Colors.secondary_color,
         },
       },
@@ -478,30 +358,19 @@ const Wallet = ({ navigation, route }) => {
   };
   
 
-  useEffect(() => {
-    // setLoading(true);
-    // getData(); 
-  }, []);
-  // console.log(customer_id);
+
 
   const toggleSelection = async (param) => {
-
-    // setSelectedPaymentMethod(param)
-
-
-
     if (param === 'stripe') {
       setSelectedPaymentMethod(param)
-      // signUpWith === param ? dispatch(setSignUpWith('')) : dispatch(setSignUpWith(param))
-      // navigation.navigate('SignUpWithstripe')
+     
       initializePaymentSheet()
       setTimeout(() => {
         closeBtmSheet()
       }, 300);
     }
     if (param === 'paypal') {
-      // signUpWith === 'paypal' ? dispatch(setSignUpWith('')) : dispatch(setSignUpWith(param))
-      // navigation.navigate('SignUpWithEmail')
+     
       setTimeout(() => {
         closeBtmSheet()
       }, 300);
@@ -528,23 +397,15 @@ const Wallet = ({ navigation, route }) => {
             "cancel_url": "https://food-delivery-restaurant-portal.netlify.app/return"
         }
     }
-    console.log(body);
     
       const CreatePayment = await  fetchApis(BASE_URL+'payment/createPayment', 'POST', setLoading,{"Content-Type": "application/json"},body ,dispatch )
       if (CreatePayment.status) {
         setAccountLinkUrl(CreatePayment.approval_url)
-      // console.log(CreatePayment, 'asdas');
-        
       }
-      
-      
     }
   }
-
-
   useFocusEffect(
     React.useCallback(() => {
-      // getCustomerCards();
       getData(); 
     }, []),
   );
@@ -569,7 +430,6 @@ const Wallet = ({ navigation, route }) => {
 
   if (navState.url.includes('https://food-delivery-restaurant-portal.netlify.app/success')) {
     // Call your withdrawal payment function
-    // WithDrawPayment(connectedAccountId);
     setAccountLinkUrl(null);
 
 
@@ -600,28 +460,115 @@ const Wallet = ({ navigation, route }) => {
         setLoading(false);
       });
     }
-    
-
-    // console.log('Payment ID:', paymentId);
-    // console.log('Payer ID:', payerId);
-
-    // Perform necessary state updates or actions
   }
    else if (navState.url.includes('https://food-delivery-restaurant-portal.netlify.app/return')) {
-    // Navigate to 'MyWallet' screen
     navigation.navigate('MyWallet');
     
-    // Reset state and handle withdrawal
     setAccountLinkUrl(null);
-    // WithDrawPayment(connectedAccountId); 
   }
 };
 
-  // console.log('somethisn');
+const styles = StyleSheet.create({
+  heading: {
+    color: Colors.primary_color,
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    fontSize: RFPercentage(2.3),
+    marginHorizontal: 20,
+    marginVertical : hp(2)
+    // backgroundColor: 'green'
+  },
+  // itemView: {
+  //   marginVertical: 10,
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   backgroundColor: Colors.Black,
+  //   padding: 10,
+  //   paddingHorizontal: 10,
+  //   borderRadius: 10,
+  //   overflow: 'hidden',
+  // },
+  // imageContainer: {
+  //   width: 50,
+  //   height: 50,
+  //   borderRadius: 10,
+  //   overflow: 'hidden',
+  //   backgroundColor: `${Colors.primary_color}30`,
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  // },
+  textContainer: {
+    marginLeft: 15,
+    flex: 1,
+  },
+  image: {
+    height: '100%',
+    width: '100%',
+    resizeMode: 'contain',
+  },
+  priceText: {
+    color: Colors.primary_color,
+    fontFamily: Fonts.Inter_SemiBold,
+    fontSize: RFPercentage(2.5),
+  },
+  // heading: {
+  //   color: '#292323',
+  //   fontFamily: Fonts.Inter_Medium,
+  //   fontSize: RFPercentage(2),
+  // },
+  // subText: {
+  //   color: '#8D93A1',
+  //   fontFamily: Fonts.PlusJakartaSans_Medium,
+  //   fontSize: RFPercentage(2),
+  // },
+  rbSheetHeading: {
+    color: Colors.primary_text,
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    fontSize: RFPercentage(2),
+  },
+  rowViewSB1: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  rowView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  transactionsContianer:{
+    borderColor: Colors.borderGray,
+    borderWidth: 1,
+    borderRadius: 10,
+    marginHorizontal: wp(5),
+    marginVertical: hp(0),
+    flexGrow: 1,
+    padding: hp(1),
+    height: '10%'
 
+  },
+  transactionId:{
+    color: Colors.primary_text,
+    fontFamily: Fonts.PlusJakartaSans_SemiBold,
+    fontSize: RFPercentage(1.7),
+    marginLeft: 10,
+  },
+  transactionType:{
+    color: Colors.secondary_text,
+    fontFamily: Fonts.PlusJakartaSans_Medium,
+    fontSize: RFPercentage(1.7),
+    marginLeft: 10,
+  },
+  transactionsAmount:{
+    color: '#FF212E',
+    fontFamily: Fonts.PlusJakartaSans_SemiBold,
+    fontSize: RFPercentage(2),
+    marginRight: 10,
+  },
+  headerContainer: { backgroundColor: Colors.primary_color, height: hp(30) },
 
-// const Colors:
-  
+});
+
   return (
     <View  style={{ flex: 1, backgroundColor: Colors.secondary_color }}>
       <Loader loading={loading} bgColor={'rgba(0, 0, 0, 0.5)'} />
@@ -937,334 +884,4 @@ const Wallet = ({ navigation, route }) => {
 
 export default Wallet;
 
-const styles = StyleSheet.create({
-  heading: {
-    color: Colors.primary_color,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(2.3),
-    marginHorizontal: 20,
-    marginVertical : hp(2)
-    // backgroundColor: 'green'
-  },
-  // itemView: {
-  //   marginVertical: 10,
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   backgroundColor: Colors.Black,
-  //   padding: 10,
-  //   paddingHorizontal: 10,
-  //   borderRadius: 10,
-  //   overflow: 'hidden',
-  // },
-  // imageContainer: {
-  //   width: 50,
-  //   height: 50,
-  //   borderRadius: 10,
-  //   overflow: 'hidden',
-  //   backgroundColor: `${Colors.primary_color}30`,
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  // },
-  textContainer: {
-    marginLeft: 15,
-    flex: 1,
-  },
-  image: {
-    height: '100%',
-    width: '100%',
-    resizeMode: 'contain',
-  },
-  priceText: {
-    color: Colors.primary_color,
-    fontFamily: Fonts.Inter_SemiBold,
-    fontSize: RFPercentage(2.5),
-  },
-  // heading: {
-  //   color: '#292323',
-  //   fontFamily: Fonts.Inter_Medium,
-  //   fontSize: RFPercentage(2),
-  // },
-  // subText: {
-  //   color: '#8D93A1',
-  //   fontFamily: Fonts.PlusJakartaSans_Medium,
-  //   fontSize: RFPercentage(2),
-  // },
-  rbSheetHeading: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(2),
-  },
-  rowViewSB1: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  rowView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  transactionsContianer:{
-    borderColor: Colors.borderGray,
-    borderWidth: 1,
-    borderRadius: 10,
-    marginHorizontal: wp(5),
-    marginVertical: hp(0),
-    flexGrow: 1,
-    padding: hp(1),
-    height: '10%'
 
-  },
-  transactionId:{
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_SemiBold,
-    fontSize: RFPercentage(1.7),
-    marginLeft: 10,
-  },
-  transactionType:{
-    color: Colors.secondary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(1.7),
-    marginLeft: 10,
-  },
-  transactionsAmount:{
-    color: '#FF212E',
-    fontFamily: Fonts.PlusJakartaSans_SemiBold,
-    fontSize: RFPercentage(2),
-    marginRight: 10,
-  },
-  headerContainer: { backgroundColor: Colors.primary_color, height: hp(30) },
-
-});
-
-// import {
-//   StyleSheet,
-//   Text,
-//   View,
-//   ScrollView,
-//   Image,
-//   ImageBackground,
-//   TouchableOpacity,
-//   FlatList,
-//   useWindowDimensions,
-//   StatusBar,
-//   Dimensions,
-//   TurboModuleRegistry,
-// } from 'react-native';
-// import React, {useState, useEffect} from 'react';
-// import {Colors, Icons, Images, Fonts} from '../../../constants';
-// import StackHeader from '../../../components/Header/StackHeader';
-// import {
-//   heightPercentageToDP as hp,
-//   widthPercentageToDP as wp,
-// } from 'react-native-responsive-screen';
-// import {RFPercentage} from 'react-native-responsive-fontsize';
-// import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
-// import AllOrders from './AllOrders';
-// import RefundedOrders from './RefundedOrders';
-// import CButton from '../../../components/Buttons/CButton';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import api from '../../../constants/api';
-// import {showAlert} from '../../../utils/helpers';
-// import Loader from '../../../components/Loader';
-// import {GetWalletAmount} from '../../../utils/helpers/walletApis';
-// import {useDispatch} from 'react-redux';
-// import {setAllOrders} from '../../../redux/OrderSlice';
-// import {useFocusEffect} from '@react-navigation/native';
-
-// const Wallet = () => {
-//   const dispatch = useDispatch();
-//   const [loading, setLoading] = useState(false);
-//   const [totalAmount, setTotalAmount] = useState(0);
-
-//   const totalWidth = Dimensions.get('screen').width;
-//   const renderScene = SceneMap({
-//     first: AllOrders,
-//     second: RefundedOrders,
-//   });
-
-//   const layout = useWindowDimensions();
-//   const [index, setIndex] = React.useState(0);
-//   const [routes] = React.useState([
-//     {key: 'first', title: 'All Orders'},
-//     {key: 'second', title: 'Refunded Orders'},
-//   ]);
-
-//   const getData = async () => {
-//     setLoading(true);
-//     let amount = await GetWalletAmount();
-//     setTotalAmount(amount);
-
-//     // getting all orders list
-//     let customer_id = await AsyncStorage.getItem('customer_id');
-//     console.log({customer_id});
-
-//     fetch(api.get_all_order_by_customer_Id + customer_id)
-//       .then(response => response.json())
-//       .then(response => {
-//         let list = response?.result ? response?.result : [];
-//         const filter = list?.filter(item => item?.cart_items_Data?.length > 0);
-//         dispatch(setAllOrders(filter?.reverse()));
-//       })
-//       .catch(err => console.log('error : ', err))
-//       .finally(() => {
-//         setLoading(false);
-//       });
-//   };
-
-//   // useEffect(() => {
-//   //   getData();
-//   // }, []);
-
-//   useFocusEffect(
-//     React.useCallback(() => {
-//       getData();
-//     }, []),
-//   );
-
-//   return (
-//     <View style={{flex: 1, backgroundColor: Colors.White}}>
-//       <Loader loading={loading} />
-//       <View style={{backgroundColor: Colors.primary_color, height: hp(27)}}>
-//         <StackHeader
-//           title={'My Wallet'}
-//           titleColor={'white'}
-//           backIconColor={'white'}
-//           translucent={true}
-//           headerView={{marginTop: StatusBar.currentHeight}}
-//         />
-//         <View
-//           style={{
-//             flex: 1,
-//             alignItems: 'center',
-//             justifyContent: 'flex-end',
-//             paddingBottom: 20,
-//           }}>
-//           <Text
-//             style={{
-//               fontFamily: Fonts.Inter_SemiBold,
-//               color: Colors.White,
-//               fontSize: RFPercentage(4),
-//               lineHeight: 45,
-//             }}>
-//             {/* $ 3,567 */}${totalAmount}
-//           </Text>
-//           <Text
-//             style={{
-//               fontFamily: Fonts.PlusJakartaSans_Medium,
-//               color: Colors.White,
-//               fontSize: RFPercentage(1.5),
-//               opacity: 0.95,
-//             }}>
-//             Total Amount
-//           </Text>
-//         </View>
-//       </View>
-
-//       <View style={{flex: 1}}>
-//         <TabView
-//           navigationState={{index, routes}}
-//           renderScene={renderScene}
-//           onIndexChange={setIndex}
-//           initialLayout={{width: layout.width}}
-//           sceneContainerStyle={{backgroundColor: Colors.White}}
-//           swipeEnabled={true}
-//           pressColor="white"
-//           renderTabBar={props => (
-//             <TabBar
-//               {...props}
-//               style={{
-//                 backgroundColor: Colors.White,
-//                 // marginTop: -15,
-//                 // paddingHorizontal: 20,
-//                 elevation: 4,
-//                 // backgroundColor: 'red',
-//               }}
-//               tabStyle={{
-//                 alignItems: 'center',
-//                 alignContent: 'center',
-//                 // width: 120,
-//                 // marginHorizontal: wp(5),
-//                 // alignSelf: 'center',
-//               }}
-//               renderLabel={({route, focused, color}) => (
-//                 <Text
-//                   style={{
-//                     color: focused ? Colors.primary_color : '#4D4D5680',
-//                     fontSize: hp(1.8),
-//                     fontFamily: focused
-//                       ? Fonts.PlusJakartaSans_Bold
-//                       : Fonts.Inter_Regular,
-//                     width: 120,
-//                     textAlign: 'center',
-//                   }}>
-//                   {route.title}
-//                 </Text>
-//               )}
-//               activeColor={'#fff'}
-//               // indicatorStyle={{
-//               //   padding: 1.5,
-//               //   backgroundColor: Colors.primary_color,
-//               // }}
-//               indicatorStyle={{
-//                 padding: 1.5,
-//                 backgroundColor: Colors.primary_color,
-//                 width: totalWidth / 2.7,
-//                 left: totalWidth / 15.5,
-//               }}
-//             />
-//           )}
-//         />
-//       </View>
-//     </View>
-//   );
-// };
-
-// export default Wallet;
-
-// const styles = StyleSheet.create({
-//   itemView: {
-//     marginVertical: 10,
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     backgroundColor: '#F6F6F6',
-//     padding: 10,
-//     paddingHorizontal: 10,
-//     borderRadius: 10,
-//     overflow: 'hidden',
-//   },
-//   imageContainer: {
-//     width: 50,
-//     height: 50,
-//     borderRadius: 10,
-//     overflow: 'hidden',
-//     backgroundColor: '#FF572233',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   textContainer: {
-//     marginLeft: 15,
-//     flex: 1,
-//   },
-//   image: {
-//     height: '100%',
-//     width: '100%',
-//     resizeMode: 'contain',
-//   },
-//   priceText: {
-//     color: Colors.primary_color,
-//     fontFamily: Fonts.Inter_SemiBold,
-//     fontSize: RFPercentage(2.5),
-//   },
-//   heading: {
-//     color: '#292323',
-//     fontFamily: Fonts.Inter_Medium,
-//     fontSize: RFPercentage(2),
-//   },
-//   subText: {
-//     color: '#8D93A1',
-//     fontFamily: Fonts.PlusJakartaSans_Medium,
-//     fontSize: RFPercentage(2),
-//   },
-// });

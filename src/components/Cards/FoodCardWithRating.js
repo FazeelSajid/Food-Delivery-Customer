@@ -16,6 +16,7 @@ import {
 } from 'react-native-responsive-screen';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { useSelector } from 'react-redux';
 
 const FoodCardWithRating = ({
   image,
@@ -44,7 +45,109 @@ const FoodCardWithRating = ({
   onRemove,
   variation_name
 }) => {
-  const navigation = useNavigation();
+    const  {Colors } = useSelector(store => store.store);
+    const styles = StyleSheet.create({
+      name: {
+        color: Colors.primary_text,
+        fontFamily: Fonts.PlusJakartaSans_SemiBold,
+        fontSize: RFPercentage(2),
+        marginTop: 5,
+        marginBottom: 1,
+      },
+      rowViewSB1: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      },
+      rowViewSB: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: 5.5,
+        // backgroundColor: 'red',
+      },
+      rowView: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+      },
+      priceText: {
+        color: Colors.primary_color,
+        fontFamily: Fonts.PlusJakartaSans_Bold,
+        fontSize: RFPercentage(2.5),
+        marginTop: -5,
+      },
+      //
+      card1: {
+        borderWidth: 1,
+        borderColor: Colors.borderGray,
+        paddingVertical: 15,
+        flex: 1,
+        marginHorizontal: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        flexDirection: 'row',
+        paddingHorizontal: 15,
+        overflow: 'hidden',
+      },
+      textContainer: {
+        justifyContent: 'center',
+        marginTop: 6,
+        alignItems: 'center',
+        marginLeft: 10,
+      },
+      imageContainer: {
+        width: hp(8.5),
+        height: 20,
+        borderRadius: 8,
+        overflow: 'hidden',
+        alignItems: 'center',
+      },
+      image: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+      },
+      title: {
+        fontFamily: Fonts.PlusJakartaSans_Bold,
+        color: Colors.primary_text,
+        fontSize: RFPercentage(1.5),
+        lineHeight: 30,
+      },
+      description: {
+        fontFamily: Fonts.PlusJakartaSans_Medium,
+        color: Colors.primary_color,
+        fontSize: RFPercentage(1.5),
+      },
+      price: {
+        fontFamily: Fonts.PlusJakartaSans_Bold,
+        color: Colors.primary_text,
+        fontSize: RFPercentage(2.5),
+      },
+      labelView: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        backgroundColor: Colors.primary_color,
+        padding: 4,
+        paddingHorizontal: 5,
+        minWidth: 80,
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      labelText: {
+        color: Colors.button.primary_button_text,
+        fontSize: RFPercentage(1.4),
+        fontFamily: Fonts.PlusJakartaSans_Regular,
+        textTransform: 'capitalize',
+      },
+      quantity:{
+        color: Colors.primary_text,
+        fontFamily: Fonts.PlusJakartaSans_Regular,
+        fontSize: RFPercentage(1.5),
+        
+      }
+    });
   return (
     <TouchableOpacity
       disabled={disabled ? disabled : false}
@@ -221,105 +324,4 @@ const FoodCardWithRating = ({
 
 export default FoodCardWithRating;
 
-const styles = StyleSheet.create({
-  name: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_SemiBold,
-    fontSize: RFPercentage(2),
-    marginTop: 5,
-    marginBottom: 1,
-  },
-  rowViewSB1: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 5.5,
-    // backgroundColor: 'red',
-  },
-  rowView: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  priceText: {
-    color: Colors.primary_color,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(2.5),
-    marginTop: -5,
-  },
-  //
-  card1: {
-    borderWidth: 1,
-    borderColor: Colors.borderGray,
-    paddingVertical: 15,
-    flex: 1,
-    marginHorizontal: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingHorizontal: 15,
-    overflow: 'hidden',
-  },
-  textContainer: {
-    justifyContent: 'center',
-    marginTop: 6,
-    alignItems: 'center',
-    marginLeft: 10,
-  },
-  imageContainer: {
-    width: hp(8.5),
-    height: 20,
-    borderRadius: 8,
-    overflow: 'hidden',
-    alignItems: 'center',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  title: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.primary_text,
-    fontSize: RFPercentage(1.5),
-    lineHeight: 30,
-  },
-  description: {
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: Colors.primary_color,
-    fontSize: RFPercentage(1.5),
-  },
-  price: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.primary_text,
-    fontSize: RFPercentage(2.5),
-  },
-  labelView: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: Colors.primary_color,
-    padding: 4,
-    paddingHorizontal: 5,
-    minWidth: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  labelText: {
-    color: Colors.button.primary_button_text,
-    fontSize: RFPercentage(1.4),
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-    textTransform: 'capitalize',
-  },
-  quantity:{
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-    fontSize: RFPercentage(1.5),
-    
-  }
-});
+

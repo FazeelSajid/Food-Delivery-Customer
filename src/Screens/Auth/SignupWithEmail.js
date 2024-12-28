@@ -8,55 +8,41 @@ import {
   ScrollView,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
-import {Colors, Fonts, Icons, Images} from '../../constants';
+import { Icons, Images} from '../../constants';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {RFPercentage} from 'react-native-responsive-fontsize';
 import CInput from '../../components/TextInput/CInput';
 import Feather from 'react-native-vector-icons/Feather';
 import CButton from '../../components/Buttons/CButton';
-import STYLE from './STYLE';
+import { getStyles } from './STYLE';
 import {useKeyboard} from '../../utils/UseKeyboardHook';
 import {
   setCustomerDetail,
   setCustomerId,
   setJoinAsGuest,
   setRestautantDetails,
-  setSignUpWith
 } from '../../redux/AuthSlice';
 import api from '../../constants/api';
-import {getUserFcmToken, handlePopup, showAlert} from '../../utils/helpers';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getUserFcmToken, handlePopup} from '../../utils/helpers';
 import CInputWithCountryCode from '../../components/TextInput/CInputWithCountryCode';
 import {
   GoogleSignin,
-  GoogleSigninButton,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import { useDispatch, useSelector } from 'react-redux';
-import Google from '../../Assets/svg/Googlee.svg';
 import PopUp from '../../components/Popup/PopUp';
 
 const SignUpWithEmail = ({navigation, route}) => {
   const dispatch = useDispatch();
-  const {showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store);
+  const {showPopUp, popUpColor, PopUpMesage, Colors} = useSelector(store => store.store);
   const keyboardHeight = useKeyboard();
   const scrollViewRef = useRef();
-  const { signUpWith } = useSelector(store => store.store)
   const [userName, setUserName] = useState('');
-
-  // const SignUpWithEmail = signUpWith === 'email'
-  // const signUpWithEmail = signUpWith === 'phone'
-  // console.log(SignUpWithEmail, signUpWithEmail);
+    const STYLE = getStyles(Colors)
   
 
-
-  // useEffect(() => {
-  //   // scrollViewRef.current?.scrollToEnd();
-  //   scrollViewRef.current?.scrollTo({y: 180});
-  // }, [keyboardHeight]);
 
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -152,9 +138,7 @@ const SignUpWithEmail = ({navigation, route}) => {
   
 
   const handleSignUp = async () => {
-    // navigation?.navigate('Verification')
-    // if (validate()) {
-      console.log({userEmail, phone_no, password, fcm_token, userName});
+    
       let fcm_token = await getUserFcmToken();
       console.log( 'SignUp token',fcm_token);
       if (validate()) {
@@ -202,7 +186,6 @@ const SignUpWithEmail = ({navigation, route}) => {
               );
               dispatch(setJoinAsGuest(false));
               dispatch(setCustomerDetail(response?.result));
-              // navigation?.popToTop()
               navigation?.navigate('Drawer');
               clearFields();
             }
@@ -260,8 +243,6 @@ const SignUpWithEmail = ({navigation, route}) => {
             );
             dispatch(setJoinAsGuest(false));
             dispatch(setCustomerDetail(response?.result));
-
-            // navigation?.popToTop()
             navigation?.navigate('Drawer');
             clearFields();
           }
@@ -291,16 +272,12 @@ const SignUpWithEmail = ({navigation, route}) => {
       if (email) {
         setLoading(true);
         let data = {
-          // phone_no: countryCode + phone_no,
           signup_type: 'email',
           email: "lifaw19906@iminko.com" ,
           user_name: user_name,
           fcm_token: fcm_token,
           signup_type: "google",
           rest_ID: "res_4074614",
-          
-
-          // password: password,
         };
         console.log('data  :  ', data);
 
@@ -352,11 +329,8 @@ const SignUpWithEmail = ({navigation, route}) => {
     } catch (error) {
       console.log('Error Message', error);
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        //alert('User Cancelled the Login Flow');
       } else if (error.code === statusCodes.IN_PROGRESS) {
-        //alert('Signing In');
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        //alert('Play Services Not Available or Outdated');
       } else {
         handlePopup(dispatch, 'Something went wrong!', 'red')
 
@@ -393,13 +367,7 @@ const SignUpWithEmail = ({navigation, route}) => {
             value={userName}
             onChangeText={text => setUserName(text)}
           />
-          {/* <CInput
-            placeholder="Phone Number"
-            value={phone_no}
-            onChangeText={text => setPhone_no(text)}
-            keyboardType="numeric"
-          /> */}
-
+       
           <CInputWithCountryCode
             phoneNo={phone_no}
             setPhoneNo={setPhone_no}
@@ -428,7 +396,6 @@ const SignUpWithEmail = ({navigation, route}) => {
             height={hp(6.2)}
             marginTop={hp(2)}
             width={wp(88)}
-            // onPress={() => navigation?.navigate('Verification')}
             onPress={() => handleSignUp()}
             loading={loading}
           />
@@ -436,7 +403,6 @@ const SignUpWithEmail = ({navigation, route}) => {
           <CButton
             title="JOIN AS GUEST"
             height={hp(6.2)}
-            // marginTop={hp(10)}
             transparent={true}
             width={wp(88)}
             onPress={() => {
@@ -450,32 +416,15 @@ const SignUpWithEmail = ({navigation, route}) => {
           <CButton
             title="Sign in with Google"
             height={hp(6.2)}
-            // marginTop={hp(10)}
             transparent={true}
             width={wp(88)}
-            leftIcon={<Google  />}
-            borderColor={Colors.borderGray}
-            color={Colors.primary_text}
+            leftIcon={<Icons.Googlee  />}
             onPress={() => handleGoogleSignUp()}
           />
           </View>
        
 
-          {/* <TouchableOpacity style={STYLE.signInWithGoogle} >
-          <Image source={Images.google} />
-            <Text>Sign in with Google</Text>
-          </TouchableOpacity> */} 
-          {/* <View style={STYLE.socialIconContainer}>
-            <TouchableOpacity
-              onPress={() => handleGoogleSignUp()}
-              activeOpacity={0.7}
-              style={STYLE.googleIconContainer}>
-              <Image source={Images.google} />
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.7}>
-              <Icons.Facebook width={wp(13)} />
-            </TouchableOpacity>
-          </View> */}
+       
         </View>
       </ScrollView>
     </View>

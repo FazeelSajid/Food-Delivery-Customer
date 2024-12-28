@@ -14,28 +14,28 @@ import {
 import Snackbar from 'react-native-snackbar';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
 
-import {Colors, Fonts, Icons} from '../../constants';
+import {Fonts, Icons} from '../../constants';
 import StackHeader from '../../components/Header/StackHeader';
 import CButton from '../../components/Buttons/CButton';
 import STYLE from './STYLE';
 import RBSheetSuccess from '../../components/BottomSheet/RBSheetSuccess';
 import {useKeyboard} from '../../utils/UseKeyboardHook';
 import {firebase} from '@react-native-firebase/auth';
-import {showAlert, showAlertLongLength} from '../../utils/helpers';
+import {handlePopup, showAlert, showAlertLongLength} from '../../utils/helpers';
 import api from '../../constants/api';
 import Loader from '../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {setCustomerDetail, setCustomerId} from '../../redux/AuthSlice';
 
 const EmailVerification = ({navigation, route}) => {
   const dispatch = useDispatch();
+    const {  Colors } = useSelector(store => store.store)
 
   const keyboardHeight = useKeyboard();
   const scrollViewRef = useRef();
   const otp = route?.params?.otp?.toString()
   const email = route?.params?.email
-  // console.log(otp);
   
 
   useEffect(() => {
@@ -46,38 +46,25 @@ const EmailVerification = ({navigation, route}) => {
   const refOTP = useRef();
   const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loader, setLoader] = useState(false);
-  const [confirmResult, setConfirmResult] = useState(null);
 
-  // useEffect(() => {
-  //   handleSendOTPCode();
-  //   // setTimeout(() => refOTP.current.focusField(0), 250);
-  // }, []);
+
 
   const validate = () => {
     console.log(otpCode, 'route :' ,  otp, email);
 
     
     if (otpCode?.length == 0 || otpCode?.length < 4) {
-      Snackbar.show({
-        text: 'Please Enter 4 digit OTP code',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: 'red',
-      });
+      handlePopup(dispatch,'Please Enter 4 digit OTP code','red')
+      
       return false;
     } else if (otpCode !== otp){
-      showAlert('Incorrect OTP code')
+      handlePopup(dispatch,'Incorrect OTP code','red')
     } 
     else {
       return true;
     }
   };
 
-  // const handleSendOTPCode = () => {
-  //   console.log('phone to send code : ', route?.params?.phone_no);
-  //   if (route?.params?.phone_no) {
-  //   }
-  // };
 
   const handleVerifyCode = async () => {
    
@@ -97,9 +84,9 @@ const EmailVerification = ({navigation, route}) => {
     .then(async response => {
       console.log('response  :  ', response);
       if (response?.status == false) {
-        showAlert(response?.message);
+        handlePopup(dispatch,response?.message, 'red');
       } else {
-        showAlert(response?.message, 'green');
+        handlePopup(dispatch,response?.message, 'green');
        navigation.navigate('ResetPassword', {
         email : response?.result?.email
        })
@@ -107,7 +94,7 @@ const EmailVerification = ({navigation, route}) => {
     })
     .catch(err => {
       console.log('Error in Login :  ', err);
-      showAlert('Something went wrong!');
+      handlePopup(dispatch,'Something went wrong!', 'red');
     })
     .finally(() => {
       setLoading(false);
@@ -133,7 +120,7 @@ const EmailVerification = ({navigation, route}) => {
       .then(async response => {
         console.log('response  :  ', response);
         if (response?.status == false) {
-          showAlert(response?.message);
+          handlePopup(dispatch,response?.message,'red');
           // showAlert('Invalid Credentials');
         } else {
           // showAlert(response.message, 'green');
@@ -156,17 +143,54 @@ const EmailVerification = ({navigation, route}) => {
       })
       .catch(err => {
         console.log('Error in Login :  ', err);
-        showAlert('Something went wrong!');
+        handlePopup(dispatch,'Something went wrong!','red');
       })
       .finally(() => {
         setLoading(false);
       });
   };
 
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+    borderRadius: 35,
+    width: wp(90),
+    marginTop: 50,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  textInput: {
+    paddingHorizontal: 20,
+  },
+  underlineStyleBase: {
+    color: Colors.primary_text,
+    fontSize: 24,
+    fontFamily: Fonts.Inter_Medium,
+    width: 48,
+    height: 50,
+    borderRadius: 30,
+    borderWidth: 0,
+    // borderBottomWidth: 1,
+    borderColor: '#DDDDDD',
+    // marginHorizontal: 2,
+    backgroundColor: '#F5F6FA',
+  },
+  underlineStyleHighLighted: {
+    borderColor: Colors.primary_color,
+    borderRadius: 30,
+    borderWidth: 1,
+  },
+});
+
+
   return (
     <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
       <StackHeader title={''} backIconColor={'#1D1D20'} />
-      <Loader loading={loader} />
+      <Loader loading={loading} />
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={{flexGrow: 1}}
@@ -244,6 +268,7 @@ const EmailVerification = ({navigation, route}) => {
             navigation.navigate('EnableLocation', {
               customer_id: route?.params?.customer_id,
             });
+            
           }}
         />
       </View>
@@ -252,38 +277,3 @@ const EmailVerification = ({navigation, route}) => {
 };
 
 export default EmailVerification;
-
-const styles = StyleSheet.create({
-  inputContainer: {
-    borderWidth: 1,
-    borderColor: '#DDDDDD',
-    borderRadius: 35,
-    width: wp(90),
-    marginTop: 50,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  textInput: {
-    paddingHorizontal: 20,
-  },
-  underlineStyleBase: {
-    color: Colors.primary_text,
-    fontSize: 24,
-    fontFamily: Fonts.Inter_Medium,
-    width: 48,
-    height: 50,
-    borderRadius: 30,
-    borderWidth: 0,
-    // borderBottomWidth: 1,
-    borderColor: '#DDDDDD',
-    // marginHorizontal: 2,
-    backgroundColor: '#F5F6FA',
-  },
-  underlineStyleHighLighted: {
-    borderColor: Colors.primary_color,
-    borderRadius: 30,
-    borderWidth: 1,
-  },
-});

@@ -18,14 +18,9 @@ import {
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import StackHeader from '../../../components/Header/StackHeader';
-import { Colors, Fonts, Icons, Images } from '../../../constants';
-// import FoodCard from '../../../components/Cards/FoodCard';
-// import Chip from '../../../components/Chip.js';
-// import FoodCardWithRating from '../../../components/Cards/FoodCardWithRating';
+import { Fonts, Icons, Images } from '../../../constants';
 import api from '../../../constants/api';
 import Loader from '../../../components/Loader';
-import { BASE_URL_IMAGE } from '../../../utils/globalVariables';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   addItemToCart,
   clearCartItems,
@@ -35,9 +30,8 @@ import {
   removeItemFromCart,
   updateCartItemQuantity,
 } from '../../../utils/helpers/cartapis';
-import { checkRestaurantTimings, fetchApisGet, handlePopup, showAlert } from '../../../utils/helpers';
+import { checkRestaurantTimings, fetchApisGet, handlePopup } from '../../../utils/helpers';
 import { useDispatch, useSelector } from 'react-redux';
-// import RBSheetOtherRestaurantCartItem from '../../../components/BottomSheet/RBSheetOtherRestaurantCartItem';
 import {
   addItemToMYCart,
   addToCart,
@@ -46,17 +40,15 @@ import {
 } from '../../../redux/CartSlice';
 import RBSheetSuccess from '../../../components/BottomSheet/RBSheetSuccess';
 import ItemLoading from '../../../components/Loader/ItemLoading';
-// import RBSheetRestaurantClosed from '../../../components/BottomSheet/RBSheetRestaurantClosed';
 import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RadioButton } from 'react-native-paper';
-import OrangeSuccessCheck from '../../../Assets/svg/orangeSuccessCheck.svg';
-import AddButton from '../../../Assets/svg/addButton.svg';
 import FoodCards from '../../../components/Cards/FoodCards';
 import { addFavoriteitem, removeFavoriteitem } from '../../../utils/helpers/FavoriteApis';
 import PopUp from '../../../components/Popup/PopUp';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
 import { RefreshControl } from 'react-native-gesture-handler';
+import RBSheetGuestUser from '../../../components/BottomSheet/RBSheetGuestUser';
 
 const SeeAllItems = ({ navigation, route }) => {
   const ref_RBSheetSuccess = useRef();
@@ -71,17 +63,17 @@ const SeeAllItems = ({ navigation, route }) => {
   const [isItemLoading, setIsItemLoading] = useState(false);
   const [Item, setItem] = useState()
   const [restaurant_timings, setRestaurant_timings] = useState('');
-  const {customer_id, showPopUp, popUpColor, PopUpMesage, cuisines, items, customerCartId} = useSelector(store => store.store)
+  const {customer_id, showPopUp, popUpColor, PopUpMesage, cuisines, items, customerCartId, Colors, join_as_guest}  = useSelector(store => store.store)
   const { favoriteItems } = useSelector(store => store.favorite);
   const [itemObj, setItemObj] = useState({})
   const [numColumns, setNumColumns] = useState(2)
   const [Variations, setVariations] = useState([])
-  const btmSheetRef = useRef()
+  const ref_RBSheet = useRef()
   const removeBtmSheet = useRef()
   const [selectedVariation, setSelectedVariation] = useState(null);
+  
 
  
-// console.log({customerCartId});
 
   // const showBtmSheet = async (item) => {
   //   setSelectedVariation(null)
@@ -143,10 +135,7 @@ const SeeAllItems = ({ navigation, route }) => {
     }
    
   }
-  // const closeBtmSheet = () => {
-  //   btmSheetRef?.current?.close()
-  //   setItemObj({})
-  // }
+
   const closeRmoveBtmSheet = () => {
     removeBtmSheet?.current?.close()
     setItemObj({})
@@ -211,9 +200,7 @@ const SeeAllItems = ({ navigation, route }) => {
 
 
   const add_item_to_cart = async (id, type, name, item_id) => {
-    // console.log('______cart    :  ', cart?.cart_id);
-    // console.log({item_id});
-    
+
 
 
     let dataa = type === 'item' ? {
@@ -643,7 +630,7 @@ const SeeAllItems = ({ navigation, route }) => {
   //         ref_RBSheetSuccess?.current?.open();
   //         updateList(item);
   //       } else {
-  //         showAlert(response?.message);
+  //       (response?.message);
   //       }
   //     })
   //     .catch(error => {
@@ -703,7 +690,7 @@ const SeeAllItems = ({ navigation, route }) => {
   //           }
   //         } else {
   //           setTimeout(() => {
-  //             showAlert(response?.message);
+  //           (response?.message);
   //           }, 500);
   //         }
   //       })
@@ -820,6 +807,91 @@ const SeeAllItems = ({ navigation, route }) => {
 
   // console.log(Variations);
   
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.secondary_color,
+    alignItems: 'center',
+  },
+  // heading: {
+  //   color: Colors.Text,
+  //   fontFamily: Fonts.PlusJakartaSans_Bold,
+  //   fontSize: RFPercentage(2.5),
+  //   marginBottom: 10,
+  // },
+  itemView: {
+    marginVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: wp(88),
+  },
+  imageContainer: {
+    width: wp(30),
+    height: hp(10),
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  image: {
+    height: '100%',
+    width: '100%',
+    resizeMode: 'contain',
+  },
+  textContainer: {
+    marginLeft: 10,
+    flex: 1,
+  },
+  // title: {
+  //   fontFamily: Fonts.PlusJakartaSans_Bold,
+  //   color: Colors.Text,
+  //   fontSize: RFPercentage(1.7),
+  //   lineHeight: 25,
+  // },
+  // nameText: {
+  //   fontFamily: Fonts.PlusJakartaSans_Medium,
+  //   color: '#7E8CA0',
+  //   fontSize: RFPercentage(2),
+  //   lineHeight: 25,
+  // },
+  // ratingText: {
+  //   fontFamily: Fonts.PlusJakartaSans_Bold,
+  //   color: Colors.Text,
+  //   fontSize: RFPercentage(2),
+  //   lineHeight: 25,
+  //   marginLeft: 5,
+  // },
+  rowViewSB: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  rowView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  // radioButton: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  // },
+  variationText: {
+    fontSize: RFPercentage(1.6),
+    color: Colors.primary_text,
+    fontFamily: Fonts.PlusJakartaSans_Medium,
+  },
+  variationTxt: {
+    color: Colors.primary_text,
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    fontSize: RFPercentage(1.7),
+    marginBottom: hp(1)
+  },
+  addbtn: {
+    backgroundColor: Colors.button.primary_button,
+    paddingHorizontal: wp(2),
+    paddingVertical: wp(2),
+    borderRadius: wp('50%'),
+  }
+
+});
   return (
     <View style={styles.container}>
       <Loader loading={loading} />
@@ -856,7 +928,16 @@ const SeeAllItems = ({ navigation, route }) => {
                   image={item?.images[0]}
                   description={item.description}
                   price={item?.item_prices ? item?.item_prices[0]?.price : item?.item_variations[0]?.price}
-                  heartPress={() => fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch, showAlert) : addFavoriteitem(item?.item_id, customer_id, dispatch, showAlert)}
+                  heartPress={() =>
+                  {
+                    if (join_as_guest) {
+                      ref_RBSheet.current.open()
+                    } else {
+                    fav ? removeFavoriteitem(item?.item_id, customer_id, favoriteItems, dispatch) : addFavoriteitem(item?.item_id, customer_id, dispatch)
+                    }
+                  }
+                    
+                  }
                   title={item?.item_name}
                   item={item}
                   id={item?.item_id}
@@ -882,15 +963,21 @@ const SeeAllItems = ({ navigation, route }) => {
                           }}>
                           <TouchableOpacity
                             onPress={() => {
-                              if ( item?.quantity === 1) {
-                                handleDelete(item)
-                              } else {
-                                if (item.item_prices.length > 1) {
-                                  showRmoveBtmSheet(item) 
+
+                              if (join_as_guest) {
+                                ref_RBSheet?.current?.open()
+                              }else{
+                                if ( item?.quantity === 1) {
+                                  handleDelete(item)
                                 } else {
-                                  handleAddToCartDecrement(item.item_prices[0].variation_id, item.item_id, item?.item_name,)
+                                  if (item.item_prices.length > 1) {
+                                    showRmoveBtmSheet(item) 
+                                  } else {
+                                    handleAddToCartDecrement(item.item_prices[0].variation_id, item.item_id, item?.item_name,)
+                                  }
                                 }
                               }
+                             
                              
                             }}
                             style={{
@@ -914,11 +1001,17 @@ const SeeAllItems = ({ navigation, route }) => {
                           </Text>
                           <TouchableOpacity
                             onPress={() => {
-                              if (item.item_prices.length > 1) {
-                                showRmoveBtmSheet(item) 
-                              } else {
-                                handleAddToCart(item.item_prices[0].variation_id, item.item_id, item?.item_name,)
+                              if (join_as_guest) {
+                                ref_RBSheet?.current?.open()
                               }
+                              else{
+                                if (item.item_prices.length > 1) {
+                                  showRmoveBtmSheet(item) 
+                                } else {
+                                  handleAddToCart(item.item_prices[0].variation_id, item.item_id, item?.item_name,)
+                                }
+                              }
+                             
                             }}
                             
                             style={{
@@ -936,16 +1029,22 @@ const SeeAllItems = ({ navigation, route }) => {
                         <TouchableOpacity
                         style={styles.addbtn}
                         onPress={() => {
-                          if (item.item_prices.length > 1) {
-                            
-                            showRmoveBtmSheet(item);
+
+                          if (join_as_guest) {
+                            ref_RBSheet?.current?.open()
                           } else {
-                            handleAddToCart(
-                              item.item_prices[0].variation_id,
-                              item.item_id,
-                              item?.item_name
-                            );
+                            if (item.item_prices.length > 1) {
+                            
+                              showRmoveBtmSheet(item);
+                            } else {
+                              handleAddToCart(
+                                item.item_prices[0].variation_id,
+                                item.item_id,
+                                item?.item_name
+                              );
+                            }
                           }
+                         
                         }}
                       >
                         <AntDesign name="plus" size={12} color={Colors.button.primary_button_text} />
@@ -972,7 +1071,7 @@ const SeeAllItems = ({ navigation, route }) => {
         height={290}
         title={`${Item?.item_name} added to cart.`}
         btnText={'OK'}
-        svg={<OrangeSuccessCheck />}
+        svg={<Icons.OrangeSuccessCheckLogoutIcon />}
         onPress={() => {
           ref_RBSheetSuccess?.current?.close();
           // navigation.goBack();
@@ -1076,6 +1175,21 @@ const SeeAllItems = ({ navigation, route }) => {
 
       />
 
+<RBSheetGuestUser
+        refRBSheet={ref_RBSheet}
+
+        btnText={'OK'}
+        onSignIn={() => {
+          ref_RBSheet?.current?.close();
+          navigation?.popToTop();
+          navigation?.replace('SignIn');
+        }}
+        onSignUp={() => {
+          ref_RBSheet?.current?.close();
+          navigation?.popToTop();
+          navigation?.replace('SignUp');
+        }}
+      />
 
             {/* <RBSheetOtherRestaurantCartItem
         refRBSheet={ref_cartAlert}
@@ -1106,90 +1220,6 @@ const SeeAllItems = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.secondary_color,
-    alignItems: 'center',
-  },
-  // heading: {
-  //   color: Colors.Text,
-  //   fontFamily: Fonts.PlusJakartaSans_Bold,
-  //   fontSize: RFPercentage(2.5),
-  //   marginBottom: 10,
-  // },
-  itemView: {
-    marginVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: wp(88),
-  },
-  imageContainer: {
-    width: wp(30),
-    height: hp(10),
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  image: {
-    height: '100%',
-    width: '100%',
-    resizeMode: 'contain',
-  },
-  textContainer: {
-    marginLeft: 10,
-    flex: 1,
-  },
-  // title: {
-  //   fontFamily: Fonts.PlusJakartaSans_Bold,
-  //   color: Colors.Text,
-  //   fontSize: RFPercentage(1.7),
-  //   lineHeight: 25,
-  // },
-  // nameText: {
-  //   fontFamily: Fonts.PlusJakartaSans_Medium,
-  //   color: '#7E8CA0',
-  //   fontSize: RFPercentage(2),
-  //   lineHeight: 25,
-  // },
-  // ratingText: {
-  //   fontFamily: Fonts.PlusJakartaSans_Bold,
-  //   color: Colors.Text,
-  //   fontSize: RFPercentage(2),
-  //   lineHeight: 25,
-  //   marginLeft: 5,
-  // },
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  rowView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  // radioButton: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  // },
-  variationText: {
-    fontSize: RFPercentage(1.6),
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-  },
-  variationTxt: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(1.7),
-    marginBottom: hp(1)
-  },
-  addbtn: {
-    backgroundColor: Colors.button.primary_button,
-    paddingHorizontal: wp(2),
-    paddingVertical: wp(2),
-    borderRadius: wp('50%'),
-  }
 
-});
 
 export default SeeAllItems;

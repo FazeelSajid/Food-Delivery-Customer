@@ -6,9 +6,11 @@ import {
 } from 'react-native-responsive-screen';
 import AddButton from '../../Assets/svg/addButton.svg';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { Colors, Fonts } from '../../constants';
+import { Fonts } from '../../constants';
 import Heart from '../../Assets/svg/heartBlack.svg';
-import HeartActive from '../../Assets/svg/heartActive.svg';const DealCard = ({
+import HeartActive from '../../Assets/svg/heartActive.svg';
+import { useSelector } from 'react-redux';
+const DealCard = ({
   isFavorite,
   description,
   price,
@@ -23,6 +25,66 @@ import HeartActive from '../../Assets/svg/heartActive.svg';const DealCard = ({
   priceStyle,
   iconSize,
 }) => {
+
+          const  {Colors } = useSelector(store => store.store);
+
+
+          const styles = StyleSheet.create({
+            cardContainer: {
+              backgroundColor: Colors.secondary_color,
+              borderRadius: wp('3%'),
+              shadowColor: '#000',
+              shadowOpacity: 0.1,
+              shadowRadius: wp('5%'),
+              shadowOffset: { width: 0, height: hp('0.5%') },
+              elevation: 2,
+              margin: wp(2),
+              width: wp(42), // Adjusted for a better fit
+              overflow: 'hidden',
+              paddingBottom: wp(2)
+            },
+            productImage: {
+              width: '100%',
+              height: hp('20%'),
+              borderRadius: wp('3%'),
+              resizeMode: 'cover',
+            },
+            cartIconContainer: {
+              position: 'absolute',
+              top: hp('1.5%'),
+              right: wp('2%'),
+              backgroundColor: Colors.button.primary_button,
+              paddingHorizontal: wp(2),
+              paddingVertical: wp(2),
+              borderRadius: wp('50%'),
+            },
+            infoContainer: {
+              paddingHorizontal: wp(3),
+              marginTop: hp('1%'),
+            },
+            productTitle: {
+              fontSize: wp('4.5%'),
+              fontFamily: Fonts.PlusJakartaSans_Bold,
+              color: Colors.primary_text,
+              marginTop: hp('0.5%'),
+            },
+            productSubtitle: {
+              fontSize: wp('3%'),
+              color: Colors.secondary_text,
+              marginTop: hp('0.5%'),
+            },
+            footer: {
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: hp('1%'),
+            },
+            priceText: {
+              fontSize: wp('4.5%'),
+              fontFamily: Fonts.PlusJakartaSans_Bold,
+              color: Colors.primary_text,
+              marginRight: wp(2),
+            },
+          });
   return (
     <TouchableOpacity onPress={onPress} style={styles.cardContainer}>
       {/* Product Image */}
@@ -61,61 +123,6 @@ import HeartActive from '../../Assets/svg/heartActive.svg';const DealCard = ({
   );
 };
 
-const styles = StyleSheet.create({
-  cardContainer: {
-    backgroundColor: Colors.secondary_color,
-    borderRadius: wp('3%'),
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: wp('5%'),
-    shadowOffset: { width: 0, height: hp('0.5%') },
-    elevation: 2,
-    margin: wp(2),
-    width: wp(42), // Adjusted for a better fit
-    overflow: 'hidden',
-    paddingBottom: wp(2)
-  },
-  productImage: {
-    width: '100%',
-    height: hp('20%'),
-    borderRadius: wp('3%'),
-    resizeMode: 'cover',
-  },
-  cartIconContainer: {
-    position: 'absolute',
-    top: hp('1.5%'),
-    right: wp('2%'),
-    backgroundColor: Colors.button.primary_button,
-    paddingHorizontal: wp(2),
-    paddingVertical: wp(2),
-    borderRadius: wp('50%'),
-  },
-  infoContainer: {
-    paddingHorizontal: wp(3),
-    marginTop: hp('1%'),
-  },
-  productTitle: {
-    fontSize: wp('4.5%'),
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.primary_text,
-    marginTop: hp('0.5%'),
-  },
-  productSubtitle: {
-    fontSize: wp('3%'),
-    color: Colors.secondary_text,
-    marginTop: hp('0.5%'),
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: hp('1%'),
-  },
-  priceText: {
-    fontSize: wp('4.5%'),
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: Colors.primary_text,
-    marginRight: wp(2),
-  },
-});
+
 
 export default DealCard;

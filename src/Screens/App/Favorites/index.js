@@ -12,11 +12,10 @@ import {
   TabBar,
   TabBarIndicator,
 } from 'react-native-tab-view';
-import {Colors, Fonts, Images} from '../../../constants';
+import { Fonts} from '../../../constants';
 import StackHeader from '../../../components/Header/StackHeader';
 import FavoriteItems from './FavoriteItems';
 import FavoriteDeals from './FavoriteDeals';
-import FavoriteRestaurants from './FavoriteRestaurants';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -25,12 +24,11 @@ import { useSelector } from 'react-redux';
 import PopUp from '../../../components/Popup/PopUp';
 
 const Favorites = () => {
-  const { showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store)
+  const { showPopUp, popUpColor, PopUpMesage, Colors} = useSelector(store => store.store)
 
   const renderScene = SceneMap({
     first: FavoriteItems,
     second: FavoriteDeals,
-    // third: FavoriteRestaurants,
   });
 
   const layout = useWindowDimensions();
@@ -39,7 +37,6 @@ const Favorites = () => {
   const [routes] = React.useState([
     {key: 'first', title: 'Items'},
     {key: 'second', title: 'Deals'},
-    // {key: 'third', title: 'Restaurants'},
   ]);
 
   const TAB_MARGIN = 24;
@@ -87,29 +84,20 @@ const Favorites = () => {
                 {route.title}
               </Text>
             )}
-            // renderIndicator={indicatorProps => {
-            //   const width = indicatorProps.getTabWidth(0) - TAB_MARGIN;
-            //   return <TabBarIndicator {...indicatorProps} width={width} />;
-            // }}
+          
             activeColor={'#fff'}
             indicatorStyle={{
               padding: 1.5,
-              // marginBottom: -2,
+             
               backgroundColor: Colors.primary_color,
-              // width: '50%',
+              
               alignSelf: 'center',
-              // width: totalWidth / 4,
-              // left: totalWidth / 23,
+              
             }}
           />
         )}
       />
-      {/* <TabView
-        navigationState={{index, routes}}
-        renderScene={renderScene}
-        onIndexChange={setIndex}
-        initialLayout={{width: layout.width}}
-      /> */}
+     
     </View>
   );
 };

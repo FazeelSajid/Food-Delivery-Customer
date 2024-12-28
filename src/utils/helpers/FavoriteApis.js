@@ -5,29 +5,40 @@ import { setFavoriteItems, setFavoriteDeals, removeFavoriteItem, addFavoriteItem
 import { handlePopup } from '../helpers';
 
 
-export const getFavoriteItem = async (customer_id, dispatch) => {
-  // console.log(customer_id);
-
+export const getFavoriteItem = async (customer_id, dispatch, setLoading) => {
+  setLoading && setLoading(true)
   try {
     const response = await fetch(api.get_all_favorite_items + `?customer_id=${customer_id}`);
     const data = await response.json();
     if (data?.status) {
       dispatch(setFavoriteItems(data.result))
+      setLoading && setLoading(false)
+
     } else {
       dispatch(setFavoriteItems([]))
+      setLoading && setLoading(false)
+
     }
   } catch (error) {
     handlePopup(dispatch, 'Something is went wrong', 'red')
+    setLoading && setLoading(false)
+
+  }
+  finally{
+    setLoading && setLoading(false)
+
   }
 };
 
-export const getFavoriteDeals = async (customer_id, dispatch) => {
+export const getFavoriteDeals = async (customer_id, dispatch, setLoading) => {
+  setLoading && setLoading(true)
   try {
     let url = api.get_all_favorite_deals + `?customer_id=${customer_id}`;
     const response = await fetch(url);
     const data = await response.json();
 
     if (data?.status === false) {
+      
       return dispatch(setFavoriteDeals([]))
     } else {
       dispatch(setFavoriteDeals(data.result))
@@ -35,6 +46,10 @@ export const getFavoriteDeals = async (customer_id, dispatch) => {
   } catch (error) {
     handlePopup(dispatch, 'Something is went wrong', 'red')
     return [];
+  }
+  finally{
+    setLoading && setLoading(false)
+
   }
 };
 
@@ -83,7 +98,7 @@ export const removeFavoriteitem = async (id, customer_id, favoriteItems, dispatc
 
 
 };
-export const removeFavoriteDeal = async (id, customer_id, favoriteDeals, dispatch, showAlert, setLoading,) => {
+export const removeFavoriteDeal = async (id, customer_id, favoriteDeals, dispatch, setLoading,) => {
 
   const favItem = favoriteDeals.find(item => item?.deal?.deal_id === id);
 
@@ -163,7 +178,7 @@ export const addFavoriteitem = async (id, customer_id, dispatch, showAlert, setL
       setLoading && setLoading(false);
     });
 };
-export const addFavoriteDeal = async (id, customer_id, dispatch, showAlert, setLoading) => {
+export const addFavoriteDeal = async (id, customer_id, dispatch, setLoading) => {
 
   setLoading && setLoading(true);
   // favourite_item_id

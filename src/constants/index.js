@@ -78,68 +78,14 @@ export const Images = {
   success_check: require('../Assets/other/success_check.json'),
 };
 
-// import SearchIcon from '../Assets/svg/search.svg';
-// import SearchIconInActive from '../Assets/svg/searchInactive.svg';
-// import Heart from '../Assets/svg/heart.svg';
-// import HeartActive from '../Assets/svg/heartActive.svg';
-// import Bike from '../Assets/svg/bike.svg';
-// import Checkout from '../Assets/svg/checkout.svg';
-// import Rating from '../Assets/svg/rating.svg';
-// import Marker from '../Assets/svg/marker.svg';
-// import MapPin from '../Assets/svg/map_pin.svg';
-// import Van from '../Assets/svg/Van.svg';
-// import Location from '../Assets/svg/Location.svg';
-// import ChatActive from '../Assets/svg/chatActive.svg';
-// import AddFilled from '../Assets/svg/add.svg';
-// import AddActive from '../Assets/svg/addActive.svg';
-// import Delete from '../Assets/svg/delete.svg';
-// import Remove from '../Assets/svg/remove.svg';
-// import Edit from '../Assets/svg/edit.svg';
-// import Phone from '../Assets/svg/phone.svg';
-
-// import OrderInProcess from '../Assets/svg/order_in_process.svg';
-// import OrderOutForDelivery from '../Assets/svg/order_out_for_delivery.svg';
-// import OrderPlaced from '../Assets/svg/order_placed.svg';
-// import WalletActive from '../Assets/svg/walletActive.svg';
-// import MapMarker from '../Assets/svg/mapMarker.svg';
-// import Send from '../Assets/svg/send.svg';
-// import DoubleTick from '../Assets/svg/double_tick.svg';
-// import LogoutActive from '../Assets/svg/logoutActive.svg';
-// import Facebook from '../Assets/svg/Facebook.svg';
-// export const Icons = {
-//   SearchIcon,
-//   SearchIconInActive,
-//   Heart,
-//   HeartActive,
-//   Bike,
-//   Checkout,
-//   Rating,
-//   Marker,
-//   MapPin,
-//   Van,
-//   Location,
-//   ChatActive,
-//   AddFilled,
-//   AddActive,
-//   Delete,
-//   Remove,
-//   Edit,
-//   Phone,
-//   OrderInProcess,
-//   OrderOutForDelivery,
-//   OrderPlaced,
-//   WalletActive,
-//   MapMarker,
-//   Send,
-//   DoubleTick,
-//   LogoutActive,
-//   Facebook,
-// };
 
 import SearchIcon from '../Assets/svg/search.svg';
 import SearchIconInActive from '../Assets/svg/searchInactive.svg';
+import Restaurent from '../Assets/svg/restaurent.svg';
 import Heart from '../Assets/svg/heart.svg';
+import Googlee from '../Assets/svg/Googlee.svg';
 import HeartActive from '../Assets/svg/heartActive.svg';
+import HeartB from '../Assets/svg/heartBlack.svg';
 import Bike from '../Assets/svg/bike.svg';
 import Checkout from '../Assets/svg/checkout.svg';
 import Rating from '../Assets/svg/rating.svg';
@@ -157,7 +103,7 @@ import Delete from '../Assets/svg/delete.svg';
 import Remove from '../Assets/svg/remove.svg';
 import Edit from '../Assets/svg/edit.svg';
 import Phone from '../Assets/svg/phone.svg';
-
+import ScanBarCode from '../Assets/svg/scanbarcode.svg';
 import OrderInProcess from '../Assets/svg/order_in_process.svg';
 import OrderOutForDelivery from '../Assets/svg/order_out_for_delivery.svg';
 import OrderPlaced from '../Assets/svg/order_placed.svg';
@@ -176,6 +122,7 @@ import Dollar from '../Assets/svg/dollar.svg';
 import Complaints from '../Assets/svg/complaints.svg';
 
 import Settings from '../Assets/svg/settings.svg';
+import SettingsActive from '../Assets/svg/settingsActive.svg';
 import Notification from '../Assets/svg/notification.svg';
 import SearchDashboard from '../Assets/svg/searchDashboard.svg';
 import StartDashboard from '../Assets/svg/starDashboard.svg';
@@ -225,7 +172,7 @@ import Discover from '../Assets/svg/discover.svg';
 import Order from '../Assets/svg/orders.svg';
 import OrdersActive from '../Assets/svg/ordersActive.svg';
 import LogoutIcon from '../Assets/svg/logout.svg';
-
+import OrangeSuccessCheckLogoutIcon from '../Assets/svg/orangeSuccessCheck.svg';
 import LockBlack from '../Assets/svg/lockBlack.svg';
 import EditProfile from '../Assets/svg/editProfile.svg';
 import Note from '../Assets/svg/note.svg';
@@ -238,15 +185,32 @@ import Video from '../Assets/svg/video.svg';
 import AddSimple from '../Assets/svg/addSimple.svg';
 import LocationLogo from '../Assets/svg/LocationLogo.svg';
 import Chat from '../Assets/svg/chat.svg';
+import Alert from '../Assets/svg/alert.svg';
+import WalletActiveBg from '../Assets/svg/WalletActiveBg.svg';
+import Invite from '../Assets/svg/invite.svg';
+import CopySvg from '../Assets/svg/copySvg.svg';
+import RiderMapMarker from '../Assets/svg/RiderMapMarker.svg';
+import WhitebikeSvg from '../Assets/svg/WhitebikeSvg.svg';
+import Delivered from '../Assets/svg/Delivered.svg';
+import ClockOrange from '../Assets/svg/clockOrange.svg';
 import { MYStore } from '../redux/MyStore';
 
 export const Icons = {
+  ClockOrange,
+  Delivered,
+  WhitebikeSvg,
+  RiderMapMarker,
+  OrangeSuccessCheckLogoutIcon,
+  Invite,
+  CopySvg,
   AddSimple,
   SearchIcon,
   SearchIconInActive,
   SearchWhite,
   Heart,
+  Googlee,
   HeartActive,
+  HeartB,
   Bike,
   Checkout,
   Rating,
@@ -280,6 +244,7 @@ export const Icons = {
   Complaints,
   Dollar,
   Settings,
+  SettingsActive,
   Notification,
   SearchDashboard,
   StartDashboard,
@@ -305,7 +270,7 @@ export const Icons = {
   Lock,
   Check,
   Refresh,
-
+  ScanBarCode,
   AuthLogo,
   Google,
   Facebook,
@@ -322,7 +287,7 @@ export const Icons = {
   Order,
   OrdersActive,
   LogoutIcon,
-
+  Alert,
   EditProfile,
   Note,
   LockBlack,
@@ -336,4 +301,6 @@ export const Icons = {
   Chat,
   CheckCircle,
   UncheckCircle,
+  Restaurent,
+  WalletActiveBg
 };

@@ -5,16 +5,16 @@ import {
   TouchableOpacity,
   StatusBar,
 } from 'react-native';
-import React, {memo} from 'react';
-import {Colors} from '../../constants';
+import React, { memo } from 'react';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {SwiperFlatList} from 'react-native-swiper-flatlist';
+import { SwiperFlatList } from 'react-native-swiper-flatlist';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useNavigation} from '@react-navigation/native';
-import {BASE_URL_IMAGE} from '../../utils/globalVariables';
+import { useNavigation } from '@react-navigation/native';
+import { BASE_URL_IMAGE } from '../../utils/globalVariables';
+import { useSelector } from 'react-redux';
 
 const HeaderImageSlider = ({
   data,
@@ -27,11 +27,12 @@ const HeaderImageSlider = ({
 }) => {
   const navigation = useNavigation();
   const dotSize = wp(2.2);
+  const { Colors } = useSelector(store => store.store)
   const styles = StyleSheet.create({
     imageCard: {
       width: wp(100),
       height: hp(38),
-      
+
       overflow: 'hidden',
     },
     sliderContainer: {
@@ -79,12 +80,12 @@ const HeaderImageSlider = ({
         // index={2}
         showPagination
         data={data}
-        renderItem={({item}) => {
+        renderItem={({ item }) => {
           return (
             <View style={styles.imageCard}>
               <Image
                 // source={item.image}
-                source={{uri: item}}
+                source={{ uri: item }}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -94,7 +95,7 @@ const HeaderImageSlider = ({
             </View>
           );
         }}
-        paginationStyle={{...styles.paginationStyle, ...paginationStyle}}
+        paginationStyle={{ ...styles.paginationStyle, ...paginationStyle }}
         paginationStyleItemActive={{
           ...styles.paginationStyleItemActive,
           ...paginationStyleItemActiveStyle,

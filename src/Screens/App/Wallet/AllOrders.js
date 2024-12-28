@@ -11,75 +11,8 @@ const AllOrders = () => {
   const orders = useSelector(store => store.order.all_orders);
   const [data, setData] = useState([]);
 
-  // const data = [
-  //   {
-  //     id: 0,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 1,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Preparing',
-  //   },
-  //   {
-  //     id: 2,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Ready to Deliver',
-  //   },
-  //   {
-  //     id: 3,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Out for Delivery',
-  //   },
-  //   {
-  //     id: 4,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 5,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 6,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  //   {
-  //     id: 7,
-  //     image: Images.salad,
-  //     title: 'Green Salad',
-  //     rating: 4.5,
-  //     price: 13.2,
-  //     status: 'Order Placed',
-  //   },
-  // ];
   useEffect(() => {
     let filter = orders?.filter(item => item?.payment_option == 'card');
-    console.log('filter  : ', filter?.length);
     setData(filter);
   }, [orders]);
   // rider_1368305  res_5691714 200621 200616
@@ -98,16 +31,7 @@ const AllOrders = () => {
           return (
             <FoodCardWithRating
               disabled={true}
-              // onPress={() =>
-              //   navigation.navigate('OrderDetails', {
-              //     type: 'completed',
-              //     id: item?.order_id,
-              //   })
-              // }
-              // title={item?.title}
-              // image={item?.image}
-              // description={item?.description}
-              // price={item?.price}
+             
               image={
                 cart_item && cart_item?.itemData?.images?.length > 0
                   ? cart_item?.itemData?.images[0]

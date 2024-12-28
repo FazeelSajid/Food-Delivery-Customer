@@ -7,17 +7,46 @@ import {
   Image,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
-import {Images, Fonts, Icons, Colors} from '../../constants';
+import {Images, Fonts, Icons} from '../../constants';
 import {Avatar, Badge} from 'react-native-paper';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import CBadge from '../CBadge';
 import {useNavigation} from '@react-navigation/native';
 import { widthPercentageToDP } from 'react-native-responsive-screen';
+import { useSelector } from 'react-redux';
 const ChatCard = ({profile, user_name, message, created_at, unread_count, onpress}) => {
   const navigation = useNavigation();
+      const  {Colors } = useSelector(store => store.store);
 
   const name = user_name;
   const avatarLetter = name ? name.charAt(0).toUpperCase() : '';
+
+  const styles = StyleSheet.create({
+    card: {flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20},
+   
+    rowViewSB: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    title: {
+      fontFamily: Fonts.Inter_SemiBold,
+      color: Colors.primary_text,
+      fontSize: RFPercentage(2),
+      lineHeight: 30,
+    },
+    timeText: {
+      fontFamily: Fonts.Inter_Medium,
+      color: Colors.secondary_text,
+      fontSize: RFPercentage(1.5),
+    },
+    description: {
+      fontFamily: Fonts.Inter_Regular,
+      color: Colors.secondary_text,
+      fontSize: RFPercentage(1.5),
+      flex: 0.9,
+    },
+  });
   return (
     <TouchableOpacity
       onPress={onpress}
@@ -64,29 +93,4 @@ const ChatCard = ({profile, user_name, message, created_at, unread_count, onpres
 
 export default ChatCard;
 
-const styles = StyleSheet.create({
-  card: {flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20},
- 
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    fontFamily: Fonts.Inter_SemiBold,
-    color: Colors.primary_text,
-    fontSize: RFPercentage(2),
-    lineHeight: 30,
-  },
-  timeText: {
-    fontFamily: Fonts.Inter_Medium,
-    color: Colors.secondary_text,
-    fontSize: RFPercentage(1.5),
-  },
-  description: {
-    fontFamily: Fonts.Inter_Regular,
-    color: Colors.secondary_text,
-    fontSize: RFPercentage(1.5),
-    flex: 0.9,
-  },
-});
+

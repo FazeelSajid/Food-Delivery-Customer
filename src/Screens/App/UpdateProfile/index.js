@@ -1,6 +1,6 @@
 import {StyleSheet, Text, View, ScrollView, Keyboard} from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
-import {Colors, Fonts, Icons} from '../../../constants';
+import { Fonts, Icons} from '../../../constants';
 import StackHeader from '../../../components/Header/StackHeader';
 import CInput from '../../../components/TextInput/CInput';
 import CButton from '../../../components/Buttons/CButton';
@@ -12,19 +12,17 @@ import {
 } from 'react-native-responsive-screen';
 import {
   getCustomerDetail,
-  getRestaurantDetail,
   getUserFcmToken,
-  showAlert,
+  handlePopup
 } from '../../../utils/helpers';
 import Loader from '../../../components/Loader';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {setCustomerDetail, setLocation, setUpdateLocation} from '../../../redux/AuthSlice';
 import api from '../../../constants/api';
 
 const UpdateProfile = ({navigation, route}) => {
   const dispatch = useDispatch();
-  const {location, customer_detail, customer_id, updateLocation} = useSelector(store => store.store);
+  const { customer_detail, customer_id, updateLocation, Colors} = useSelector(store => store.store);
 
   const ref_RBSheet = useRef();
   const textInput_HEIGHT = 42;
@@ -44,13 +42,11 @@ const UpdateProfile = ({navigation, route}) => {
   })
   
 
-  // const [location, setLocation] = useState('');
-  // console.log(updateLocation);
+
   
 
   const handleUpdateProfile = async () => {
     setUpdating(true);
-    // let customer_id = await AsyncStorage.getItem('customer_id');
     let fcm_token = await getUserFcmToken();
     let data = {
       customer_id: customer_id,
@@ -86,12 +82,12 @@ const UpdateProfile = ({navigation, route}) => {
           // );
           ref_RBSheet?.current?.open();
         } else {
-          showAlert(response?.message);
+          handlePopup(dispatch,response?.message,'green');
         }
       })
       .catch(err => {
         console.log('Error in Login :  ', err);
-        showAlert('Something went wrong!');
+        handlePopup(dispatch,'Something went wrong!', 'red');
       })
       .finally(() => {
         setUpdating(false);
@@ -137,12 +133,26 @@ const UpdateProfile = ({navigation, route}) => {
       longitude: customer_detail?.longitude,
       address: customer_detail?.location,
   }))
-    // setName(customer_detail?.user_name);
-    //   setPhoneNo(customer_detail?.phone_no);
-    //   setEmail(customer_detail?.email);
-    //   setUserDetail(customer_detail);
-    // get_customer_Details();
+   
   }, []);
+
+  const styles = StyleSheet.create({
+    headingStyle: {
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_SemiBold,
+      fontSize: RFPercentage(1.8),
+      marginTop: -5,
+      marginBottom: 10,
+    },
+    errorText: {
+      color: '#FF0505',
+      marginTop: -15,
+      marginLeft: 25,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+      fontSize: RFPercentage(1.6),
+      marginBottom: 18,
+    },
+  });
 
   return (
     <ScrollView
@@ -260,20 +270,4 @@ const UpdateProfile = ({navigation, route}) => {
 
 export default UpdateProfile;
 
-const styles = StyleSheet.create({
-  headingStyle: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_SemiBold,
-    fontSize: RFPercentage(1.8),
-    marginTop: -5,
-    marginBottom: 10,
-  },
-  errorText: {
-    color: '#FF0505',
-    marginTop: -15,
-    marginLeft: 25,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(1.6),
-    marginBottom: 18,
-  },
-});
+

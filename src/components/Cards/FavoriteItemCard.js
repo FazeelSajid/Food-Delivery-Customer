@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React from 'react';
-import {Colors, Fonts, Icons} from '../../constants';
+import { Fonts, Icons} from '../../constants';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {
   widthPercentageToDP as wp,
@@ -15,6 +15,7 @@ import {
 } from 'react-native-responsive-screen';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { useSelector } from 'react-redux';
 
 const FavoriteItemCard = ({
   image,
@@ -39,7 +40,110 @@ const FavoriteItemCard = ({
   onHeartPress,
   reviews,
 }) => {
-  const navigation = useNavigation();
+  const  {Colors } = useSelector(store => store.store);
+
+  const styles = StyleSheet.create({
+    name: {
+      color: '#02010E',
+      fontFamily: Fonts.PlusJakartaSans_SemiBold,
+      fontSize: RFPercentage(2),
+      marginTop: 3,
+      marginBottom: 1,
+    },
+    rowViewSB1: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    rowViewSB: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: 5.5,
+      // backgroundColor: 'red',
+    },
+    rowView: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+    },
+    priceText: {
+      color: Colors.primary_color,
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      fontSize: RFPercentage(2.5),
+      marginTop: -5,
+    },
+    reviewText: {
+      fontFamily: Fonts.PlusJakartaSans_Regular,
+      color: '#979797',
+      fontSize: RFPercentage(1.5),
+    },
+    //
+    card1: {
+      borderWidth: 1,
+      borderColor: '#E6E7EB',
+      paddingVertical: 7,
+      flex: 1,
+      marginHorizontal: 20,
+      borderRadius: 10,
+      alignItems: 'center',
+      flexDirection: 'row',
+      paddingHorizontal: 10,
+      overflow: 'hidden',
+      marginTop: 15,
+    },
+    textContainer: {
+      justifyContent: 'center',
+      marginTop: 6,
+      alignItems: 'center',
+      marginLeft: 10,
+    },
+    imageContainer: {
+      width: hp(8.5),
+      height: 20,
+      borderRadius: 8,
+      overflow: 'hidden',
+      alignItems: 'center',
+    },
+    image: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+    title: {
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      color: '#0A212B',
+      fontSize: RFPercentage(1.5),
+      lineHeight: 30,
+    },
+    description: {
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+      color: Colors.primary_color,
+      fontSize: RFPercentage(1.5),
+    },
+    price: {
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      color: '#0A212B',
+      fontSize: RFPercentage(2.5),
+    },
+    labelView: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      backgroundColor: Colors.primary_color,
+      padding: 4,
+      paddingHorizontal: 5,
+      minWidth: 80,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    labelText: {
+      color: Colors.White,
+      fontSize: RFPercentage(1.4),
+      fontFamily: Fonts.PlusJakartaSans_Regular,
+    },
+  });
+  
   return (
     <TouchableOpacity
       disabled={disabled == false ? false : true}
@@ -151,204 +255,4 @@ const FavoriteItemCard = ({
 
 export default FavoriteItemCard;
 
-const styles = StyleSheet.create({
-  name: {
-    color: '#02010E',
-    fontFamily: Fonts.PlusJakartaSans_SemiBold,
-    fontSize: RFPercentage(2),
-    marginTop: 3,
-    marginBottom: 1,
-  },
-  rowViewSB1: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 5.5,
-    // backgroundColor: 'red',
-  },
-  rowView: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  priceText: {
-    color: Colors.primary_color,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(2.5),
-    marginTop: -5,
-  },
-  reviewText: {
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-    color: '#979797',
-    fontSize: RFPercentage(1.5),
-  },
-  //
-  card1: {
-    borderWidth: 1,
-    borderColor: '#E6E7EB',
-    paddingVertical: 7,
-    flex: 1,
-    marginHorizontal: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    overflow: 'hidden',
-    marginTop: 15,
-  },
-  textContainer: {
-    justifyContent: 'center',
-    marginTop: 6,
-    alignItems: 'center',
-    marginLeft: 10,
-  },
-  imageContainer: {
-    width: hp(8.5),
-    height: 20,
-    borderRadius: 8,
-    overflow: 'hidden',
-    alignItems: 'center',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  title: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#0A212B',
-    fontSize: RFPercentage(1.5),
-    lineHeight: 30,
-  },
-  description: {
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: Colors.primary_color,
-    fontSize: RFPercentage(1.5),
-  },
-  price: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#0A212B',
-    fontSize: RFPercentage(2.5),
-  },
-  labelView: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: Colors.primary_color,
-    padding: 4,
-    paddingHorizontal: 5,
-    minWidth: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  labelText: {
-    color: Colors.White,
-    fontSize: RFPercentage(1.4),
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-  },
-});
 
-// import {
-//   StyleSheet,
-//   Text,
-//   View,
-//   Image,
-//   ImageBackground,
-//   FlatList,
-// } from 'react-native';
-// import React from 'react';
-// import AntDesign from 'react-native-vector-icons/AntDesign';
-// import {Colors, Fonts, Images} from '../../constants';
-// import {
-//   widthPercentageToDP as wp,
-//   heightPercentageToDP as hp,
-// } from 'react-native-responsive-screen';
-// import {RFPercentage} from 'react-native-responsive-fontsize';
-// import PriceText from '../Text';
-
-// const FavoriteItemCard = ({image, title, description, price}) => {
-//   return (
-//     <View style={styles.itemView}>
-//       <ImageBackground
-//         source={image}
-//         blurRadius={40}
-//         style={styles.imageContainer}>
-//         <Image source={image} style={styles.image} />
-//       </ImageBackground>
-//       <View style={styles.textContainer}>
-//         <View style={styles.rowViewSB}>
-//           <Text style={styles.title}>{title}</Text>
-//           <AntDesign name="heart" color={Colors.primary_color} size={20} />
-//         </View>
-//         <Text style={styles.nameText}>{description}</Text>
-//         {/* <Text style={{...styles.title, color: Colors.primary_color}}>$ {price}</Text>
-//          */}
-//         <PriceText text={price} />
-//       </View>
-//     </View>
-//   );
-// };
-
-// export default FavoriteItemCard;
-
-// const styles = StyleSheet.create({
-//   itemView: {
-//     marginVertical: 10,
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     backgroundColor: '#F6F6F6',
-//     padding: 5,
-//     paddingHorizontal: 10,
-//     borderRadius: 10,
-//   },
-//   imageContainer: {
-//     width: 80,
-//     height: 70,
-//     borderRadius: 10,
-//     overflow: 'hidden',
-//   },
-//   image: {
-//     height: '100%',
-//     width: '100%',
-//     resizeMode: 'contain',
-//   },
-//   textContainer: {
-//     marginLeft: 10,
-//     flex: 1,
-//   },
-//   title: {
-//     fontFamily: Fonts.Inter_Medium,
-//     color: Colors.Text,
-//     fontSize: RFPercentage(2),
-//     // lineHeight: 25,
-//   },
-//   nameText: {
-//     fontFamily: Fonts.PlusJakartaSans_Medium,
-//     color: '#7E8CA0',
-//     fontSize: RFPercentage(1.5),
-//     // lineHeight: 20,
-//     marginBottom: 5,
-//   },
-//   ratingText: {
-//     fontFamily: Fonts.PlusJakartaSans_Bold,
-//     color: Colors.Text,
-//     fontSize: RFPercentage(2),
-//     lineHeight: 25,
-//     marginLeft: 5,
-//   },
-//   rowViewSB: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     // flex: 1,
-//     justifyContent: 'space-between',
-//   },
-//   rowView: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-// });

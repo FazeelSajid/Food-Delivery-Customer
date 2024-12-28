@@ -1,11 +1,7 @@
 import {StyleSheet, Text, View, FlatList} from 'react-native';
 import React, {memo, useState, useEffect} from 'react';
-import {Images} from '../../../../constants';
-import OrdersCard from '../../../../components/Cards/OrdersCard';
-import FoodCardWithRating from '../../../../components/Cards/FoodCardWithRating';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import { useNavigation} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
-import {BASE_URL_IMAGE} from '../../../../utils/globalVariables';
 import NoDataFound from '../../../../components/NotFound/NoDataFound';
 import OrderCard from '../../../../components/Cards/OrderCard';
 import {
@@ -18,7 +14,7 @@ const CancelledOrders = () => {
   const orders = useSelector(store => store.order.all_orders);
   const navigation = useNavigation();
   const [data, setData] = useState([]);
-
+  const { Colors} = useSelector(store => store.store)
 
   useEffect(() => {
     let filter = orders?.filter(item => item?.order_status == 'cancelled');

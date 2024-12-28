@@ -1,12 +1,13 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import {SelectCountry, Dropdown} from 'react-native-element-dropdown';
-import {Colors, Fonts, Images, Icons} from '../../constants';
+import { Dropdown} from 'react-native-element-dropdown';
+import {Fonts, Images, Icons} from '../../constants';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import { useSelector } from 'react-redux';
 
 const CDropDown = ({
   heading,
@@ -17,6 +18,7 @@ const CDropDown = ({
   onFocus,
   onBlur,
 }) => {
+      const  {Colors } = useSelector(store => store.store);
   return (
     <View>
       {heading && (
@@ -99,4 +101,3 @@ const CDropDown = ({
 
 export default CDropDown;
 
-const styles = StyleSheet.create({});

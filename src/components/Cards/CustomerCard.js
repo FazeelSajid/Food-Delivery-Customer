@@ -1,8 +1,9 @@
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import React, {memo} from 'react';
 import {Avatar} from 'react-native-paper';
-import {Fonts, Icons, Colors} from '../../constants';
+import {Fonts, Icons} from '../../constants';
 import {RFPercentage} from 'react-native-responsive-fontsize';
+import { useSelector } from 'react-redux';
 
 const CustomerCard = ({
   profile,
@@ -21,6 +22,8 @@ const CustomerCard = ({
   showNameProfile,
   descriptionLines,
 }) => {
+        const  {Colors } = useSelector(store => store.store);
+  
   const getFirstTwoLettersOfName = name => {
     let data = name?.split(' ').map(name => name[0]);
     if (data) {
@@ -29,6 +32,55 @@ const CustomerCard = ({
       return '';
     }
   };
+
+  const styles = StyleSheet.create({
+    itemContainer: {
+      marginVertical: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#F6F6F6',
+      paddingVertical: 10,
+      paddingHorizontal: 10,
+      borderRadius: 10,
+      overflow: 'hidden',
+      alignSelf: 'center',
+    },
+    textContainer: {
+      marginLeft: 10,
+      flex: 1,
+    },
+    title: {
+      fontFamily: Fonts.Inter_Medium,
+      color: Colors.Text,
+      fontSize: RFPercentage(2),
+      lineHeight: 25,
+    },
+    description: {
+      fontFamily: Fonts.Inter_Regular,
+      color: '#808D9E',
+      fontSize: RFPercentage(1.5),
+      lineHeight: 25,
+      marginLeft: 10,
+    },
+    description1: {
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+      color: '#7E8CA0',
+      fontSize: RFPercentage(1.5),
+      // lineHeight: 25,
+      marginLeft: 10,
+    },
+    rowView: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    rowViewSB: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+  });
+
+  
   return (
     <TouchableOpacity
       disabled={disabled ? disabled : false}
@@ -96,49 +148,4 @@ const CustomerCard = ({
 
 export default memo(CustomerCard);
 
-const styles = StyleSheet.create({
-  itemContainer: {
-    marginVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F6F6F6',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    overflow: 'hidden',
-    alignSelf: 'center',
-  },
-  textContainer: {
-    marginLeft: 10,
-    flex: 1,
-  },
-  title: {
-    fontFamily: Fonts.Inter_Medium,
-    color: Colors.Text,
-    fontSize: RFPercentage(2),
-    lineHeight: 25,
-  },
-  description: {
-    fontFamily: Fonts.Inter_Regular,
-    color: '#808D9E',
-    fontSize: RFPercentage(1.5),
-    lineHeight: 25,
-    marginLeft: 10,
-  },
-  description1: {
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: '#7E8CA0',
-    fontSize: RFPercentage(1.5),
-    // lineHeight: 25,
-    marginLeft: 10,
-  },
-  rowView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-});
+

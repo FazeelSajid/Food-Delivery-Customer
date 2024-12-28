@@ -7,20 +7,19 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React from 'react';
-import {Colors, Fonts, Icons} from '../../constants';
+import { Fonts, Icons} from '../../constants';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import {useNavigation} from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 const RestaurantCard = ({
   image,
   title,
   description,
-  price,
   onPress,
-  imageHeight,
   disabled,
   imageStyle,
   cardStyle,
@@ -32,9 +31,9 @@ const RestaurantCard = ({
   priceContainerStyle,
   rating,
   tag,
-  reviews,
 }) => {
   const navigation = useNavigation();
+    const  {Colors } = useSelector(store => store.store);
 
   function truncateString(str) {
     if (str?.length > 75) {
@@ -42,6 +41,92 @@ const RestaurantCard = ({
     }
     return str;
 }
+const styles = StyleSheet.create({
+  name: {
+    color: '#02010E',
+    fontFamily: Fonts.PlusJakartaSans_SemiBold,
+    fontSize: RFPercentage(2),
+    marginTop: 3,
+    marginBottom: 1,
+  },
+  rowViewText: {
+    fontFamily: Fonts.PlusJakartaSans_Regular,
+    color: '#979797',
+    fontSize: RFPercentage(1.4),
+    // width: wp(40)
+    // flex: 2
+  },
+  rowViewSB1: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  rowViewSB: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 5.5,
+    // backgroundColor: 'red',
+  },
+  rowView: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  priceText: {
+    color: Colors.primary_color,
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    fontSize: RFPercentage(2.5),
+    marginTop: -5,
+  },
+  //
+  card1: {
+    borderWidth: 1,
+    borderColor: '#E6E7EB',
+    paddingVertical: 7,
+    flex: 1,
+    marginHorizontal: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+  },
+  textContainer: {
+    justifyContent: 'center',
+    marginTop: 6,
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  imageContainer: {
+    width: hp(8.5),
+    height: 20,
+    borderRadius: 8,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  title: {
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    color: '#0A212B',
+    fontSize: RFPercentage(1.5),
+    lineHeight: 30,
+  },
+  description: {
+    fontFamily: Fonts.PlusJakartaSans_Medium,
+    color: Colors.primary_color,
+    fontSize: RFPercentage(1.5),
+  },
+  price: {
+    fontFamily: Fonts.PlusJakartaSans_Bold,
+    color: '#0A212B',
+    fontSize: RFPercentage(2.5),
+  },
+});
+
   return (
     <TouchableOpacity
       disabled={disabled ? disabled : false}
@@ -185,88 +270,4 @@ const RestaurantCard = ({
 
 export default RestaurantCard;
 
-const styles = StyleSheet.create({
-  name: {
-    color: '#02010E',
-    fontFamily: Fonts.PlusJakartaSans_SemiBold,
-    fontSize: RFPercentage(2),
-    marginTop: 3,
-    marginBottom: 1,
-  },
-  rowViewText: {
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-    color: '#979797',
-    fontSize: RFPercentage(1.4),
-    // width: wp(40)
-    // flex: 2
-  },
-  rowViewSB1: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 5.5,
-    // backgroundColor: 'red',
-  },
-  rowView: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  priceText: {
-    color: Colors.primary_color,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(2.5),
-    marginTop: -5,
-  },
-  //
-  card1: {
-    borderWidth: 1,
-    borderColor: '#E6E7EB',
-    paddingVertical: 7,
-    flex: 1,
-    marginHorizontal: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-  },
-  textContainer: {
-    justifyContent: 'center',
-    marginTop: 6,
-    alignItems: 'center',
-    marginLeft: 10,
-  },
-  imageContainer: {
-    width: hp(8.5),
-    height: 20,
-    borderRadius: 8,
-    overflow: 'hidden',
-    alignItems: 'center',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  title: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#0A212B',
-    fontSize: RFPercentage(1.5),
-    lineHeight: 30,
-  },
-  description: {
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    color: Colors.primary_color,
-    fontSize: RFPercentage(1.5),
-  },
-  price: {
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    color: '#0A212B',
-    fontSize: RFPercentage(2.5),
-  },
-});
+

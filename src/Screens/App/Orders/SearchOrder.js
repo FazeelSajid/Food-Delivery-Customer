@@ -8,8 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
-import {Colors, Icons, Fonts, Images} from '../../../constants';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import {Icons, Fonts, Images} from '../../../constants';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -17,30 +16,22 @@ import {
 import StackHeader from '../../../components/Header/StackHeader';
 import CInput from '../../../components/TextInput/CInput';
 import FoodCardWithRating from '../../../components/Cards/FoodCardWithRating';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import ItemSeparator from '../../../components/Separator/ItemSeparator';
 import TopSearchesList from '../../../components/Lists/TopSearchesList';
 import {
-  addDealsTopSearch,
   addOrderTopSearch,
-  getDealsTopSearch,
   getOrderTopSearch,
-  removeDealsTopSearch,
   removeOrderTopSearch,
 } from '../../../utils/helpers/localStorage';
 import {showAlert} from '../../../utils/helpers';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
-import api from '../../../constants/api';
-import {BASE_URL_IMAGE} from '../../../utils/globalVariables';
 import Loader from '../../../components/Loader';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useSelector} from 'react-redux';
 
 const SearchOrder = ({navigation, route}) => {
   const order_history = useSelector(store => store.order.order_history);
+      const  {Colors } = useSelector(store => store.store);
+  
 
-  const [isSearch, setIsSearch] = useState(false);
-  const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [showTopSearches, setShowTopSearches] = useState(true);
@@ -127,9 +118,6 @@ const SearchOrder = ({navigation, route}) => {
   ]);
 
   const [topSearchesList, setTopSearchesList] = useState([]);
-
-  // const handleSearch = query => {
-  //   setSearchQuery(query);
 
   const handleRemoveTopSearches = async item => {
     const filter = topSearchesList.filter(e => e != item);

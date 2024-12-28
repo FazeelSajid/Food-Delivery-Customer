@@ -7,7 +7,9 @@ import {
 import { Fonts } from '../../../constants';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 
-export const styles = StyleSheet.create({
+
+export const getStyles = (Colors) =>
+StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: Colors.secondary_color,

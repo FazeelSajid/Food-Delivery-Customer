@@ -1,7 +1,8 @@
-import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
+import {StyleSheet, Text, Image, TouchableOpacity} from 'react-native';
 import React from 'react';
-import {Colors, Fonts, Icons, Images} from '../../constants';
+import { Fonts, Icons, Images} from '../../constants';
 import {RFPercentage} from 'react-native-responsive-fontsize';
+import { useSelector } from 'react-redux';
 
 const PaymentCard = ({
   style,
@@ -13,6 +14,16 @@ const PaymentCard = ({
   onEditPress,
   showEditButton,
 }) => {
+  const  {Colors } = useSelector(store => store.store);
+  const styles = StyleSheet.create({
+    title: {
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+      fontSize: RFPercentage(2),
+      marginLeft: 15,
+      textTransform: 'capitalize',
+    },
+  });
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -57,12 +68,4 @@ const PaymentCard = ({
 
 export default PaymentCard;
 
-const styles = StyleSheet.create({
-  title: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontSize: RFPercentage(2),
-    marginLeft: 15,
-    textTransform: 'capitalize',
-  },
-});
+

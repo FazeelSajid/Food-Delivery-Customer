@@ -7,21 +7,16 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
-import { Colors, Fonts, Icons, Images } from '../../constants';
+import {  Fonts, Icons, Images } from '../../constants';
 import StackHeader from '../../components/Header/StackHeader';
-import { RFPercentage } from 'react-native-responsive-fontsize';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import CButton from '../../components/Buttons/CButton';
-import OTPInputView from '@twotalltotems/react-native-otp-input';
-import SuccessModal from '../../components/Modal/SuccessModal';
 import STYLE from './STYLE';
 import Feather from 'react-native-vector-icons/Feather';
 import CInput from '../../components/TextInput/CInput';
-import CRBSheetComponent from '../../components/BottomSheet/CRBSheetComponent';
-import Lottie from 'lottie-react-native';
 import RBSheetSuccess from '../../components/BottomSheet/RBSheetSuccess';
 import { useKeyboard } from '../../utils/UseKeyboardHook';
 import { handlePopup } from '../../utils/helpers';
@@ -33,6 +28,7 @@ import PopUp from '../../components/Popup/PopUp';
 
 const ResetPassword = ({ navigation, route }) => {
   const keyboardHeight = useKeyboard();
+    const { Colors } = useSelector(store => store.store)
   const scrollViewRef = useRef();
   const {showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store);
   const email = route?.params?.email
@@ -248,38 +244,3 @@ const ResetPassword = ({ navigation, route }) => {
 
 export default ResetPassword;
 
-const styles = StyleSheet.create({
-  inputContainer: {
-    borderWidth: 1,
-    borderColor: Colors.borderGray,
-    borderRadius: 35,
-    width: wp(90),
-    // marginVertical: 80,
-    marginTop: 50,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  // textInput: {
-  //   paddingHorizontal: 20,
-  // },
-  // underlineStyleBase: {
-  //   color: Colors.Text,
-  //   fontSize: 24,
-  //   fontFamily: Fonts.Inter_Medium,
-  //   width: 60,
-  //   height: 50,
-  //   borderRadius: 30,
-  //   borderWidth: 0,
-  //   // borderBottomWidth: 1,
-  //   borderColor: Colors.borderGray,
-  //   marginHorizontal: 5,
-  //   backgroundColor: Colors.secondary_color,
-  // },
-  // underlineStyleHighLighted: {
-  //   borderColor: Colors.primary_color,
-  //   borderRadius: 30,
-  //   borderWidth: 1,
-  // },
-});

@@ -1,16 +1,32 @@
 import {StyleSheet, Text, View, ScrollView} from 'react-native';
 import React from 'react';
-import {Colors, Fonts} from '../../../constants';
+import { Fonts} from '../../../constants';
 import StackHeader from '../../../components/Header/StackHeader';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {WebView} from 'react-native-webview';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import CButton from '../../../components/Buttons/CButton';
+import { useSelector } from 'react-redux';
 
 const TermsAndCondition = () => {
+      const  {Colors } = useSelector(store => store.store);
+
+
+      const styles = StyleSheet.create({
+        textContainer: {
+          flex: 1,
+          paddingHorizontal: 25,
+          marginTop: hp(1.5),
+          paddingBottom: 20,
+        },
+        text: {
+          color: Colors.secondary_text,
+          fontFamily: Fonts.PlusJakartaSans_Regular,
+          fontSize: RFPercentage(1.5),
+          lineHeight: 25,
+        },
+      });
   return (
     <ScrollView
       contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.secondary_color}}>
@@ -34,17 +50,4 @@ const TermsAndCondition = () => {
 
 export default TermsAndCondition;
 
-const styles = StyleSheet.create({
-  textContainer: {
-    flex: 1,
-    paddingHorizontal: 25,
-    marginTop: hp(1.5),
-    paddingBottom: 20,
-  },
-  text: {
-    color: Colors.secondary_text,
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-    fontSize: RFPercentage(1.5),
-    lineHeight: 25,
-  },
-});
+

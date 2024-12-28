@@ -1,8 +1,9 @@
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import React from 'react';
-import {Colors} from '../../constants';
+import { useSelector } from 'react-redux';
 
 const Chip = ({title, onPress, selected, icon}) => {
+      const  {Colors } = useSelector(store => store.store);
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -28,4 +29,3 @@ const Chip = ({title, onPress, selected, icon}) => {
 
 export default Chip;
 
-const styles = StyleSheet.create({});

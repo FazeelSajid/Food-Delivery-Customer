@@ -1,14 +1,11 @@
 import {
-  StyleSheet,
-  Text,
   View,
-  TextInput,
   TouchableOpacity,
   FlatList,
   ScrollView,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import { Colors, Icons, Fonts, Images } from '../../../constants';
+import React, { useState, useEffect, useRef } from 'react';
+import { Icons, Fonts, Images } from '../../../constants';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import {
   widthPercentageToDP as wp,
@@ -16,19 +13,10 @@ import {
 } from 'react-native-responsive-screen';
 import StackHeader from '../../../components/Header/StackHeader';
 import CInput from '../../../components/TextInput/CInput';
-import FoodCardWithRating from '../../../components/Cards/FoodCardWithRating';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import ItemSeparator from '../../../components/Separator/ItemSeparator';
 import TopSearchesList from '../../../components/Lists/TopSearchesList';
-import {
-  addDealsTopSearch,
-  getDealsTopSearch,
-  removeDealsTopSearch,
-} from '../../../utils/helpers/localStorage';
-import { fetchApisGet, handlePopup, showAlert } from '../../../utils/helpers';
+import { handlePopup } from '../../../utils/helpers';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
 import api from '../../../constants/api';
-import { BASE_URL_IMAGE } from '../../../utils/globalVariables';
 import Loader from '../../../components/Loader';
 import { useDispatch, useSelector } from 'react-redux';
 import { removeDealResearch, setDealsResearch } from '../../../redux/AuthSlice';
@@ -37,9 +25,9 @@ import { addFavoriteDeal, removeFavoriteDeal } from '../../../utils/helpers/Favo
 import { addItemToCart, getCustomerCart, updateCartItemQuantity } from '../../../utils/helpers/cartapis';
 import { addItemToMYCart, updateMyCartList } from '../../../redux/CartSlice';
 import PopUp from '../../../components/Popup/PopUp';
+import RBSheetGuestUser from '../../../components/BottomSheet/RBSheetGuestUser';
 
 const SearchNearByDeals = ({ navigation, route }) => {
-
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch()
@@ -49,46 +37,23 @@ const SearchNearByDeals = ({ navigation, route }) => {
   const [data, setData] = useState([]);
   const [numColumns, setNumColumns] = useState(2)
   const { favoriteDeals } = useSelector(store => store.favorite);
-  const {  dealsRecentResearch, customer_id, cuisines,showPopUp, popUpColor, PopUpMesage } = useSelector(store => store.store);
-
-
-
-
-
+  const ref_RBSheet = useRef()
+  const {  dealsRecentResearch, customer_id, cuisines,showPopUp, popUpColor, PopUpMesage,Colors, join_as_guest } = useSelector(store => store.store);
   const setCusineNameByItemCusineId = (cusineId) => {
     const cuisineName = cuisines?.filter(item => item?.cuisine_id === cusineId)[0]?.cuisine_name;
 
     return cuisineName;
   }
-
-
-
   const handleRemoveTopSearches = async query => {
     dispatch(removeDealResearch(query))
     // const filter = topSearchesList.filter(e => e != item);
     // setTopSearchesList(filter);
     // removeDealsTopSearch(filter); //also remove item from local storage
   };
-
-  // Simulated search API function
   const searchApi = async query => {
-    // setShowTopSearches(false);
     if (!loading) {
       setLoading(true);
     }
-    // const response = await fetchApisGet(api.search_deal_by_name + query, setLoading, dispatch);
-    // let list = response?.result ? response?.result : [];
-    // console.log(response);
-    
-    // setData(list)
-    // if (response?.result?.length > 0) {
-    //       let found = dealsRecentResearch?.some(item => item == query);
-    //       if (!found) {
-    //         // addDealsTopSearch([...topSearchesList, query]);
-    //         dispatch(setDealsResearch(query))
-    //         // getTopSearches();
-    //       }
-    //     }
     try {
       const response = await fetch(api.search_deal_by_name + query);
       if (!response.ok) {
@@ -101,27 +66,20 @@ const SearchNearByDeals = ({ navigation, route }) => {
       if (json?.result?.length > 0) {
         let found = dealsRecentResearch?.some(item => item == query);
         if (!found) {
-          // addDealsTopSearch([...topSearchesList, query]);
           dispatch(setDealsResearch(query))
-          // getTopSearches();
         }
       }
     } catch (error) {
       console.log('error in search api : ', error);
-      showAlert('Something went wrong');
+      handlePopup(dispatch,'Something went wrong','red');
     } finally {
       setLoading(false);
-      // setShowTopSearches(true);
     }
   };
 
   const add_item_to_cart = async (id, name) => {
-
-    
     let cart = await getCustomerCart(customer_id, dispatch);
     console.log('______cart    :  ', cart?.cart_id);
-
-
     let data = {
       item_id: id,
       cart_id: cart?.cart_id?.toString(),
@@ -129,20 +87,11 @@ const SearchNearByDeals = ({ navigation, route }) => {
       comments: '',
       quantity: 1,
     };
-
-
     await addItemToCart(data, dispatch)
       .then(response => {
         console.log('response ', response);
         if (response?.status == true) {
-          // navigation?.navigate('MyCart');
-          // cart_restaurant_id
-          // dispatch(setCartRestaurantId(restaurantDetails?.restaurant_id));
-          //my_cart
           dispatch(addItemToMYCart(response?.result));
-          // setSelectedVariation(null)
-
-          // ref_RBSheetSuccess?.current?.open();
           handlePopup(dispatch, `${name} is added to cart`, 'green')
         } else {
           handlePopup(dispatch,response?.message, 'red')
@@ -160,8 +109,6 @@ const SearchNearByDeals = ({ navigation, route }) => {
   const handleSearch = text => {
     console.log('text : ', text);
     setSearchQuery(text);
-    // setShowTopSearches(true);
-    // debouncedSearch(text?.trim());
   };
 
   const shortenString = (str) => {
@@ -172,8 +119,6 @@ const SearchNearByDeals = ({ navigation, route }) => {
   }
 
   const handleDealAddToCart = async (deal) => {
-
-
     setItemObj({
       id: deal.deal_id,
       name: deal?.name,
@@ -182,8 +127,6 @@ const SearchNearByDeals = ({ navigation, route }) => {
       id: deal.deal_id,
       name: deal?.name,
     });
-
-
     const filter = my_cart?.filter(
       item => item?.item_id == deal.deal_id,
     );
@@ -195,11 +138,9 @@ const SearchNearByDeals = ({ navigation, route }) => {
       await updateCartItemQuantity(obj, dispatch)
         .then(response => {
           if (response.status === true) {
-            // showAlert(`${deal?.name}'s quantity updated`, 'green')
             handlePopup(dispatch, `${deal?.name}'s quantity updated`, 'green')
           }
         })
-      // also update quantity in redux
       const newData = my_cart?.map(item => {
         if (item?.item_id == deal.deal_id) {
           return {
@@ -211,53 +152,12 @@ const SearchNearByDeals = ({ navigation, route }) => {
         }
       });
       dispatch(updateMyCartList(newData));
-
-
-
     } else {
       add_item_to_cart(deal.deal_id, deal?.name)
-
     }
-    // }
   };
 
   
-
-  // const [isSearch, setIsSearch] = useState(false);
-  // const [filteredData, setFilteredData] = useState([]);
-  // const [topSearchesList, setTopSearchesList] = useState(dealsRecentResearch);
-
-  // console.log(dealsRecentResearch, 'topSearches');
-
-  // const getTopSearches = async () => {
-  //   let list = await getDealsTopSearch();
-  //   console.log('list  :  ', list);
-  //   setTopSearchesList(list);
-  // };
-  // useEffect(() => {
-  //   getTopSearches();
-  // }, []);
-  // const debouncedSearch = debounce(searchApi, 2000);
-
-  // const handleSearch = query => {
-  //   setSearchQuery(query);
-  //   const filteredData = data.filter(item =>
-  //     item?.title?.toLowerCase()?.includes(query?.toLowerCase()),
-  //   );
-  //   setFilteredData(filteredData);
-  // };
-
-  // const handleCloseSearch = async () => {
-  //   setIsSearch(false);
-  //   setFilteredData([]);
-  //   setSearchQuery('');
-  // };
-
-  // const handleRemoveTopSearches = async item => {
-  //   const filter = topSearchesList.filter(e => e != item);
-  //   setTopSearchesList(filter);
-  //   removeDealsTopSearch(filter); //also remove item from local storage
-  // };
 
 
   const isDealFavorite = (id) => {
@@ -277,7 +177,6 @@ const SearchNearByDeals = ({ navigation, route }) => {
         setShowTopSearches(false);
 
       }
-      // Send Axios request here
     }, 2000);
 
     return () => clearTimeout(delayDebounceFn);
@@ -378,8 +277,22 @@ const SearchNearByDeals = ({ navigation, route }) => {
                   });
                 }}
                 isFavorite={fav}
-                heartPress={() => fav ? removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch, showAlert) : addFavoriteDeal(item?.deal_id, customer_id, dispatch, showAlert)}
-                addToCartpress={() => handleDealAddToCart(item)}
+                heartPress={() => {
+                  if (join_as_guest) {
+                    ref_RBSheet.current.open()
+                  } else {
+                    fav ? removeFavoriteDeal(item?.deal_id, customer_id, favoriteDeals, dispatch) : addFavoriteDeal(item?.deal_id, customer_id, dispatch)
+                  }
+                }
+                }
+                addToCartpress={() => {
+                  if (join_as_guest) {
+                    ref_RBSheet.current.open()
+                  } else {
+                    handleDealAddToCart(item)   
+                  }
+                } 
+                 }
                 imageStyle={{
                   width: wp(42),
                   height: hp('16.5%')
@@ -389,34 +302,29 @@ const SearchNearByDeals = ({ navigation, route }) => {
                 priceStyle={{ fontSize: RFPercentage(2.2), color: Colors.primary_color }}
                 iconSize={19}
               />
-                // <FoodCardWithRating
-                //   onPress={() => navigation?.navigate('NearByDealsDetails')}
-                //   title={item?.name}
-                //   // image={item?.image}
-                //   image={
-                //     item?.images?.length > 0
-                //       ? BASE_URL_IMAGE + item?.images[0]
-                //       : ''
-                //   }
-                //   // description={item?.description}
-                //   price={item?.price}
-                //   rating={item?.rating}
-                //   // tag={item?.tag}
-                //   // tag={['Burger', 'Pizza', 'Drinks']}
-                //   tag={cuisineNames ? cuisineNames : []}
-                //   isTagArray={true}
-                //   nextIconWidth={26}
-                //   // cardStyle={{marginHorizontal: 20, marginBottom: 15}}
-                //   showNextButton={true}
-                //   showRating={false}
-                //   priceContainerStyle={{ marginTop: 0 }}
-                // />
+               
               )
             }}
           />
 
         )}
       </ScrollView>
+
+      <RBSheetGuestUser
+        refRBSheet={ref_RBSheet}
+
+        btnText={'OK'}
+        onSignIn={() => {
+          ref_RBSheet?.current?.close();
+          navigation?.popToTop();
+          navigation?.replace('SignIn');
+        }}
+        onSignUp={() => {
+          ref_RBSheet?.current?.close();
+          navigation?.popToTop();
+          navigation?.replace('SignUp');
+        }}
+      />
     </View>
   );
 };

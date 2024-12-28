@@ -13,10 +13,41 @@ import {
 import Feather from 'react-native-vector-icons/Feather';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
-import {Colors, Fonts, Icons} from '../../constants';
+import { Fonts, Icons} from '../../constants';
+import { useSelector } from 'react-redux';
 
 const MenuHeader = ({title, rightIcon}) => {
   const navigation = useNavigation();
+        const  {Colors } = useSelector(store => store.store);
+  
+        const styles = StyleSheet.create({
+          header: {
+            justifyContent: 'center',
+            paddingVertical: 15,
+            paddingBottom: hp(4),
+          },
+          headerView: {
+            width: wp(100),
+            flexDirection: 'row',
+            alignItems: 'center',
+          },
+          iconContainer: {
+            width: wp(20),
+            justifyContent: 'center',
+            alignItems: 'center',
+          },
+          headerTextContainer: {
+            flex: 1,
+          },
+          mainText: {
+            color: Colors.primary_color,
+            // fontFamily: Fonts.PlusJakartaSans_Medium,
+            fontFamily: Fonts.PlusJakartaSans_SemiBold,
+            letterSpacing: 1,
+            fontSize: RFPercentage(2.5),
+            textAlign: 'center',
+          },
+        });
 
   return (
     <View style={styles.header}>
@@ -29,7 +60,6 @@ const MenuHeader = ({title, rightIcon}) => {
         <TouchableOpacity
           onPress={() => navigation?.toggleDrawer()}
           style={styles.iconContainer}>
-          {/* <Feather name="menu" size={hp(3.5)} color={Colors.primary_color} /> */}
           <Icons.MenuActive width={24} />
         </TouchableOpacity>
         <View style={styles.headerTextContainer}>
@@ -45,31 +75,4 @@ const MenuHeader = ({title, rightIcon}) => {
 
 export default MenuHeader;
 
-const styles = StyleSheet.create({
-  header: {
-    justifyContent: 'center',
-    paddingVertical: 15,
-    paddingBottom: hp(4),
-  },
-  headerView: {
-    width: wp(100),
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: wp(20),
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTextContainer: {
-    flex: 1,
-  },
-  mainText: {
-    color: Colors.primary_color,
-    // fontFamily: Fonts.PlusJakartaSans_Medium,
-    fontFamily: Fonts.PlusJakartaSans_SemiBold,
-    letterSpacing: 1,
-    fontSize: RFPercentage(2.5),
-    textAlign: 'center',
-  },
-});
+

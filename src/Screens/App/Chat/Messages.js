@@ -4,62 +4,27 @@ import {
   View,
   FlatList,
   TouchableOpacity,
-  Image,
-  Button,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
-import {Images, Colors, Fonts, Icons} from '../../../constants';
-import {Avatar, Badge} from 'react-native-paper';
+import { Fonts, Icons} from '../../../constants';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import StackHeader from '../../../components/Header/StackHeader';
 import ItemSeparator from '../../../components/Separator/ItemSeparator';
-import CBadge from '../../../components/CBadge';
 import ChatCard from '../../../components/Cards/ChatCard';
 import { io } from 'socket.io-client';
-import { constants } from 'buffer';
 import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { BASE_URL } from '../../../utils/globalVariables';
-import Restaurent from '../../../Assets/svg/restaurent.svg';
-import ChatActive from '../../../Assets/svg/chatActive.svg';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { setContacts } from '../../../redux/AuthSlice';
 const Messages = () => {
-  const {  customer_id, customer_detail, contacts } = useSelector(store => store.store);
+  const {  customer_id, customer_detail, contacts, Colors } = useSelector(store => store.store);
   const navigation = useNavigation()
   const dispatch = useDispatch()
-
-
-  // console.log(customer_detail.rest_id)
-
-
-
-// const socketUrl = 'https://food-delivery-be.caprover-demo.mtechub.com/';
-
-const socketUrl = 'http://192.168.100.239:3017'
-
-// const rest_ID = "res_4074614";
-// const customer_id = 202028; 
-// const rider_id = "rider_1673186"; 
-
-
-// const socketUrl = 'http://192.168.18.120:3017/';
-// const rest_ID = customer_detail.rest_id;
-// const customer_id = 202028; 
-// const rider_id = "rider_1673186"; 
-
-
-  // const [socket, setSocket] = useState(null);
-    // const [message, setMessage] = useState(`Hey testing message from cutomer  (${customer_id}) to restaurent from app`);
-    const [messages, setMessages] = useState([]);
-    const [roomId, setRoomId] = useState(null);
-    // const [contacts, setContacts] = useState([]); // State to hold contacts list
-
-    
 
     // useEffect(() => {
     //     const newSocket = io(socketUrl);
@@ -156,9 +121,7 @@ const socketUrl = 'http://192.168.100.239:3017'
     //     };
     // }, []);
 
-    const contac = { "customer_id": customer_id,  "receiver_id":customer_detail.rest_id, "receiver_type": "restaurent", "restaurant_id": customer_detail.rest_id, "rider_id": null, "room_id": getRoomIdByRestaurantId(customer_detail.rest_id), "sender_id": customer_id, "sender_type": "customer", 'restaurant_name': 'Grill Out' }
 
-console.log(contac);
 
 function getRoomIdByRestaurantId(restaurantId) {
   for (const item of contacts) {
@@ -166,25 +129,33 @@ function getRoomIdByRestaurantId(restaurantId) {
           return item?.room_id; // Return the room_id if the restaurant_id matches
       }
   }
-  return null; // Return null if no match is found
+  return null; 
 }
+function getOrderIdByRestaurantId(restaurantId) {
+  for (const item of contacts) {
+      if (item?.restaurant_id === restaurantId) {
+          return item?.order_id; // Return the room_id if the restaurant_id matches
+      }
+  }
+  return null; 
+}
+
+
+const contac = { "customer_id": customer_id,  "receiver_id":customer_detail.rest_id, "receiver_type": "restaurent", "restaurant_id": customer_detail.rest_id, "rider_id": null, "room_id": getRoomIdByRestaurantId(customer_detail.rest_id), "sender_id": customer_id, "sender_type": "customer", 'restaurant_name': 'Grill Out', order_id: getOrderIdByRestaurantId(customer_detail.rest_id)}
+
+// console.log({contacts});
+
 
 
     useEffect(() => {
       const newSocket = io(BASE_URL);
-      // setSocket(newSocket);
-
-      // Fetch contacts on socket connection
       newSocket.on('connect', () => {
           newSocket.emit('getContacts', { customer_id }); 
       });
-
       // Listen for contacts data
       newSocket.on('contacts', (contactsData) => {
+        
           dispatch(setContacts(contactsData));  
-          // console.log({contactsData});
-          
-          
       });
 
       // Listen for room join confirmation
@@ -257,70 +228,23 @@ function getRoomIdByRestaurantId(restaurantId) {
       // });
 
       // Handle errors
-      
-      
       newSocket.on('error', (error) => {
           console.error('Socket Error:', error.message);
       });
-
       // Cleanup on component unmount
       return () => {
           newSocket.disconnect();
       };
   }, []);
     
-    // const sendMessage = () => {
 
-    //     console.log(roomId, rider_id);
-        
-
-    //     if (message.trim() && roomId) {
-    //         // socket.emit('sendMessage', {
-    //         //     roomId,
-    //         //     sender_type: 'customer',
-    //         //     senderId: customer_id,
-    //         //     message,
-    //         // });
-
-    //         socket.emit('sendMessage', {
-    //             roomId, sender_type: "customer", senderId: customer_id, receiver_type: "restaurant",
-    //             receiverId: rest_ID, message
-    //         });
-
-    //         setMessage('');  // Clear message input after sending
-
-    //         // Update contacts after sending a message
-    //         setContacts((prevContacts) => {
-    //             const updatedContacts = prevContacts.map(contact => {
-    //                 if (contact.room_id === roomId) {
-    //                     return {
-    //                         ...contact,
-    //                         message: message,
-    //                         last_message_time: new Date().toISOString() // Update the last message time
-    //                     };
-    //                 }
-    //                 return contact;
-    //             });
-    //             // Sort contacts to bring the one with the latest message to the top
-    //             return updatedContacts.sort((a, b) => new Date(b.last_message_time) - new Date(a.last_message_time));
-    //         });
-    //     }
-    // };
-
-    // Handle selecting a contact
-  
    
     const handleSelectContact = async (contact) => {
-        // setRoomId(contact.room_id); 
-        // setMessages([]); 
-       
         navigation.navigate('Conversation', {
           contact: contact,
           name: contact?.restaurant_name || contact?.rider_name
         })
     };
-
-
 
 const formatDate = (inputDate) => {
   const now = moment(); 
@@ -335,58 +259,8 @@ const formatDate = (inputDate) => {
   }
 };
 function removeItemsByRestaurantId(restaurantId) {
-  // console.log(restaurantId);
-  
-  // Filter the array to exclude items with the matching restaurant_id
   return contacts.filter(item => item.restaurant_id !== restaurantId);
 }
-
-
-
-
-
-  return (
-    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
-      <StackHeader title={'My Chats'} />
-      <View style={{paddingHorizontal: wp(0),backgroundColor: `${Colors.primary_color}50`,}} >
-
-      
-      <TouchableOpacity style={styles.rowView} onPress={()=> handleSelectContact(contac)} >
-        <Restaurent width={wp(12)} />
-        <Text style={styles.restaurant_name} >Grill Out</Text>
-        <ChatActive width={wp(12)} height={hp(5)} />
-
-      </TouchableOpacity>
-      </View>
-      <FlatList
-        data={removeItemsByRestaurantId(customer_detail.rest_id)}
-        ListHeaderComponent={() => <View style={{height: 20}} />}
-        ItemSeparatorComponent={() => <ItemSeparator />}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: 30}}
-        renderItem={({item, index}) => {
-          return(
-          
-          <ChatCard
-            profile={false}
-            user_name={item?.restaurant_name || item?.rider_name}
-            created_at={formatDate(item?.created_at)}
-            message={item?.message}
-            unread_count={item?.unread_count}
-            onpress={()=> handleSelectContact(item)}
-          />
-        )}}
-      />
-
-
-      {/* <Button title='send' onPress={sendMessage} /> */}
-
-    </View>
-  );
-};
-
-export default Messages;
-
 const styles = StyleSheet.create({
   card: {flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20},
   rowViewSB: {
@@ -429,3 +303,40 @@ const styles = StyleSheet.create({
     
   }
 });
+  return (
+    <View style={{flex: 1, backgroundColor: Colors.secondary_color}}>
+      <StackHeader title={'My Chats'} />
+      <View style={{paddingHorizontal: wp(0),backgroundColor: `${Colors.primary_color}50`,}} >
+      <TouchableOpacity style={styles.rowView} onPress={()=> handleSelectContact(contac)} >
+        <Icons.Restaurent width={wp(12)} />
+        <Text style={styles.restaurant_name} >Grill Out</Text>
+        <Icons.ChatActive width={wp(12)} height={hp(5)} />
+
+      </TouchableOpacity>
+      </View>
+      <FlatList
+        data={removeItemsByRestaurantId(customer_detail.rest_id)}
+        ListHeaderComponent={() => <View style={{height: 20}} />}
+        ItemSeparatorComponent={() => <ItemSeparator />}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: 30}}
+        renderItem={({item, index}) => {
+          return(
+          
+          <ChatCard
+            profile={false}
+            user_name={item?.restaurant_name || item?.rider_name}
+            created_at={formatDate(item?.created_at)}
+            message={item?.message}
+            unread_count={item?.unread_count}
+            onpress={()=> handleSelectContact(item)}
+          />
+        )}}
+      />
+    </View>
+  );
+};
+
+export default Messages;
+
+

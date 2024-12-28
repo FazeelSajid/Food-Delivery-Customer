@@ -1,17 +1,17 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import {Modal, Portal, Button, PaperProvider} from 'react-native-paper';
-
-import Lottie from 'lottie-react-native';
+import {Modal} from 'react-native-paper';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import CButton from '../Buttons/CButton';
-import {Colors, Fonts, Images, Icons} from '../../constants';
+import {Fonts} from '../../constants';
+import { useSelector } from 'react-redux';
 
 const ConfirmationModal = ({visible, setVisible, onOK, onCancel}) => {
+    const  {Colors } = useSelector(store => store.store);
   return (
     <Modal
       visible={visible}
@@ -71,4 +71,3 @@ const ConfirmationModal = ({visible, setVisible, onOK, onCancel}) => {
 
 export default ConfirmationModal;
 
-const styles = StyleSheet.create({});

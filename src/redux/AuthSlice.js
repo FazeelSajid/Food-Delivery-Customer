@@ -60,7 +60,7 @@ const initialState = {
       secondary_button_text: "#FF5722",
       secondary_button_border: "#FF5722",
     },
-    primary_color: "#FF5722",
+    primary_color: "green",
     primary_text: '#0A212B',
     secondary_text: '#56585B',
     secondary_color: '#FFFFFF',

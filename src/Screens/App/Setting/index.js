@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { Colors, Fonts, Icons } from '../../../constants';
+import { Fonts, Icons } from '../../../constants';
 import MenuHeader from '../../../components/Header/MenuHeader';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -27,16 +27,14 @@ import { resetState } from '../../../redux/AuthSlice';
 import PopUp from '../../../components/Popup/PopUp';
 
 const Setting = ({ navigation, route }) => {
-  const { join_as_guest, customer_id, showPopUp, popUpColor, PopUpMesage } = useSelector(store => store.store);
+  const { join_as_guest, customer_id, showPopUp, popUpColor, PopUpMesage, Colors } = useSelector(store => store.store);
   const ref_RBSheetGuestUser = useRef(null);
   const dispatch = useDispatch();
-
   const { customer_detail } = useSelector(store => store.store);
   const ref_RBSheet = useRef();
   const ref_RBSheetDELETE = useRef();
   const [isNotificationEnable, setIsNotificationEnable] = useState(false);
   const [isEmailEnable, setIsEmailEnable] = useState(false);
-
   const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
@@ -202,6 +200,24 @@ const Setting = ({ navigation, route }) => {
     }, []),
   );
 
+  const styles = StyleSheet.create({
+    card: {
+      backgroundColor: `${Colors.secondary_text}10`,
+      paddingHorizontal: 18,
+      paddingVertical: 15,
+      borderRadius: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginVertical: 10,
+    },
+    cardTitle: {
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+    },
+    cardIconSize: 25,
+  });
+  
   return (
     <View style={{ flex: 1, backgroundColor: Colors.secondary_color }}>
       {join_as_guest ? (
@@ -455,20 +471,3 @@ const Setting = ({ navigation, route }) => {
 
 export default Setting;
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: `${Colors.secondary_text}10`,
-    paddingHorizontal: 18,
-    paddingVertical: 15,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginVertical: 10,
-  },
-  cardTitle: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-  },
-  cardIconSize: 25,
-});

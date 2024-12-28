@@ -9,9 +9,11 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import CButton from '../Buttons/CButton';
-import {Colors, Fonts, Images, Icons} from '../../constants';
+import {Fonts, Images, Icons} from '../../constants';
+import { useSelector } from 'react-redux';
 
 const SuccessModal = ({visible, setVisible, onOK, title, description}) => {
+    const  {Colors } = useSelector(store => store.store);
   return (
     <Modal
       visible={visible}
@@ -28,7 +30,6 @@ const SuccessModal = ({visible, setVisible, onOK, title, description}) => {
           height: 150,
           width: 150,
           marginBottom: 10,
-          //   aspectRatio: 1,
         }}>
         <Lottie
           source={Images.success_check}
@@ -66,4 +67,3 @@ const SuccessModal = ({visible, setVisible, onOK, title, description}) => {
 
 export default SuccessModal;
 
-const styles = StyleSheet.create({});

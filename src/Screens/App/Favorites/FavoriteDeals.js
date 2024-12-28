@@ -1,10 +1,6 @@
 import {StyleSheet, View, FlatList} from 'react-native';
 import React, {memo, useState, useEffect} from 'react';
-import {Colors, Images} from '../../../constants';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../../../constants/api';
-import {BASE_URL_IMAGE} from '../../../utils/globalVariables';
 import Loader from '../../../components/Loader';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
 import {handlePopup} from '../../../utils/helpers';
@@ -18,12 +14,11 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import { RFPercentage } from 'react-native-responsive-fontsize';
-import PopUp from '../../../components/Popup/PopUp';
 
 const FavoriteDeals = ({}) => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
-  const {customer_id, showPopUp, popUpColor, PopUpMesage} = useSelector(store => store.store)
+  const {customer_id, showPopUp, popUpColor, PopUpMesage, Colors} = useSelector(store => store.store)
   const { favoriteDeals} = useSelector(store => store.favorite);
   const dispatch = useDispatch()
   const [itemObj, setItemObj] = useState({})
@@ -158,7 +153,6 @@ const FavoriteDeals = ({}) => {
       quantity: 1,
     };
 
-    console.log('data   :  ', data);
 
     await addItemToCart(data, dispatch)
       .then(response => {
@@ -182,7 +176,7 @@ const FavoriteDeals = ({}) => {
   useFocusEffect(
     React.useCallback(() => {
       if(favoriteDeals.length === 0){
-        getFavoriteDeals(customer_id, dispatch);
+        getFavoriteDeals(customer_id, dispatch, setLoading);
       }
       
     }, []),

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Platform, Text, TouchableOpacity, View } from 'react-native';
-import { styles } from './Styles';
+import { getStyles,  } from './Styles';
 import CustomButton from '../../../components/Buttons/customButton';
 import Onbording1 from '../../../Assets/svg/Onboarding1.svg';
 import Onbording2 from '../../../Assets/svg/Onboarding2.svg';
@@ -12,7 +12,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { Colors, Fonts } from '../../../constants';
+import {  Fonts } from '../../../constants';
 import { useDispatch, useSelector } from 'react-redux';
 import { setJoinAsGuest, setSignUpWith } from '../../../redux/AuthSlice';
 import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
@@ -25,7 +25,8 @@ const Onboarding = ({ navigation }) => {
   const [currentPage, setCurrentPage] = useState(0); // Track the current page index
   const pagerRef = useRef(null); // Ref to control pager
   const dispatch = useDispatch()
-  const { signUpWith } = useSelector(store => store.store)
+  const { signUpWith, Colors } = useSelector(store => store.store)
+      const styles = getStyles(Colors)
 
   const btmSheetRef = useRef()
 
@@ -92,7 +93,6 @@ const Onboarding = ({ navigation }) => {
 
 
   const onPageSelected = (e) => {
-    // Update the page when the user swipes
     setCurrentPage(e.nativeEvent.position);
 
   };
@@ -135,7 +135,7 @@ const Onboarding = ({ navigation }) => {
           style={[{ height: hp(63), backgroundColor: 'white' }, lastPage && { marginTop: wp(7) }]}
           initialPage={0}
           onPageSelected={onPageSelected}
-          ref={pagerRef} // Reference to control PagerView programmatically
+          ref={pagerRef} 
 
         >
           {pages.map((page, index) => (
@@ -156,51 +156,23 @@ const Onboarding = ({ navigation }) => {
          {renderPaginationDots()}
       </View>
 
-      {/* Continue button */}
 
       {!lastPage ? <View style={{ flex: 1, paddingHorizontal: wp(10), flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
        
 
-        {/* <CustomButton svg={<ChevronRightOrange />} containerStyle={{ paddingBottom: hp(8.5) }} onPress={handleContinue} /> */}
 
         <CButton
           title="Continue"
           width={wp(85)}
-          // height={hp(6)}
-          // transparent={true}
          onPress={handleContinue} 
           bgColor={Colors.button.primary_button}
-          // leftIcon={<ChevronRightOrange />}
           
         />
 
       </View> :
         <View >
          
-            
-             {/* <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingHorizontal: 20,
-            width: wp(100),
-            justifyContent: 'space-between',
-          }}>
-          <CButton
-            title="SIGN IN"
-            // height={hp(5.5)}
-            marginTop={hp(15)}
-            width={wp(38)}
-            onPress={() => navigation.navigate('SignIn')}
-          />
-          <CButton
-            title="SIGN UP"
-            // height={hp(5.7)}
-            marginTop={hp(15)}
-            width={wp(38)}
-            onPress={() => showBtmSheet()}
-          />
-        </View> */}
+         
         <CButton
           title="Sign Up"
           width={wp(85)}
@@ -236,7 +208,6 @@ const Onboarding = ({ navigation }) => {
               </View>
 
               <TouchableOpacity style={styles.rowView} onPress={() =>toggleSelection('phone')} >
-                {/* <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={signUpWith === 'phone' ? 'checked' : 'unchecked'} onPress={() =>toggleSelection('phone')}/> */}
                 <Text
                   style={{
                     color: Colors.secondary_text,
@@ -250,7 +221,6 @@ const Onboarding = ({ navigation }) => {
               </TouchableOpacity  >
               <ItemSeparator />
               <TouchableOpacity style={styles.rowView} onPress={() => toggleSelection('email')}>
-                {/* <RadioButton color={Colors.primary_color} uncheckedColor={Colors.primary_color} status={signUpWith === 'email' ? 'checked' : 'unchecked'} onPress={() => toggleSelection('email')} /> */}
                 <Text
                   style={{
                     color: Colors.secondary_text,

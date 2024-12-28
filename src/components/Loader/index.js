@@ -1,12 +1,13 @@
 import {StyleSheet, Text, View, ActivityIndicator, Modal} from 'react-native';
 import React from 'react';
-import {Colors} from '../../constants';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
+import { useSelector } from 'react-redux';
 
 const Loader = ({loading, size, color, bgColor}) => {
+    const  {Colors } = useSelector(store => store.store);
   return (
     <Modal visible={loading} transparent={true}>
       <View

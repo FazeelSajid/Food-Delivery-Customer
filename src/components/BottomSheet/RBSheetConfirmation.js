@@ -6,16 +6,16 @@ import {
 } from 'react-native';
 import React from 'react';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import MapView, {PROVIDER_GOOGLE} from 'react-native-maps';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
-import {Fonts, Images, Colors} from '../../constants';
+import {Fonts, Images} from '../../constants';
 import Lottie from 'lottie-react-native';
 import CButton from '../Buttons/CButton';
+import { useSelector } from 'react-redux';
 const RBSheetConfirmation = ({
   refRBSheet,
   content,
@@ -33,6 +33,7 @@ const RBSheetConfirmation = ({
   okBtnColor
 }) => {
   const navigation = useNavigation();
+    const  {Colors } = useSelector(store => store.store);
 
   return (
     <View style={{flex: 1}}>
@@ -52,13 +53,7 @@ const RBSheetConfirmation = ({
         }}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={{width: wp(87), alignItems: 'center'}}>
-            {/* <View
-              style={{
-                height: 150,
-                width: 150,
-                marginBottom: 10,
-                //   aspectRatio: 1,
-              }}> */}
+           
 
                 {
                   svg ? <View style={{
@@ -86,7 +81,6 @@ const RBSheetConfirmation = ({
                 }
 
             
-            {/* </View> */}
             <Text
               style={{
                 color: textColor ? textColor : '#1D1D20',

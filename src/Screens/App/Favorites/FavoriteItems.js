@@ -1,10 +1,7 @@
 import {StyleSheet, View, FlatList, Text, TouchableOpacity} from 'react-native';
 import React, {useState, memo, useEffect, useRef} from 'react';
-import {Colors, Fonts, Images} from '../../../constants';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Fonts, Images} from '../../../constants';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import api from '../../../constants/api';
-import {BASE_URL_IMAGE} from '../../../utils/globalVariables';
 import Loader from '../../../components/Loader';
 import {handlePopup} from '../../../utils/helpers';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
@@ -21,13 +18,12 @@ import { RadioButton } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { addItemToMYCart, updateMyCartList } from '../../../redux/CartSlice';
 import { addItemToCart, getCustomerCart, updateCartItemQuantity } from '../../../utils/helpers/cartapis';
-import PopUp from '../../../components/Popup/PopUp';
 
 
 const FavoriteItems = ({}) => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
-  const {customer_id} = useSelector(store => store.store)
+  const {customer_id, Colors} = useSelector(store => store.store)
   const { favoriteItems} = useSelector(store => store.favorite);
   const dispatch = useDispatch()
   const btmSheetRef = useRef()
@@ -35,59 +31,11 @@ const FavoriteItems = ({}) => {
   const {  my_cart } = useSelector(store => store.cart);
   const [selectedVariation, setSelectedVariation] = useState(null);
 
-  // console.log(customer_id);
-
-  // const [data, setData] = useState(favoriteItems);
-
-  // const removeFavorite = async id => {
-  //   setLoading(true);
-  //   // favourite_item_id
-
-  //   fetch(api.delete_item_from_favorites + id, {
-  //     method: 'DELETE',
-  //     // body: JSON.stringify(data),
-  //     headers: {
-  //       'Content-type': 'application/json; charset=UTF-8',
-  //     },
-  //   })
-  //     .then(response => response.json())
-  //     .then(async response => {
-  //       console.log('response : ', response);
-  //       if (response?.status == true) {
-  //         const filter = data.filter(item => item?.favourite_item_id != id);
-  //         setData(filter);
-  //       } else {
-  //         handlePopup(dispatch,response?.message);
-  //       }
-  //     })
-  //     .catch(err => {
-  //       console.log('Error   ', err);
-  //       handlePopup(dispatch,'Something Went Wrong');
-  //     })
-  //     .finally(() => {
-  //       setLoading(false);
-  //     });
-  // };
-
-  // const getData = async () => {
-  //   setLoading(true);
-  //   // let customer_id = await AsyncStorage.getItem('customer_id');
-  //   console.log(customer_id);
-  //   fetch(api.get_all_favorite_items + `?customer_id=${customer_id}`)
-  //     .then(response => response.json())
-  //     .then(response => {
-  //       let list = response?.result ? response?.result : [];
-  //       setData(list);
-  //     })
-  //     .catch(err => console.log('error : ', err))
-  //     .finally(() => setLoading(false));
-  // };
-
 
   useFocusEffect(
     React.useCallback(() => {
       if (favoriteItems.length === 0) {
-        getFavoriteItem(customer_id, dispatch);
+        getFavoriteItem(customer_id, dispatch, setLoading);
       }
     }, []),
   );
@@ -139,7 +87,6 @@ const FavoriteItems = ({}) => {
            if (response.status === true) {
            
             handlePopup(dispatch,`${itemObj.name} quantity updated`, 'green')
-              // also update quantity in redux
               const newData = my_cart?.map(item => {
                 if (item?.item_id == item_id) {
                   return {
@@ -204,6 +151,33 @@ const FavoriteItems = ({}) => {
         // setLoading(false)
       });
   };
+
+  const styles = StyleSheet.create({
+    variationText: {
+      fontSize: RFPercentage(1.6),
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Medium,
+    },
+    rowViewSB: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 10,
+  
+    },
+    variationTxt: {
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      fontSize: RFPercentage(1.7),
+      marginBottom: hp(1)
+    },
+    rowView: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: wp(45),
+      marginLeft: wp(3)
+    },
+  })
   return (
     <View style={{flex: 1}}>
       <Loader loading={loading} />
@@ -277,32 +251,6 @@ const FavoriteItems = ({}) => {
 };
 
 
-const styles = StyleSheet.create({
-  variationText: {
-    fontSize: RFPercentage(1.6),
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Medium,
-  },
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
 
-  },
-  variationTxt: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(1.7),
-    marginBottom: hp(1)
-  },
-  rowView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    // justifyContent:'space-between',
-    width: wp(45),
-    marginLeft: wp(3)
-  },
-})
 
 export default memo(FavoriteItems);

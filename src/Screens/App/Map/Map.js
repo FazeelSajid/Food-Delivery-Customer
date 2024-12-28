@@ -4,8 +4,7 @@ import MapView, { Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Geocoder from 'react-native-geocoding';  // Import Geocoder for reverse geocoding
 import { googleMapKey } from '../../../utils/globalVariables';
-import { Fonts, Colors } from '../../../constants';
-
+import { Fonts } from '../../../constants';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
@@ -42,9 +41,8 @@ const Map = ({navigation}) => {
     const [label, setLabel] = useState()
     const [formErrors, setFormErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false)
-    const {customer_id, showPopUp, popUpColor, PopUpMesage, restautantDetails} = useSelector(store => store.store)
+    const {customer_id, showPopUp, popUpColor, PopUpMesage, restautantDetails, Colors} = useSelector(store => store.store)
 
-    // console.log(customer_id, 'id');
     
  
 
@@ -71,18 +69,10 @@ const Map = ({navigation}) => {
           return null; // or handle error based on your app logic
         }
       };
-      
-    // Example usage:
-   
-    
-
 useEffect(()=>{
     getCurrentLocatin()
 },[])
-
-
     const btmSheetRef = useRef()
-
     const showBtmSheet = () => {
         btmSheetRef?.current?.open()
     }
@@ -90,7 +80,6 @@ useEffect(()=>{
         btmSheetRef?.current?.close()
         clearFields()
     }
-
     const getCurrentLocatin = async () => {
         const { latitude, longitude, address, shortAddress : shortAdress } = await getCurrentLocation()
 
@@ -153,7 +142,6 @@ useEffect(()=>{
         const { name} = event.nativeEvent;
 
         const namee = extractEnglishWords(name)
-        console.log(namee);
 
         // Get the address using reverse geocoding
         const address = await getAddressFromCoordinates(latitude, longitude);
@@ -207,11 +195,7 @@ useEffect(()=>{
             name: name
         });
 
-        // Show the popup with the address, latitude, and longitude
-        // Alert.alert(
-        //   "Selected Location",
-        //   `Address: ${address}\nLatitude: ${lat}\nLongitude: ${lng}`
-        // );
+      
         showBtmSheet()
     };
 
@@ -306,6 +290,47 @@ useEffect(()=>{
         }
     }
 
+    const styles = StyleSheet.create({
+        map: {
+            ...StyleSheet.absoluteFillObject,
+        },
+        title: {
+            fontSize: 18,
+            textAlign: 'center',
+            marginVertical: 10,
+        },
+        rbSheetHeading: {
+            color: Colors.primary_text,
+            fontFamily: Fonts.PlusJakartaSans_Bold,
+            fontSize: RFPercentage(2),
+        },
+        rowViewSB1: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 20,
+            paddingHorizontal: 10,
+        },
+        rowView: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        currentLocationButton: {
+            position: 'absolute',
+            bottom: 80,
+            right: 20,
+            backgroundColor: Colors.primary_color,
+            borderRadius: 50,
+            padding: 8,
+        },
+        errorText: {
+            color: 'red',
+            fontSize: wp(3.5),
+            marginBottom: hp(1),
+            marginLeft: wp(3)
+        },
+    });
+    
     return (
         <View style={{ flex: 1 }}>
             <Text style={styles.title}>Map with Address Selection</Text>
@@ -446,44 +471,3 @@ useEffect(()=>{
 };
 
 export default Map;
-
-const styles = StyleSheet.create({
-    map: {
-        ...StyleSheet.absoluteFillObject,
-    },
-    title: {
-        fontSize: 18,
-        textAlign: 'center',
-        marginVertical: 10,
-    },
-    rbSheetHeading: {
-        color: Colors.primary_text,
-        fontFamily: Fonts.PlusJakartaSans_Bold,
-        fontSize: RFPercentage(2),
-    },
-    rowViewSB1: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-        paddingHorizontal: 10,
-    },
-    rowView: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    currentLocationButton: {
-        position: 'absolute',
-        bottom: 80,
-        right: 20,
-        backgroundColor: Colors.primary_color,
-        borderRadius: 50,
-        padding: 8,
-    },
-    errorText: {
-        color: 'red',
-        fontSize: wp(3.5),
-        marginBottom: hp(1),
-        marginLeft: wp(3)
-    },
-});

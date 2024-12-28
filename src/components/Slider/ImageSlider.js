@@ -1,13 +1,14 @@
 import {StyleSheet, View, Image} from 'react-native';
 import React from 'react';
-import {Colors} from '../../constants';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import {SwiperFlatList} from 'react-native-swiper-flatlist';
 import { BASE_URL_IMAGE } from '../../utils/globalVariables';
+import { useSelector } from 'react-redux';
 const ImageSlider = ({data, marginBottom}) => {
+          const  {Colors } = useSelector(store => store.store)
   const styles = StyleSheet.create({
     imageCard: {
       width: wp(90),

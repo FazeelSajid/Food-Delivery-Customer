@@ -3,30 +3,21 @@ import {
   Text,
   View,
   ScrollView,
-  Image,
-  ImageBackground,
   TouchableOpacity,
-  FlatList,
 } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
-import { Colors, Icons, Images, Fonts } from '../../../constants';
-import MenuHeader from '../../../components/Header/MenuHeader';
+import { Icons, Images, Fonts } from '../../../constants';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-import { SwipeListView } from 'react-native-swipe-list-view';
 import CButton from '../../../components/Buttons/CButton';
 import CartSwipeListView from '../../../components/Lists/CartSwipeListView';
-import PriceText from '../../../components/Text';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
-import CInput from '../../../components/TextInput/CInput';
 import { useKeyboard } from '../../../utils/UseKeyboardHook';
 import StackHeader from '../../../components/Header/StackHeader';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getCartItems,
   getCustomerCart,
@@ -35,20 +26,15 @@ import {
 } from '../../../utils/helpers/cartapis';
 
 import Loader from '../../../components/Loader';
-import { getRestaurantDetail, handlePopup, showAlert } from '../../../utils/helpers';
+import {  handlePopup } from '../../../utils/helpers';
 import { useFocusEffect } from '@react-navigation/native';
-import { BASE_URL_IMAGE } from '../../../utils/globalVariables';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addToCart,
-  removeItemFromMyCart,
   setCartRestaurantId,
-  setOrderComment,
   setSelectedPaymentType,
   updateMyCartList,
 } from '../../../redux/CartSlice';
-import { getEstimatedDeliveryTime } from '../../../utils/helpers/location';
-import { getShippingAddress } from '../../../utils/helpers/localStorage';
 import PopUp from '../../../components/Popup/PopUp';
 import { setBill } from '../../../redux/AuthSlice';
 import api from '../../../constants/api';
@@ -168,7 +154,7 @@ const MyCart = ({ navigation, route }) => {
   const { cart_restaurant_id, my_cart, cart, selected_payment_type,
     selected_payment_string } = useSelector(store => store.cart);
 
-  const { customer_id, showPopUp, popUpColor, PopUpMesage, promos, Bill, location } = useSelector(store => store.store)
+  const { customer_id, showPopUp, popUpColor, PopUpMesage, promos, Bill, location, Colors } = useSelector(store => store.store)
   const [selectedItem, setSelectedItem] = useState()
   const [itemLoading, setItemLoading] = useState()
   const [checkOutLoading, setCheckOutLoading] = useState()
@@ -187,7 +173,6 @@ const MyCart = ({ navigation, route }) => {
     }
   }, [keyboardHeight]);
 
-  // console.log({selected_payment_type});
 
   
 
@@ -419,6 +404,115 @@ const MyCart = ({ navigation, route }) => {
       get_Cart_Items();
     }, []),
   );
+
+  const styles = StyleSheet.create({
+    itemView: {
+      marginVertical: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: `${Colors.secondary_text}20`,
+      padding: 10,
+      paddingHorizontal: 10,
+      borderRadius: 10,
+      overflow: 'hidden',
+    },
+    itemCard: {
+      marginVertical: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      borderRadius: 10,
+      overflow: 'hidden',
+      width: wp(90),
+      alignSelf: 'center',
+    },
+    imageContainer1: {
+      width: 70,
+      height: 70,
+      borderRadius: 10,
+      overflow: 'hidden',
+      backgroundColor: `${Colors.primary_color}30`,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    imageContainer: {
+      width: 60,
+      height: 60,
+      borderRadius: 10,
+      overflow: 'hidden',
+      backgroundColor: `${Colors.primary_color}30`,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    textContainer: {
+      marginLeft: 15,
+      flex: 1,
+    },
+    image: {
+      height: '100%',
+      width: '100%',
+      resizeMode: 'cover',
+    },
+   
+    title: {
+      color: Colors.primary_text,
+      fontSize: RFPercentage(2),
+      fontFamily: Fonts.Inter_SemiBold,
+      lineHeight: 25,
+    },
+  
+    rowViewSB: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    rowView: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    rowViewSB1: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 20,
+      paddingHorizontal: 10,
+    },
+    rbSheetHeading: {
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+      fontSize: RFPercentage(1.9),
+    },
+    btmsheettext: {
+      color: Colors.primary_text,
+      fontFamily: Fonts.PlusJakartaSans_Regular,
+      marginLeft: wp(5),
+      fontSize: RFPercentage(1.9),
+    },
+    countText: {
+      color: Colors.primary_text,
+      marginHorizontal: 8,
+      fontFamily: Fonts.PlusJakartaSans_Bold,
+    },
+  
+    rowBack: {
+      alignItems: 'center',
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginHorizontal: wp(1),
+    },
+    backRightBtn: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'absolute',
+      width: wp(15),
+      height: hp(6.7),
+      borderRadius: wp(2),
+    },
+    backRightBtnRight: {
+      right: 0,
+    },
+  });
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.secondary_color }}>
@@ -672,114 +766,7 @@ const MyCart = ({ navigation, route }) => {
 
 export default MyCart;
 
-const styles = StyleSheet.create({
-  itemView: {
-    marginVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: `${Colors.secondary_text}20`,
-    padding: 10,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  itemCard: {
-    marginVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    overflow: 'hidden',
-    width: wp(90),
-    alignSelf: 'center',
-  },
-  imageContainer1: {
-    width: 70,
-    height: 70,
-    borderRadius: 10,
-    overflow: 'hidden',
-    backgroundColor: `${Colors.primary_color}30`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  imageContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-    overflow: 'hidden',
-    backgroundColor: `${Colors.primary_color}30`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  textContainer: {
-    marginLeft: 15,
-    flex: 1,
-  },
-  image: {
-    height: '100%',
-    width: '100%',
-    resizeMode: 'cover',
-  },
- 
-  title: {
-    color: Colors.primary_text,
-    fontSize: RFPercentage(2),
-    fontFamily: Fonts.Inter_SemiBold,
-    lineHeight: 25,
-  },
 
-  rowViewSB: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  rowView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  rowViewSB1: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  rbSheetHeading: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-    fontSize: RFPercentage(1.9),
-  },
-  btmsheettext: {
-    color: Colors.primary_text,
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-    marginLeft: wp(5),
-    fontSize: RFPercentage(1.9),
-  },
-  countText: {
-    color: Colors.primary_text,
-    marginHorizontal: 8,
-    fontFamily: Fonts.PlusJakartaSans_Bold,
-  },
-
-  rowBack: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginHorizontal: wp(1),
-  },
-  backRightBtn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
-    width: wp(15),
-    height: hp(6.7),
-    borderRadius: wp(2),
-  },
-  backRightBtnRight: {
-    right: 0,
-  },
-});
 
 // import {
 //   StyleSheet,

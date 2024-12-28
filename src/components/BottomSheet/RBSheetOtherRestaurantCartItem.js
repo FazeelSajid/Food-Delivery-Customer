@@ -14,9 +14,10 @@ import {
 } from 'react-native-responsive-screen';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
-import {Fonts, Icons, Images, Colors} from '../../constants';
+import {Fonts, Icons, Images} from '../../constants';
 import Lottie from 'lottie-react-native';
 import CButton from '../Buttons/CButton';
+import { useSelector } from 'react-redux';
 const RBSheetOtherRestaurantCartItem = ({
   refRBSheet,
   content,
@@ -34,6 +35,7 @@ const RBSheetOtherRestaurantCartItem = ({
   onSignUp,
 }) => {
   const navigation = useNavigation();
+  const  {Colors } = useSelector(store => store.store);
 
   return (
     <View style={{flex: 1}}>
@@ -125,4 +127,3 @@ const RBSheetOtherRestaurantCartItem = ({
 
 export default RBSheetOtherRestaurantCartItem;
 
-const styles = StyleSheet.create({});

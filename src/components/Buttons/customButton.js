@@ -1,12 +1,8 @@
 
 
 import {StyleSheet, Text, View, Pressable, Image} from 'react-native';
-import React, {Children} from 'react';
+import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
 import Loader from '../Loader copy/loader';
 
 const CustomButton = ({

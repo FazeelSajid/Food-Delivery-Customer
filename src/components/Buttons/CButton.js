@@ -11,7 +11,8 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {Colors, Fonts} from '../../constants';
+import {Fonts} from '../../constants';
+import { useSelector } from 'react-redux';
 
 const CButton = ({
   title = '',
@@ -35,7 +36,28 @@ const CButton = ({
   borderColor
 }) => {
   let isDarkMode = false;
-  // console.log({marginTop});
+    const  {Colors } = useSelector(store => store.store);
+  
+
+    const styles = StyleSheet.create({
+      btn: {
+        backgroundColor: Colors.button.primary_button,
+        // padding: hp(2),
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: wp(8),
+        marginTop: hp(3),
+        alignSelf: 'center',
+        flexDirection: 'row',
+      },
+      btnText: {
+        color: Colors.button.primary_button_text,
+        fontSize: 14,
+        fontWeight: '500',
+        marginHorizontal: wp(3),
+        fontFamily: Fonts.PlusJakartaSans_Regular
+      },
+    });
   
   return (
     <TouchableOpacity
@@ -80,7 +102,7 @@ const CButton = ({
             : color
             ? color
             : isDarkMode
-            ? Colors.button.primary_button_text
+            ? Colors.button.secondary_button_text
             : Colors.button.primary_button_text,
           fontSize: txtSize,
           // textTransform: 'uppercase',
@@ -106,22 +128,4 @@ const CButton = ({
 
 export default CButton;
 
-const styles = StyleSheet.create({
-  btn: {
-    backgroundColor: Colors.button.primary_button,
-    // padding: hp(2),
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: wp(8),
-    marginTop: hp(3),
-    alignSelf: 'center',
-    flexDirection: 'row',
-  },
-  btnText: {
-    color: Colors.button.primary_button_text,
-    fontSize: 14,
-    fontWeight: '500',
-    marginHorizontal: wp(3),
-    fontFamily: Fonts.PlusJakartaSans_Regular
-  },
-});
+

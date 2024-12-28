@@ -1,6 +1,5 @@
 import { Keyboard, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useRef, useState } from 'react'
-import { Colors } from '../../../constants'
 import StackHeader from '../../../components/Header/StackHeader'
 import { useDispatch, useSelector } from 'react-redux'
 import CInput from '../../../components/TextInput/CInput'
@@ -19,7 +18,7 @@ import { setPassword } from '../../../redux/AuthSlice'
 
 const UpdatePassord = ({ navigation }) => {
     const dispatch = useDispatch();
-    const { join_as_guest, password, customer_detail } = useSelector(store => store.store);
+    const { join_as_guest, password, customer_detail, Colors } = useSelector(store => store.store);
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -106,6 +105,7 @@ const UpdatePassord = ({ navigation }) => {
         return true;
     };
 
+    
 
 
     const handleUpdatePassword = () => {
@@ -143,6 +143,19 @@ const UpdatePassord = ({ navigation }) => {
                 });
         }
     };
+
+    const styles = StyleSheet.create({
+        container: {
+            flexGrow: 1, backgroundColor: Colors.secondary_color
+        },
+        errorText: {
+            color: 'red',
+            fontSize: RFPercentage(1.5),
+            marginBottom: wp(3),
+            marginLeft: wp(8),
+            // marginTop: 2
+        }
+    })
 
     return (
         <View style={styles.container} >
@@ -249,15 +262,3 @@ const UpdatePassord = ({ navigation }) => {
 
 export default UpdatePassord
 
-const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1, backgroundColor: Colors.secondary_color
-    },
-    errorText: {
-        color: 'red',
-        fontSize: RFPercentage(1.5),
-        marginBottom: wp(3),
-        marginLeft: wp(8),
-        // marginTop: 2
-    }
-})

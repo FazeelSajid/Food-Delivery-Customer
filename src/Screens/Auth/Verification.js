@@ -21,7 +21,7 @@ import STYLE from './STYLE';
 import RBSheetSuccess from '../../components/BottomSheet/RBSheetSuccess';
 import {useKeyboard} from '../../utils/UseKeyboardHook';
 import {firebase} from '@react-native-firebase/auth';
-import {handlePopup, showAlert, showAlertLongLength} from '../../utils/helpers';
+import {handlePopup, } from '../../utils/helpers';
 import api from '../../constants/api';
 import Loader from '../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -66,75 +66,6 @@ const Verification = ({navigation, route}) => {
     }
   };
 
-  // const handleSendOTPCode = () => {
-  //   console.log('phone to send code : ', route?.params?.phone_no);
-  //   if (route?.params?.phone_no) {
-  //     setLoader(true);
-  //     firebase
-  //       .auth()
-  //       .signInWithPhoneNumber(route?.params?.phone_no)
-  //       .then(response => {
-  //         console.log('confirmResult  :  ', response);
-  //         setConfirmResult(response);
-  //         setTimeout(() => refOTP.current.focusField(0), 250);
-  //       })
-  //       .catch(error => {
-  //         showAlert(error.message);
-  //         console.log(error,'error');
-  //       })
-  //       .finally(() => setLoader(false));
-  //   }
-  // };
-
-  // const handleVerifyCode = async () => {
-  //   console.log('handleVerifyCode________++++++++++');
-  //   // if (validate()) {
-  //   // navigation.replace('ResetPassword');
-  //   // }
-  //   // ref_RBSheet?.current?.open();
-  //   if (validate()) {
-  //     try {
-  //       setLoading(true);
-  //       await confirmResult
-  //         .confirm(otpCode)
-  //         .then(user => {
-  //           console.log('user :  ', user);
-  //           //
-  //           if (route?.params?.phone_no == '+11234567890') {
-  //             ref_RBSheet?.current?.open();
-  //           } else {
-  //             updateVerificationStatus();
-  //           }
-  //         })
-  //         .catch(error => {
-  //           const {code, message} = error;
-  //           console.log({code, message});
-  //           let messageText = '';
-  //           if (code == 'auth/too-many-requests') {
-  //             messageText =
-  //               'We have blocked all requests from this device due to unusual activity. Try again later.';
-  //           } else if (code == 'auth/invalid-verification-code') {
-  //             messageText =
-  //               'The verification code from SMS/TOTP is invalid. Please check and enter the correct verification code again.';
-  //           } else if (code == 'auth/session-expired') {
-  //             messageText =
-  //               'The sms code has expired. Please re-send the verification code to try again.';
-  //           } else {
-  //             messageText = 'Something went wrong';
-  //           }
-  //           showAlertLongLength(messageText, 'red', 3);
-  //           setLoading(false);
-  //         });
-  //     } catch (error) {
-  //       setLoading(false);
-  //       showAlert('Something went wrong');
-  //       console.log('error : ', error);
-  //     }
-  //   } else {
-  //     console.log('else called.....');
-  //   }
-  // };
-
   const updateVerificationStatus = () => {
     if (validate()) {
       
@@ -156,13 +87,9 @@ const Verification = ({navigation, route}) => {
     })
       .then(response => response.json())
       .then(async response => {
-        // console.log('response  :  ', response); 
         if (response?.status == false) {
-          // showAlert(response?.message);
           handlePopup(dispatch, response?.message, 'red')
-          // showAlert('Invalid Credentials');
         } else {
-          // showAlert(response.message, 'green');
           ref_RBSheet?.current?.open();
           dispatch(setJoinAsGuest(false));
           
@@ -175,7 +102,6 @@ const Verification = ({navigation, route}) => {
       })
       .catch(err => {
         console.log('Error in Login :  ', err);
-        // showAlert('Something went wrong!');
         handlePopup(dispatch, 'Something went wrong!', 'red')
 
       })
@@ -184,10 +110,43 @@ const Verification = ({navigation, route}) => {
       });
     }
   };
+
+  const styles = StyleSheet.create({
+    inputContainer: {
+      borderWidth: 1,
+      borderColor:Colors.borderGray,
+      borderRadius: 35,
+      width: wp(90),
+      marginTop: 50,
+      marginBottom: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+    },
+    textInput: {
+      paddingHorizontal: 20,
+    },
+    underlineStyleBase: {
+      color: Colors.Text,
+      fontSize: 24,
+      fontFamily: Fonts.Inter_Medium,
+      width: 48,
+      height: 50,
+      borderRadius: 30,
+      borderWidth: 0,
+      borderColor:Colors.borderGray,
+      backgroundColor: '#F5F6FA',
+    },
+    underlineStyleHighLighted: {
+      borderColor: Colors.primary_color,
+      borderRadius: 30,
+      borderWidth: 1,
+    },
+  });
   return (
     <View style={{flex: 1, backgroundColor: Colors.White}}>
       {showPopUp && <PopUp color={popUpColor} message={PopUpMesage} />}
-      <StackHeader title={''} backIconColor={'#1D1D20'} />
+      <StackHeader title={''} backIconColor={Colors.primary_text} />
       <Loader loading={loader} />
       <ScrollView
         ref={scrollViewRef}
@@ -212,7 +171,6 @@ const Verification = ({navigation, route}) => {
               ref={refOTP}
               style={{
                 height: 50,
-                // marginTop: hp(5),
               }}
               pinCount={4}
               code={otpCode}
@@ -231,20 +189,11 @@ const Verification = ({navigation, route}) => {
           </View>
           <View
             style={{
-              // height: hp(47),
               flex: 1,
               justifyContent: 'flex-end',
               paddingBottom: 30,
               marginBottom: 10,
             }}>
-            {/* <CButton
-              title="Send OTP"
-              height={hp(6)}
-              width={wp(82)}
-              onPress={() => handleSendOTPCode()}
-              loading={loading}
-            /> */}
-
             <CButton
               title="VERIFY"
               height={hp(6)}
@@ -263,11 +212,7 @@ const Verification = ({navigation, route}) => {
           svg={<OrangeSuccessCheck/>}
           onPress={() => {
             ref_RBSheet?.current?.close();
-            // navigation?.popToTop();
             navigation?.replace('Drawer');
-            // navigation.navigate('EnableLocation', {
-            //   customer_id: route?.params?.customer_id,
-            // });
           }
         }
         />
@@ -278,37 +223,4 @@ const Verification = ({navigation, route}) => {
 
 export default Verification;
 
-const styles = StyleSheet.create({
-  inputContainer: {
-    borderWidth: 1,
-    borderColor: '#DDDDDD',
-    borderRadius: 35,
-    width: wp(90),
-    marginTop: 50,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  textInput: {
-    paddingHorizontal: 20,
-  },
-  underlineStyleBase: {
-    color: Colors.Text,
-    fontSize: 24,
-    fontFamily: Fonts.Inter_Medium,
-    width: 48,
-    height: 50,
-    borderRadius: 30,
-    borderWidth: 0,
-    // borderBottomWidth: 1,
-    borderColor: '#DDDDDD',
-    // marginHorizontal: 2,
-    backgroundColor: '#F5F6FA',
-  },
-  underlineStyleHighLighted: {
-    borderColor: Colors.primary_color,
-    borderRadius: 30,
-    borderWidth: 1,
-  },
-});
+

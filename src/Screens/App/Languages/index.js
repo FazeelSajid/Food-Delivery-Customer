@@ -6,19 +6,12 @@ import {
   FlatList,
   ScrollView,
   TextInput,
-  Animated,
-  BackHandler,
-  Keyboard,
 } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import StackHeader from '../../../components/Header/StackHeader';
-import {Colors, Images, Fonts, Icons} from '../../../constants';
-import uuid from 'react-native-uuid';
+import { Images, Fonts, Icons} from '../../../constants';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {RadioButton} from 'react-native-paper';
-import ItemSeparator from '../../../components/Separator/ItemSeparator';
-
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -28,7 +21,7 @@ import {setSelectedLanguage} from '../../../redux/AuthSlice';
 
 const Languages = ({navigation, route}) => {
   const dispatch = useDispatch();
-  const {selectedLanguage} = useSelector(store => store.store);
+  const {selectedLanguage, Colors} = useSelector(store => store.store);
 
   const [checked, setChecked] = React.useState(selectedLanguage);
   const [isSearch, setIsSearch] = useState(false);
@@ -84,8 +77,52 @@ const Languages = ({navigation, route}) => {
       selected: false,
     },
   ]);
+  const styles = StyleSheet.create({
+    rowViewSB: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+    },
+    text: {
+      fontFamily: Fonts.Inter_Medium,
+      fontSize: RFPercentage(2.1),
+      color: Colors.primary_text,
+      paddingHorizontal: 5,
+    },
+    input: {
+      flex: 0.9,
+      fontFamily: Fonts.PlusJakartaSans_Regular,
+      color: Colors.primary_text,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      backgroundColor:Colors.secondary_color,
+      width: wp(75),
+      // flex: 1,
+      height: wp(12),
+      // marginRight: wp(5),
+      borderRadius: hp(10),
+      // marginLeft: 20,
+      alignItems: 'center',
+    },
+    iconContainer: {
+      width: wp(11),
+      height: wp(11),
+      borderRadius: hp(50),
+      marginHorizontal: wp(5),
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      // height: wp(11),
+      paddingVertical: 0,
+      // backgroundColor: 'red',
+    },
+  });
 
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredData, setFilteredData] = useState();
   const [searchQuery, setSearchQuery] = useState('');
   // Function to handle the search query and update the filteredData state
   const handleSearch = text => {
@@ -167,47 +204,4 @@ const Languages = ({navigation, route}) => {
 
 export default Languages;
 
-const styles = StyleSheet.create({
-  rowViewSB: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  text: {
-    fontFamily: Fonts.Inter_Medium,
-    fontSize: RFPercentage(2.1),
-    color: Colors.primary_text,
-    paddingHorizontal: 5,
-  },
-  input: {
-    flex: 0.9,
-    fontFamily: Fonts.PlusJakartaSans_Regular,
-    color: Colors.primary_text,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    backgroundColor:Colors.secondary_color,
-    width: wp(75),
-    // flex: 1,
-    height: wp(12),
-    // marginRight: wp(5),
-    borderRadius: hp(10),
-    // marginLeft: 20,
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: wp(11),
-    height: wp(11),
-    borderRadius: hp(50),
-    marginHorizontal: wp(5),
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    // height: wp(11),
-    paddingVertical: 0,
-    // backgroundColor: 'red',
-  },
-});
+
