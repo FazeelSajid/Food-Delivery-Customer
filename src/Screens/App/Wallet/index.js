@@ -26,7 +26,7 @@ import {
 } from '../../../utils/helpers/walletApis';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
-import { BASE_URL, BASE_URL_IMAGE, STRIPE_PUBLISH_KEY } from '../../../utils/globalVariables';
+import { BASE_URL, STRIPE_PUBLISH_KEY } from '../../../utils/globalVariables';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
 import CRBSheetComponent from '../../../components/BottomSheet/CRBSheetComponent';
 import CInput from '../../../components/TextInput/CInput';

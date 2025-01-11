@@ -5,7 +5,6 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import {SwiperFlatList} from 'react-native-swiper-flatlist';
-import { BASE_URL_IMAGE } from '../../utils/globalVariables';
 import { useSelector } from 'react-redux';
 const ImageSlider = ({data, marginBottom}) => {
           const  {Colors } = useSelector(store => store.store)

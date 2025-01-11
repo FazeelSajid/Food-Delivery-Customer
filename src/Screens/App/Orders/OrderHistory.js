@@ -24,7 +24,6 @@ import {useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../../constants/api';
 import Loader from '../../../components/Loader';
-import {BASE_URL_IMAGE} from '../../../utils/globalVariables';
 import {useDispatch, useSelector} from 'react-redux';
 import {setOrderHistory} from '../../../redux/OrderSlice';
 import FoodCardOrderHistory from '../../../components/Cards/FoodCardOrderHistory';

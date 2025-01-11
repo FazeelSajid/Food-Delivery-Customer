@@ -22,7 +22,6 @@ import RestaurantCard from '../../../components/Cards/RestaurantCard';
 import Loader from '../../../components/Loader';
 import api from '../../../constants/api';
 import {getCurrentLocation} from '../../../utils/helpers/location';
-import {BASE_URL_IMAGE} from '../../../utils/globalVariables';
 
 import debounce from 'lodash.debounce';
 import {checkRestaurantTimings} from '../../../utils/helpers';
