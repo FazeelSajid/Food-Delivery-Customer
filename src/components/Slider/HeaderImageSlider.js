@@ -13,7 +13,6 @@ import {
 import { SwiperFlatList } from 'react-native-swiper-flatlist';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { BASE_URL_IMAGE } from '../../utils/globalVariables';
 import { useSelector } from 'react-redux';
 
 const HeaderImageSlider = ({

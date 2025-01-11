@@ -32,7 +32,6 @@ import {
   showAlertLongLength,
 } from '../../../utils/helpers';
 import {
-  BASE_URL_IMAGE,
   firebase_server_key,
 } from '../../../utils/globalVariables';
 import {useFocusEffect} from '@react-navigation/native';
@@ -782,22 +781,7 @@ const RestaurantAllDetails = ({navigation, route}) => {
       />
       {!loading && (
         <ScrollView style={{flex: 1}}>
-          {/* <ImageBackground
-            // source={Images.restaurant1}
-            source={
-              !details || !details?.images
-                ? Images.restaurant1
-                : details?.images?.length == 0
-                ? Images.restaurant1
-                : {uri: BASE_URL_IMAGE + details?.images[0]}
-            }
-            style={{height: hp(40), width: wp(100)}}>
-            <TouchableOpacity
-              onPress={() => navigation?.goBack()}
-              style={styles.iconContainer}>
-              <Ionicons name={'chevron-back'} size={hp(3)} color={Colors.White} />
-            </TouchableOpacity>
-          </ImageBackground> */}
+         
 
           <HeaderImageSlider
             data={details?.images ? details?.images : []}

@@ -31,7 +31,6 @@ import {
   showAlertLongLength,
 } from '../../../utils/helpers';
 import {
-  BASE_URL_IMAGE,
   firebase_server_key,
 } from '../../../utils/globalVariables';
 import {useFocusEffect} from '@react-navigation/native';
@@ -517,33 +516,7 @@ const RestaurantDetails = ({navigation, route}) => {
                 </Text>
               </View>
             </View>
-
-            {/* <FlatList
-              data={details?.images ? details?.images : []}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              renderItem={({item}) => (
-                <View
-                  style={{
-                    height: hp(13),
-                    width: wp(45),
-                    borderRadius: 10,
-                    overflow: 'hidden',
-                    marginRight: 15,
-                  }}>
-                  <Image
-                    // source={Images.restaurant1}
-                    source={{uri: BASE_URL_IMAGE + item}}
-                    style={{
-                      height: '100%',
-                      width: '100%',
-                    }}
-                  />
-                </View>
-              )}
-              ListHeaderComponent={() => <View style={{width: 20}} />}
-              ListFooterComponent={() => <View style={{width: 20}} />}
-            /> */}
+           
             <ScrollView
               horizontal
               contentContainerStyle={{flex: 1, padding: 20}}>

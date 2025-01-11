@@ -22,7 +22,6 @@ import debounce from 'lodash.debounce';
 import {showAlert} from '../../../utils/helpers';
 import api from '../../../constants/api';
 import RestaurantCard from '../../../components/Cards/RestaurantCard';
-import {BASE_URL_IMAGE} from '../../../utils/globalVariables';
 import Loader from '../../../components/Loader';
 import NoDataFound from '../../../components/NotFound/NoDataFound';
 import {
